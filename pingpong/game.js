@@ -1,13 +1,14 @@
 const leftPingpongBoard = document.querySelector("#leftPingpongBoard");
+const body = document.querySelector('body');
 
 //왼쪽 패들을 정확하게 감지하는 방법 추가 필요
 const leftPaddle = document.querySelector(".paddle");
 // leftPaddle.style.pointerEvents = "none";
 // console.log(leftPaddle.style.pointerEvents);
 
-leftPingpongBoard.addEventListener("mousemove", (e) => {
+body.addEventListener("mousemove", (e) => {
   
-  //leftPingpongBoard의 
+  //leftPingpongBoard의 뷰포트 위치를 받는다.
   const rect = leftPingpongBoard.getBoundingClientRect();
 
   // 패들 중앙을 기준으로 마우스 위치를 조정합니다.
