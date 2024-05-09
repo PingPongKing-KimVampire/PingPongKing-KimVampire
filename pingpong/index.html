@@ -1,49 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PingPong</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="app.css" />
-  </head>
-  <body>
-    <img src="exit.svg" alt="" id="exit" />
-    <div id="game">
-      <div class="displayBoard">
-        <div id="leftdisplayBoard">
-          <div class="player">
-            <div class="playerName">홍길길</div>
-            <div class="playerScore">11</div>
-          </div>
-          <img src="playerA.svg" alt="" class="playerAvartar" />
-        </div>
-        <div id="time">
-          <span id="gameTime">01:33</span>
-        </div>
-        <div id="rightdisplayBoard">
-          <img src="playerB.svg" alt="" class="playerAvartar" />
-          <div class="player">
-            <div class="playerName">홍동동</div>
-            <div class="playerScore">8</div>
-          </div>
-        </div>
-      </div>
-      <div id="pingpongBoard">
-        <div id="ball"></div>
-        <div id="leftPingpongBoard">
-          <div class="paddle"></div>
-        </div>
-        <div id="rightPingpongBoard">
-          <div class="paddle"></div>
-        </div>
-      </div>
-    </div>
-    <script src="game.js"></script>
-  </body>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Ping Pong Game</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+
+	<button class="exitButton"></button>
+
+	<div id="gameContainer">
+		<div id="displayBoard">
+			<div id="leftDisplayBoard">
+				<div class="playerInfo">
+					<div class="playerName">김철수</div>
+					<div class="playerScore">
+						11<div class="playerScoreStroke">11</div>
+					</div>
+				</div>
+				<div class="playerAvatar">
+					<img src="images/playerA.png">
+					<!-- <img src="playerA.svg"> -->
+				</div>
+			</div>
+			<div class="timeInfo">
+				<div id="timeText">01 : 33</div>
+			</div>
+			<div id="rightDisplayBoard">
+				<div class="playerInfo">
+					<div class="playerName">이영희</div>
+					<div class="playerScore">
+						8<div class="playerScoreStroke">8</div>
+					</div>
+				</div>
+				<div class="playerAvatar">
+					<img src="images/playerB.png">
+				</div>
+			</div>
+		</div>
+		<div id="playBoard">
+			<div class="subPlayBoard">
+				<div class="paddle"></div>
+			</div>
+			<div class="subPlayBoard"></div>
+		</div>
+	</div>
+
+	<div class="exitModal">
+		<div class="questionBox">
+			<div class="question">상대에게 승리를 선사하시겠습니까?</div>
+			<div class="buttonGroup">
+				<button class="yesButton">네</button>
+				<button class="noButton">아니오</button>
+			</div>
+		</div>
+	</div>
+
+	<script src="app.js"></script>
+</body>
+
 </html>

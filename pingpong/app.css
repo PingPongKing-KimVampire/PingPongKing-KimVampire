@@ -128,122 +128,336 @@ table {
   border-spacing: 0;
 }
 
-body,
 html {
-  background-color: #010425;
-  color: white;
-  width: 100%;
-  height: 100%;
+  font-size: 16px;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
-  text-align: center;
   font-family: "Inter", sans-serif;
+  background-color: rgb(1, 4, 37);
+  color: white;
 }
 
-#exit {
+.exitButton {
+  width: 3%;
+  aspect-ratio: 1/1;
   position: absolute;
-  top: 30px;
-  left: 30px;
-  height: 100px;
+  top: 3%;
+  left: 2%;
+  background: url("images/exitImg.png") center/cover;
 }
 
-.displayBoard {
+#gameContainer {
+  width: 70%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#displayBoard {
+  width: 100%;
+  height: 15%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  height: 200px;
-  padding: 0px 20px;
 }
 
-#leftdisplayBoard {
-  display: flex;
-  flex-direction: row;
-}
-
-.player {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 0px 10px;
-}
-
-.playerName {
-  font-size: 50px;
-  font-weight: bold;
-}
-
-.playerScore {
-  font-size: 140px;
-  font-weight: bold;
-  color: #d570ff;
-  /* -webkit-text-stroke: 5px white;
-  text-shadow: -5px 0  white, 0 5px white, 5px 0 white, 0 -5px white; */
-}
-
-.playerAvartar {
-  height: 100%;
-}
-
-#rightdisplayBoard {
-  display: flex;
-  flex-direction: row;
-}
-
-#time {
+#leftDisplayBoard,
+#rightDisplayBoard {
+  width: 40%;
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  height: 100%;
-  padding-bottom: 10px;
-}
-#gameTime {
-  font-size: 50px;
-  font-weight: 550;
 }
 
-#pingpongBoard {
-  width: 1500px;
-  height: 800px;
-  border: 4px solid white;
+#leftDisplayBoard {
+  padding-left: 1%;
+}
+
+#rightDisplayBoard {
+  flex-direction: row-reverse;
+  padding-right: 1%;
+}
+
+.playerInfo {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#leftDisplayBoard .playerInfo {
+  margin-right: 2%;
+}
+
+#rightDisplayBoard .playerInfo {
+  margin-left: 2%;
+}
+
+.playerInfo .playerName {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.playerInfo .playerScore {
+  position: relative;
+  font-size: 5.3rem;
+  font-weight: 900;
+  color: rgb(213, 112, 255);
+}
+
+.playerInfo .playerScore .playerScoreStroke {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -1;
+  -webkit-text-stroke: 0.6rem white;
+}
+
+.playerAvatar {
+  width: 75%;
+  height: 100%;
   display: flex;
   flex-direction: row;
-  /* position: relative; */
+  align-items: flex-end;
 }
 
-#ball {
-  width: 40px;
-  height: 40px;
-  background-color: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 50%;
-  left: 100px;
+#rightDisplayBoard .playerAvatar {
+  flex-direction: row-reverse;
 }
 
-#leftPingpongBoard {
-  border-right: 2px solid white;
-  width: 50%;
-  height: 100%;
+.playerAvatar img {
+  max-height: 100%;
+  max-width: 100%; /* 팀전이라 여러 이미지가 들어가는 경우, js에서 이 부분 조정하기*/
+}
+
+.timeInfo {
   display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  position: relative; 
-}
-
-#rightPingpongBoard {
-  border-left: 2px solid white;
-  width: 50%;
-  height: 100%;
-  display: flex;
+  flex-direction: column;
   justify-content: flex-end;
   align-items: center;
+  padding: 0 1% 2%;
+}
+
+.timeInfo #timeText {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+#playBoard {
+  width: 100%;
+  height: 85%;
+  display: flex;
+  flex-direction: row;
+  border: 4px solid white;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.subPlayBoard {
+  width: 50%;
+  height: 100%;
+}
+
+.subPlayBoard:nth-child(1) {
+  border-right: 2px solid white;
+}
+
+.subPlayBoard:nth-child(2) {
+  border-left: 2px solid white;
 }
 
 .paddle {
-  height: 20%;
-  width: 15px;
+  height: 18%;
+  width: 1.5%;
   background-color: #d570ff;
   position: absolute;
-  /* margin: 0px 10px; */
+}
+
+.exitModal {
+  display: none;
+  /* display: flex; */
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  z-index: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.exitModal .questionBox {
+  width: 80%;
+  height: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+.exitModal .question {
+  padding-bottom: 1.5%;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.exitModal .buttonGroup {
+  width: 40%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-top: 1.5%;
+}
+
+.exitModal .buttonGroup button {
+  width: 45%;
+  padding: 2.5% 2.5%;
+  font-size: 2rem;
+  font-weight: 600;
+  border-radius: 30px;
+  background-color: rgb(213, 112, 255);
+  border: 0;
+}
+
+/* larger Desktop */
+@media (max-width: 1400px) and (orientation: landscape) {
+  html {
+    font-size: 13px;
+  }
+}
+
+/* large Desktop */
+@media (max-width: 1200px) and (orientation: landscape) {
+  html {
+    font-size: 11px;
+  }
+}
+
+/* notebook, tablets (최대가 맥북)*/
+@media (max-width: 992px) and (orientation: landscape) {
+  html {
+    font-size: 8px;
+  }
+}
+
+/* tablets */
+@media (max-width: 768px) and (orientation: landscape) {
+  html {
+    font-size: 6px;
+  }
+}
+
+/* phone */
+@media (max-width: 576px) and (orientation: landscape) {
+  html {
+    font-size: 4px;
+  }
+}
+
+@media (orientation: portrait) {
+  .exitButton {
+    top: 2%;
+    left: 3%;
+  }
+  #gameContainer {
+    width: 80%;
+  }
+  #displayBoard {
+    height: 10%;
+  }
+  #leftDisplayBoard,
+  #rightDisplayBoard {
+    padding: 0;
+  }
+  #leftDisplayBoard .playerInfo,
+  #rightDisplayBoard .playerInfo {
+    margin: 0;
+  }
+  .playerInfo {
+    width: 35%;
+  }
+  .playerAvatar {
+    width: 65%;
+  }
+  #playBoard {
+    height: 90%;
+    flex-direction: column;
+  }
+  .subPlayBoard {
+    width: 100%;
+    height: 50%;
+  }
+  .subPlayBoard:nth-child(1) {
+    border-right: none;
+    border-bottom: 2px solid white;
+  }
+  .subPlayBoard:nth-child(2) {
+    border-left: none;
+    border-top: 2px solid white;
+  }
+  .exitModal .questionBox {
+    height: 30%;
+  }
+  .exitModal .question {
+    padding-bottom: 3%;
+  }
+  .exitModal .buttonGroup {
+    width: 60%;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 3%;
+  }
+  .exitModal .buttonGroup button:nth-child(1) {
+    margin-bottom: 2.5%;
+  }
+  .exitModal .buttonGroup button:nth-child(2) {
+    margin-top: 2.5%;
+  }
+  .exitModal .buttonGroup button {
+    width: 100%;
+    padding: 3.5% 0;
+  }
+
+  .paddle {
+    height: 0.5%;
+    width: 12%;
+  }
+}
+
+/* large Desktop */
+@media (max-width: 1200px) and (orientation: portrait) {
+  html {
+    font-size: 12px;
+  }
+}
+
+/* notebook, tablets (최대가 맥북)*/
+@media (max-width: 992px) and (orientation: portrait) {
+  html {
+    font-size: 11px;
+  }
+}
+
+/* tablets */
+@media (max-width: 768px) and (orientation: portrait) {
+  html {
+    font-size: 9px;
+  }
+}
+
+/* phone */
+@media (max-width: 576px) and (orientation: portrait) {
+  html {
+    font-size: 6px;
+  }
 }
