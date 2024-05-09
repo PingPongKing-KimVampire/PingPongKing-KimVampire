@@ -173,6 +173,7 @@ body {
 #playBoard {
 	width: 100%;
 	height: 85%;
+	position: relative;
 	display: flex;
 	flex-direction: row;
 	border: 4px solid white;
@@ -182,14 +183,30 @@ body {
 .subPlayBoard {
 	width: 50%;
 	height: 100%;
+	position: relative;
 }
 
-.subPlayBoard:nth-child(1) {
+.subPlayBoard:nth-of-type(1) {
 	border-right: 2px solid white;
 }
 
-.subPlayBoard:nth-child(2) {
+.subPlayBoard:nth-of-type(2) {
 	border-left: 2px solid white;
+}
+
+.subPlayBoard:nth-of-type(1) .paddle {
+	width: 2.5%;
+	height: 15%;
+	position: absolute;
+	background-color: rgb(213, 112, 255);
+}
+
+#playBoard #ball {
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: white;
 }
 
 .exitModal {
@@ -312,6 +329,10 @@ body {
 	.subPlayBoard:nth-child(2) {
 		border-left: none;
 		border-top: 2px solid white;
+	}
+	.subPlayBoard:nth-of-type(1) .paddle {
+		width: 15%;
+		height: 2.5%;
 	}
 	.exitModal .questionBox {
 		height: 30%;
