@@ -68,6 +68,7 @@ function initBall(ball) {
 	ball.element.style.left = `${ball.cx}px`;
 }
 
+let isMyTurn = false;
 const playBoard = document.querySelector('#playBoard');
 const ball = {
 	element: document.querySelector('#playBoard #ball'),
@@ -90,10 +91,13 @@ function detectWall() {
 		return;
 	}
 	// 공이 위, 아래, 오른쪽 벽과 만나면 이동 방향 전환
-	if (ball.cy < 0 || boardH - ballH < ball.cy)
+	if (ball.cy < 0 || boardH - ballH < ball.cy) {
 		ball.dy = -ball.dy;
-	if (boardW - ballW < ball.cx)
+	}
+	if (boardW - ballW < ball.cx) {
+		isMyTurn = true; // 공이 오른쪽 벽과 만나면 턴 전환
 		ball.dx = -ball.dx;
+	}
 }
 
 function detectPaddle() {
@@ -106,6 +110,7 @@ function detectPaddle() {
 		ballRect.top < paddleRect.bottom
 	) {
 		ball.dx = -ball.dx;
+		isMyTurn = false;
 	}
 }
 
@@ -115,7 +120,8 @@ function moveBall() {
 	ball.element.style.top = `${ball.cy}px`;
 	ball.element.style.left = `${ball.cx}px`;
 	detectWall();
-	detectPaddle();
+	if (isMyTurn)
+		detectPaddle();
 }
 
 let isPlaying = false;
