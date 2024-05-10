@@ -1,0 +1,11 @@
+# docker-compose.yml
+version: "3.8"
+services:
+  infinite-loop:  
+    container_name: be
+    build: .
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3000:3000"
+    # command: npm run start
