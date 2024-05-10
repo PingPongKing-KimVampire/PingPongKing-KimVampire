@@ -70,23 +70,34 @@ const ball = {
 		this.element.style.left = `${this.cx}%`;
 		this.element.style.top = `${this.cy}%`;
 	},
-	changeDx() {
+	changeRandomAngle() {
 		let rand = Math.floor(Math.random() * 21) - 10; // -10 ~ 10도 사이에서 이동 방향 변화
 		ball.angle = Math.max(0, Math.min(45, ball.angle + rand)); // 최소 각도 0, 최대 각도 45
+	},
+	reversalRandomDx() {
+		this.changeRandomAngle();
 		const movement = calculateMovement(ball.speed, ball.angle);
 		ball.dx = ball.dx < 0 ? movement.dx : -movement.dx; // dx는 부호 반전
 		ball.dy = ball.dy < 0 ? -movement.dy : movement.dy; // dy는 부호 유지
+	},
+	reversalRandomDy() {
+		this.changeRandomAngle();
+		const movement = calculateMovement(ball.speed, ball.angle);
+		ball.dx = ball.dx < 0 ? -movement.dx : movement.dx; // dx는 부호 유지
+		ball.dy = ball.dy < 0 ? movement.dy : -movement.dy; // dy는 부호 반전
 	}
 };
 
 let isPlaying = false;
 let isMyTurn = false;
+let isPortrait = false;
 let ballMoveIntervalID;
 
 function startGame(ball) {
 	isPlaying = true;
 	isMyTurn = false;
 	ballMoveIntervalID = setInterval(moveBall, 1);
+	ball.init();
 }
 
 function stopGame(ball) {
@@ -99,31 +110,47 @@ function detectWall() {
 	const ballRect = ball.element.getBoundingClientRect();
 	const boardRect = playBoard.getBoundingClientRect();
 
-	// 공이 왼쪽 벽과 만나면 초기 위치로 리셋
-	if (ballRect.left <= boardRect.left) {
-		stopGame(ball);
-		return;
-	}
-	// 공이 위, 아래쪽 벽과 만나면 이동 방향 전환
-	if (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom) {
-		ball.dy = -ball.dy;
-	}
-	if (boardRect.right <= ballRect.right) {
-		isMyTurn = true; // 공이 오른쪽 벽과 만나면 턴 전환
-		ball.dx = -ball.dx;
+	if (isPortrait) {
+
+	} else {
+		if (ballRect.left <= boardRect.left) {
+			// stopGame(ball);
+			// return;
+			ball.dx = -ball.dx;
+		}
+		if (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom) {
+			ball.dy = -ball.dy;
+		}
+		if (boardRect.right <= ballRect.right) {
+			isMyTurn = true; // 공이 오른쪽 벽과 만나면 턴 전환
+			ball.dx = -ball.dx;
+		}
 	}
 }
 
 function detectPaddle() {
 	const ballRect = ball.element.getBoundingClientRect();
 	const paddleRect = paddle.element.getBoundingClientRect();
+
 	if (
+		isPortrait === false &&
 		ballRect.left <= paddleRect.right && 
 		ballRect.right > paddleRect.right &&
 		ballRect.bottom > paddleRect.top &&
 		ballRect.top < paddleRect.bottom
 	) {
-		ball.changeDx();
+		ball.reversalRandomDx();
+		isMyTurn = false;
+	}
+
+	if (
+		isPortrait === true &&
+		ballRect.top <= paddleRect.bottom &&
+		ballRect.bottom > paddleRect.bottom &&
+		ballRect.right > paddleRect.left &&
+		ballRect.left < paddleRect.right
+	) {
+		ball.reversalRandomDy();
 		isMyTurn = false;
 	}
 }
@@ -131,12 +158,35 @@ function detectPaddle() {
 function moveBall() {
 	ball.cy += ball.dy;
 	ball.cx += ball.dx;
+
 	ball.element.style.top = `${ball.cy}%`;
-	ball.element.style.left = `${ball.cx}%`;
+	if (isPortrait) {
+		ball.element.style.right = `${ball.cx}`;
+	} else {
+		ball.element.style.left = `${ball.cx}%`;
+	}
+
 	detectWall();
-	if (isMyTurn)
+	if (isMyTurn) {
 		detectPaddle();
+	}
 }
+
+// orienration이 바뀔 때마다 공의 위치 변경
+
+// const portraitQuery = window.matchMedia('(orientation: portrait)');
+
+// function changeOrientation(e) {
+// 	if (e.matches) {
+// 		isPortrait = true;
+// 	} else {
+// 		isPortrait = false;
+// 	}
+// }
+
+// portraitQuery.addEventListener('change', changeOrientation);
+
+// changeOrientation(portraitQuery);
 
 ball.init();
 
