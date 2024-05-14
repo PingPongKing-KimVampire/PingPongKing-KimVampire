@@ -194,7 +194,7 @@ body {
 	border-left: 2px solid white;
 }
 
-.subPlayBoard:nth-of-type(1) .paddle {
+.subPlayBoard:nth-of-type(2) .paddle {
 	width: 2.5%;
 	height: 15%;
 	position: absolute;
@@ -330,7 +330,7 @@ body {
 		border-left: none;
 		border-top: 2px solid white;
 	}
-	.subPlayBoard:nth-of-type(1) .paddle {
+	.subPlayBoard:nth-of-type(2) .paddle {
 		width: 15%;
 		height: 2.5%;
 	}
