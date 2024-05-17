@@ -1,13 +1,13 @@
 import gameInstance from './Game.js';
 
 class Ball {
-	constructor(ballContainer, isPortrait) {
+	constructor(ballContainer, orientation) {
 		this.element = ballContainer.querySelector('.ball');
 		this.board = ballContainer;
-		this.init(isPortrait);
+		this.init(orientation);
 	}
 
-	init(isPortrait) {
+	init(orientation) {
 		this.angle = 20;
 		this.speed = 0.3;
 		const dir = this.calculateDirection(this.speed, this.angle);
@@ -17,7 +17,7 @@ class Ball {
 		const radiusY = ((this.element.clientHeight / 2) / this.board.clientHeight) * 100;
 		this.cx = 50 - radiusX;
 		this.cy = 50 - radiusY;
-		this.display();
+		this.display(orientation);
 	}
 
 	calculateDirection(speed, angle) {
@@ -27,63 +27,61 @@ class Ball {
 		return { dx, dy };
 	}
 
-	move(isPortrait) {
-		if (isPortrait) {
+	move(orientation) {
+		if (orientation === 'portrait') {
 			this.cx += this.dy;
 			this.cy += this.dx;
-		} else {
+		} else if (orientation === 'landscape') {
 			this.cx += this.dx;
 			this.cy += this.dy;
 		}
-		this.display(isPortrait);
+		this.display(orientation);
 	}
 
-	display(isPortrait) {
-		if (isPortrait) {
+	display(orientation) {
+		if (orientation === 'portrait') {
 			this.element.style.left = '';
 			this.element.style.right = `${this.cx}%`;
 			this.element.style.top = `${this.cy}%`;
-		} else {
+		} else if (orientation === 'landscape') {
 			this.element.style.right = '';
 			this.element.style.left = `${this.cx}%`;
 			this.element.style.top = `${this.cy}%`;
 		}
 	}
 
-	detectWall(isPortrait) {
+	detectWall(orientation) {
 		const ballRect = this.element.getBoundingClientRect();
 		const boardRect = this.board.getBoundingClientRect();
-		console.log(isPortrait);
 	
 		// 공이 플레이어 편 벽과 충돌한 경우 (게임 중단 & 실점)
-		if ((isPortrait && boardRect.bottom <= ballRect.bottom) ||
-			(!isPortrait && boardRect.right <= ballRect.right)) {
+		if ((orientation === 'portrait' && boardRect.bottom <= ballRect.bottom) ||
+			(orientation === 'landscape' && boardRect.right <= ballRect.right)) {
 			gameInstance.stopGame();
 			return;
 		}
 		// 공이 플레이어 반대편 벽과 충돌한 경우 (턴 전환)
-		if ((isPortrait && ballRect.top <= boardRect.top) ||
-			(!isPortrait && ballRect.left <= boardRect.left)) {
+		if ((orientation === 'portrait' && ballRect.top <= boardRect.top) ||
+			(orientation === 'landscape' && ballRect.left <= boardRect.left)) {
 			gameInstance.isMyTurn = true;
-			gameInstance.stopGame();
 		}
-		// 위, 아래쪽 벽과 충돌 시 dy 반전
-		if ((isPortrait && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) ||
-			(!isPortrait && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom))) {
+		// 수평 벽과 충돌 시 dy 반전
+		if ((orientation === 'portrait' && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) ||
+			(orientation === 'landscape' && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom))) {
 			this.dy = -this.dy;
 		}
-		// 왼, 오른쪽 벽과 충돌 시 dx 반전
-		if ((isPortrait && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom)) ||
-			!isPortrait && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) {
+		// 수직 벽과 충돌 시 dx 반전
+		if ((orientation === 'portrait' && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom)) ||
+			orientation === 'landscape' && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) {
 			this.dx = -this.dx;
 		}
 	}
 
-	detectPaddle(isPortrait) {
+	detectPaddle(orientation) {
 		const ballRect = this.element.getBoundingClientRect();
 		const paddleRect = gameInstance.paddle.element.getBoundingClientRect();
 
-		if (isPortrait === false &&
+		if (orientation === 'landscape' &&
 			ballRect.right >= paddleRect.left &&
 			ballRect.left < paddleRect.left &&
 			ballRect.bottom > paddleRect.top &&
@@ -93,7 +91,7 @@ class Ball {
 			gameInstance.isMyTurn = false;
 		}
 
-		if (isPortrait === true &&
+		if (orientation === 'portrait' &&
 			ballRect.top <= paddleRect.bottom &&
 			ballRect.bottom > paddleRect.bottom &&
 			ballRect.right > paddleRect.left &&
@@ -107,8 +105,6 @@ class Ball {
 	reversalRandomDx() {
 		let rand = Math.floor(Math.random() * 81) - 40; // -40 ~ +40도 사이에서 이동 방향 변화
 		this.angle = Math.max(0, Math.min(45, this.angle + rand)); // 최소 각도 0, 최대 각도 45
-		const prevDx = this.dx;
-		const prevDy = this.dy;
 		const dir = this.calculateDirection(this.speed, this.angle);
 		this.dx = this.dx < 0 ? dir.dx : -dir.dx; // dx는 부호 반전
 		this.dy = this.dy < 0 ? -dir.dy : dir.dy; // dy는 부호 유지
