@@ -1,17 +1,20 @@
 import Ball from './Ball.js';
 import Paddle from './Paddle.js';
 
-class Game {
+class GameManager {
 	constructor() {
-		const board = document.querySelector('#playBoard');
-		const subBoard = document.querySelector('.subPlayBoard:nth-of-type(2)');
-		this.portraitQuery = window.matchMedia('(orientation: portrait');
-		this.orientation = this.portraitQuery.matches ? 'portrait' : 'landscape';
-		this.ball = new Ball(board, this.orientation);
-		this.paddle = new Paddle(subBoard);
 		this.isPlaying = false;
 		this.isMyTurn = true;
 		this.ballMoveIntervalID = null;
+	}
+
+	initialize() {
+		this.portraitQuery = window.matchMedia('(orientation: portrait');
+		this.orientation = this.portraitQuery.matches ? 'portrait' : 'landscape';
+		const board = document.querySelector('#playBoard');
+		const subBoard = document.querySelector('.subPlayBoard:nth-of-type(2)');
+		this.paddle = new Paddle(subBoard);
+		this.ball = new Ball(this, board);
 		this.addEventListeners();
 	}
 
@@ -23,11 +26,11 @@ class Game {
 				this.startGame();
 			}
 		});
-		this.portraitQuery.addEventListener('change', this.changeOrientation.bind(this));
-		window.addEventListener('resize', () => { // TODO : 필요할까?
+		window.addEventListener('resize', () => {
 			if (!this.isPlaying)
-				this.ball.init(this.orientation);
+			this.ball.init(this.orientation);
 		})
+		this.portraitQuery.addEventListener('change', this.changeOrientation.bind(this));
 	}
 
 	startGame() {
@@ -59,6 +62,4 @@ class Game {
 	}
 }
 
-const gameInstance = new Game();
-
-export default gameInstance;
+export default GameManager;

@@ -1,13 +1,12 @@
-import gameInstance from './Game.js';
-
 class Ball {
-	constructor(ballContainer, orientation) {
-		this.element = ballContainer.querySelector('.ball');
-		this.board = ballContainer;
-		this.init(orientation);
+	constructor(gameManager, container) {
+		this.gameManager = gameManager;
+		this.element = container.querySelector('.ball');
+		this.board = container;
+		this.init(gameManager.orientation);
 	}
 
-	init(orientation) {
+	init() {
 		this.angle = 20;
 		this.speed = 0.3;
 		const dir = this.calculateDirection(this.speed, this.angle);
@@ -17,7 +16,7 @@ class Ball {
 		const radiusY = ((this.element.clientHeight / 2) / this.board.clientHeight) * 100;
 		this.cx = 50 - radiusX;
 		this.cy = 50 - radiusY;
-		this.display(orientation);
+		this.display();
 	}
 
 	calculateDirection(speed, angle) {
@@ -27,59 +26,59 @@ class Ball {
 		return { dx, dy };
 	}
 
-	move(orientation) {
-		if (orientation === 'portrait') {
+	move() {
+		if (this.gameManager.orientation === 'portrait') {
 			this.cx += this.dy;
 			this.cy += this.dx;
-		} else if (orientation === 'landscape') {
+		} else if (this.gameManager.orientation === 'landscape') {
 			this.cx += this.dx;
 			this.cy += this.dy;
 		}
-		this.display(orientation);
+		this.display();
 	}
 
-	display(orientation) {
-		if (orientation === 'portrait') {
+	display() {
+		if (this.gameManager.orientation === 'portrait') {
 			this.element.style.left = '';
 			this.element.style.right = `${this.cx}%`;
 			this.element.style.top = `${this.cy}%`;
-		} else if (orientation === 'landscape') {
+		} else if (this.gameManager.orientation === 'landscape') {
 			this.element.style.right = '';
 			this.element.style.left = `${this.cx}%`;
 			this.element.style.top = `${this.cy}%`;
 		}
 	}
 
-	detectWall(orientation) {
+	detectWall() {
 		const ballRect = this.element.getBoundingClientRect();
 		const boardRect = this.board.getBoundingClientRect();
 	
 		// 공이 플레이어 편 벽과 충돌한 경우 (게임 중단 & 실점)
-		if ((orientation === 'portrait' && boardRect.bottom <= ballRect.bottom) ||
-			(orientation === 'landscape' && boardRect.right <= ballRect.right)) {
-			gameInstance.stopGame();
+		if ((this.gameManager.orientation === 'portrait' && boardRect.bottom <= ballRect.bottom) ||
+			(this.gameManager.orientation === 'landscape' && boardRect.right <= ballRect.right)) {
+			this.gameManager.stopGame();
 			return;
 		}
 		// 공이 플레이어 반대편 벽과 충돌한 경우 (턴 전환)
-		if ((orientation === 'portrait' && ballRect.top <= boardRect.top) ||
-			(orientation === 'landscape' && ballRect.left <= boardRect.left)) {
-			gameInstance.isMyTurn = true;
+		if ((this.gameManager.orientation === 'portrait' && ballRect.top <= boardRect.top) ||
+			(this.gameManager.orientation === 'landscape' && ballRect.left <= boardRect.left)) {
+			this.gameManager.isMyTurn = true;
 		}
 		// 수평 벽과 충돌 시 dy 반전
-		if ((orientation === 'portrait' && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) ||
-			(orientation === 'landscape' && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom))) {
+		if ((this.gameManager.orientation === 'portrait' && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) ||
+			(this.gameManager.orientation === 'landscape' && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom))) {
 			this.dy = -this.dy;
 		}
 		// 수직 벽과 충돌 시 dx 반전
-		if ((orientation === 'portrait' && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom)) ||
-			orientation === 'landscape' && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) {
+		if ((this.gameManager.orientation === 'portrait' && (ballRect.top <= boardRect.top || boardRect.bottom <= ballRect.bottom)) ||
+			this.gameManager.orientation === 'landscape' && (ballRect.left <= boardRect.left || boardRect.right <= ballRect.right)) {
 			this.dx = -this.dx;
 		}
 	}
 
 	detectPaddle(orientation) {
 		const ballRect = this.element.getBoundingClientRect();
-		const paddleRect = gameInstance.paddle.element.getBoundingClientRect();
+		const paddleRect = this.gameManager.paddle.element.getBoundingClientRect();
 
 		if (orientation === 'landscape' &&
 			ballRect.right >= paddleRect.left &&
@@ -88,7 +87,7 @@ class Ball {
 			ballRect.top < paddleRect.bottom)
 		{
 			this.reversalRandomDx();
-			gameInstance.isMyTurn = false;
+			this.gameManager.isMyTurn = false;
 		}
 
 		if (orientation === 'portrait' &&
@@ -98,7 +97,7 @@ class Ball {
 			ballRect.left < paddleRect.right) 
 		{
 			this.reversalRandomDx();
-			gameInstance.isMyTurn = false;
+			this.gameManager.isMyTurn = false;
 		}
 	}
 
