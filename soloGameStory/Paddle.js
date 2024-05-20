@@ -1,7 +1,7 @@
 class Paddle {
-	constructor(paddleContainer) {
-		this.element = paddleContainer.querySelector('.paddle');
-		this.board = paddleContainer;
+	constructor(container) {
+		this.element = container.querySelector('.paddle');
+		this.board = container;
 		this.updateOnResize();
 		this.addEventListeners();
 	}
