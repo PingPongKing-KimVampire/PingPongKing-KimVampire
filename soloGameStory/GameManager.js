@@ -28,7 +28,7 @@ class GameManager {
 		});
 		window.addEventListener('resize', () => {
 			if (!this.isPlaying)
-			this.ball.init(this.orientation);
+				this.ball.init();
 		})
 		this.portraitQuery.addEventListener('change', this.changeOrientation.bind(this));
 	}
@@ -36,28 +36,28 @@ class GameManager {
 	startGame() {
 		this.isPlaying = true;
 		this.isMyTurn = true;
-		this.ball.init(this.orientation);
+		this.ball.init();
 		this.ballMoveIntervalID = setInterval(this.moveBall.bind(this), 1);
 	}
 
 	stopGame() {
 		this.isPlaying = false;
 		clearInterval(this.ballMoveIntervalID);
-		this.ball.init(this.orientation);
+		this.ball.init();
 	}
 
 	moveBall() {
-		this.ball.move(this.orientation);
-		this.ball.detectWall(this.orientation);
+		this.ball.move();
+		this.ball.detectWall();
 		if (this.isMyTurn) {
-			this.ball.detectPaddle(this.orientation);
+			this.ball.detectPaddle();
 		}
 	}
 
 	changeOrientation(e) {
 		this.orientation = e.matches ? 'portrait' : 'landscape';
 		this.ball.swapDirection();
-		this.ball.display(this.orientation);
+		this.ball.display();
 		this.paddle.display();
 	}
 }

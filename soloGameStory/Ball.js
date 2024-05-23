@@ -3,7 +3,7 @@ class Ball {
 		this.gameManager = gameManager;
 		this.element = container.querySelector('.ball');
 		this.board = container;
-		this.init(gameManager.orientation);
+		this.init();
 	}
 
 	init() {
@@ -76,11 +76,11 @@ class Ball {
 		}
 	}
 
-	detectPaddle(orientation) {
+	detectPaddle() {
 		const ballRect = this.element.getBoundingClientRect();
 		const paddleRect = this.gameManager.paddle.element.getBoundingClientRect();
 
-		if (orientation === 'landscape' &&
+		if (this.gameManager.orientation === 'landscape' &&
 			ballRect.right >= paddleRect.left &&
 			ballRect.left < paddleRect.left &&
 			ballRect.bottom > paddleRect.top &&
@@ -90,7 +90,7 @@ class Ball {
 			this.gameManager.isMyTurn = false;
 		}
 
-		if (orientation === 'portrait' &&
+		if (this.gameManager.orientation === 'portrait' &&
 			ballRect.top <= paddleRect.bottom &&
 			ballRect.bottom > paddleRect.bottom &&
 			ballRect.right > paddleRect.left &&
