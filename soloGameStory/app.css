@@ -135,7 +135,7 @@ body {
 	font-size: 5.3rem;
 	font-weight: 900;
 	color: rgb(213, 112, 255);
-	z-index: 0; /* 왜 이게 있어야만 테두리가 보일까? */
+	z-index: 0; /* TODO : 왜 이게 있어야만 테두리가 보일까? */
 }
 
 .playerInfo .playerScore .playerScoreStroke {
@@ -160,7 +160,7 @@ body {
 
 .playerAvatar img {
 	max-height: 100%;
-	max-width: 100%; /* 팀전이라 여러 이미지가 들어가는 경우, js에서 이 부분 조정하기*/
+	max-width: 100%; /* TODO : 팀전이라 여러 이미지가 들어가는 경우, js에서 이 부분 조정하기*/
 }
 
 .timeInfo {
@@ -182,8 +182,7 @@ body {
 	position: relative;
 	display: flex;
 	flex-direction: row;
-	/* border: 4px solid white; */
-	border: max(2px, 0.25vw) solid white;
+	border: 0.25rem solid white;
 	box-sizing: border-box;
 }
 
@@ -194,11 +193,11 @@ body {
 }
 
 .subPlayBoard:nth-of-type(1) {
-	border-right: max(1px, 0.125rem) solid white;
+	border-right: 0.125rem solid white;
 }
 
 .subPlayBoard:nth-of-type(2) {
-	border-left: max(1px, 0.125rem) solid white;
+	border-left: 0.125rem solid white;
 }
 
 .subPlayBoard:nth-of-type(2) .paddle {
@@ -296,11 +295,11 @@ body {
 	}
 	.subPlayBoard:nth-child(1) {
 		border-right: none;
-		border-bottom: max(1px, 0.125rem) solid white;
+		border-bottom: 0.125rem solid white;
 	}
 	.subPlayBoard:nth-child(2) {
 		border-left: none;
-		border-top: max(1px, 0.125rem) solid white;
+		border-top: 0.125rem solid white;
 	}
 	.subPlayBoard:nth-of-type(2) .paddle {
 		width: 15%;
