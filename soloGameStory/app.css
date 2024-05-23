@@ -48,7 +48,7 @@ table {
 }
 
 html {
-	font-size: 1vw;
+	font-size: 1.6vh;
 }
 
 body {
@@ -78,12 +78,8 @@ body {
 }
 
 #gameContainer {
-	width: 70%;
-	height: 90%;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
+	height: 90vh;
+	aspect-ratio: 155 / 100;
 }
 
 #displayBoard {
@@ -208,6 +204,7 @@ body {
 }
 
 #playBoard .ball {
+	height: auto;
 	width: 3%;
 	aspect-ratio: 1/1;
 	position: absolute;
@@ -264,7 +261,7 @@ body {
 
 @media (orientation: portrait) {
 	html {
-		font-size: 1vh;
+		font-size: 1.6vw;
 	}
 	.exitButton {
 		top: 2%;
@@ -307,6 +304,11 @@ body {
 	.subPlayBoard:nth-of-type(2) .paddle {
 		width: 15%;
 		height: 2.5%;
+	}
+	#playBoard .ball {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
 	}
 	.exitModal .questionBox {
 		height: 30%;
