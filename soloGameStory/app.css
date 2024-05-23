@@ -263,6 +263,9 @@ body {
 }
 
 @media (orientation: portrait) {
+	html {
+		font-size: 1vh;
+	}
 	.exitButton {
 		top: 2%;
 		left: 3%;
