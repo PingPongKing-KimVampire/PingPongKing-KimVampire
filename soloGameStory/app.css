@@ -1,0 +1,335 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+html {
+	font-size: 1.6vh;
+}
+
+body {
+	width: 100vw;
+	height: 100vh;
+}
+
+#app {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	font-family: "Inter", sans-serif;
+	background-color: rgb(1, 4, 37);
+	color: white;
+}
+
+.exitButton {
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	top: 3%;
+	left: 2%;
+	background: url("images/exitImg.png") center/cover;
+}
+
+#gameContainer {
+	height: 90vh;
+	aspect-ratio: 155 / 100;
+}
+
+#displayBoard {
+	width: 100%;
+	height: 15%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#leftDisplayBoard, #rightDisplayBoard {
+	width: 40%;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+}
+
+#leftDisplayBoard {
+	padding-left: 1%;
+}
+
+#rightDisplayBoard {
+	flex-direction: row-reverse;
+	padding-right: 1%;
+}
+
+.playerInfo {
+	width: 25%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#leftDisplayBoard .playerInfo {
+	margin-right: 2%;
+}
+
+#rightDisplayBoard .playerInfo {
+	margin-left: 2%;
+}
+
+.playerInfo .playerName {
+	font-size: 2rem;
+	font-weight: 700;
+}
+
+.playerInfo .playerScore {
+	position: relative;
+	font-size: 5.3rem;
+	font-weight: 900;
+	color: rgb(213, 112, 255);
+	z-index: 0; /* TODO : 왜 이게 있어야만 테두리가 보일까? */
+}
+
+.playerInfo .playerScore .playerScoreStroke {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: -1;
+	-webkit-text-stroke: 0.6rem white;
+}
+
+.playerAvatar {
+	width: 75%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+}
+
+#rightDisplayBoard .playerAvatar {
+	flex-direction: row-reverse;
+}
+
+.playerAvatar img {
+	max-height: 100%;
+	max-width: 100%; /* TODO : 팀전이라 여러 이미지가 들어가는 경우, js에서 이 부분 조정하기*/
+}
+
+.timeInfo {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: center;
+	padding: 0 1% 2%;
+}
+
+.timeInfo #timeText {
+	font-size: 2rem;
+	font-weight: 500;
+}
+
+#playBoard {
+	width: 100%;
+	height: 85%;
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	border: 0.25rem solid white;
+	box-sizing: border-box;
+}
+
+.subPlayBoard {
+	width: 50%;
+	height: 100%;
+	position: relative;
+}
+
+.subPlayBoard:nth-of-type(1) {
+	border-right: 0.125rem solid white;
+}
+
+.subPlayBoard:nth-of-type(2) {
+	border-left: 0.125rem solid white;
+}
+
+.subPlayBoard:nth-of-type(2) .paddle {
+	width: 2.5%;
+	height: 15%;
+	position: absolute;
+	background-color: rgb(213, 112, 255);
+}
+
+#playBoard .ball {
+	height: auto;
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: white;
+}
+
+.exitModal {
+	display: none;
+	/* display: flex; */
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.exitModal .questionBox {
+	width: 80%;
+	height: 20%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 3rem;
+	font-weight: 900;
+}
+
+.exitModal .question {
+	padding-bottom: 1.5%;
+	text-align: center;
+	line-height: 1.5;
+}
+
+.exitModal .buttonGroup {
+	width: 40%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding-top: 1.5%;
+}
+
+.exitModal .buttonGroup button {
+	width: 45%;
+	padding: 2.5% 2.5%;
+	font-size: 2rem;
+	font-weight: 600;
+	border-radius: 30px;
+	background-color: rgb(213, 112, 255);
+	border: 0;
+}
+
+@media (orientation: portrait) {
+	html {
+		font-size: 1.6vw;
+	}
+	.exitButton {
+		top: 2%;
+		left: 3%;
+	}
+	#gameContainer {
+		width: 80%;
+	}
+	#displayBoard {
+		height: 10%;
+	}
+	#leftDisplayBoard, #rightDisplayBoard {
+		padding: 0;
+	}
+	#leftDisplayBoard .playerInfo, #rightDisplayBoard .playerInfo {
+		margin: 0;
+	}
+	.playerInfo {
+		width: 35%;
+	}
+	.playerAvatar {
+		width: 65%;
+	}
+	#playBoard {
+		height: 90%;
+		flex-direction: column;
+	}
+	.subPlayBoard {
+		width: 100%;
+		height: 50%;
+	}
+	.subPlayBoard:nth-child(1) {
+		border-right: none;
+		border-bottom: 0.125rem solid white;
+	}
+	.subPlayBoard:nth-child(2) {
+		border-left: none;
+		border-top: 0.125rem solid white;
+	}
+	.subPlayBoard:nth-of-type(2) .paddle {
+		width: 15%;
+		height: 2.5%;
+	}
+	#playBoard .ball {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
+	.exitModal .questionBox {
+		height: 30%;
+	}
+	.exitModal .question {
+		padding-bottom: 3%;
+	}
+	.exitModal .buttonGroup {
+		width: 60%;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 3%;
+	}
+	.exitModal .buttonGroup button:nth-child(1) {
+		margin-bottom: 2.5%;
+	}
+	.exitModal .buttonGroup button:nth-child(2) {
+		margin-top: 2.5%;
+	}
+	.exitModal .buttonGroup button {
+		width: 100%;
+		padding: 3.5% 0;
+	}
+}
