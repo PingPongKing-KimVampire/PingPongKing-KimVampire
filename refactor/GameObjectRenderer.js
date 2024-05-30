@@ -13,6 +13,8 @@ class GameObjectRenderer {
 	}
 
 	renderBall() {
+		const ballWidthPercent = this.referee.ball.radius*2 / this.referee.boardWidth * 100;
+		this.ballElement.style.width = `${ballWidthPercent}%`;
 		const yPercent = this.referee.ball.yPos / this.referee.boardHeight * 100;
 		const xPercent = this.referee.ball.xPos / this.referee.boardWidth * 100;
 		this.ballElement.style.top = `${yPercent}%`;
@@ -21,12 +23,15 @@ class GameObjectRenderer {
 	}
 
 	renderPaddle() {
-		const paddlePercent = this.referee.paddleHeight / this.referee.boardHeight * 100;
-		this.paddleElement.style.height = `${paddlePercent}%`;
-		const yPercent = this.referee.paddle.y / this.referee.boardHeight * 100 - paddlePercent / 2;
+		const paddleHeightPercent = this.referee.paddleHeight / this.referee.boardHeight * 100;
+		const paddleWidthPercent =  this.referee.paddleWidth / this.referee.boardWidth * 100;
+		this.paddleElement.style.height = `${paddleHeightPercent}%`;
+		this.paddleElement.style.width = `${paddleWidthPercent}%`;
+		const yPercent = this.referee.paddle.y / this.referee.boardHeight * 100;
 		const xPercent = (this.referee.paddle.x - this.referee.boardWidth / 2) / (this.referee.boardWidth / 2) * 100;
 		this.paddleElement.style.top = `${yPercent}%`;
 		this.paddleElement.style.left = `${xPercent}%`;
+		this.paddleElement.style.transform = `translate(-50%, -50%)`;
 	}
 
 	_updateGameContainerRatio(WHRatio) { // TODO : resize 이벤트 발생 시 호출, portrait도 고려
