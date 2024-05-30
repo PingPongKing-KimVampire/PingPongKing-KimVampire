@@ -26,13 +26,16 @@ class GamePageManager {
 			width: newRect.width
 		}
 
-		const gameResizeObserver = new GameResizeObserver(this.UpdateSubBoard.bind(this));
-		this.eventHandler.subscribe('resize', gameResizeObserver);
+		// const gameResizeObserver = new GameResizeObserver(this.updateSubBoard.bind(this));
+		const updateSubBoardObserver = new GameResizeObserver(this.updateSubBoard.bind(this));
+		const updateGameContainerObserver = new GameResizeObserver(this.gameObjectRenderer.updateGameContainer.bind(this.gameObjectRenderer));
+		this.eventHandler.subscribe('resize', updateSubBoardObserver);
+		this.eventHandler.subscribe('resize', updateGameContainerObserver);
 
 		this.player = new Player(this.eventHandler, this.referee, this.gameObjectRenderer, this.subBoardRect);
 	}
 
-	UpdateSubBoard() {
+	updateSubBoard() {
 		const newRect = this.subBoard.getBoundingClientRect();
 		this.subBoardRect.top = newRect.top;
 		this.subBoardRect.left = newRect.left;

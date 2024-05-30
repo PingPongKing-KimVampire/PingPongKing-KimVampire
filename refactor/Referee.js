@@ -11,7 +11,7 @@ class Referee {
     };
     this.boardWidth = 1550;
     this.boardHeight = 1000;
-
+    this.gameContainerRatio = this.boardWidth / this.boardHeight;
     this.paddleHeight = 150;
     this.paddleWidth = 30;
 
