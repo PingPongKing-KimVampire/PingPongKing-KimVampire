@@ -9,6 +9,9 @@ class GameObjectRenderer {
 		this.paddleElement = document.querySelector('.paddle');
 		this.renderBall();
 		this.renderPaddle();
+		
+		this.gameContainer = document.querySelector('#gameContainer');
+		this.VCPercent = 90;
 
 		// TODO : 이후엔 OrientationEventHandler 생성을 여기서 하면 안 될 것임
 		this.orientationEventHandler = new OrientationEventHandler();
@@ -17,35 +20,59 @@ class GameObjectRenderer {
 		// TODO : 방향 초기화하고 시작하기 위한 임시 코드
 		// 모든 옵저버에게 알릴 필요 X, 특정 옵저버에게만 notify할 수 있는 메소드가 필요하려나
 		this.orientationEventHandler.notify();
-
-		this.gameContainer = document.querySelector('#gameContainer');
-		this.updateGameContainer();
-		this.VCPercent = 90;
 	}
 
 	updateOrientation(orientation) {
 		this.orientation = orientation;
+		this.updateGameContainer();
+		this.renderBall();
+		this.renderPaddle();
 	}
 
 	renderBall() {
-		const ballWidthPercent = this.referee.ball.radius*2 / this.referee.boardWidth * 100;
-		this.ballElement.style.width = `${ballWidthPercent}%`;
+		// TODO : orientation에 따라 공 크기 결정 기준 달리하기
+		if (this.orientation === 'portrait') {
+			const ballHeightPercent = this.referee.ball.radius*2 / this.referee.boardHeight * 100;
+			console.log(`ballHeightPercent: ${ballHeightPercent}`);
+			this.ballElement.style.height = `${ballHeightPercent}%`;
+			this.ballElement.style.width = 'auto';
+			this.ballElement.style.aspectRatio = '1/1';
+		} else if (this.orientation === 'landscape') {
+			const ballWidthPercent = this.referee.ball.radius*2 / this.referee.boardWidth * 100;
+			console.log(`ballWidthPercent: ${ballWidthPercent}`);
+			this.ballElement.style.width = `${ballWidthPercent}%`;
+			this.ballElement.style.height = 'auto';
+			this.ballElement.style.aspectRatio = '1/1';
+		}
+
 		const yPercent = this.referee.ball.yPos / this.referee.boardHeight * 100;
 		const xPercent = this.referee.ball.xPos / this.referee.boardWidth * 100;
-		this.ballElement.style.top = `${yPercent}%`;
-		this.ballElement.style.left = `${xPercent}%`;
+		if (this.orientation === 'portrait') {
+			this.ballElement.style.top = `${xPercent}%`;
+			this.ballElement.style.left = `${100 - yPercent}%`;
+		} else if (this.orientation === 'landscape') {
+			this.ballElement.style.top = `${yPercent}%`;
+			this.ballElement.style.left = `${xPercent}%`;
+		}
 		this.ballElement.style.transform = `translate(-50%, -50%)`;
 	}
 
 	renderPaddle() {
-		const paddleHeightPercent = this.referee.paddleHeight / this.referee.boardHeight * 100;
-		const paddleWidthPercent =  this.referee.paddleWidth / this.referee.boardWidth * 100;
-		this.paddleElement.style.height = `${paddleHeightPercent}%`;
-		this.paddleElement.style.width = `${paddleWidthPercent * 2}%`;
+		const heightPercent = this.referee.paddleHeight / this.referee.boardHeight * 100;
+		const widthPercent =  this.referee.paddleWidth / this.referee.boardWidth * 100;
 		const yPercent = this.referee.paddle.y / this.referee.boardHeight * 100;
 		const xPercent = (this.referee.paddle.x - this.referee.boardWidth / 2) / (this.referee.boardWidth / 2) * 100;
-		this.paddleElement.style.top = `${yPercent}%`;
-		this.paddleElement.style.left = `${xPercent}%`;
+		if (this.orientation === 'portrait') {
+			this.paddleElement.style.height = `${widthPercent * 2}%`;
+			this.paddleElement.style.width = `${heightPercent}%`;
+			this.paddleElement.style.top = `${xPercent}%`;
+			this.paddleElement.style.left = `${100 - yPercent}%`;
+		} else if (this.orientation === 'landscape') {
+			this.paddleElement.style.height = `${heightPercent}%`;
+			this.paddleElement.style.width = `${widthPercent * 2}%`;
+			this.paddleElement.style.top = `${yPercent}%`;
+			this.paddleElement.style.left = `${xPercent}%`;
+		}
 		this.paddleElement.style.transform = `translate(-50%, -50%)`;
 	}
 
