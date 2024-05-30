@@ -38,13 +38,16 @@ class Referee {
   updatePaddlePosition(y, x) {
     this.paddle.y = y;
     this.paddle.x = x;
+    console.log("y", y);
+    console.log("x", x);
+    //landscape 왼쪽 하단 1000, 775
   }
 
   _moveBall(gameObjectRenderer) {
     // 시간 측정
-    let curTime = new Date().getTime();
-    let elapsedTime = curTime - this.startTime;
-    console.log("Elapsed time: " + elapsedTime + " ms");
+    // let curTime = new Date().getTime();
+    // let elapsedTime = curTime - this.startTime;
+    // console.log("Elapsed time: " + elapsedTime + " ms");
 
     this.ball.yPos += this.ball.dy;
     this.ball.xPos += this.ball.dx;
