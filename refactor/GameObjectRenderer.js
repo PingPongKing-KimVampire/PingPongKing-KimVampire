@@ -41,7 +41,7 @@ class GameObjectRenderer {
 		const paddleHeightPercent = this.referee.paddleHeight / this.referee.boardHeight * 100;
 		const paddleWidthPercent =  this.referee.paddleWidth / this.referee.boardWidth * 100;
 		this.paddleElement.style.height = `${paddleHeightPercent}%`;
-		this.paddleElement.style.width = `${paddleWidthPercent}%`;
+		this.paddleElement.style.width = `${paddleWidthPercent * 2}%`;
 		const yPercent = this.referee.paddle.y / this.referee.boardHeight * 100;
 		const xPercent = (this.referee.paddle.x - this.referee.boardWidth / 2) / (this.referee.boardWidth / 2) * 100;
 		this.paddleElement.style.top = `${yPercent}%`;

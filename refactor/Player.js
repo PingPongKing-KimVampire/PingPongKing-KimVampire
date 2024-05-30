@@ -18,7 +18,6 @@ class Player {
     );
     eventHandler.subscribe("mousedown", togglePlayObserver);
 
-    this.orientation = "landscape";
     this.orientationEventHandler = new OrientationEventHandler();
     const updateOrientationObserver = new GameOrientationObserver(
       this.updateOrientation.bind(this)
@@ -33,7 +32,6 @@ class Player {
   }
 
   sendPaddlePosition(e) {
-    console.log(this.orientation);
     const yPos = e.clientY - this.subBoardRect.top;
     const xPos = e.clientX - this.subBoardRect.left;
     let x, y;
@@ -53,10 +51,13 @@ class Player {
     }
 
     x = Math.max(
-      this.referee.boardWidth / 2,
-      Math.min(x, this.referee.boardWidth)
+      this.referee.boardWidth / 2 + this.referee.paddleWidth / 2,
+      Math.min(x, this.referee.boardWidth - this.referee.paddleWidth / 2)
     );
-    y = Math.max(0, Math.min(y, this.referee.boardHeight));
+    y = Math.max(
+      0 + this.referee.paddleHeight / 2,
+      Math.min(y, this.referee.boardHeight - this.referee.paddleHeight / 2)
+    );
     this.referee.updatePaddlePosition(y, x);
     this.gameObjectRenderer.renderPaddle(
       y,

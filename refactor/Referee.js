@@ -13,7 +13,7 @@ class Referee {
     this.boardHeight = 1000;
     this.gameContainerRatio = this.boardWidth / this.boardHeight;
     this.paddleHeight = 150;
-    this.paddleWidth = 30;
+    this.paddleWidth = 15;
 
     const ballFirstAngle = 20;
     const ballSpeed = 8;
@@ -38,9 +38,6 @@ class Referee {
   updatePaddlePosition(y, x) {
     this.paddle.y = y;
     this.paddle.x = x;
-    console.log("y", y);
-    console.log("x", x);
-    //landscape 왼쪽 하단 1000, 775
   }
 
   _moveBall(gameObjectRenderer) {
