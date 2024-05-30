@@ -87,22 +87,14 @@ class Referee {
     const paddleTop = this.paddle.y - this.paddleHeight / 2;
     const paddleBot = this.paddle.y + this.paddleHeight / 2;
 
-    // Check if the ball is within the paddle's x range
     if (ballPrevX <= this.paddle.x && this.paddle.x < ballNextX) {
-      // Calculate the point of collision on the y-axis
       const firstXRatio = (this.paddle.x - ballPrevX) / (ballNextX - ballPrevX);
       const ballYDiff = ballNextY - ballPrevY;
       const collisionY = ballPrevY + firstXRatio * ballYDiff;
 
-      // Check if the collision point is within the paddle's y range
       if (paddleTop <= collisionY && collisionY <= paddleBot) {
         this.isMyTurn = false;
-        this.ball.dx = -this.ball.dx;
-
-        // Optionally adjust the ball's position slightly to prevent sticking
-        this.ball.xPos =
-          this.paddle.x +
-          (this.ball.dx > 0 ? this.ball.radius : -this.ball.radius);
+        this.ball.reversalRandomDx();
       }
     }
   }
