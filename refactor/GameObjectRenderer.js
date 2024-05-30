@@ -30,20 +30,15 @@ class GameObjectRenderer {
 	}
 
 	renderBall() {
-		// TODO : orientation에 따라 공 크기 결정 기준 달리하기
+		const ballSizePercent = this.referee.ball.radius*2 / this.referee.boardWidth * 100;
 		if (this.orientation === 'portrait') {
-			const ballHeightPercent = this.referee.ball.radius*2 / this.referee.boardHeight * 100;
-			console.log(`ballHeightPercent: ${ballHeightPercent}`);
-			this.ballElement.style.height = `${ballHeightPercent}%`;
+			this.ballElement.style.height = `${ballSizePercent}%`;
 			this.ballElement.style.width = 'auto';
-			this.ballElement.style.aspectRatio = '1/1';
 		} else if (this.orientation === 'landscape') {
-			const ballWidthPercent = this.referee.ball.radius*2 / this.referee.boardWidth * 100;
-			console.log(`ballWidthPercent: ${ballWidthPercent}`);
-			this.ballElement.style.width = `${ballWidthPercent}%`;
+			this.ballElement.style.width = `${ballSizePercent}%`;
 			this.ballElement.style.height = 'auto';
-			this.ballElement.style.aspectRatio = '1/1';
 		}
+		this.ballElement.style.aspectRatio = '1/1';
 
 		const yPercent = this.referee.ball.yPos / this.referee.boardHeight * 100;
 		const xPercent = this.referee.ball.xPos / this.referee.boardWidth * 100;
