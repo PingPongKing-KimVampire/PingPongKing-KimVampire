@@ -1,3 +1,6 @@
+import OrientationEventHandler from "./OrientationEventHandler.js";
+import GameOrientationObserver from "./GameOrientationObserver.js";
+
 class GameObjectRenderer {
 	constructor(referee) {
 		this.referee = referee;
@@ -7,9 +10,21 @@ class GameObjectRenderer {
 		this.renderBall();
 		this.renderPaddle();
 
+		// TODO : 이후엔 OrientationEventHandler 생성을 여기서 하면 안 될 것임
+		this.orientationEventHandler = new OrientationEventHandler();
+		const updateOrientationObserver = new GameOrientationObserver(this.updateOrientation.bind(this));
+		this.orientationEventHandler.subscribe(updateOrientationObserver);
+		// TODO : 방향 초기화하고 시작하기 위한 임시 코드
+		// 모든 옵저버에게 알릴 필요 X, 특정 옵저버에게만 notify할 수 있는 메소드가 필요하려나
+		this.orientationEventHandler.notify();
+
 		this.gameContainer = document.querySelector('#gameContainer');
-		this._updateGameContainerRatio(this.referee.boardWidth / this.referee.boardHeight);
+		this.updateGameContainer();
 		this.VCPercent = 90;
+	}
+
+	updateOrientation(orientation) {
+		this.orientation = orientation;
 	}
 
 	renderBall() {
@@ -34,14 +49,26 @@ class GameObjectRenderer {
 		this.paddleElement.style.transform = `translate(-50%, -50%)`;
 	}
 
-	_updateGameContainerRatio(WHRatio) { // TODO : resize 이벤트 발생 시 호출, portrait도 고려
-		// 뷰포트 너비가 높이에 비해 일정 수준 이상 작아짐 -> 뷰포트 너비 기준
-		if (window.innerWidth / window.innerHeight < WHRatio) {
-			this.gameContainer.style.width = `${this.VCPercent}vw`;
-			this.gameContainer.style.height = `${this.VCPercent / WHRatio}vw`;
-		} else { // 뷰포트 너비가 충분함 -> 뷰포트 높이 기준
-			this.gameContainer.style.height = `${this.VCPercent}vh`;
-			this.gameContainer.style.width = `${this.VCPercent * WHRatio}vh`;
+	updateGameContainer() {
+		const ratio = this.referee.gameContainerRatio;
+		if (this.orientation === 'portrait') {
+			// 뷰포트 너비가 높이에 비해 일정 수준 이상 작아짐 -> 뷰포트 너비 기준
+			if (window.innerHeight / window.innerWidth < ratio) {
+				this.gameContainer.style.height = `${this.VCPercent}vh`;
+				this.gameContainer.style.width = `${this.VCPercent / ratio}vh`;
+			} else { // 뷰포트 높이가 충분함 -> 뷰포트 너비 기준
+				this.gameContainer.style.width = `${this.VCPercent}vw`;
+				this.gameContainer.style.height = `${this.VCPercent * ratio}vw`;
+			}
+		} else if (this.orientation === 'landscape') {
+			// 뷰포트 너비가 높이에 비해 일정 수준 이상 작아짐 -> 뷰포트 너비 기준
+			if (window.innerWidth / window.innerHeight < ratio) {
+				this.gameContainer.style.width = `${this.VCPercent}vw`;
+				this.gameContainer.style.height = `${this.VCPercent / ratio}vw`;
+			} else { // 뷰포트 너비가 충분함 -> 뷰포트 높이 기준
+				this.gameContainer.style.height = `${this.VCPercent}vh`;
+				this.gameContainer.style.width = `${this.VCPercent * ratio}vh`;
+			}
 		}
 	}
 }
