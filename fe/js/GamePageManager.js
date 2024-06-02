@@ -12,7 +12,6 @@ class GamePageManager {
 		this.eventHandler.setupEventListeners('resize');
 		this.eventHandler.setupEventListeners('mousedown');
 		this.eventHandler.setupEventListeners('mousemove');
-		// TODO : 방향 변경 이벤트 등록
 
 		this.referee = new Referee();
 		this.gameObjectRenderer = new GameObjectRenderer(this.referee); // TODO : gameObjectRenderer, referee 둘이 양방향 상관관계다
