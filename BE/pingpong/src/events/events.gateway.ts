@@ -63,15 +63,15 @@ export class WebsocketService implements OnModuleInit {
           const { roomId } = content;
           const playerList = this.pingpongRoomMap.get(roomId).playerList;
           playerList.forEach((player) => {
-            player.send(JSON.stringify(message));
+            player.send(JSON.stringify(pingpongMsg));
           });
         } else if (receiver.includes('referee')) {
           const { roomId } = content;
           const refereeClient = this.pingpongRoomMap.get(roomId).refereeClient;
-          refereeClient.send(JSON.stringify(message));
+          refereeClient.send(JSON.stringify(pingpongMsg));
         } else {
           client.send('why you send this msg?');
-          client.send(JSON.stringify(message));
+          client.send(JSON.stringify(pingpongMsg));
         }
       });
 
