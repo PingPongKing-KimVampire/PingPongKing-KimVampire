@@ -1,13 +1,16 @@
+import Referee from "../TestReferee/Referee.js";
+
 class LobbyPageManager {
-	constructor(app, clientInfo, OnEnterSuccess) {
+	constructor(app, clientInfo, onEnterSuccess) {
 		console.log("Lobby Page!");
 		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
+		this.onEnterSuccess = onEnterSuccess;
 		this.enteredPlayers = [];
 
 		// 탁구장 생성
-		const createRoomBtn = document.querySelector('.createButton');
-		createRoomBtn.addEventListener('click', () => {
+		const createRoomButton = document.querySelector('.createButton');
+		createRoomButton.addEventListener('click', () => {
 			const createMessage = {
 				sender: 'client',
 				receiver: ['server'],
@@ -38,29 +41,26 @@ class LobbyPageManager {
 			this.enterRoom(roomIdInput.value);
 		})
 
-		this.clientInfo.socket.addEventListener('message', (messageEvent) => {
-			const message = JSON.parse(messageEvent.data);
-			const { sender, receiver, event, content } = message;
+		this.clientInfo.socket.addEventListener('message', this.listener);
+	}
 
-			if (receiver.includes('referee') && this.clientInfo.isReferee) {
-				console.log('referee가 메시지를 받음', message);
-				if (event === 'enterPingpongRoom') { // 탁구장 입장 요청
-					this.enterRoomResponse(content);
-				}
+	listener = (messageEvent) => {
+		const message = JSON.parse(messageEvent.data);
+		const { sender, receiver, event, content } = message;
+
+		if (receiver.includes('client')) {
+			if (event === 'appointReferee') { // 심판 임명 응답
+				this.clientInfo.isReferee = true;
+				this.clientInfo.roomId = content.roomId;
+				const referee = new Referee(this.clientInfo);
+				this.enterRoom(content.roomId);
+			} else if (event === 'getPingpongRoomResponse') { // 탁구장 조회 응답
+				console.log(content.roomIdList);
+			} else if (event === 'enterPingpongRoomResponse') { // 탁구장 입장 응답
+				this.onEnterSuccess(content.roomId);
+				this.clientInfo.socket.removeEventListener('message', this.listener);
 			}
-			if (receiver.includes('client')) {
-				if (event === 'appointReferee') { // 심판 임명 응답
-					this.clientInfo.isReferee = true;
-					const { roomId } = content;
-					this.roomId = roomId;
-					this.enterRoom(this.roomId);
-				} else if (event === 'getPingpongRoomResponse') { // 탁구장 조회 응답
-					console.log(content.roomIdList);
-				} else if (event === 'enterPingpongRoomResponse') { // 탁구장 입장 응답
-					OnEnterSuccess(content.roomId);
-				}
-			}
-		});
+		}
 	}
 
 	enterRoom(roomId) {
@@ -76,22 +76,6 @@ class LobbyPageManager {
 		}
 		this.clientInfo.socket.send(JSON.stringify(enterMessage));
 	};
-
-	enterRoomResponse(content) {
-		const { clientId, clientNickname } = content;
-		this.enteredPlayers.push({ clientId, clientNickname });
-		console.log(this.enteredPlayers);
-		const enterRoomResponse = {
-			sender: "referee",
-			receiver: ["server", "client"],
-			event: "enterPingpongRoomResponse",
-			content: {
-				roomId: this.roomId,
-				clientId
-			}
-		}
-		this.clientInfo.socket.send(JSON.stringify(enterRoomResponse));
-	}
 
 	_getHTML() {
 		return `

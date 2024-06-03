@@ -5,8 +5,8 @@ class LoginPageManager {
 		this.onLoginSuccess = onLoginSuccess;
 
 		// 로그인
-		const loginBtn = document.querySelector('#loginButton');
-		loginBtn.addEventListener('click', (event) => {
+		const loginButton = document.querySelector('#loginButton');
+		loginButton.addEventListener('click', (event) => {
 			event.preventDefault();
 			this.socket = new WebSocket('ws://127.0.0.1:3001');
 			this.socket.addEventListener('open', () => {
