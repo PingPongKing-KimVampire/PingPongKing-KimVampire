@@ -32,14 +32,14 @@ export class WebsocketService implements OnModuleInit {
       console.log('Client connected');
       client.isInit = false;
 
-      client.on('message', (message: any) => {
+      client.on('message', (message: ArrayBuffer) => {
         let pingpongMsg: PingpongMsg;
         try {
           pingpongMsg = JSON.parse(message.toString());
         } catch (e) {
           console.log(e);
           client.send('why you send this msg?');
-          client.send(JSON.stringify(message));
+          client.send(message.toString());
           return;
         }
         const { sender, receiver, event, content } = pingpongMsg;
@@ -57,21 +57,32 @@ export class WebsocketService implements OnModuleInit {
           } else if (event === 'getPingpongRoomList') {
             this.getPingpongRoomList(client);
           } else if (event === 'enterPingpongRoomResponse') {
-            this.enterPingpongRoomResponse(pingpongMsg);
+            this.enterPingpongRoomResponse(client, pingpongMsg);
           }
-        } else if (receiver.includes('player')) {
+        }
+        if (receiver.includes('player')) {
           const { roomId } = content;
+          if (!roomId || !this.pingpongRoomMap.has(roomId)) {
+            this.sendNoRoomMsg(client);
+            return;
+          }
           const playerList = this.pingpongRoomMap.get(roomId).playerList;
+          const msg = { ...pingpongMsg };
+          msg.receiver = ['player'];
           playerList.forEach((player) => {
-            player.send(JSON.stringify(pingpongMsg));
+            player.send(JSON.stringify(msg));
           });
-        } else if (receiver.includes('referee')) {
+        }
+        if (receiver.includes('referee')) {
           const { roomId } = content;
+          if (!roomId || !this.pingpongRoomMap.has(roomId)) {
+            this.sendNoRoomMsg(client);
+            return;
+          }
           const refereeClient = this.pingpongRoomMap.get(roomId).refereeClient;
-          refereeClient.send(JSON.stringify(pingpongMsg));
-        } else {
-          client.send('why you send this msg?');
-          client.send(JSON.stringify(pingpongMsg));
+          const msg = { ...pingpongMsg };
+          msg.receiver = ['referee'];
+          refereeClient.send(JSON.stringify(msg));
         }
       });
 
@@ -84,12 +95,29 @@ export class WebsocketService implements OnModuleInit {
     console.log('WebSocket server started on port 3001');
   }
 
-  private enterPingpongRoomResponse(pingpongMsg: PingpongMsg) {
+  private enterPingpongRoomResponse(
+    client: PingpongClient,
+    pingpongMsg: PingpongMsg,
+  ) {
     const { content } = pingpongMsg;
     const { roomId, clientId } = content;
+    if (!this.pingpongRoomMap.has(roomId)) {
+      this.sendNoRoomMsg(client);
+      return;
+    }
     const player = this.clientMap.get(clientId);
     this.pingpongRoomMap.get(roomId).playerList.push(player);
     player.send(JSON.stringify(pingpongMsg));
+  }
+
+  private sendNoRoomMsg(client: PingpongClient) {
+    const msg = {
+      sender: 'server',
+      receiver: ['client'],
+      event: 'noRoom',
+      content: {},
+    };
+    client.send(JSON.stringify(msg));
   }
 
   private getPingpongRoomList(client: PingpongClient) {
