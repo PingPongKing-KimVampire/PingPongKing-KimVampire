@@ -1,7 +1,7 @@
 import MovePaddleObserver from "./MovePaddleObserver.js";
 import OrientationEventHandler from "./OrientationEventHandler.js";
 import GameOrientationObserver from "./GameOrientationObserver.js";
-import TogglePlayObserver from "./TogglePlayObserver.js";
+import StartPlayObserver from "./StartPlayObserver.js";
 
 class Player {
   constructor(eventHandler, referee, gameObjectRenderer, subBoardRect) {
@@ -13,10 +13,10 @@ class Player {
       this.sendPaddlePosition.bind(this)
     );
     eventHandler.subscribe("mousemove", movePaddleObserver);
-    const togglePlayObserver = new TogglePlayObserver(
+    const startPlayObserver = new StartPlayObserver(
       this.sendStartGame.bind(this)
     );
-    eventHandler.subscribe("mousedown", togglePlayObserver);
+    eventHandler.subscribe("mousedown", startPlayObserver);
 
     this.orientationEventHandler = new OrientationEventHandler();
     const updateOrientationObserver = new GameOrientationObserver(

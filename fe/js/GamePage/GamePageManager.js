@@ -14,7 +14,7 @@ class GamePageManager {
 		this.eventHandler.setupEventListeners('mousemove');
 
 		this.referee = new Referee();
-		this.gameObjectRenderer = new GameObjectRenderer(this.referee); // TODO : gameObjectRenderer, referee 둘이 양방향 상관관계다
+		this.gameObjectRenderer = new GameObjectRenderer(this.referee);
 		
 		this.subBoard = document.querySelector('.subPlayBoard:nth-of-type(2)');
 		const newRect = this.subBoard.getBoundingClientRect();
