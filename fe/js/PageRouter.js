@@ -1,7 +1,7 @@
-import LobbyPageManager from './LobbyPageManager.js';
-import GamePageManager from './GamePageManager.js';
-import LoginPageManager from './LoginPageManager.js';
-import PingpongRoomPageManager from './PingpongRoomPageManager.js';
+import GamePageManager from './GamePage/GamePageManager.js';
+import LoginPageManager from './TestPage/LoginPageManager.js';
+import LobbyPageManager from './TestPage/LobbyPageManager.js';
+import PingpongRoomPageManager from './TestPage/PingpongRoomPageManager.js';
 
 class PageRouter {
 	constructor() {

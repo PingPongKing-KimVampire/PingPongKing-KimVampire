@@ -5,10 +5,10 @@ class Referee {
     this.isPlaying = false;
     this.isMyTurn = true;
     this.ballMoveIntervalID = null;
-    // this.paddle = {
-    //   y: this.boardHeight / 2,
-    //   x: this.boardWidth / 2 + this.boardWidth / 4,
-    // };
+    this.paddle = {
+      y: this.boardHeight / 2,
+      x: this.boardWidth / 2 + this.boardWidth / 4,
+    };
     // TODO : Referee가 clientID에 따라 패들을 여러 개 관리해야 하나?
     // TODO : 모든 플레이어가 탁구장에 입장하면, 호스트 클라이언트가 Referee를 생성되어야 하나?
     this.paddles = {
