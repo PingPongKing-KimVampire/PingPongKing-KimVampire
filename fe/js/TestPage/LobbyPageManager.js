@@ -57,6 +57,7 @@ class LobbyPageManager {
 				} else if (event === 'getPingpongRoomResponse') { // 탁구장 조회 응답
 					console.log(content.roomIdList);
 				} else if (event === 'enterPingpongRoomResponse') { // 탁구장 입장 응답
+					console.log("you successfully enter pingpong room");
 					OnEnterSuccess(content.roomId);
 				}
 			}
