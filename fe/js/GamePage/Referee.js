@@ -20,7 +20,7 @@ class Referee {
 		this.ballMoveIntervalID = null;
 
 		const ballFirstAngle = 20;
-		const ballSpeed = 8;
+		const ballSpeed = 3;
 		this.ball = new Ball(ballFirstAngle, ballSpeed, this.ballRadius);
 		this.ball.initBall(this.boardWidth, this.boardHeight);
 	}
@@ -42,7 +42,7 @@ class Referee {
 		})
 	}
 
-	manageEnterRoom({roomId, clientId, clientNickname}) {
+	manageEnterRoom({ roomId, clientId, clientNickname }) {
 		if (this.players.length === 2) { // 입장 불가 // TODO : 모드에 따라 인원 수 설정
 			this.sendEnterImpossibleMsg(roomId);
 		} else { // 입장 가능
@@ -56,7 +56,7 @@ class Referee {
 			}
 		}
 	}
-	
+
 	sendEnterImpossibleMsg(roomId) {
 		const impossibleMessage = {
 			sender: "server",
@@ -123,14 +123,13 @@ class Referee {
 
 	startGame() {
 		if (this.isPlaying) return;
-
 		this.isPlaying = true;
 		this.turn = 'right';
 		this.ball.initBall(this.boardWidth, this.boardHeight);
 		this.ballMoveIntervalID = setInterval(this._moveBall.bind(this));
 	}
 
-	updatePaddlePosition({clientId, yPosition, xPosition}) {
+	updatePaddlePosition({ clientId, yPosition, xPosition }) {
 		const player = this.players.find(player => player.id === clientId);
 		if (player) {
 			player.paddle.y = yPosition;
@@ -167,14 +166,10 @@ class Referee {
 	}
 
 	_detectWall() {
-		if (this.ball.getRightX() >= this.boardWidth) {
+		if (this.ball.getRightX() >= this.boardWidth ||
+			this.ball.getLeftX() <= 0) {
 			this._stopGame();
 			return;
-		}
-
-		if (this.ball.getLeftX() <= 0) {
-			this.isMyTurn = true;
-			this.ball.dx = -this.ball.dx;
 		}
 
 		if (
@@ -194,8 +189,16 @@ class Referee {
 	}
 
 	_detectPaddle() {
-		const ballPrevX = this.ball.getLeftX() - this.ball.dx;
-		const ballNextX = this.ball.getRightX();
+		let ballPrevX;
+		let ballNextX;
+		if (this.turn === 'right') {
+			ballPrevX = this.ball.getLeftX() - this.ball.dx;
+			ballNextX = this.ball.getRightX();
+		}
+		else if (this.turn === 'left') {
+			ballPrevX = this.ball.getRightX() - this.ball.dx;
+			ballNextX = this.ball.getLeftX();
+		}
 		const ballPrevY = this.ball.yPos - this.ball.dy;
 		const ballNextY = this.ball.yPos;
 
@@ -204,9 +207,14 @@ class Referee {
 			const paddle = player.paddle;
 			const paddleTop = paddle.y - this.paddleHeight / 2;
 			const paddleBot = paddle.y + this.paddleHeight / 2;
+			console.log(this.turn);
+			if (this.turn === 'left') {
+				console.log(player);
+				console.log("ballNextX", ballNextX);
+				console.log("ballPrevX", ballPrevX);
+			}
 			if ((player.team === 'right' && ballPrevX <= paddle.x && paddle.x <= ballNextX) ||
-				(player.team === 'left' && paddle.x <= ballPrevX && ballNextX <= paddle.x))
-			{
+				(player.team === 'left' && paddle.x <= ballPrevX && ballNextX <= paddle.x)) {
 				const firstXRatio = (paddle.x - ballPrevX) / (ballNextX - ballPrevX);
 				const ballYDiff = ballNextY - ballPrevY;
 				const collisionY = ballPrevY + firstXRatio * ballYDiff;

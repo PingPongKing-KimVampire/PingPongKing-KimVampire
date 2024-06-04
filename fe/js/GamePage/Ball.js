@@ -11,6 +11,7 @@ class Ball {
     const dir = this._calculateBallDirection();
     this.dx = dir.dx;
     this.dy = dir.dy;
+    this.angle = 0;
   }
 
   _calculateBallDirection() {
