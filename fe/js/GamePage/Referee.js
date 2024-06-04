@@ -124,8 +124,6 @@ class Referee {
 	startGame() {
 		if (this.isPlaying) return;
 
-		this.startTime = new Date().getTime();
-
 		this.isPlaying = true;
 		this.turn = 'right';
 		this.ball.initBall(this.boardWidth, this.boardHeight);
@@ -192,6 +190,7 @@ class Referee {
 		clearInterval(this.ballMoveIntervalID);
 		this.ball.initBall(this.boardWidth, this.boardHeight);
 		this.sendBallUpdateMsg();
+		this.startGame();
 	}
 
 	_detectPaddle() {

@@ -17,7 +17,7 @@ class GameObjectRenderer {
 		// TODO : 공/패들의 위치 기억하기
 		// this.renderBall({0, 0});
 		// this.renderPaddle();
-		
+
 		this.gameContainer = document.querySelector('#gameContainer');
 		this.VCPercent = 90;
 
@@ -48,18 +48,19 @@ class GameObjectRenderer {
 		this.gameContainerRatio = this.boardWidth / this.boardHeight;
 		this.paddleHeightPercent = gameInfo.paddleHeight / this.boardHeight * 100;
 		this.paddleWidthPercent = gameInfo.paddleWidth / this.boardWidth * 100;
-		this.ballSizePercent = gameInfo.ballRadius*2 / this.boardWidth * 100;
+		this.ballSizePercent = gameInfo.ballRadius * 2 / this.boardWidth * 100;
 	}
 
 	setPlayers(playerList) {
 		console.log('setPlayers', playerList);
-		const leftBoard = document.querySelector('.subPlayBoard:nth-of-type(1)');
-		const rightBoard = document.querySelector('.subPlayBoard:nth-of-type(2');
-		for (const {clientId, team} of playerList) {
+		// const leftBoard = document.querySelector('.subPlayBoard:nth-of-type(1)');
+		// const rightBoard = document.querySelector('.subPlayBoard:nth-of-type(2');
+		const board = document.querySelector('#playBoard');
+		for (const { clientId, team } of playerList) {
 			const player = {
 				id: clientId,
 				team: team,
-				paddle: this.createPaddle(team, leftBoard, rightBoard), // 패들 생성하기
+				paddle: this.createPaddle(team, board), // 패들 생성하기
 			}
 			this.players.push(player);
 			console.log('setPlayer', clientId, this.clientInfo.id);
@@ -68,14 +69,15 @@ class GameObjectRenderer {
 		}
 	}
 
-	createPaddle(team, leftBoard, rightBoard) {
+	createPaddle(team, board) {
 		const paddle = document.createElement('div');
 		paddle.classList.add('paddle');
-		if (team === 'left') {
-			leftBoard.appendChild(paddle);
-		} else {
-			rightBoard.appendChild(paddle);
-		}
+		board.appendChild(paddle);
+		// if (team === 'left') {
+		// 	leftBoard.appendChild(paddle);
+		// } else {
+		// 	rightBoard.appendChild(paddle);
+		// }
 		return paddle;
 	}
 
@@ -86,7 +88,7 @@ class GameObjectRenderer {
 		// this.renderPaddle();
 	}
 
-	renderBall({xPosition, yPosition}) {
+	renderBall({ xPosition, yPosition }) {
 		if (this.orientation === 'portrait') {
 			this.ball.style.height = `${this.ballSizePercent}%`;
 			this.ball.style.width = 'auto';
@@ -108,22 +110,33 @@ class GameObjectRenderer {
 		this.ball.style.transform = `translate(-50%, -50%)`;
 	}
 
-	renderPaddle({clientId, xPosition, yPosition}) {
+	renderPaddle({ clientId, xPosition, yPosition }) {
 		const yPercent = yPosition / this.boardHeight * 100;
-		const xPercent = (xPosition - this.boardWidth / 2) / (this.boardWidth / 2) * 100;
+		const xPercent = xPosition / this.boardWidth * 100;
+		// console.log(`yPercent`)
+		// console.log(yPercent)
+		// console.log(`xPercent`)
+		// console.log(xPercent)
 
 		const player = this.players.find(player => player.id === clientId);
+
+		console.log(player);
+		console.log(this.paddleWidthPercent);
+		console.log(this.paddleHeightPercent);
+
 		// TODO : paddle의 height, width를 매번 재설정해 줄 필요가 있을까?
+		player.paddle.style.color = 'blue';
 		if (this.orientation === 'portrait') {
-			player.paddle.style.height = `${this.paddleWidthPercent * 2}%`;
+			player.paddle.style.height = `${this.paddleWidthPercent}%`;
 			player.paddle.style.width = `${this.paddleHeightPercent}%`;
 			player.paddle.style.top = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
 			player.paddle.style.left = `${100 - yPercent}%`;
 		} else if (this.orientation === 'landscape') {
 			player.paddle.style.height = `${this.paddleHeightPercent}%`;
-			player.paddle.style.width = `${this.paddleWidthPercent * 2}%`;
+			player.paddle.style.width = `${this.paddleWidthPercent}%`;
 			player.paddle.style.top = `${yPercent}%`;
 			player.paddle.style.left = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
+
 		}
 		player.paddle.style.transform = `translate(-50%, -50%)`;
 	}

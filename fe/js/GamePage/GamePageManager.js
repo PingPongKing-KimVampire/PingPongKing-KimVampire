@@ -144,7 +144,7 @@ class GamePageManager {
 		return `
 			<div id="playBoard">
 				<div class="subPlayBoard"></div>
-				<div class="subPlayBoard"><div class="paddle"></div></div>
+				<div class="subPlayBoard"></div>
 				<div class="ball"></div>
 			</div>
 		`;
