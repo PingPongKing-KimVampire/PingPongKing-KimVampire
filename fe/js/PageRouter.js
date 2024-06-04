@@ -15,7 +15,10 @@ class PageRouter {
 		};
 	}
 
-	renderPage(url) {
+	async renderPage(url) {
+		//콜백함수로 성공상황을 주면 가독성이 조금 떨어지는것 같음
+		//하지만 loginPage가 lobbyPage를 몰라도 되는 패턴은 맘에 듬
+		//가독성을 높일 수 있는 방법은 없을까?
 		if (url === 'login') {
 			let loginPageManager = new LoginPageManager(this.app, (socket, id, nickname) => {
 				this.clientInfo.socket = socket;
@@ -26,10 +29,10 @@ class PageRouter {
 		} else if (url === 'lobby') {
 			let lobbyPageManager = new LobbyPageManager(this.app, this.clientInfo, (roomId) => {
 				this.clientInfo.roomId = roomId;
-				this.renderPage('pingpongRoom');
+				this.renderPage('game');
 			});
 		} else if (url === 'game') {
-			let gamePageManager = new GamePageManager(this.app);
+			let gamePageManager = new GamePageManager(this.app, this.clientInfo);
 		} else if (url == 'pingpongRoom') {
 			let pingpongRoomPageManager = new PingpongRoomPageManager(this.app, this.clientInfo);
 		}

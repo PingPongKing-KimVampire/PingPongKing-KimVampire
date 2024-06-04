@@ -7,7 +7,6 @@ class Referee {
 	constructor(clientInfo) {
 		this.boardWidth = 1550;
 		this.boardHeight = 1000;
-		this.gameContainerRatio = this.boardWidth / this.boardHeight;
 		this.paddleHeight = 150;
 		this.paddleWidth = 15;
 		this.ballRadius = 25;
@@ -26,46 +25,47 @@ class Referee {
 		this.ball.initBall(this.boardWidth, this.boardHeight);
 	}
 
-	manageMessageEvent() {
-		this.clientInfo.socket.addEventListener('message', (messageEvent) => {
-			const message = JSON.parse(messageEvent.data);
-			const { sender, receiver, event, content } = message;
+	// // TODO : 삭제할 수 있도록 listener 분리하기
+	// manageMessageEvent() {
+	// 	this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+	// 		const message = JSON.parse(messageEvent.data);
+	// 		const { sender, receiver, event, content } = message;
 
-			if (receiver.includes('referee')) {
-				console.log('referee가 메시지를 받음', message);
-				if (event === 'enterPingpongRoom') { // 탁구장 입장 요청
-					this.manageEnterRoom(content);
-				} else if (event === 'updatePaddleLocation') { // 패들 위치 변경
-					this.updatePaddlePosition(content);
-				}
-			}
-		})
-	}
+	// 		if (receiver.includes('referee')) {
+	// 			console.log('referee가 메시지를 받음', message);
+	// 			if (event === 'enterPingpongRoom') { // 탁구장 입장 요청
+	// 				this.manageEnterRoom(content);
+	// 			} else if (event === 'updatePaddleLocation') { // 패들 위치 변경
+	// 				this.updatePaddlePosition(content);
+	// 			}
+	// 		}
+	// 	})
+	// }
 
-	manageEnterRoom(roomId, clientId, clientNickname) {
-		if (this.players.length === 2) { // 입장 불가 // TODO : 모드에 따라 인원 수 설정
-			this.sendEnterImpossibleMsg(roomId);
-		} else { // 입장 가능
-			this.addPlayer(clientId, clientNickname);
-			this.sendEnterPossibleMsg(roomId, clientId);
-			if (this.players.length === 2) {
-				this.sendStartGameMsg();
-				this.startGame();
-			}
-		}
-	}
+	// manageEnterRoom(roomId, clientId, clientNickname) {
+	// 	if (this.players.length === 2) { // 입장 불가 // TODO : 모드에 따라 인원 수 설정
+	// 		this.sendEnterImpossibleMsg(roomId);
+	// 	} else { // 입장 가능
+	// 		this.addPlayer(clientId, clientNickname);
+	// 		this.sendEnterPossibleMsg(roomId, clientId);
+	// 		if (this.players.length === 2) {
+	// 			this.sendStartGameMsg();
+	// 			this.startGame();
+	// 		}
+	// 	}
+	// }
 	
-	sendEnterImpossibleMsg(roomId) {
-		const impossibleMessage = {
-			sender: "server",
-			receiver: ["client"],
-			event: "noRoom",
-			content: {
-				roomId,
-			}
-		}
-		this.clientInfo.socket.send(JSON.stringify(impossibleMessage));
-	}
+	// sendEnterImpossibleMsg(roomId) {
+	// 	const impossibleMessage = {
+	// 		sender: "server",
+	// 		receiver: ["client"],
+	// 		event: "noRoom",
+	// 		content: {
+	// 			roomId,
+	// 		}
+	// 	}
+	// 	this.clientInfo.socket.send(JSON.stringify(impossibleMessage));
+	// }
 
 	addPlayer(id, nickname) {
 		let team = this.players.length ? 'right' : 'left'; // 처음 입장하면 left, 나중에 입장하면 right로 임시 설정
@@ -81,45 +81,45 @@ class Referee {
 		this.players.push(player);
 	}
 
-	sendEnterPossibleMsg(roomId, clientId) {
-		const possibleMessage = {
-			sender: "referee",
-			receiver: ["server", "client"],
-			event: "enterPingpongRoomResponse",
-			content: {
-				roomId,
-				clientId
-			}
-		}
-		this.clientInfo.socket.send(JSON.stringify(possibleMessage));
-	}
+	// sendEnterPossibleMsg(roomId, clientId) {
+	// 	const possibleMessage = {
+	// 		sender: "referee",
+	// 		receiver: ["server", "client"],
+	// 		event: "enterPingpongRoomResponse",
+	// 		content: {
+	// 			roomId,
+	// 			clientId
+	// 		}
+	// 	}
+	// 	this.clientInfo.socket.send(JSON.stringify(possibleMessage));
+	// }
 
-	sendStartGameMsg() {
-		const clientList = this.players.map(player => ({
-			clientId: player.id,
-			clientNickname: player.nickname,
-			team: player.team,
-		}));
-		const startMessage = {
-			sender: "referee",
-			receiver: ["player"],
-			event: "startGame",
-			content: {
-				roomId: this.clientInfo.roomId,
-				clientList: clientList,
-				gameInfo: {
-					boardWidth: this.boardWidth,
-					boardHeight: this.boardHeight,
-					paddleWidth: this.paddleWidth,
-					paddleHeight: this.paddleHeight,
-					ballRadius: this.ballRadius,
-				}
-			}
-		};
-		this.clientInfo.socket.send(JSON.stringify(startMessage));
-	}
+	// sendStartGameMsg() {
+	// 	const clientList = this.players.map(player => ({
+	// 		clientId: player.id,
+	// 		clientNickname: player.nickname,
+	// 		team: player.team,
+	// 	}));
+	// 	const startMessage = {
+	// 		sender: "referee",
+	// 		receiver: ["player"],
+	// 		event: "startGame",
+	// 		content: {
+	// 			roomId: this.clientInfo.roomId,
+	// 			clientList: clientList,
+	// 			gameInfo: {
+	// 				boardWidth: this.boardWidth,
+	// 				boardHeight: this.boardHeight,
+	// 				paddleWidth: this.paddleWidth,
+	// 				paddleHeight: this.paddleHeight,
+	// 				ballRadius: this.ballRadius,
+	// 			}
+	// 		}
+	// 	};
+	// 	this.clientInfo.socket.send(JSON.stringify(startMessage));
+	// }
 
-	startGame(gameObjectRenderer) {
+	startGame() {
 		if (this.isPlaying) return;
 
 		this.startTime = new Date().getTime();
