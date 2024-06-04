@@ -44,7 +44,8 @@ class Referee {
 
 	manageEnterRoom({ roomId, clientId, clientNickname }) {
 		if (this.players.length === 2) { // 입장 불가 // TODO : 모드에 따라 인원 수 설정
-			this.sendEnterImpossibleMsg(roomId);
+			// this.sendEnterImpossibleMsg(roomId);
+			// TODO : 입장 불가 메시지 전달
 		} else { // 입장 가능
 			console.log('sendEnterPossibleMsg');
 			this.addPlayer(clientId, clientNickname);
@@ -57,17 +58,17 @@ class Referee {
 		}
 	}
 
-	sendEnterImpossibleMsg(roomId) {
-		const impossibleMessage = {
-			sender: "server",
-			receiver: ["client"],
-			event: "noRoom",
-			content: {
-				roomId,
-			}
-		}
-		this.clientInfo.socket.send(JSON.stringify(impossibleMessage));
-	}
+	// sendEnterImpossibleMsg(roomId) {
+	// 	const impossibleMessage = {
+	// 		sender: "server",
+	// 		receiver: ["client"],
+	// 		event: "noRoom",
+	// 		content: {
+	// 			roomId,
+	// 		}
+	// 	}
+	// 	this.clientInfo.socket.send(JSON.stringify(impossibleMessage));
+	// }
 
 	addPlayer(id, nickname) {
 		let team = this.players.length ? 'right' : 'left'; // 처음 입장하면 left, 나중에 입장하면 right로 임시 설정
