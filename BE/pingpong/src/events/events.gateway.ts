@@ -35,6 +35,7 @@ export class WebsocketService implements OnModuleInit {
       client.on('message', (message: ArrayBuffer) => {
         let pingpongMsg: PingpongMsg;
         try {
+          console.log(message.toString());
           pingpongMsg = JSON.parse(message.toString());
         } catch (e) {
           console.log(e);
@@ -63,7 +64,7 @@ export class WebsocketService implements OnModuleInit {
         if (receiver.includes('player')) {
           const { roomId } = content;
           if (!roomId || !this.pingpongRoomMap.has(roomId)) {
-            this.sendNoRoomMsg(client);
+            this.sendNoRoomMsg(client, pingpongMsg);
             return;
           }
           const playerList = this.pingpongRoomMap.get(roomId).playerList;
@@ -76,7 +77,7 @@ export class WebsocketService implements OnModuleInit {
         if (receiver.includes('referee')) {
           const { roomId } = content;
           if (!roomId || !this.pingpongRoomMap.has(roomId)) {
-            this.sendNoRoomMsg(client);
+            this.sendNoRoomMsg(client, pingpongMsg);
             return;
           }
           const refereeClient = this.pingpongRoomMap.get(roomId).refereeClient;
@@ -102,7 +103,7 @@ export class WebsocketService implements OnModuleInit {
     const { content } = pingpongMsg;
     const { roomId, clientId } = content;
     if (!this.pingpongRoomMap.has(roomId)) {
-      this.sendNoRoomMsg(client);
+      this.sendNoRoomMsg(client, pingpongMsg);
       return;
     }
     const player = this.clientMap.get(clientId);
@@ -110,12 +111,12 @@ export class WebsocketService implements OnModuleInit {
     player.send(JSON.stringify(pingpongMsg));
   }
 
-  private sendNoRoomMsg(client: PingpongClient) {
+  private sendNoRoomMsg(client: PingpongClient, clientMsg: any) {
     const msg = {
       sender: 'server',
       receiver: ['client'],
       event: 'noRoom',
-      content: {},
+      content: {clientMsg},
     };
     client.send(JSON.stringify(msg));
   }

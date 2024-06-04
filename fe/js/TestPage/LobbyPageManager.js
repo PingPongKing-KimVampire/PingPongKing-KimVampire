@@ -1,4 +1,4 @@
-import Referee from "../TestReferee/Referee.js";
+import Referee from "../GamePage/Referee.js";
 
 class LobbyPageManager {
 	constructor(app, clientInfo, onEnterSuccess) {
@@ -47,6 +47,7 @@ class LobbyPageManager {
 	listener = (messageEvent) => {
 		const message = JSON.parse(messageEvent.data);
 		const { sender, receiver, event, content } = message;
+		console.log(message);
 
 		if (receiver.includes('client')) {
 			if (event === 'appointReferee') { // 심판 임명 응답
@@ -57,6 +58,7 @@ class LobbyPageManager {
 			} else if (event === 'getPingpongRoomResponse') { // 탁구장 조회 응답
 				console.log(content.roomIdList);
 			} else if (event === 'enterPingpongRoomResponse') { // 탁구장 입장 응답
+				console.log('enterPingpongRoomResponse', message);
 				this.onEnterSuccess(content.roomId);
 				this.clientInfo.socket.removeEventListener('message', this.listener);
 			}

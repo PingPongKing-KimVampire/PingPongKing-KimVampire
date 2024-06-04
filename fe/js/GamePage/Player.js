@@ -4,9 +4,12 @@ import GameOrientationObserver from "./GameOrientationObserver.js";
 import StartPlayObserver from "./StartPlayObserver.js";
 
 class Player {
-  constructor(clientInfo, myTeam, gameInfo, eventHandler, subBoardRect) {
+  constructor(clientInfo, playerList, gameInfo, eventHandler, subBoardRect) {
     this.clientInfo = clientInfo;
-    this.myTeam = myTeam;
+
+    this.playerList = playerList;
+    this.myTeam = this.playerList.find((player)=>player.clientId === clientInfo.id).team;
+    console.log(this.myTeam);
     this.gameInfo = {
       boardWidth: null,
       boardHeight: null,
