@@ -203,13 +203,6 @@ body {
 	background-color: rgb(213, 112, 255);
 }
 
-/* .subPlayBoard:nth-of-type(2) .paddle {
-	width: 2.5%;
-	height: 15%;
-	position: absolute;
-	background-color: rgb(213, 112, 255);
-} */
-
 #playBoard .ball {
 	height: auto;
 	width: 3%;

@@ -1,7 +1,5 @@
+import ScoreManager from './ScoreManager.js';
 import Ball from "./Ball.js";
-
-// - Referee와 RefereeSocketManager는 양방향 연관 관계가 될 수 없다.
-// - RefereeSocketManager가 Referee를 프로퍼티로 가질까?
 
 class Referee {
 	constructor(clientInfo) {
@@ -13,52 +11,61 @@ class Referee {
 
 		this.clientInfo = clientInfo;
 		this.players = [];
-		this.manageMessageEvent();
+		this._manageMessageEvent();
 
+		this.winningScore = 5;
 		this.isPlaying = false;
+		this.isEnd = false;
+		this.ballSubWaited = true;
 		this.turn = 'right';
+		this.subTeam = 'right';
 		this.ballMoveIntervalID = null;
+		this.scoreManager = null;
 
-		const ballFirstAngle = 20;
-		const ballSpeed = 3;
-		this.ball = new Ball(ballFirstAngle, ballSpeed, this.ballRadius);
-		this.ball.initBall(this.boardWidth, this.boardHeight);
+		// const ballFirstAngle = 20;
+		// const ballSpeed = 3;
+		// this.ball = new Ball(ballFirstAngle, ballSpeed, this.ballRadius);
+		// this.ball.initBall(this.boardWidth, this.boardHeight);
+
+		const ballSpeed = 1;
+		this.ball = new Ball(ballSpeed, this.ballRadius);
 	}
 
 	// TODO : 삭제할 수 있도록 listener 분리하기
-	manageMessageEvent() {
+	_manageMessageEvent() {
 		this.clientInfo.socket.addEventListener('message', (messageEvent) => {
 			const message = JSON.parse(messageEvent.data);
 			const { sender, receiver, event, content } = message;
 
 			if (receiver.includes('referee')) {
-				console.log('referee가 메시지를 받음', message);
+				// console.log('referee가 메시지를 받음', message);
 				if (event === 'enterPingpongRoom') { // 탁구장 입장 요청
-					this.manageEnterRoom(content);
+					this._manageEnterRoom(content);
 				} else if (event === 'updatePaddleLocation') { // 패들 위치 변경
-					this.updatePaddlePosition(content);
+					this._updatePaddlePosition(content);
 				}
 			}
 		})
 	}
 
-	manageEnterRoom({ roomId, clientId, clientNickname }) {
+	_manageEnterRoom({ roomId, clientId, clientNickname }) {
 		if (this.players.length === 2) { // 입장 불가 // TODO : 모드에 따라 인원 수 설정
-			// this.sendEnterImpossibleMsg(roomId);
+			// this._sendEnterImpossibleMsg(roomId);
 			// TODO : 입장 불가 메시지 전달
 		} else { // 입장 가능
-			console.log('sendEnterPossibleMsg');
-			this.addPlayer(clientId, clientNickname);
-			this.sendEnterPossibleMsg(roomId, clientId);
+			// console.log('sendEnterPossibleMsg');
+			this._addPlayer(clientId, clientNickname);
+			this._sendEnterPossibleMsg(roomId, clientId);
 			if (this.players.length === 2) {
-				// console.log(this.players);
-				this.sendStartGameMsg();
-				this.startGame();
+				this.scoreManager = new ScoreManager(this.clientInfo,
+					this.winningScore, this.winGame.bind(this), this.players);
+				this._sendStartGameMsg();
+				this._readyRound(); // TODO : Player 객체가 이벤트 감지를 못 할 것 같은데?
 			}
 		}
 	}
 
-	// sendEnterImpossibleMsg(roomId) {
+	// _sendEnterImpossibleMsg(roomId) {
 	// 	const impossibleMessage = {
 	// 		sender: "server",
 	// 		receiver: ["client"],
@@ -70,7 +77,7 @@ class Referee {
 	// 	this.clientInfo.socket.send(JSON.stringify(impossibleMessage));
 	// }
 
-	addPlayer(id, nickname) {
+	_addPlayer(id, nickname) {
 		let team = this.players.length ? 'right' : 'left'; // 처음 입장하면 left, 나중에 입장하면 right로 임시 설정
 		const player = {
 			id: id,
@@ -84,7 +91,7 @@ class Referee {
 		this.players.push(player);
 	}
 
-	sendEnterPossibleMsg(roomId, clientId) {
+	_sendEnterPossibleMsg(roomId, clientId) {
 		const possibleMessage = {
 			sender: "referee",
 			receiver: ["server", "client"],
@@ -97,7 +104,7 @@ class Referee {
 		this.clientInfo.socket.send(JSON.stringify(possibleMessage));
 	}
 
-	sendStartGameMsg() {
+	_sendStartGameMsg() {
 		const clientList = this.players.map(player => ({
 			clientId: player.id,
 			clientNickname: player.nickname,
@@ -122,15 +129,7 @@ class Referee {
 		this.clientInfo.socket.send(JSON.stringify(startMessage));
 	}
 
-	startGame() {
-		if (this.isPlaying) return;
-		this.isPlaying = true;
-		this.turn = 'right';
-		this.ball.initBall(this.boardWidth, this.boardHeight);
-		this.ballMoveIntervalID = setInterval(this._moveBall.bind(this));
-	}
-
-	updatePaddlePosition({ clientId, yPosition, xPosition }) {
+	_updatePaddlePosition({ clientId, yPosition, xPosition }) {
 		const player = this.players.find(player => player.id === clientId);
 		if (player) {
 			player.paddle.y = yPosition;
@@ -138,7 +137,7 @@ class Referee {
 		}
 	}
 
-	sendBallUpdateMsg() {
+	_sendBallUpdateMsg() {
 		const ballMessage = {
 			sender: "referee",
 			receiver: ["player"],
@@ -163,13 +162,25 @@ class Referee {
 		this.ball.xPos += this.ball.dx;
 		this._detectWall();
 		this._detectPaddle();
-		this.sendBallUpdateMsg(); // 실시간으로 볼 위치 알리기
+		this._sendBallUpdateMsg(); // 실시간으로 볼 위치 알리기
 	}
 
 	_detectWall() {
-		if (this.ball.getRightX() >= this.boardWidth ||
-			this.ball.getLeftX() <= 0) {
-			this._stopGame();
+		if (this.ball.getRightX() >= this.boardWidth) {
+			this.scoreManager.getScore('left');
+			this.subTeam = 'left';
+			this._stopRound();
+			console.log(this.isEnd);
+			if (!this.isEnd)
+				this._readyRound();
+			return;
+		}
+		if (this.ball.getLeftX() <= 0) {
+			this.scoreManager.getScore('right');
+			this.subTeam = 'right';
+			this._stopRound();
+			if (!this.isEnd)
+				this._readyRound();
 			return;
 		}
 
@@ -181,12 +192,51 @@ class Referee {
 		}
 	}
 
-	_stopGame() {
+	_stopRound() {
 		this.isPlaying = false;
 		clearInterval(this.ballMoveIntervalID);
-		this.ball.initBall(this.boardWidth, this.boardHeight);
-		this.sendBallUpdateMsg();
-		this.startGame();
+	}
+
+	_readyRound() {
+		// 현재 서브팀 앞으로 공 가져다두기
+		// let ballInitX = this.boardWidth / 2;
+		// let ballInitAngle;
+		// if (this.subTeam === 'left') {
+		// 	ballInitX -= this.boardWidth / 4;
+		// 	ballInitAngle = 180;
+		// } else {
+		// 	ballInitX += this.boardWidth / 4;
+		// 	ballInitAngle = 0;
+		// }
+		// this.ballSubWaited = true;
+		// this.ball.initBall(ballInitX, this.boardHeight / 2, ballInitAngle);
+		this.ball.initBall(50, 50, 20);
+		this._sendBallUpdateMsg();
+		this._startRound();
+	}
+
+	_startRound() {
+		this.isPlaying = true;
+		this.turn = this.subTeam;
+		this.ballMoveIntervalID = setInterval(this._moveBall.bind(this));
+	}
+
+	winGame(team) {
+		this.isEnd = true;
+		this._sendWinGameMsg(team);
+	}
+
+	_sendWinGameMsg(team) {
+		const winGameMessage = {
+			sender: "referee",
+			receiver: ["player"],
+			event: "winGame",
+			content: {
+				team, // TODO : first, second 인가 / left, right 인가?
+				roomId: this.clientInfo.roomId,
+			}
+		}
+		this.clientInfo.socket.send(JSON.stringify(winGameMessage));
 	}
 
 	_detectPaddle() {
@@ -208,18 +258,15 @@ class Referee {
 			const paddle = player.paddle;
 			const paddleTop = paddle.y - this.paddleHeight / 2;
 			const paddleBot = paddle.y + this.paddleHeight / 2;
-			console.log(this.turn);
-			if (this.turn === 'left') {
-				console.log(player);
-				console.log("ballNextX", ballNextX);
-				console.log("ballPrevX", ballPrevX);
-			}
 			if ((player.team === 'right' && ballPrevX <= paddle.x && paddle.x <= ballNextX) ||
 				(player.team === 'left' && paddle.x <= ballPrevX && ballNextX <= paddle.x)) {
 				const firstXRatio = (paddle.x - ballPrevX) / (ballNextX - ballPrevX);
 				const ballYDiff = ballNextY - ballPrevY;
 				const collisionY = ballPrevY + firstXRatio * ballYDiff;
 				if (paddleTop <= collisionY && collisionY <= paddleBot) {
+					// if (this.ballSubWaited) {
+					// 	this._startRound();
+					// }
 					this.turn = player.team === 'right' ? 'left' : 'right';
 					this.ball.reversalRandomDx();
 				}

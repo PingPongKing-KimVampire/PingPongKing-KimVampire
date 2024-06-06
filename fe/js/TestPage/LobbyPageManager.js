@@ -47,7 +47,7 @@ class LobbyPageManager {
 	listener = (messageEvent) => {
 		const message = JSON.parse(messageEvent.data);
 		const { sender, receiver, event, content } = message;
-		console.log(message);
+		// console.log(message);
 
 		if (receiver.includes('client')) {
 			if (event === 'appointReferee') { // 심판 임명 응답

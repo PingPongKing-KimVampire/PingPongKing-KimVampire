@@ -12,7 +12,7 @@ class RefereeSocketHandler {
 			const { sender, receiver, event, content } = message;
 
 			if (receiver.includes('referee')) {
-				console.log('referee가 메시지를 받음', message);
+				// console.log('referee가 메시지를 받음', message);
 				if (event === 'enterPingpongRoom') { // 탁구장 입장 요청
 					this._manageEnterRoom(content);
 				} else if (event === 'updatePaddleLocation') { // 패들 위치 변경

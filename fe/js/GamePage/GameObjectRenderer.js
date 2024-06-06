@@ -7,42 +7,51 @@ class GameObjectRenderer {
 		this.players = [];
 		this.me = null;
 
-		this.setGameSizeInfo(gameInfo);
-		this.setPlayers(playerList);
+		this._setGameSizeInfo(gameInfo);
+		this._setPlayers(playerList);
+		this._manageMessageEvent();
 
-		this.manageMessageEvent();
-
-		this.ball = document.querySelector('.ball');
-
+		this.ball = {
+			element: document.querySelector('.ball'),
+			xPos: 50,
+			yPos: 50,
+		}
 		// TODO : 공/패들의 위치 기억하기
-		// this.renderBall({0, 0});
-		// this.renderPaddle();
 
 		this.gameContainer = document.querySelector('#gameContainer');
 		this.VCPercent = 90;
 
 		this.orientationEventHandler = new OrientationEventHandler();
-		const updateOrientationObserver = new GameOrientationObserver(this.updateOrientation.bind(this));
+		const updateOrientationObserver = new GameOrientationObserver(this._updateOrientation.bind(this));
 		this.orientationEventHandler.subscribe(updateOrientationObserver);
 		this.orientationEventHandler.notify();
+
+		this.leftScore = document.querySelector('#leftDisplayBoard .playerScore');
+		this.rightScore = document.querySelector('#rightDisplayBoard .playerScore');
+		this.leftBoard = document.querySelector('.subPlayBoard:nth-of-type(1)');
+		this.rightBoard = document.querySelector('.subPlayBoard:nth-of-type(2)');
 	}
 
-	manageMessageEvent() {
+	_manageMessageEvent() {
 		this.clientInfo.socket.addEventListener('message', (messageEvent) => {
 			const message = JSON.parse(messageEvent.data);
 			const { sender, receiver, event, content } = message;
 			// TODO : 혹시 roomId도 확인해야 하나?
 			if (receiver.includes('player')) {
 				if (event === 'updatePaddleLocation') { // 패들 위치 변경
-					this.renderPaddle(content);
+					this._renderPaddle(content);
 				} else if (event === 'updateBallLocation') { // 공 위치 변경
-					this.renderBall(content);
+					this._renderBall(content);
+				} else if (event === 'updateScore') { // 점수 변경
+					this._updateScore(content);
+				} else if (event === 'winGame') { // 게임 승리
+					this._winGame(content);
 				}
 			}
 		});
 	}
 
-	setGameSizeInfo(gameInfo) {
+	_setGameSizeInfo(gameInfo) {
 		this.boardWidth = gameInfo.boardWidth;
 		this.boardHeight = gameInfo.boardHeight;
 		this.gameContainerRatio = this.boardWidth / this.boardHeight;
@@ -51,94 +60,94 @@ class GameObjectRenderer {
 		this.ballSizePercent = gameInfo.ballRadius * 2 / this.boardWidth * 100;
 	}
 
-	setPlayers(playerList) {
-		console.log('setPlayers', playerList);
-		// const leftBoard = document.querySelector('.subPlayBoard:nth-of-type(1)');
-		// const rightBoard = document.querySelector('.subPlayBoard:nth-of-type(2');
+	_setPlayers(playerList) {
 		const board = document.querySelector('#playBoard');
 		for (const { clientId, team } of playerList) {
 			const player = {
 				id: clientId,
 				team: team,
-				paddle: this.createPaddle(team, board), // 패들 생성하기
+				paddle: {
+					element: this._createPaddle(board), // 패들 생성하기
+					xPos: 0,
+					yPos: 0,
+				}
 			}
 			this.players.push(player);
-			console.log('setPlayer', clientId, this.clientInfo.id);
 			if (clientId === this.clientInfo.id)
 				this.me = player;
 		}
 	}
 
-	createPaddle(team, board) {
+	_createPaddle(board) {
 		const paddle = document.createElement('div');
 		paddle.classList.add('paddle');
 		board.appendChild(paddle);
-		// if (team === 'left') {
-		// 	leftBoard.appendChild(paddle);
-		// } else {
-		// 	rightBoard.appendChild(paddle);
-		// }
 		return paddle;
 	}
 
-	updateOrientation(orientation) {
+	_updateOrientation(orientation) {
 		this.orientation = orientation;
 		this.updateGameContainer();
-		// this.renderBall();
-		// this.renderPaddle();
+		// this._renderBall();
+		// this._renderPaddle();
 	}
 
-	renderBall({ xPosition, yPosition }) {
+	_renderBall({ xPosition, yPosition }) {
 		if (this.orientation === 'portrait') {
-			this.ball.style.height = `${this.ballSizePercent}%`;
-			this.ball.style.width = 'auto';
+			this.ball.element.style.height = `${this.ballSizePercent}%`;
+			this.ball.element.style.width = 'auto';
 		} else if (this.orientation === 'landscape') {
-			this.ball.style.width = `${this.ballSizePercent}%`;
-			this.ball.style.height = 'auto';
+			this.ball.element.style.width = `${this.ballSizePercent}%`;
+			this.ball.element.style.height = 'auto';
 		}
-		this.ball.style.aspectRatio = '1/1';
+		this.ball.element.style.aspectRatio = '1/1';
 
 		const yPercent = yPosition / this.boardHeight * 100;
 		const xPercent = xPosition / this.boardWidth * 100;
 		if (this.orientation === 'portrait') {
-			this.ball.style.top = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
-			this.ball.style.left = `${100 - yPercent}%`;
+			this.ball.element.style.top = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
+			this.ball.element.style.left = `${100 - yPercent}%`;
 		} else if (this.orientation === 'landscape') {
-			this.ball.style.top = `${yPercent}%`;
-			this.ball.style.left = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
+			this.ball.element.style.top = `${yPercent}%`;
+			this.ball.element.style.left = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
 		}
-		this.ball.style.transform = `translate(-50%, -50%)`;
+		this.ball.element.style.transform = `translate(-50%, -50%)`;
 	}
 
-	renderPaddle({ clientId, xPosition, yPosition }) {
+	_renderPaddle({ clientId, xPosition, yPosition }) {
 		const yPercent = yPosition / this.boardHeight * 100;
 		const xPercent = xPosition / this.boardWidth * 100;
-		// console.log(`yPercent`)
-		// console.log(yPercent)
-		// console.log(`xPercent`)
-		// console.log(xPercent)
 
 		const player = this.players.find(player => player.id === clientId);
 
-		console.log(player);
-		console.log(this.paddleWidthPercent);
-		console.log(this.paddleHeightPercent);
-
 		// TODO : paddle의 height, width를 매번 재설정해 줄 필요가 있을까?
-		player.paddle.style.color = 'blue';
+		player.paddle.element.style.color = 'blue';
 		if (this.orientation === 'portrait') {
-			player.paddle.style.height = `${this.paddleWidthPercent}%`;
-			player.paddle.style.width = `${this.paddleHeightPercent}%`;
-			player.paddle.style.top = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
-			player.paddle.style.left = `${100 - yPercent}%`;
+			player.paddle.element.style.height = `${this.paddleWidthPercent}%`;
+			player.paddle.element.style.width = `${this.paddleHeightPercent}%`;
+			player.paddle.element.style.top = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
+			player.paddle.element.style.left = `${100 - yPercent}%`;
 		} else if (this.orientation === 'landscape') {
-			player.paddle.style.height = `${this.paddleHeightPercent}%`;
-			player.paddle.style.width = `${this.paddleWidthPercent}%`;
-			player.paddle.style.top = `${yPercent}%`;
-			player.paddle.style.left = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
-
+			player.paddle.element.style.height = `${this.paddleHeightPercent}%`;
+			player.paddle.element.style.width = `${this.paddleWidthPercent}%`;
+			player.paddle.element.style.top = `${yPercent}%`;
+			player.paddle.element.style.left = this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
 		}
-		player.paddle.style.transform = `translate(-50%, -50%)`;
+		player.paddle.element.style.transform = `translate(-50%, -50%)`;
+	}
+
+	_updateScore({ team, score }) {
+		const updatedHTML = `${score}<div class="playerScoreStroke">${score}</div>`;
+		if (team === 'left') {
+			this.leftScore.innerHTML = updatedHTML;
+		} else {
+			this.rightScore.innerHTML = updatedHTML;
+		}
+	}
+
+	_winGame({ team }) {
+		const board = team === 'left' ? this.leftBoard : this.rightBoard;
+		board.style.backgroundColor = 'red';
 	}
 
 	updateGameContainer() {

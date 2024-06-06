@@ -9,7 +9,7 @@ class Player {
 
     this.playerList = playerList;
     this.myTeam = this.playerList.find((player)=>player.clientId === clientInfo.id).team;
-    console.log(this.myTeam);
+    // console.log(this.myTeam);
     this.gameInfo = {
       boardWidth: null,
       boardHeight: null,
@@ -54,9 +54,9 @@ class Player {
     const xPos = e.clientX - this.subBoardRect.left;
     let x, y;
 
-    console.log(this.clientInfo);
-    console.log(this.myTeam);
-    console.log(this.gameInfo);
+    // console.log(this.clientInfo);
+    // console.log(this.myTeam);
+    // console.log(this.gameInfo);
 
     if (this.orientation === "landscape") {
       y = (yPos / this.subBoardRect.height) * this.gameInfo.boardHeight;
@@ -94,7 +94,7 @@ class Player {
       // }
     }
 
-    console.log("y: ", y, "x: ", x);
+    // console.log("y: ", y, "x: ", x);
 
     const msg = {
       sender: "player",

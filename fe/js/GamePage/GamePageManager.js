@@ -79,8 +79,8 @@ class GamePageManager {
 				(eventMessage) => {
 					const message = JSON.parse(eventMessage.data);
 					const { sender, receiver, event, content } = message;
-					console.log("GAME START!!!!");
-					console.log(message);
+					// console.log("GAME START!!!!");
+					// console.log(message);
 					if (receiver.includes("player") && event === "startGame") {
 						const { playerList, gameInfo } = content;
 						this.playerList = playerList;
@@ -122,7 +122,7 @@ class GamePageManager {
 				<div id="leftDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName">${this.playerList.filter((player) => player.clientId !== this.clientInfo.id)[0].clientNickname}</div>
-						<div class="playerScore">11<div class="playerScoreStroke">11</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
 					</div>
 					<div class="playerAvatar"><img src="images/playerA.png"></div>
 				</div>
@@ -132,7 +132,7 @@ class GamePageManager {
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName">${this.playerList.filter((player) => player.clientId === this.clientInfo.id)[0].clientNickname}</div>
-						<div class="playerScore">8<div class="playerScoreStroke">8</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
 					</div>
 					<div class="playerAvatar"><img src="images/playerB.png"></div>
 				</div>
