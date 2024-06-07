@@ -1,15 +1,17 @@
-import MovePaddleObserver from "./MovePaddleObserver.js";
-import OrientationEventHandler from "./OrientationEventHandler.js";
-import GameOrientationObserver from "./GameOrientationObserver.js";
-import StartPlayObserver from "./StartPlayObserver.js";
+import windowObservable from "../../WindowObservable.js";
 
 class Player {
-  constructor(clientInfo, playerList, gameInfo, eventHandler, subBoardRect) {
-    this.clientInfo = clientInfo;
+  constructor(clientInfo, playerList, gameInfo) {
+    this._initPlayerProperty(clientInfo, playerList, gameInfo);
+    this._subscribeWindow();
+  }
 
+  _initPlayerProperty(clientInfo, playerList, gameInfo) {
+    this.clientInfo = clientInfo;
     this.playerList = playerList;
-    this.myTeam = this.playerList.find((player)=>player.clientId === clientInfo.id).team;
-    // console.log(this.myTeam);
+    this.myTeam = this.playerList.find(
+      (player) => player.clientId === clientInfo.id
+    ).team;
     this.gameInfo = {
       boardWidth: null,
       boardHeight: null,
@@ -18,31 +20,28 @@ class Player {
       ballRadius: null,
     };
     this.gameInfo = gameInfo;
-    this.eventHandler = eventHandler;
-    this.subBoardRect = subBoardRect;
+    this.subBoard = document.querySelector(".subPlayBoard:nth-of-type(2)");
+    this.subBoardRect = {
+      top: null,
+      left: null,
+      height: null,
+      width: null,
+    };
     this.orientation = null;
-    // this.gameObjectRenderer = gameObjectRenderer;
+    this.updateSubBoardRect();
+    this.orientation = windowObservable.getOrientation();
+  }
 
-    //mousemove 변화 관찰
-    const movePaddleObserver = new MovePaddleObserver(
-      this.sendPaddlePosition.bind(this)
-    );
-    eventHandler.subscribe("mousemove", movePaddleObserver);
-
-    // //mousedown 변화 관찰
-    // const startPlayObserver = new StartPlayObserver(
-    //   this.sendStartGame.bind(this)
-    // );
-    // eventHandler.subscribe("mousedown", startPlayObserver);
-
-    //orientation 변화 관찰
-    this.orientationEventHandler = new OrientationEventHandler();
-    const updateOrientationObserver = new GameOrientationObserver(
+  _subscribeWindow() {
+    windowObservable.subscribeResize(this.updateSubBoardRect.bind(this));
+    windowObservable.subscribeOrientationChange(
       this.updateOrientation.bind(this)
     );
-    this.orientationEventHandler.subscribe(updateOrientationObserver);
-    //최초 orientation 감지
-    this.orientationEventHandler.notify();
+    windowObservable.subscribeMousemove(this.sendPaddlePosition.bind(this));
+  }
+
+  updateSubBoardRect() {
+    this.subBoardRect = this.subBoard.getBoundingClientRect();
   }
 
   updateOrientation(orientation) {
@@ -50,13 +49,9 @@ class Player {
   }
 
   sendPaddlePosition(e) {
+    let x, y;
     const yPos = e.clientY - this.subBoardRect.top;
     const xPos = e.clientX - this.subBoardRect.left;
-    let x, y;
-
-    // console.log(this.clientInfo);
-    // console.log(this.myTeam);
-    // console.log(this.gameInfo);
 
     if (this.orientation === "landscape") {
       y = (yPos / this.subBoardRect.height) * this.gameInfo.boardHeight;
@@ -87,14 +82,7 @@ class Player {
     } else if (this.myTeam === "left") {
       x = this.gameInfo.boardWidth - x;
       y = y;
-      // if (this.orientation === "landscape") {
-      //   x = this.gameInfo.boardWidth - x;
-      //   y = y;
-      // } else if (this.orientation === "portrait") {
-      // }
     }
-
-    // console.log("y: ", y, "x: ", x);
 
     const msg = {
       sender: "player",
@@ -108,15 +96,6 @@ class Player {
       },
     };
     this.clientInfo.socket.send(JSON.stringify(msg));
-
-    //내 패들을 렌더링하는것임 -> 그래도 게임규칙에 맞게 주는게 맞지 않을까? renderpaddle 재활용할 생각하는게 좋을듯
-    // this.gameObjectRenderer.renderPaddle(
-    //   y,
-    //   x,
-    //   this.referee.paddleHeight,
-    //   this.referee.boardHeight,
-    //   this.referee.boardWidth
-    // );
   }
 
   // sendStartGame() {
