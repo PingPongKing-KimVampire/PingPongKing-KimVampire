@@ -12,7 +12,7 @@ class ScoreManager {
 		}
 	}
 
-	getScore(teamString) {
+	addScore(teamString) {
 		const team = teamString === 'left' ? this.leftTeam : this.rightTeam;
 		team.score += 1;
 		this._sendUpdateScoreMsg(teamString, team.score);
