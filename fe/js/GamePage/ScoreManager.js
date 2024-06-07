@@ -1,8 +1,8 @@
 class ScoreManager {
-	constructor(clientInfo, winnigScore, onWin, players) {
+	constructor(clientInfo, onWin) { // TODO 여기서 win 메시지도 보내면 어떨까
 		this.clientInfo = clientInfo;
-		this.winnigScore = winnigScore;
 		this.onWin = onWin;
+		this.winnigScore = 5;
 
 		this.leftTeam = {
 			score: 0,
@@ -13,14 +13,13 @@ class ScoreManager {
 	}
 
 	getScore(teamString) {
-		// console.log(`${teamString} get score!`);
-
 		const team = teamString === 'left' ? this.leftTeam : this.rightTeam;
 		team.score += 1;
 		this._sendUpdateScoreMsg(teamString, team.score);
 
 		if (team.score === this.winnigScore) {
-			this.onWin(teamString);
+			this.onWin();
+			this._sendWinGameMsg(teamString);
 		}
 	}
 
@@ -38,7 +37,18 @@ class ScoreManager {
 		this.clientInfo.socket.send(JSON.stringify(updateScoreMessage));
 	}
 
-
+	_sendWinGameMsg(team) {
+		const winGameMessage = {
+			sender: "referee",
+			receiver: ["player"],
+			event: "winGame",
+			content: {
+				team, // TODO : first, second 인가 / left, right 인가?
+				roomId: this.clientInfo.roomId,
+			}
+		}
+		this.clientInfo.socket.send(JSON.stringify(winGameMessage));
+	}
 
 }
 

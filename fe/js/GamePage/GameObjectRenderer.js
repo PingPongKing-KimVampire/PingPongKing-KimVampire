@@ -5,10 +5,6 @@ class GameObjectRenderer {
     this._initGaneObjectRenderer(clientInfo, playerList, gameInfo);
     this._manageMessageEvent();
     this._subscribeWindow();
-
-    // TODO : 공/패들의 위치 기억하기
-    // this.renderBall({0, 0});
-    // this.renderPaddle();
   }
 
   _initGaneObjectRenderer(clientInfo, playerList, gameInfo) {
@@ -41,27 +37,31 @@ class GameObjectRenderer {
   }
 
   _manageMessageEvent() {
-    this.clientInfo.socket.addEventListener("message", (messageEvent) => {
-      const message = JSON.parse(messageEvent.data);
-      const { sender, receiver, event, content } = message;
-      // TODO : 혹시 roomId도 확인해야 하나?
-      if (receiver.includes("player")) {
-        if (event === "updatePaddleLocation") {
-          // 패들 위치 변경
-          this._renderPaddle(content);
-        } else if (event === "updateBallLocation") {
-          // 공 위치 변경
-          this._renderBall(content);
-        } else if (event === "updateScore") {
-          // 점수 변경
-          this._updateScore(content);
-        } else if (event === "winGame") {
-          // 게임 승리
-          this._winGame(content);
-        }
-      }
-    });
-  }
+	this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+		const message = JSON.parse(messageEvent.data);
+		const { sender, receiver, event, content } = message;
+		// TODO : 혹시 roomId도 확인해야 하나?
+		if (receiver.includes('player')) {
+			if (event === 'updatePaddleLocation') { // 패들 위치 변경
+				const { clientId, xPosition, yPosition } = content;
+				const player = this.players.find((player) => player.id === clientId);
+				player.paddle.xPos = xPosition;
+				player.paddle.yPos = yPosition;
+				this._renderPaddle({ clientId, xPosition, yPosition });
+			} else if (event === 'updateBallLocation') { // 공 위치 변경
+				const { xPosition, yPosition } = content;
+				//remember ballPosition
+				this.ball.xPos = xPosition;
+				this.ball.yPos = yPosition;
+				this._renderBall({ xPosition, yPosition });
+			} else if (event === 'updateScore') { // 점수 변경
+				this._updateScore(content);
+			} else if (event === 'winGame') { // 게임 승리
+				this._winGame(content);
+			}
+		}
+	});
+}
 
   _setGameSizeInfo(gameInfo) {
     this.boardWidth = gameInfo.boardWidth;
@@ -99,8 +99,10 @@ class GameObjectRenderer {
   _updateOrientation(orientation) {
     this.orientation = orientation;
     this._updateGameContainer();
-    // this.renderBall();
-    // this.renderPaddle();
+    this._renderBall({ xPosition: this.ball.xPos, yPosition: this.ball.yPos });
+	this.players.forEach((player) =>
+		this._renderPaddle({ clientId: player.id, xPosition: player.paddle.xPos, yPosition: player.paddle.yPos })
+	)
   }
 
   _renderBall({ xPosition, yPosition }) {

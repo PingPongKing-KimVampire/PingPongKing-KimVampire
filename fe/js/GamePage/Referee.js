@@ -13,21 +13,17 @@ class Referee {
 		this.players = [];
 		this._manageMessageEvent();
 
-		this.winningScore = 5;
 		this.isPlaying = false;
 		this.isEnd = false;
 		this.ballSubWaited = true;
+		this.enableSub = false;
 		this.turn = 'right';
 		this.subTeam = 'right';
 		this.ballMoveIntervalID = null;
+		this.waitSubIntervalID = null;
 		this.scoreManager = null;
 
-		// const ballFirstAngle = 20;
-		// const ballSpeed = 3;
-		// this.ball = new Ball(ballFirstAngle, ballSpeed, this.ballRadius);
-		// this.ball.initBall(this.boardWidth, this.boardHeight);
-
-		const ballSpeed = 1;
+		const ballSpeed = 2;
 		this.ball = new Ball(ballSpeed, this.ballRadius);
 	}
 
@@ -57,10 +53,9 @@ class Referee {
 			this._addPlayer(clientId, clientNickname);
 			this._sendEnterPossibleMsg(roomId, clientId);
 			if (this.players.length === 2) {
-				this.scoreManager = new ScoreManager(this.clientInfo,
-					this.winningScore, this.winGame.bind(this), this.players);
+				this.scoreManager = new ScoreManager(this.clientInfo, this.winGame.bind(this));
 				this._sendStartGameMsg();
-				this._readyRound(); // TODO : Player 객체가 이벤트 감지를 못 할 것 같은데?
+				this._readyRound();
 			}
 		}
 	}
@@ -192,61 +187,13 @@ class Referee {
 		}
 	}
 
-	_stopRound() {
-		this.isPlaying = false;
-		clearInterval(this.ballMoveIntervalID);
-	}
-
-	_readyRound() {
-		// 현재 서브팀 앞으로 공 가져다두기
-		// let ballInitX = this.boardWidth / 2;
-		// let ballInitAngle;
-		// if (this.subTeam === 'left') {
-		// 	ballInitX -= this.boardWidth / 4;
-		// 	ballInitAngle = 180;
-		// } else {
-		// 	ballInitX += this.boardWidth / 4;
-		// 	ballInitAngle = 0;
-		// }
-		// this.ballSubWaited = true;
-		// this.ball.initBall(ballInitX, this.boardHeight / 2, ballInitAngle);
-		this.ball.initBall(50, 50, 20);
-		this._sendBallUpdateMsg();
-		this._startRound();
-	}
-
-	_startRound() {
-		this.isPlaying = true;
-		this.turn = this.subTeam;
-		this.ballMoveIntervalID = setInterval(this._moveBall.bind(this));
-	}
-
-	winGame(team) {
-		this.isEnd = true;
-		this._sendWinGameMsg(team);
-	}
-
-	_sendWinGameMsg(team) {
-		const winGameMessage = {
-			sender: "referee",
-			receiver: ["player"],
-			event: "winGame",
-			content: {
-				team, // TODO : first, second 인가 / left, right 인가?
-				roomId: this.clientInfo.roomId,
-			}
-		}
-		this.clientInfo.socket.send(JSON.stringify(winGameMessage));
-	}
-
 	_detectPaddle() {
 		let ballPrevX;
 		let ballNextX;
 		if (this.turn === 'right') {
 			ballPrevX = this.ball.getLeftX() - this.ball.dx;
 			ballNextX = this.ball.getRightX();
-		}
-		else if (this.turn === 'left') {
+		} else if (this.turn === 'left') {
 			ballPrevX = this.ball.getRightX() - this.ball.dx;
 			ballNextX = this.ball.getLeftX();
 		}
@@ -264,15 +211,108 @@ class Referee {
 				const ballYDiff = ballNextY - ballPrevY;
 				const collisionY = ballPrevY + firstXRatio * ballYDiff;
 				if (paddleTop <= collisionY && collisionY <= paddleBot) {
-					// if (this.ballSubWaited) {
-					// 	this._startRound();
-					// }
 					this.turn = player.team === 'right' ? 'left' : 'right';
 					this.ball.reversalRandomDx();
 				}
 			}
 		}
 	}
+
+	_isDetected() {
+		let ballPrevX;
+		let ballNextX;
+		if (this.turn === 'right') {
+			ballPrevX = this.ball.getLeftX() - this.ball.dx;
+			ballNextX = this.ball.getRightX();
+		} else if (this.turn === 'left') {
+			ballPrevX = this.ball.getRightX() - this.ball.dx;
+			ballNextX = this.ball.getLeftX();
+		}
+		const ballPrevY = this.ball.yPos - this.ball.dy;
+		const ballNextY = this.ball.yPos;
+
+		for (const player of this.players) { // 현재 턴인 팀의 패들에 대해 충돌 감지
+			if (player.team !== this.turn) continue;
+			const paddle = player.paddle;
+			const paddleTop = paddle.y - this.paddleHeight / 2;
+			const paddleBot = paddle.y + this.paddleHeight / 2;
+			if ((player.team === 'right' && ballPrevX <= paddle.x && paddle.x <= ballNextX) ||
+				(player.team === 'left' && paddle.x <= ballPrevX && ballNextX <= paddle.x)) {
+				const firstXRatio = (paddle.x - ballPrevX) / (ballNextX - ballPrevX);
+				const ballYDiff = ballNextY - ballPrevY;
+				const collisionY = ballPrevY + firstXRatio * ballYDiff;
+				if (paddleTop <= collisionY && collisionY <= paddleBot) {
+					return (true);
+				}
+			}
+		}
+		return (false);
+	}
+
+	_detectSub(paddle) // TODO : 패들이 완벽히 공의 뒤에 있을 때만 서브 가능하게
+	{
+		// if (this.enableSub && this._isDetected() === true) {
+		if (this._isDetected() === true) {
+			this.ball.reversalRandomDx();
+			this.ballSubWaited = false;
+			clearInterval(this.waitSubIntervalID);
+			this._startRound();
+			return;
+		}
+		// if (this.subTeam === 'right') {
+		// 	if (paddle.x - this.paddleWidth/2 >= this.ball.getRightX()) {
+		// 		this.enableSub = true;
+		// 	} else {
+		// 		this.enableSub = false;
+		// 	}
+		// } else if (this.subTeam === 'left') {
+		// 	if (paddle.x + this.paddleWidth/2 <= this.ball.getLeftX()) {
+		// 		this.enableSub = true;
+		// 	} else {
+		// 		this.enableSub = false;
+		// 	}
+		// }
+	}
+
+	_startRound() {
+		this.isPlaying = true;
+		// this.turn = this.subTeam;
+		this.ballMoveIntervalID = setInterval(this._moveBall.bind(this));
+	}
+
+	_stopRound() {
+		this.isPlaying = false;
+		clearInterval(this.ballMoveIntervalID);
+	}
+
+	_readyRound() {
+		// 현재 서브팀 앞으로 공 가져다두기
+		let ballInitX = this.boardWidth / 2;
+		let ballInitAngle;
+		if (this.subTeam === 'left') {
+			ballInitX -= this.boardWidth / 4;
+			ballInitAngle = 0;
+		} else {
+			ballInitX += this.boardWidth / 4;
+			ballInitAngle = 180;
+		}
+		this.ball.initBall(ballInitX, this.boardHeight / 2, ballInitAngle);
+		this.ballSubWaited = true;
+		this._sendBallUpdateMsg();
+		this.turn = this.subTeam;
+		this._startWaitSub();
+	}
+
+	_startWaitSub() {
+		const paddle = this.players.find((player) => player.team === this.subTeam).paddle;
+		this.enableSub = false;
+		this.waitSubIntervalID = setInterval(this._detectSub.bind(this, paddle));
+	}
+
+	winGame() {
+		this.isEnd = true;
+	}
+
 }
 
 export default Referee;
