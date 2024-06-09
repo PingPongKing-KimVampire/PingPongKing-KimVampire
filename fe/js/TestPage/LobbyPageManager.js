@@ -58,6 +58,11 @@ class LobbyPageManager {
 				this.enterRoom(content.roomId);
 			} else if (event === 'getPingpongRoomResponse') { // 탁구장 조회 응답
 				console.log(content.roomIdList);
+				if(content.roomIdList.length > 0)
+				{
+					const roomIdInput = document.querySelector('#roomIdInput');
+					roomIdInput.value = content.roomIdList.pop();
+				}
 			} else if (event === 'enterPingpongRoomResponse') { // 탁구장 입장 응답
 				console.log('enterPingpongRoomResponse', message);
 				this.onEnterSuccess(content.roomId);
