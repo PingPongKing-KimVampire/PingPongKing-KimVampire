@@ -3,7 +3,7 @@ import windowObservable from "../../WindowObservable.js";
 class GameObjectRenderer {
   constructor(clientInfo, playerList, gameInfo, gameMode, personnel) {
     this._initGaneObjectRenderer(clientInfo, playerList, gameInfo);
-    this._setDisplayName(gameMode);
+    this._setDisplayBoard(gameMode, personnel);
     this._manageMessageEvent();
     this._subscribeWindow();
     this._updateGameContainer();
@@ -31,18 +31,50 @@ class GameObjectRenderer {
     this.rightBoard = document.querySelector(".subPlayBoard:nth-of-type(2)");
   }
 
+  _setDisplayBoard(gameMode, personnel) {
+    this._setDisplayName(gameMode);
+    this._setDisplayAvatar(gameMode, personnel);
+  }
   _setDisplayName(gameMode) {
     const leftName = document.querySelector("#leftDisplayBoard .playerName");
     const rightName = document.querySelector('#rightDisplayBoard .playerName');
 
+    let myTeamName, oppnentTeamName;
     if (gameMode === 'vampire') {
-      if (this.me.team === 'left') { // left 팀이면 뱀파이어
-        rightName.innerText = '뱀파이어';
-        leftName.innerText = '인간';
-      } else if (this.me.team === 'right') { // right 팀이면 인간
-        rightName.innerText = '인간';
-        leftName.innerText =  '뱀파이어';
+      const ImVampire = this.me.team === 'left';
+      myTeamName = ImVampire ? '뱀파이어' : '인간';
+      oppnentTeamName = ImVampire ? '인간' : '뱀파이어';
+    } else if (gameMode === 'normal') {
+      console.log(this.me.nickName, this.players.find((player) => player !== this.me).nickName);
+      myTeamName = this.me.nickName;
+      oppnentTeamName = this.players.find((player) => player !== this.me).nickName;
+    }
+
+    leftName.innerText = oppnentTeamName;
+    rightName.innerText = myTeamName;
+  }
+  _setDisplayAvatar(gameMode, personnel) {
+    const leftAvatar = document.querySelector('#leftDisplayBoard .playerAvatar');
+    const rightAvatar = document.querySelector('#rightDisplayBoard .playerAvatar');
+
+    const appendImage = (avatar, src, count = 1) => {
+      for (let i = 0; i < count; i++) {
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.maxWidth = `${100 / count}%`;
+        avatar.appendChild(img);
       }
+    }
+    
+    if (gameMode === 'vampire') {
+      const ImVampire = this.me.team === 'left';
+      const vampireAvatar = ImVampire ? rightAvatar : leftAvatar;
+      const humanAvatar = ImVampire ? leftAvatar : rightAvatar;
+      appendImage(vampireAvatar, 'images/playerA.png');
+      appendImage(humanAvatar, 'images/playerB.png', personnel - 1);
+    } else if (gameMode === 'normal') {
+      appendImage(leftAvatar, 'images/playerA.png');
+      appendImage(rightAvatar, 'images/playerB.png');
     }
   }
 
@@ -85,9 +117,10 @@ class GameObjectRenderer {
 
   _setPlayers(playerList) {
     const board = document.querySelector("#playBoard");
-    for (const { clientId, team } of playerList) {
+    for (const { clientId, clientNickname, team } of playerList) {
       const player = {
         id: clientId,
+        nickName: clientNickname,
         team: team,
         paddle: {
           element: this._createPaddle(board), // 패들 생성하기

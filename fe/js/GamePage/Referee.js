@@ -1,7 +1,7 @@
 import PongBoard from "./PongBoard.js";
 
 class Referee {
-	constructor(clientInfo, players, gameMode, personnel) {
+	constructor(clientInfo, players) {
 		const sizeInfo = {
 			boardWidth: 1550,
 			boardHeight: 1000,
@@ -12,8 +12,6 @@ class Referee {
 
 		this.clientInfo = clientInfo;
 		this._sendStartGameMsg(players, sizeInfo);
-		this.gameMode = gameMode; // TODO : 현재 gameMode, personnel은 안 쓰이고 있음
-		this.personnel = personnel;
 
 		this.scoreInfo = {
 			winningScore: 5,

@@ -72,28 +72,20 @@ class GamePageManager {
 			<div id="displayBoard">
 				<div id="leftDisplayBoard">
 					<div class="playerInfo">
-						<div class="playerName">${
-              this.playerList.filter(
-                (player) => player.clientId !== this.clientInfo.id
-              )[0].clientNickname
-            }</div>
+						<div class="playerName"></div>
 						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
 					</div>
-					<div class="playerAvatar"><img src="images/playerA.png"></div>
+					<div class="playerAvatar"></div>
 				</div>
 				<div class="timeInfo">
 					<div id="timeText">01 : 33</div>
 				</div>
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">
-						<div class="playerName">${
-              this.playerList.filter(
-                (player) => player.clientId === this.clientInfo.id
-              )[0].clientNickname
-            }</div>
+						<div class="playerName"></div>
 						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
 					</div>
-					<div class="playerAvatar"><img src="images/playerB.png"></div>
+					<div class="playerAvatar"></div>
 				</div>
 			</div>
 		`;

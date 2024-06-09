@@ -3,9 +3,9 @@ import Referee from './Referee.js';
 class WaitingRoom {
 	constructor(clientInfo, gameMode, personnel) {
 		this.clientInfo = clientInfo;
-		this.gameMode = gameMode;
+		this.gameMode = gameMode; // TODO : 현재 안 쓰이고 있으나 필요해 질 수 있음
 		// this.personnel = personnel;
-		this.personnel = 3; // 임시
+		this.personnel = 3; // TODO : personnel을 정상적으로 전달받게 되면 삭제
 
 		this.players = [];
 		this.clientInfo.socket.addEventListener('message', this.listener);
@@ -34,7 +34,7 @@ class WaitingRoom {
 				// TODO : 리스너 어디서 삭제해야 할까?
 				// 서버에게 대기실 삭제를 알리고, 서버가 클라이언트들에게 알렸을 때 삭제해야 하지 않을까?
 				this.clientInfo.socket.removeEventListener('message', this.listener);
-				const referee = new Referee(this.clientInfo, this.players, this.gameMode, this.personnel);
+				const referee = new Referee(this.clientInfo, this.players);
 			}
 		}
 	}
