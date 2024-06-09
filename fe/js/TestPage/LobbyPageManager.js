@@ -8,9 +8,29 @@ class LobbyPageManager {
 		this.onEnterSuccess = onEnterSuccess;
 		this.enteredPlayers = [];
 
+		const modeSelect = document.getElementById('modeSelect');
+		const participantCountDiv = document.getElementById('participantCountDiv');
+		
+		modeSelect.addEventListener('change', function() {
+			if (modeSelect.value === 'vampire') {
+				participantCountDiv.style.display = 'block';
+			} else {
+				participantCountDiv.style.display = 'none';
+			}
+		});
+
 		// 탁구장 생성
 		const createRoomButton = document.querySelector('.createButton');
 		createRoomButton.addEventListener('click', () => {
+
+			const mode = modeSelect.value;
+			const participantCount = document.getElementById('participantCount').value;
+			if (mode === 'vampire' && (participantCount < 2 || participantCount > 6)) {
+				alert('참여인원 수는 2~6명이어야 합니다.');
+				return;
+			}
+			//추후 모드, 인원수를 반영
+
 			const createMessage = {
 				sender: 'client',
 				receiver: ['server'],
@@ -87,6 +107,16 @@ class LobbyPageManager {
 
 	_getHTML() {
 		return `
+			<label for="modeSelect">모드 선택:</label>
+			<select id="modeSelect">
+				<option value="normal">일반 모드</option>
+				<option value="vampire">뱀파이어 모드</option>
+			</select>
+			
+			<div id="participantCountDiv" style="display:none;">
+				<label for="participantCount">참여인원 수 (2-6명):</label>
+				<input type="number" id="participantCount" min="2" max="6">
+			</div>
 			<button class="createButton">탁구장 생성</button>
 			<input type="text" id="roomIdInput">
 			<button class="enterRoomButton">탁구장 입장</button>
