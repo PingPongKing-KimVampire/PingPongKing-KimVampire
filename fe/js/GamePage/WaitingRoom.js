@@ -5,7 +5,7 @@ class WaitingRoom {
 		this.clientInfo = clientInfo;
 		this.gameMode = gameMode;
 		// this.personnel = personnel;
-		this.personnel = 2; // 임시
+		this.personnel = 3; // 임시
 
 		this.players = [];
 		this.clientInfo.socket.addEventListener('message', this.listener);
@@ -32,6 +32,7 @@ class WaitingRoom {
 			this._sendEnterPossibleMsg(roomId, clientId);
 			if (this.players.length === this.personnel) {
 				// TODO : 리스너 어디서 삭제해야 할까?
+				// 서버에게 대기실 삭제를 알리고, 서버가 클라이언트들에게 알렸을 때 삭제해야 하지 않을까?
 				this.clientInfo.socket.removeEventListener('message', this.listener);
 				const referee = new Referee(this.clientInfo, this.players, this.gameMode, this.personnel);
 			}

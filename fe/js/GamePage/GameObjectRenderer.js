@@ -1,10 +1,12 @@
 import windowObservable from "../../WindowObservable.js";
 
 class GameObjectRenderer {
-  constructor(clientInfo, playerList, gameInfo) {
+  constructor(clientInfo, playerList, gameInfo, gameMode, personnel) {
     this._initGaneObjectRenderer(clientInfo, playerList, gameInfo);
+    this._setDisplayName(gameMode);
     this._manageMessageEvent();
     this._subscribeWindow();
+    this._updateGameContainer();
   }
 
   _initGaneObjectRenderer(clientInfo, playerList, gameInfo) {
@@ -27,6 +29,21 @@ class GameObjectRenderer {
     this.rightScore = document.querySelector("#rightDisplayBoard .playerScore");
     this.leftBoard = document.querySelector(".subPlayBoard:nth-of-type(1)");
     this.rightBoard = document.querySelector(".subPlayBoard:nth-of-type(2)");
+  }
+
+  _setDisplayName(gameMode) {
+    const leftName = document.querySelector("#leftDisplayBoard .playerName");
+    const rightName = document.querySelector('#rightDisplayBoard .playerName');
+
+    if (gameMode === 'vampire') {
+      if (this.me.team === 'left') { // left 팀이면 뱀파이어
+        rightName.innerText = '뱀파이어';
+        leftName.innerText = '인간';
+      } else if (this.me.team === 'right') { // right 팀이면 인간
+        rightName.innerText = '인간';
+        leftName.innerText =  '뱀파이어';
+      }
+    }
   }
 
   _subscribeWindow() {
@@ -160,10 +177,10 @@ class GameObjectRenderer {
 
   _updateScore({ team, score }) {
     const updatedHTML = `${score}<div class="playerScoreStroke">${score}</div>`;
-    if (team === "left") {
-      this.leftScore.innerHTML = updatedHTML;
-    } else {
+    if (team === this.me.team) {
       this.rightScore.innerHTML = updatedHTML;
+    } else {
+      this.leftScore.innerHTML = updatedHTML;
     }
   }
 

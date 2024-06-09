@@ -7,7 +7,7 @@ class GamePageManager {
     this.playerList = [];
     this.leftPlayer = { clientId: null, clientNickname: null };
     this.rightPlayer = { clientId: null, clientNickname: null };
-    this.gameInfo = {
+    this.gameInfo = { // TODO : sizeInfo로 이름을 바꾸면 어떨까?
       boardWidth: null,
       boardHeight: null,
       paddleWidth: null,
@@ -20,10 +20,13 @@ class GamePageManager {
     //게임정보 응답 받으면 시작
     this._getStartGameResponse(this.clientInfo.socket).then(() => {
       app.innerHTML = this.getHTML();
+      // TODO : 게임 모드, 인원 전달하기
       this.gameObjectRenderer = new GameObjectRenderer(
         this.clientInfo,
         this.playerList,
-        this.gameInfo
+        this.gameInfo,
+        'vampire',
+        3, // 임시 전달
       );
 
       this.player = new Player(this.clientInfo, this.playerList, this.gameInfo);
