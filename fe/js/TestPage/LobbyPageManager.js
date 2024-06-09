@@ -1,4 +1,4 @@
-import Referee from "../GamePage/Referee.js";
+import WaitingRoom from "../GamePage/WaitingRoom.js";
 
 class LobbyPageManager {
 	constructor(app, clientInfo, onEnterSuccess) {
@@ -53,7 +53,8 @@ class LobbyPageManager {
 			if (event === 'appointReferee') { // 심판 임명 응답
 				this.clientInfo.isReferee = true;
 				this.clientInfo.roomId = content.roomId;
-				const referee = new Referee(this.clientInfo);
+				// TODO : gameMode와 personnel도 전달하기
+				const waitingRoom = new WaitingRoom(this.clientInfo);
 				this.enterRoom(content.roomId);
 			} else if (event === 'getPingpongRoomResponse') { // 탁구장 조회 응답
 				console.log(content.roomIdList);
