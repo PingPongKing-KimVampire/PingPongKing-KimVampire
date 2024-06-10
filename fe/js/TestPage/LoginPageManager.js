@@ -2,6 +2,8 @@ class LoginPageManager {
   constructor(app, onLoginSuccess) {
     console.log("Login Page!");
     app.innerHTML = this._getHTML();
+	this._setRandomId();
+	this._setRandomNickname();
     this.onLoginSuccess = onLoginSuccess;
 
     // 로그인
@@ -26,6 +28,23 @@ class LoginPageManager {
       });
       this.socket.addEventListener("message", this.listener);
     });
+  }
+
+  _setRandomId() {
+    const idInput = document.querySelector("#id");
+    const randomId = Math.floor(Math.random() * 1000000) + 1;
+    idInput.value = randomId;
+  }
+
+  _setRandomNickname() {
+    const nicknameInput = document.querySelector("#nickname");
+    const characters = '가나다라마바사아자카파타하동해물과백두산이마르고닳도록하나님이보우하사우리나라만세';
+    let randomNickname = '';
+    for (let i = 0; i < 3; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      randomNickname += characters[randomIndex];
+    }
+    nicknameInput.value = randomNickname;
   }
 
   _getHTML() {
