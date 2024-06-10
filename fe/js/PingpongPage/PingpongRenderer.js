@@ -1,16 +1,15 @@
 import windowObservable from "../../WindowObservable.js";
 
 class PingpongRenderer {
-  constructor(clientInfo, playerList, gameInfo, gameMode, totalPlayerCount) {
-    console.log(gameMode, totalPlayerCount);
-    this._initGaneObjectRenderer(clientInfo, playerList, gameInfo);
-    this._setDisplayBoard(gameMode, totalPlayerCount);
+  constructor(clientInfo, playerList, sizeInfo, gameInfo) {
+    this._initGaneObjectRenderer(clientInfo, playerList, sizeInfo);
+    this._setDisplayBoard(gameInfo.mode, gameInfo.totalPlayerCount);
     this._manageMessageEvent();
     this._subscribeWindow();
     this._updateGameContainer();
   }
 
-  _initGaneObjectRenderer(clientInfo, playerList, gameInfo) {
+  _initGaneObjectRenderer(clientInfo, playerList, sizeInfo) {
     this.clientInfo = clientInfo;
     this.players = [];
     this.me = null;
@@ -21,7 +20,7 @@ class PingpongRenderer {
       yPos: 50,
     };
 
-    this._setGameSizeInfo(gameInfo);
+    this._setGameSizeInfo(sizeInfo);
     this._setPlayers(playerList);
     this.gameContainer = document.querySelector("#gameContainer");
     this.VCPercent = 90;
@@ -32,49 +31,55 @@ class PingpongRenderer {
     this.rightBoard = document.querySelector(".subPlayBoard:nth-of-type(2)");
   }
 
-  _setDisplayBoard(gameMode, totalPlayerCount) {
-    this._setDisplayName(gameMode);
-    this._setDisplayAvatar(gameMode, totalPlayerCount);
+  _setDisplayBoard(mode, totalPlayerCount) {
+    this._setDisplayName(mode);
+    this._setDisplayAvatar(mode, totalPlayerCount);
   }
   _setDisplayName(gameMode) {
     const leftName = document.querySelector("#leftDisplayBoard .playerName");
-    const rightName = document.querySelector('#rightDisplayBoard .playerName');
+    const rightName = document.querySelector("#rightDisplayBoard .playerName");
 
     let myTeamName, oppnentTeamName;
-    if (gameMode === 'vampire') {
-      const ImVampire = this.me.team === 'left';
-      myTeamName = ImVampire ? '뱀파이어' : '인간';
-      oppnentTeamName = ImVampire ? '인간' : '뱀파이어';
-    } else if (gameMode === 'normal') {
+    if (gameMode === "vampire") {
+      const ImVampire = this.me.team === "left";
+      myTeamName = ImVampire ? "뱀파이어" : "인간";
+      oppnentTeamName = ImVampire ? "인간" : "뱀파이어";
+    } else if (gameMode === "normal") {
       myTeamName = this.me.nickName;
-      oppnentTeamName = this.players.find((player) => player !== this.me).nickName;
+      oppnentTeamName = this.players.find(
+        (player) => player !== this.me
+      ).nickName;
     }
 
     leftName.innerText = oppnentTeamName;
     rightName.innerText = myTeamName;
   }
   _setDisplayAvatar(gameMode, totalPlayerCount) {
-    const leftAvatar = document.querySelector('#leftDisplayBoard .playerAvatar');
-    const rightAvatar = document.querySelector('#rightDisplayBoard .playerAvatar');
+    const leftAvatar = document.querySelector(
+      "#leftDisplayBoard .playerAvatar"
+    );
+    const rightAvatar = document.querySelector(
+      "#rightDisplayBoard .playerAvatar"
+    );
 
     const appendImage = (avatar, src, count = 1) => {
       for (let i = 0; i < count; i++) {
-        const img = document.createElement('img');
+        const img = document.createElement("img");
         img.src = src;
         img.style.maxWidth = `${100 / count}%`;
         avatar.appendChild(img);
       }
-    }
-    
-    if (gameMode === 'vampire') {
-      const ImVampire = this.me.team === 'left';
+    };
+
+    if (gameMode === "vampire") {
+      const ImVampire = this.me.team === "left";
       const vampireAvatar = ImVampire ? rightAvatar : leftAvatar;
       const humanAvatar = ImVampire ? leftAvatar : rightAvatar;
-      appendImage(vampireAvatar, 'images/playerA.png');
-      appendImage(humanAvatar, 'images/playerB.png', totalPlayerCount - 1);
-    } else if (gameMode === 'normal') {
-      appendImage(leftAvatar, 'images/playerA.png');
-      appendImage(rightAvatar, 'images/playerB.png');
+      appendImage(vampireAvatar, "images/playerA.png");
+      appendImage(humanAvatar, "images/playerB.png", totalPlayerCount - 1);
+    } else if (gameMode === "normal") {
+      appendImage(leftAvatar, "images/playerA.png");
+      appendImage(rightAvatar, "images/playerB.png");
     }
   }
 
@@ -86,33 +91,37 @@ class PingpongRenderer {
   }
 
   _manageMessageEvent() {
-    this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+    this.clientInfo.socket.addEventListener("message", (messageEvent) => {
       const message = JSON.parse(messageEvent.data);
       const { sender, receiver, event, content } = message;
       // TODO : 혹시 roomId도 확인해야 하나?
-      if (receiver.includes('player')) {
-        if (event === 'updatePaddleLocation') { // 패들 위치 변경
+      if (receiver.includes("player")) {
+        if (event === "updatePaddleLocation") {
+          // 패들 위치 변경
           this._updatePaddle(content);
           this._renderPaddle(content);
-        } else if (event === 'updateBallLocation') { // 공 위치 변경
+        } else if (event === "updateBallLocation") {
+          // 공 위치 변경
           this._updateBall(content);
           this._renderBall(content);
-        } else if (event === 'updateScore') { // 점수 변경
+        } else if (event === "updateScore") {
+          // 점수 변경
           this._updateScore(content);
-        } else if (event === 'winGame') { // 게임 승리
+        } else if (event === "winGame") {
+          // 게임 승리
           this._winGame(content);
         }
       }
     });
   }
 
-  _setGameSizeInfo(gameInfo) {
-    this.boardWidth = gameInfo.boardWidth;
-    this.boardHeight = gameInfo.boardHeight;
+  _setGameSizeInfo(sizeInfo) {
+    this.boardWidth = sizeInfo.boardWidth;
+    this.boardHeight = sizeInfo.boardHeight;
     this.gameContainerRatio = this.boardWidth / this.boardHeight;
-    this.paddleHeightPercent = (gameInfo.paddleHeight / this.boardHeight) * 100;
-    this.paddleWidthPercent = (gameInfo.paddleWidth / this.boardWidth) * 100;
-    this.ballSizePercent = ((gameInfo.ballRadius * 2) / this.boardWidth) * 100;
+    this.paddleHeightPercent = (sizeInfo.paddleHeight / this.boardHeight) * 100;
+    this.paddleWidthPercent = (sizeInfo.paddleWidth / this.boardWidth) * 100;
+    this.ballSizePercent = ((sizeInfo.ballRadius * 2) / this.boardWidth) * 100;
   }
 
   _setPlayers(playerList) {
@@ -145,8 +154,12 @@ class PingpongRenderer {
     this._updateGameContainer();
     this._renderBall({ xPosition: this.ball.xPos, yPosition: this.ball.yPos });
     this.players.forEach((player) =>
-      this._renderPaddle({ clientId: player.id, xPosition: player.paddle.xPos, yPosition: player.paddle.yPos })
-    )
+      this._renderPaddle({
+        clientId: player.id,
+        xPosition: player.paddle.xPos,
+        yPosition: player.paddle.yPos,
+      })
+    );
   }
 
   _updatePaddle({ clientId, xPosition, yPosition }) {
@@ -220,8 +233,8 @@ class PingpongRenderer {
   _winGame({ team }) {
     const winBoard = this.me.team === team ? this.rightBoard : this.leftBoard;
     const loseBoard = this.me.team === team ? this.leftBoard : this.rightBoard;
-    winBoard.style.backgroundColor = 'blue';
-    loseBoard.style.backgroundColor = 'red';
+    winBoard.style.backgroundColor = "blue";
+    loseBoard.style.backgroundColor = "red";
   }
 
   _updateGameContainer() {

@@ -31,7 +31,7 @@ class PingpongBoard {
 	listener = (messageEvent) => { // TODO : 게임 종료 시 해제하기
 		const message = JSON.parse(messageEvent.data);
 		const { sender, receiver, event, content } = message;
-		if (receiver.includes('referee') && event === 'updatePaddleLocation') {
+		if (receiver.includes('pingpongBoard') && event === 'updatePaddleLocation') {
 			this._updatePaddlePosition(content); // 패들 위치 변경
 		}
 	}
@@ -119,7 +119,7 @@ class PingpongBoard {
 
 	_sendBallUpdateMsg() { // 공 위치 브로드캐스팅
 		const ballMessage = {
-			sender: "referee",
+			sender: "pingpongBoard",
 			receiver: ["player"],
 			event: "updateBallLocation",
 			content: {

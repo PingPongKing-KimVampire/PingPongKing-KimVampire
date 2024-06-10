@@ -8,43 +8,35 @@ class PingpongPageManager {
     this.playerList = [];
     this.leftPlayer = { clientId: null, clientNickname: null };
     this.rightPlayer = { clientId: null, clientNickname: null };
-
+    this.sizeInfo = null;
 
     app.innerHTML = "WAIT START GAME";
 
-    //게임정보 응답 받으면 시작
+    //게임시작 메시지 받으면 시작
     this._getStartGameResponse(this.clientInfo.socket).then(() => {
-      app.innerHTML = this.getHTML();
+      app.innerHTML = this._getPingpongHTML();
 
       this.gameObjectRenderer = new PingpongRenderer(
         this.clientInfo,
         this.playerList,
         this.sizeInfo,
-        this.gameInfo.mode,
-        this.gameInfo.totalPlayerCount,
+        this.gameInfo
       );
 
       this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
     });
   }
 
-  //remove이벤트 리스너로 변경하기
   _getStartGameResponse(socket) {
     return new Promise((res, rej) => {
-      socket.addEventListener("message", (eventMessage) => {
-        const message = JSON.parse(eventMessage.data);
+      const listener = (messageEvent) => {
+        const message = JSON.parse(messageEvent.data);
         const { sender, receiver, event, content } = message;
         if (receiver.includes("player") && event === "startGame") {
-          const { playerList, gameInfo } = content;
-        this.sizeInfo = {
-          boardWidth: gameInfo.boardWidth,
-          boardHeight: gameInfo.boardHeight,
-          paddleWidth: gameInfo.paddleWidth,
-          paddleHeight: gameInfo.paddleHeight,
-          ballRadius: gameInfo.ballRadius,
-        };
+          socket.removeEventListener("message", listener);
+          const { playerList, sizeInfo } = content;
+          this.sizeInfo = sizeInfo;
           this.playerList = playerList;
-          // this.gameInfo = gameInfo;
           this.leftPlayer = this.playerList.find(
             (player) => player.team === "left"
           );
@@ -53,11 +45,13 @@ class PingpongPageManager {
           );
           res();
         }
-      });
+      };
+
+      socket.addEventListener("message", listener);
     });
   }
 
-  getHTML() {
+  _getPingpongHTML() {
     return `
 			<div id="gameContainer">
 				${this._getDisplayBoardHTML()}

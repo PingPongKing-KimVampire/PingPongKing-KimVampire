@@ -1,25 +1,25 @@
 import windowObservable from "../../WindowObservable.js";
 
 class Player {
-  constructor(clientInfo, playerList, gameInfo) {
-    this._initPlayerProperty(clientInfo, playerList, gameInfo);
+  constructor(clientInfo, playerList, sizeInfo) {
+    this._initPlayerProperty(clientInfo, playerList, sizeInfo);
     this._subscribeWindow();
   }
 
-  _initPlayerProperty(clientInfo, playerList, gameInfo) {
+  _initPlayerProperty(clientInfo, playerList, sizeInfo) {
     this.clientInfo = clientInfo;
     this.playerList = playerList;
     this.myTeam = this.playerList.find(
       (player) => player.clientId === clientInfo.id
     ).team;
-    this.gameInfo = {
+    this.sizeInfo = {
       boardWidth: null,
       boardHeight: null,
       paddleWidth: null,
       paddleHeight: null,
       ballRadius: null,
     };
-    this.gameInfo = gameInfo;
+    this.sizeInfo = sizeInfo;
     this.subBoard = document.querySelector(".subPlayBoard:nth-of-type(2)");
     this.subBoardRect = {
       top: null,
@@ -54,39 +54,39 @@ class Player {
     const xPos = e.clientX - this.subBoardRect.left;
 
     if (this.orientation === "landscape") {
-      y = (yPos / this.subBoardRect.height) * this.gameInfo.boardHeight;
+      y = (yPos / this.subBoardRect.height) * this.sizeInfo.boardHeight;
       x =
-        this.gameInfo.boardWidth / 2 +
-        ((xPos / this.subBoardRect.width) * this.gameInfo.boardWidth) / 2;
+        this.sizeInfo.boardWidth / 2 +
+        ((xPos / this.subBoardRect.width) * this.sizeInfo.boardWidth) / 2;
     } else if (this.orientation === "portrait") {
       y =
-        this.gameInfo.boardHeight -
-        (xPos / this.subBoardRect.width) * this.gameInfo.boardHeight;
+        this.sizeInfo.boardHeight -
+        (xPos / this.subBoardRect.width) * this.sizeInfo.boardHeight;
       x =
-        this.gameInfo.boardWidth / 2 +
-        ((yPos / this.subBoardRect.height) * this.gameInfo.boardWidth) / 2;
+        this.sizeInfo.boardWidth / 2 +
+        ((yPos / this.subBoardRect.height) * this.sizeInfo.boardWidth) / 2;
     }
 
     x = Math.max(
-      this.gameInfo.boardWidth / 2 + this.gameInfo.paddleWidth / 2,
-      Math.min(x, this.gameInfo.boardWidth - this.gameInfo.paddleWidth / 2)
+      this.sizeInfo.boardWidth / 2 + this.sizeInfo.paddleWidth / 2,
+      Math.min(x, this.sizeInfo.boardWidth - this.sizeInfo.paddleWidth / 2)
     );
     y = Math.max(
-      0 + this.gameInfo.paddleHeight / 2,
-      Math.min(y, this.gameInfo.boardHeight - this.gameInfo.paddleHeight / 2)
+      0 + this.sizeInfo.paddleHeight / 2,
+      Math.min(y, this.sizeInfo.boardHeight - this.sizeInfo.paddleHeight / 2)
     );
 
     if (this.myTeam === "right") {
       x = x;
       y = y;
     } else if (this.myTeam === "left") {
-      x = this.gameInfo.boardWidth - x;
+      x = this.sizeInfo.boardWidth - x;
       y = y;
     }
 
     const msg = {
       sender: "player",
-      receiver: ["player", "referee"],
+      receiver: ["player", "pingpongBoard"],
       event: "updatePaddleLocation",
       content: {
         roomId: this.clientInfo.roomId,
