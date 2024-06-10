@@ -1,11 +1,11 @@
 import Referee from './Referee.js';
 
 class WaitingRoom {
-	constructor(clientInfo, gameMode, personnel) {
+	constructor(clientInfo, gameMode, totalPlayerCount) {
+		console.log('totalPlayerCount', totalPlayerCount);
 		this.clientInfo = clientInfo;
-		this.gameMode = gameMode; // TODO : 현재 안 쓰이고 있으나 필요해 질 수 있음
-		// this.personnel = personnel;
-		this.personnel = 3; // TODO : personnel을 정상적으로 전달받게 되면 삭제
+		this.gameMode = gameMode;
+		this.totalPlayerCount = totalPlayerCount;
 
 		this.players = [];
 		this.clientInfo.socket.addEventListener('message', this.listener);
@@ -25,12 +25,15 @@ class WaitingRoom {
 
 	// 탁구장 입장 & 게임 시작 관리
 	_manageEnterRoom({ roomId, clientId, clientNickname }) {
-		if (this.players.length === this.personnel) { // 입장 불가
+		if (this.players.length === this.totalPlayerCount) { // 입장 불가
 			// this._sendEnterImpossibleMsg(roomId); // TODO : 입장 불가 메시지 전달
 		} else { // 입장 가능
 			this._addPlayer(clientId, clientNickname);
 			this._sendEnterPossibleMsg(roomId, clientId);
-			if (this.players.length === this.personnel) {
+			console.log(this.players);
+			console.log(this.totalPlayerCount);
+			console.log(this.players.length === this.totalPlayerCount);
+			if (this.players.length === this.totalPlayerCount) {
 				// TODO : 리스너 어디서 삭제해야 할까?
 				// 서버에게 대기실 삭제를 알리고, 서버가 클라이언트들에게 알렸을 때 삭제해야 하지 않을까?
 				this.clientInfo.socket.removeEventListener('message', this.listener);
@@ -68,7 +71,11 @@ class WaitingRoom {
 			event: "enterPingpongRoomResponse",
 			content: {
 				roomId,
-				clientId
+				clientId,
+				gameInfo: {
+					mode: this.gameMode,
+					totalPlayerCount: this.totalPlayerCount,
+				}
 			}
 		}
 		this.clientInfo.socket.send(JSON.stringify(possibleMessage));

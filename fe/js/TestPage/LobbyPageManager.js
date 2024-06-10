@@ -10,8 +10,8 @@ class LobbyPageManager {
 
 		const modeSelect = document.getElementById('modeSelect');
 		const participantCountDiv = document.getElementById('participantCountDiv');
-		
-		modeSelect.addEventListener('change', function() {
+
+		modeSelect.addEventListener('change', function () {
 			if (modeSelect.value === 'vampire') {
 				participantCountDiv.style.display = 'block';
 			} else {
@@ -24,10 +24,13 @@ class LobbyPageManager {
 		createRoomButton.addEventListener('click', () => {
 
 			const mode = modeSelect.value;
-			const participantCount = document.getElementById('participantCount').value;
-			if (mode === 'vampire' && (participantCount < 2 || participantCount > 6)) {
+			let totalPlayerCount = parseInt(document.getElementById('participantCount').value);
+			if (mode === 'vampire' && (totalPlayerCount < 2 || totalPlayerCount > 6)) {
 				alert('참여인원 수는 2~6명이어야 합니다.');
 				return;
+			}
+			if (mode === 'normal') {
+				totalPlayerCount = 2;
 			}
 			//추후 모드, 인원수를 반영
 
@@ -37,6 +40,10 @@ class LobbyPageManager {
 				event: 'createPingpongRoom',
 				content: {
 					clientId: `${clientInfo.id}`, // TODO : 로그인 페이지에서 입력 받은 아이디
+					gameInfo: {
+						mode,
+						totalPlayerCount,
+					}
 				}
 			}
 			this.clientInfo.socket.send(JSON.stringify(createMessage));
@@ -70,22 +77,23 @@ class LobbyPageManager {
 		// console.log(message);
 
 		if (receiver.includes('client')) {
-			if (event === 'appointReferee') { // 심판 임명 응답
+			if (event === 'appointReferee') { // 대기실 임명 응답
 				this.clientInfo.isReferee = true;
 				this.clientInfo.roomId = content.roomId;
-				// TODO : gameMode와 personnel도 전달하기
-				const waitingRoom = new WaitingRoom(this.clientInfo);
+				const gameMode = content.gameInfo.mode;
+				const totalPlayerCount = content.gameInfo.totalPlayerCount;
+				const waitingRoom = new WaitingRoom(this.clientInfo, gameMode, totalPlayerCount);
 				this.enterRoom(content.roomId);
 			} else if (event === 'getPingpongRoomResponse') { // 탁구장 조회 응답
 				console.log(content.roomIdList);
-				if(content.roomIdList.length > 0)
-				{
+				if (content.roomIdList.length > 0) {
 					const roomIdInput = document.querySelector('#roomIdInput');
 					roomIdInput.value = content.roomIdList.pop();
 				}
 			} else if (event === 'enterPingpongRoomResponse') { // 탁구장 입장 응답
 				console.log('enterPingpongRoomResponse', message);
-				this.onEnterSuccess(content.roomId);
+				const gameInfo = content.gameInfo;
+				this.onEnterSuccess(content.roomId, gameInfo);
 				this.clientInfo.socket.removeEventListener('message', this.listener);
 			}
 		}

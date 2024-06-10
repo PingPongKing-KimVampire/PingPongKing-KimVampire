@@ -1,9 +1,10 @@
 import windowObservable from "../../WindowObservable.js";
 
 class GameObjectRenderer {
-  constructor(clientInfo, playerList, gameInfo, gameMode, personnel) {
+  constructor(clientInfo, playerList, gameInfo, gameMode, totalPlayerCount) {
+    console.log(gameMode, totalPlayerCount);
     this._initGaneObjectRenderer(clientInfo, playerList, gameInfo);
-    this._setDisplayBoard(gameMode, personnel);
+    this._setDisplayBoard(gameMode, totalPlayerCount);
     this._manageMessageEvent();
     this._subscribeWindow();
     this._updateGameContainer();
@@ -45,6 +46,7 @@ class GameObjectRenderer {
       myTeamName = ImVampire ? '뱀파이어' : '인간';
       oppnentTeamName = ImVampire ? '인간' : '뱀파이어';
     } else if (gameMode === 'normal') {
+      console.log('normal!!!!!');
       console.log(this.me.nickName, this.players.find((player) => player !== this.me).nickName);
       myTeamName = this.me.nickName;
       oppnentTeamName = this.players.find((player) => player !== this.me).nickName;

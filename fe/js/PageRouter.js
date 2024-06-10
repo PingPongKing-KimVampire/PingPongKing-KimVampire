@@ -27,14 +27,15 @@ class PageRouter {
 				this.renderPage('lobby');
 			});
 		} else if (url === 'lobby') {
-			let lobbyPageManager = new LobbyPageManager(this.app, this.clientInfo, (roomId) => {
+			let lobbyPageManager = new LobbyPageManager(this.app, this.clientInfo, (roomId, gameInfo) => {
 				this.clientInfo.roomId = roomId;
+				this.gameInfo = gameInfo;
 				this.renderPage('game');
 			});
 		} else if (url === 'game') {
-			let gamePageManager = new GamePageManager(this.app, this.clientInfo);
+			let gamePageManager = new GamePageManager(this.app, this.clientInfo, this.gameInfo);
 		} else if (url == 'pingpongRoom') {
-			let pingpongRoomPageManager = new PingpongRoomPageManager(this.app, this.clientInfo);
+			let pingpongRoomPageManager = new PingpongRoomPageManager(this.app, this.clientInfo, this.gameInfo);
 		}
 	}
 }

@@ -2,34 +2,29 @@ import Player from "./Player.js";
 import GameObjectRenderer from "./GameObjectRenderer.js";
 
 class GamePageManager {
-  constructor(app, clientInfo) {
+  constructor(app, clientInfo, gameInfo) {
     this.clientInfo = clientInfo;
+    this.gameInfo = gameInfo;
     this.playerList = [];
     this.leftPlayer = { clientId: null, clientNickname: null };
     this.rightPlayer = { clientId: null, clientNickname: null };
-    this.gameInfo = { // TODO : sizeInfo로 이름을 바꾸면 어떨까?
-      boardWidth: null,
-      boardHeight: null,
-      paddleWidth: null,
-      paddleHeight: null,
-      ballRadius: null,
-    };
+
 
     app.innerHTML = "WAIT START GAME";
 
     //게임정보 응답 받으면 시작
     this._getStartGameResponse(this.clientInfo.socket).then(() => {
       app.innerHTML = this.getHTML();
-      // TODO : 게임 모드, 인원 전달하기
+
       this.gameObjectRenderer = new GameObjectRenderer(
         this.clientInfo,
         this.playerList,
-        this.gameInfo,
-        'vampire',
-        3, // 임시 전달
+        this.sizeInfo,
+        this.gameInfo.mode,
+        this.gameInfo.totalPlayerCount,
       );
 
-      this.player = new Player(this.clientInfo, this.playerList, this.gameInfo);
+      this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
     });
   }
 
@@ -43,8 +38,15 @@ class GamePageManager {
         // console.log(message);
         if (receiver.includes("player") && event === "startGame") {
           const { playerList, gameInfo } = content;
+        this.sizeInfo = {
+          boardWidth: gameInfo.boardWidth,
+          boardHeight: gameInfo.boardHeight,
+          paddleWidth: gameInfo.paddleWidth,
+          paddleHeight: gameInfo.paddleHeight,
+          ballRadius: gameInfo.ballRadius,
+        };
           this.playerList = playerList;
-          this.gameInfo = gameInfo;
+          // this.gameInfo = gameInfo;
           this.leftPlayer = this.playerList.find(
             (player) => player.team === "left"
           );

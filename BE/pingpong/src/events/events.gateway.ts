@@ -54,7 +54,9 @@ export class WebsocketService implements OnModuleInit {
         }
         if (receiver.includes('server')) {
           if (event === 'createPingpongRoom') {
-            this.createPingpongRoom(client);
+            const gameMode = content.gameInfo.mode;
+            const totalPlayerCount = content.gameInfo.totalPlayerCount;
+            this.createPingpongRoom(client, gameMode, totalPlayerCount);
           } else if (event === 'getPingpongRoomList') {
             this.getPingpongRoomList(client);
           } else if (event === 'enterPingpongRoomResponse') {
@@ -131,19 +133,23 @@ export class WebsocketService implements OnModuleInit {
     client.send(JSON.stringify(msg));
   }
 
-  private createPingpongRoom(client: PingpongClient) {
+  private createPingpongRoom(client: PingpongClient, mode:string, totalPlayerCount:number) {
     const roomId = uuidv4();
     const roomInformation: PingPongRoomInfo = {
       refereeClient: client,
       playerList: [],
     };
     this.pingpongRoomMap.set(roomId, roomInformation);
+    const gameInfo = {
+      mode,
+      totalPlayerCount
+    }
 
     const msg = {
       sender: 'server',
       receiver: ['client'],
       event: 'appointReferee',
-      content: { roomId },
+      content: { roomId, gameInfo },
     };
     client.send(JSON.stringify(msg));
   }
