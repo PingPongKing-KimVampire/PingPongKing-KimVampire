@@ -2,7 +2,6 @@ import Referee from './Referee.js';
 
 class WaitingRoom {
 	constructor(clientInfo, gameMode, totalPlayerCount) {
-		console.log('totalPlayerCount', totalPlayerCount);
 		this.clientInfo = clientInfo;
 		this.gameMode = gameMode;
 		this.totalPlayerCount = totalPlayerCount;
@@ -16,7 +15,6 @@ class WaitingRoom {
 		const { sender, receiver, event, content } = message;
 
 		if (receiver.includes('referee')) {
-			// console.log('referee가 메시지를 받음', message);
 			if (event === 'enterPingpongRoom') { // 탁구장 입장 요청
 				this._manageEnterRoom(content);
 			}
@@ -30,9 +28,6 @@ class WaitingRoom {
 		} else { // 입장 가능
 			this._addPlayer(clientId, clientNickname);
 			this._sendEnterPossibleMsg(roomId, clientId);
-			console.log(this.players);
-			console.log(this.totalPlayerCount);
-			console.log(this.players.length === this.totalPlayerCount);
 			if (this.players.length === this.totalPlayerCount) {
 				// TODO : 리스너 어디서 삭제해야 할까?
 				// 서버에게 대기실 삭제를 알리고, 서버가 클라이언트들에게 알렸을 때 삭제해야 하지 않을까?

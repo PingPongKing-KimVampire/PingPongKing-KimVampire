@@ -1,4 +1,4 @@
-import WaitingRoom from "../GamePage/WaitingRoom.js";
+import WaitingRoom from "../PingpongPage/WaitingRoom.js";
 
 class LobbyPageManager {
 	constructor(app, clientInfo, onEnterSuccess) {
@@ -74,7 +74,6 @@ class LobbyPageManager {
 	listener = (messageEvent) => {
 		const message = JSON.parse(messageEvent.data);
 		const { sender, receiver, event, content } = message;
-		// console.log(message);
 
 		if (receiver.includes('client')) {
 			if (event === 'appointReferee') { // 대기실 임명 응답
@@ -91,7 +90,6 @@ class LobbyPageManager {
 					roomIdInput.value = content.roomIdList.pop();
 				}
 			} else if (event === 'enterPingpongRoomResponse') { // 탁구장 입장 응답
-				console.log('enterPingpongRoomResponse', message);
 				const gameInfo = content.gameInfo;
 				this.onEnterSuccess(content.roomId, gameInfo);
 				this.clientInfo.socket.removeEventListener('message', this.listener);

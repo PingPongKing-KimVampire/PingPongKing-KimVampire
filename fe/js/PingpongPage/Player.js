@@ -97,11 +97,6 @@ class Player {
     };
     this.clientInfo.socket.send(JSON.stringify(msg));
   }
-
-  // sendStartGame() {
-  //   console.log("게임 시작해줘");
-  //   // this.referee.startGame(this.gameObjectRenderer);
-  // }
 }
 
 export default Player;

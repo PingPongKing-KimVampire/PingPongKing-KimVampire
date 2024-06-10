@@ -1,6 +1,6 @@
 import windowObservable from "../../WindowObservable.js";
 
-class GameObjectRenderer {
+class PingpongRenderer {
   constructor(clientInfo, playerList, gameInfo, gameMode, totalPlayerCount) {
     console.log(gameMode, totalPlayerCount);
     this._initGaneObjectRenderer(clientInfo, playerList, gameInfo);
@@ -32,9 +32,9 @@ class GameObjectRenderer {
     this.rightBoard = document.querySelector(".subPlayBoard:nth-of-type(2)");
   }
 
-  _setDisplayBoard(gameMode, personnel) {
+  _setDisplayBoard(gameMode, totalPlayerCount) {
     this._setDisplayName(gameMode);
-    this._setDisplayAvatar(gameMode, personnel);
+    this._setDisplayAvatar(gameMode, totalPlayerCount);
   }
   _setDisplayName(gameMode) {
     const leftName = document.querySelector("#leftDisplayBoard .playerName");
@@ -46,8 +46,6 @@ class GameObjectRenderer {
       myTeamName = ImVampire ? '뱀파이어' : '인간';
       oppnentTeamName = ImVampire ? '인간' : '뱀파이어';
     } else if (gameMode === 'normal') {
-      console.log('normal!!!!!');
-      console.log(this.me.nickName, this.players.find((player) => player !== this.me).nickName);
       myTeamName = this.me.nickName;
       oppnentTeamName = this.players.find((player) => player !== this.me).nickName;
     }
@@ -55,7 +53,7 @@ class GameObjectRenderer {
     leftName.innerText = oppnentTeamName;
     rightName.innerText = myTeamName;
   }
-  _setDisplayAvatar(gameMode, personnel) {
+  _setDisplayAvatar(gameMode, totalPlayerCount) {
     const leftAvatar = document.querySelector('#leftDisplayBoard .playerAvatar');
     const rightAvatar = document.querySelector('#rightDisplayBoard .playerAvatar');
 
@@ -73,7 +71,7 @@ class GameObjectRenderer {
       const vampireAvatar = ImVampire ? rightAvatar : leftAvatar;
       const humanAvatar = ImVampire ? leftAvatar : rightAvatar;
       appendImage(vampireAvatar, 'images/playerA.png');
-      appendImage(humanAvatar, 'images/playerB.png', personnel - 1);
+      appendImage(humanAvatar, 'images/playerB.png', totalPlayerCount - 1);
     } else if (gameMode === 'normal') {
       appendImage(leftAvatar, 'images/playerA.png');
       appendImage(rightAvatar, 'images/playerB.png');
@@ -220,8 +218,10 @@ class GameObjectRenderer {
   }
 
   _winGame({ team }) {
-    const board = team === "left" ? this.leftBoard : this.rightBoard;
-    board.style.backgroundColor = "red";
+    const winBoard = this.me.team === team ? this.rightBoard : this.leftBoard;
+    const loseBoard = this.me.team === team ? this.leftBoard : this.rightBoard;
+    winBoard.style.backgroundColor = 'blue';
+    loseBoard.style.backgroundColor = 'red';
   }
 
   _updateGameContainer() {
@@ -250,4 +250,4 @@ class GameObjectRenderer {
   }
 }
 
-export default GameObjectRenderer;
+export default PingpongRenderer;

@@ -1,4 +1,4 @@
-import PongBoard from "./PongBoard.js";
+import PingpongBoard from "./PingpongBoard.js";
 
 class Referee {
 	constructor(clientInfo, players) {
@@ -20,7 +20,7 @@ class Referee {
 		}
 
 		this.ballMoveIntervalID = null;
-		this.pongBoard = new PongBoard(clientInfo, players, sizeInfo);
+		this.pongBoard = new PingpongBoard(clientInfo, players, sizeInfo);
 		this._readyRound();
 	}
 

@@ -1,7 +1,7 @@
 import Player from "./Player.js";
-import GameObjectRenderer from "./GameObjectRenderer.js";
+import PingpongRenderer from "./PingpongRenderer.js";
 
-class GamePageManager {
+class PingpongPageManager {
   constructor(app, clientInfo, gameInfo) {
     this.clientInfo = clientInfo;
     this.gameInfo = gameInfo;
@@ -16,7 +16,7 @@ class GamePageManager {
     this._getStartGameResponse(this.clientInfo.socket).then(() => {
       app.innerHTML = this.getHTML();
 
-      this.gameObjectRenderer = new GameObjectRenderer(
+      this.gameObjectRenderer = new PingpongRenderer(
         this.clientInfo,
         this.playerList,
         this.sizeInfo,
@@ -34,8 +34,6 @@ class GamePageManager {
       socket.addEventListener("message", (eventMessage) => {
         const message = JSON.parse(eventMessage.data);
         const { sender, receiver, event, content } = message;
-        // console.log("GAME START!!!!");
-        // console.log(message);
         if (receiver.includes("player") && event === "startGame") {
           const { playerList, gameInfo } = content;
         this.sizeInfo = {
@@ -119,4 +117,4 @@ class GamePageManager {
   }
 }
 
-export default GamePageManager;
+export default PingpongPageManager;

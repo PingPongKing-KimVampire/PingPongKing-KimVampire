@@ -1,7 +1,6 @@
-import GamePageManager from './GamePage/GamePageManager.js';
+import PingpongPageManager from './PingpongPage/PingpongPageManager.js';
 import LoginPageManager from './TestPage/LoginPageManager.js';
 import LobbyPageManager from './TestPage/LobbyPageManager.js';
-import PingpongRoomPageManager from './TestPage/PingpongRoomPageManager.js';
 
 class PageRouter {
 	constructor() {
@@ -33,9 +32,7 @@ class PageRouter {
 				this.renderPage('game');
 			});
 		} else if (url === 'game') {
-			let gamePageManager = new GamePageManager(this.app, this.clientInfo, this.gameInfo);
-		} else if (url == 'pingpongRoom') {
-			let pingpongRoomPageManager = new PingpongRoomPageManager(this.app, this.clientInfo, this.gameInfo);
+			let gamePageManager = new PingpongPageManager(this.app, this.clientInfo, this.gameInfo);
 		}
 	}
 }

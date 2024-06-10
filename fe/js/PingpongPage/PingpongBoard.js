@@ -1,6 +1,6 @@
 import Ball from './Ball.js';
 
-class PongBoard {
+class PingpongBoard {
 	constructor(clientInfo, players, sizeInfo) {
 		this.clientInfo = clientInfo;
 		this.players = this._setPlayers(players);
@@ -197,4 +197,4 @@ class PongBoard {
 	}
 }
 
-export default PongBoard;
+export default PingpongBoard;
