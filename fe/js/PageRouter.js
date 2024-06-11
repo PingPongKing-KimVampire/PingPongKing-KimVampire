@@ -28,11 +28,13 @@ class PageRouter {
 		} else if (url === 'lobby') {
 			let lobbyPageManager = new LobbyPageManager(this.app, this.clientInfo, (roomId, gameInfo) => {
 				this.clientInfo.roomId = roomId;
-				this.gameInfo = gameInfo;
+				this.gameInfo = gameInfo; // TODO : 개선하기
 				this.renderPage('game');
 			});
 		} else if (url === 'game') {
-			let gamePageManager = new PingpongPageManager(this.app, this.clientInfo, this.gameInfo);
+			let pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this.gameInfo, () => {
+				this.renderPage('lobby');
+			});
 		}
 	}
 }

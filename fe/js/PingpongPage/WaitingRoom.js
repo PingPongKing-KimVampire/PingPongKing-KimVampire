@@ -54,6 +54,10 @@ class WaitingRoom {
     this.players.push(player);
   }
 
+	removePlayer(id) {
+		this.players = this.players.filter((player) => player.id !== id);
+	}
+
   _sendEnterPossibleMsg(roomId, clientId) {
     // 입장 가능 메시지 보내기
     const possibleMessage = {

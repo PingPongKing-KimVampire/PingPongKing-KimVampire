@@ -11,7 +11,7 @@ class PingpongBoard {
 		this.isEnableServe = false; // TODO : 원활한 서브를 위한 변수 (이후 구현하기)
 		this.waitServeIntervalID = null;
 
-		const ballSpeed = 2;
+		const ballSpeed = 5;
 		this.ball = new Ball(ballSpeed, this.sizeInfo.ballRadius);
 
 		this.clientInfo.socket.addEventListener('message', this.listener);
@@ -21,19 +21,26 @@ class PingpongBoard {
 		return players.map((player) => {
 			return {
 				id: player.id,
-				nickname: player.nickname, // TODO : 필요없으면 빼기
 				team: player.team,
 				paddle: { x: 0, y: 0 },
 			}
 		});
 	}
 
-	listener = (messageEvent) => { // TODO : 게임 종료 시 해제하기
+	removePlayer(clientId) {
+		this.players = this.players.filter((player) => player.id !== clientId);
+	}
+
+	listener = (messageEvent) => {
 		const message = JSON.parse(messageEvent.data);
 		const { sender, receiver, event, content } = message;
 		if (receiver.includes('pingpongBoard') && event === 'updatePaddleLocation') {
 			this._updatePaddlePosition(content); // 패들 위치 변경
 		}
+	}
+
+	removeListener() {
+		this.clientInfo.socket.removeEventListener('message', this.listener);
 	}
 
 	// 패들 정보 업데이트

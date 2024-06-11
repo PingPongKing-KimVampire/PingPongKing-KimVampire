@@ -33,11 +33,18 @@ class Player {
   }
 
   _subscribeWindow() {
-    windowObservable.subscribeResize(this.updateSubBoardRect.bind(this));
-    windowObservable.subscribeOrientationChange(
-      this.updateOrientation.bind(this)
-    );
-    windowObservable.subscribeMousemove(this.sendPaddlePosition.bind(this));
+    this.updateSubBoardRectRef = this.updateSubBoardRect.bind(this);
+    windowObservable.subscribeResize(this.updateSubBoardRectRef);
+    this.updateOrientationRef = this.updateOrientation.bind(this);
+    windowObservable.subscribeOrientationChange(this.updateOrientationRef);
+    this.sendPaddlePositionRef = this.sendPaddlePosition.bind(this);
+    windowObservable.subscribeMousemove(this.sendPaddlePositionRef);
+  }
+
+  unsubscribeWindow() {
+    windowObservable.unsubscribeResize(this.updateSubBoardRectRef);
+    windowObservable.unsubscribeOrientationChange(this.updateOrientationRef);
+    windowObservable.unsubscribeMousemove(this.sendPaddlePositionRef);
   }
 
   updateSubBoardRect() {
