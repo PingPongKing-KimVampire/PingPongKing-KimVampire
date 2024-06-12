@@ -108,10 +108,15 @@ class PingpongRenderer {
 	}
 
 	_subscribeWindow() {
-		windowObservable.subscribeResize(this._updateGameContainer.bind(this));
-		windowObservable.subscribeOrientationChange(
-			this._updateOrientation.bind(this)
-		);
+		this.updateGameContainerRef = this._updateGameContainer.bind(this);
+		windowObservable.subscribeResize(this.updateGameContainerRef);
+		this.updateOrientationRef = this._updateOrientation.bind(this);
+		windowObservable.subscribeOrientationChange(this.updateOrientationRef);
+	}
+
+	unsubscribeWindow() {
+		windowObservable.unsubscribeResize(this.updateGameContainerRef);
+		windowObservable.unsubscribeOrientationChange(this.updateOrientationRef);
 	}
 
 	_setGameSizeInfo(sizeInfo) {

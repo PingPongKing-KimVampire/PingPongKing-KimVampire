@@ -100,8 +100,11 @@ class PingpongPageManager {
 		// PingpongPageManager, PingpongRenderer, Player에서 소켓과의 모든 상호작용 삭제
 		this.clientInfo.socket.removeEventListener('message', this.closeRoomListener);
 		this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
+		this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
 		this.player.unsubscribeWindow.call(this.player);
 		this.onExitPingpong();
+		// window.getEventListeners(this.clientInfo.socket);
+		// TODO : 남아있는 리스너 확인하기
 	}
 
 	_getPingpongHTML() {
