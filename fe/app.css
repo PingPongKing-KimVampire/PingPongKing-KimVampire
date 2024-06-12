@@ -156,7 +156,7 @@ body {
 
 .playerAvatar img {
 	max-height: 100%;
-	max-width: 100%; /* TODO : 팀전이라 여러 이미지가 들어가는 경우, js에서 이 부분 조정하기*/
+	max-width: 100%; /* 팀전이라 여러 이미지가 들어가는 경우, js에서 이 부분 조정*/
 }
 
 .timeInfo {

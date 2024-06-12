@@ -1,22 +1,9 @@
 class Ball {
-	// constructor(angle, speed, radius) {
-	// 	this.angle = angle;
-	// 	this.speed = speed;
-	// 	this.radius = radius;
-	// }
 	constructor(speed, radius) {
 		this.speed = speed;
 		this.radius = radius;
 	}
 
-	// initBall(boardWidth, boardHeight) {
-	// 	this.xPos = boardWidth / 2;
-	// 	this.yPos = boardHeight / 2;
-	// 	const dir = this._calculateBallDirection();
-	// 	this.dx = dir.dx;
-	// 	this.dy = dir.dy;
-	// 	this.angle = 0;
-	// }
 	initBall(x, y, angle) {
 		this.xPos = x;
 		this.yPos = y;
@@ -31,6 +18,10 @@ class Ball {
 		const dx = Math.cos(angleRadians) * this.speed;
 		const dy = Math.sin(angleRadians) * this.speed;
 		return { dx, dy };
+	}
+
+	reversalDy() {
+		this.dy = -this.dy;
 	}
 
 	reversalRandomDx() {

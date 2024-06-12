@@ -1,7 +1,6 @@
-import GamePageManager from './GamePage/GamePageManager.js';
+import PingpongPageManager from './PingpongPage/PingpongPageManager.js';
 import LoginPageManager from './TestPage/LoginPageManager.js';
 import LobbyPageManager from './TestPage/LobbyPageManager.js';
-import PingpongRoomPageManager from './TestPage/PingpongRoomPageManager.js';
 
 class PageRouter {
 	constructor() {
@@ -27,14 +26,15 @@ class PageRouter {
 				this.renderPage('lobby');
 			});
 		} else if (url === 'lobby') {
-			let lobbyPageManager = new LobbyPageManager(this.app, this.clientInfo, (roomId) => {
+			let lobbyPageManager = new LobbyPageManager(this.app, this.clientInfo, (roomId, gameInfo) => {
 				this.clientInfo.roomId = roomId;
+				this.gameInfo = gameInfo; // TODO : 개선하기
 				this.renderPage('game');
 			});
 		} else if (url === 'game') {
-			let gamePageManager = new GamePageManager(this.app, this.clientInfo);
-		} else if (url == 'pingpongRoom') {
-			let pingpongRoomPageManager = new PingpongRoomPageManager(this.app, this.clientInfo);
+			let pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this.gameInfo, () => {
+				this.renderPage('lobby');
+			});
 		}
 	}
 }
