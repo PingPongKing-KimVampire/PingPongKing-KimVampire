@@ -43,7 +43,7 @@ class Referee {
 		}));
 		const startMessage = {
 			sender: "referee",
-			receiver: ["player"],
+			receiver: ["player", "server"],
 			event: "startGame",
 			content: {
 				roomId: this.clientInfo.roomId,

@@ -110,7 +110,7 @@ export class WebsocketService implements OnModuleInit {
   private setPlayingStatePingpongRoom(client, pingpongMsg) {
     const { sender, receiver, event, content } = pingpongMsg;
     const { roomId } = content;
-    if (this.pingpongRoomMap.has(roomId)) {
+    if (!this.pingpongRoomMap.has(roomId)) {
       this.sendNoRoomMsg(client, pingpongMsg);
       return;
     }
@@ -174,6 +174,7 @@ export class WebsocketService implements OnModuleInit {
 
   private async getWaitingRoomList(client: PingpongClient) {
     const gameInfoPromiseList = [];
+
     this.pingpongRoomMap.forEach((waitingRoom) => {
       if (waitingRoom.state !== 'WAITING') return;
       const listener = (res, message: ArrayBuffer) => {
