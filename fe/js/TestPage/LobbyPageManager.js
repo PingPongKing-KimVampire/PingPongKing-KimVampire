@@ -101,7 +101,7 @@ class LobbyPageManager {
         this.clientInfo.roomId = content.roomId;
         const gameInfo = content.gameInfo;
         new WaitingRoom(this.clientInfo, gameInfo);
-        this._enterWaitingRoom(content.roomId);
+        this._enterWaitingRoom(this.clientInfo.roomId);
       } else if (event === "enterWaitingRoomResponse") {
         // 대기실 입장 응답
         const gameInfo = content.gameInfo;
@@ -109,10 +109,12 @@ class LobbyPageManager {
         this.clientInfo.socket.removeEventListener("message", this.listener);
       } else if (event === "getWaitingRoomResponse") {
         // 대기실 조회 응답
-        console.log(content.roomIdList);
-        if (content.roomIdList.length > 0) {
+        console.log(message);
+        console.log(content);
+        console.log(content.gameInfoList[0]);
+        if (content.gameInfoList.length > 0) {
           const roomIdInput = document.querySelector("#roomIdInput");
-          roomIdInput.value = content.roomIdList.pop();
+          roomIdInput.value = content.gameInfoList.pop().roomId;
         }
       }
     }
