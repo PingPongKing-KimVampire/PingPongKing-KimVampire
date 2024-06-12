@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "3001:3001"
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"

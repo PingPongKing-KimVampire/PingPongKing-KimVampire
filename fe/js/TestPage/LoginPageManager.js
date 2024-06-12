@@ -8,7 +8,7 @@ class LoginPageManager {
     const loginButton = document.querySelector("#loginButton");
     loginButton.addEventListener("click", (event) => {
       event.preventDefault();
-      this.socket = new WebSocket("ws://127.0.0.1:3001");
+      this.socket = new WebSocket("ws://localhost:3001/ws/pingpong/");
       this.socket.addEventListener("open", () => {
         this.id = parseInt(document.querySelector("#id").value);
         if (isNaN(parseInt(this.id))) return;
