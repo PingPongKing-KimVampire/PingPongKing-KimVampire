@@ -1,6 +1,7 @@
 import PingpongPageManager from './PingpongPage/PingpongPageManager.js';
 import LoginPageManager from './TestPage/LoginPageManager.js';
 import LobbyPageManager from './TestPage/LobbyPageManager.js';
+import WaitingRoomCreationPageManager from './LobbyPage/WaitingRoomCreationPageManager.js';
 
 class PageRouter {
 	constructor() {
@@ -35,6 +36,8 @@ class PageRouter {
 			let pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this.gameInfo, () => {
 				this.renderPage('lobby');
 			});
+		} else if (url === 'waitingRoomCreation') {
+			let waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app);
 		}
 	}
 }
