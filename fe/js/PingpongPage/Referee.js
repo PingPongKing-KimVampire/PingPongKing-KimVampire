@@ -66,12 +66,12 @@ class Referee {
 		this.ballMoveIntervalID = setInterval(
 			this.pingpongBoard._moveBall.bind(
 				this.pingpongBoard,
-				this._isOverRound.bind(this)
+				this._roundIsOver.bind(this)
 			)
-			// 공이 왼/오 벽과 충돌하면 _isOverRound 호출
+			// 공이 왼/오 벽과 충돌하면 _roundIsOver 호출
 		);
 	}
-	_isOverRound(scoreTeam) {
+	_roundIsOver(scoreTeam) {
 		this._stopRound();
 		this._updateScore(scoreTeam);
 		if (this._isDecidedWinner(scoreTeam) === true) {

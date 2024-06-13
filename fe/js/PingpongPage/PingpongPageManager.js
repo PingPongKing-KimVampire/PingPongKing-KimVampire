@@ -57,8 +57,8 @@ class PingpongPageManager {
 
 	_manageExitRoom() {
 		const exitButton = document.querySelector('.exitButton');
-		const exitYesButton = document.querySelector('.exitModal .yesButton');
-		const exitNoButton = document.querySelector('.exitModal .noButton');
+		const exitYesButton = document.querySelector('.exitModal .activatedButton:nth-of-type(1)');
+		const exitNoButton = document.querySelector('.exitModal .activatedButton:nth-of-type(2)');
 		const exitModal = document.querySelector('.exitModal');
 		exitButton.addEventListener('click', this._exitButtonClicked.bind(this, exitModal));
 		exitYesButton.addEventListener('click', this._exitYesButtonClicked.bind(this));
@@ -158,8 +158,8 @@ class PingpongPageManager {
 				<div class="questionBox">
 					<div class="question">상대에게 승리를 선사하시겠습니까?</div>
 					<div class="buttonGroup">
-						<button class="yesButton">네</button>
-						<button class="noButton">아니오</button>
+						<button class="activatedButton">네</button>
+						<button class="activatedButton">아니오</button>
 					</div>
 				</div>
 			</div>
