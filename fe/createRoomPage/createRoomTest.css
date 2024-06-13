@@ -1,0 +1,115 @@
+#roomSettingContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 70%;
+	height: 60%;
+}
+
+.selectionGroup {
+	display: flex;
+	flex-direction: row;
+	justify-content: start;
+	align-items: center;
+	width: 100%;
+}
+
+.selectionLabel {
+	width: 10%;
+	margin-right: 6%;
+	font-size: 2.5rem;
+	font-weight: 800;
+	text-align: end;
+}
+
+#titleInput {
+	width: 70%;
+	background-color: rgb(1, 4, 37);
+	border: 0.15rem solid white;
+	border-radius: 50px;
+	color: white;
+	font-size: 1.5rem;
+	padding: 1.5% 2.5%;
+}
+
+input[type="radio"] {
+	display: none;
+}
+
+.modeButton {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 18%;
+	aspect-ratio: 1/1.05;
+	margin-right: 5%;
+	border: 0.15rem solid white;
+	border-radius: 30px;
+	font-size: 1.2rem;
+	font-weight: 500;
+}
+
+.modeButton:hover {
+	background-color: rgb(213, 112, 255);
+	border: 0.15rem solid rgb(213, 112, 255);
+	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
+	transition-duration: 0.15s;
+}
+
+.countButtonGroup {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin-right: 1.5%;
+}
+#humanCountButtonGroup {
+	width: 30%;
+}
+#vampireCounButtonGroup {
+	width: 4.5%;
+}
+
+.countButton {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	aspect-ratio: 1/1;
+	border: 0.15rem solid white;
+	border-radius: 50%;
+	font-size: 1.6rem;
+	font-weight: 500;
+}
+#humanCountButtonGroup .countButton{
+	width: 15%;
+}
+#vampireCounButtonGroup .countButton {
+	width: 100%;
+}
+
+.countButton:hover {
+	background-color: rgb(213, 112, 255);
+	border: 0.15rem solid rgb(213, 112, 255);
+	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
+	transition-duration: 0.15s;
+}
+
+#vsText {
+	margin-left: 4%;
+	margin-right: 6%;
+	font-size: 3rem;
+	font-weight: 800;
+}
+
+.countText {
+	align-self: end;
+	font-size: 1.5rem;
+	font-weight: 600;
+}
+
+#completeButton {
+	position: absolute;
+	width: 13%;
+	aspect-ratio: 4/1;
+	bottom: 9%;
+	right: 6%;
+}

@@ -1,0 +1,26 @@
+/* TODO : 여기에 CSS Reset을 넣으면 좋을 듯 */
+
+.activatedButton {
+	font-size: 2rem;
+	font-weight: 700;
+	border-radius: 30px;
+	background-color: rgb(213, 112, 255);
+	color: rgb(1, 4, 37);
+}
+
+.disabledButton {
+	font-size: 2rem;
+	font-weight: 700;
+	border-radius: 30px;
+	background-color: rgb(190, 190, 190);
+	color: rgb(130, 130, 130);
+}
+
+.exitButton {
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	top: 3%;
+	left: 2%;
+	background: url("images/exitImg.png") center/cover;
+}
