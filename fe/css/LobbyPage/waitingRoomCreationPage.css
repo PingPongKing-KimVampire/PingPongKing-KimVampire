@@ -1,9 +1,10 @@
 #roomSettingContainer {
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	/* justify-content: space-between; */
+	justify-content: center;
 	width: 70%;
-	height: 60%;
+	height: 40%;
 }
 
 .selectionGroup {
@@ -12,6 +13,21 @@
 	justify-content: start;
 	align-items: center;
 	width: 100%;
+	transition-duration: 0.5s;
+}
+.selectionGroup:nth-of-type(1) { /* 모드 선택 */
+	margin-bottom: 8%;
+}
+.invisibleSelectionGroup { /* 인원 선택 (표시되지 않음) */
+	height: 0;
+	opacity: 0;
+	visibility: hidden;
+	overflow: hidden;
+}
+.visibleSelectionGroup { /* 인원 선택 (표시됨) */
+	height: auto;
+	opacity: 1;
+	visibility: visible;
 }
 
 .selectionLabel {
@@ -47,6 +63,10 @@ input[type="radio"] {
 	border-radius: 30px;
 	font-size: 1.2rem;
 	font-weight: 500;
+}
+
+.modeButton:hover, #humanCountButtonGroup .countButton:hover {
+	cursor: pointer;
 }
 
 .modeButton:hover, .countButton:hover,
@@ -102,7 +122,8 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 
 #completeButton {
 	position: absolute;
-	width: 13%;
+	padding: 1% 1.5%;
+	/* width: 13%; */
 	aspect-ratio: 4/1;
 	bottom: 9%;
 	right: 6%;

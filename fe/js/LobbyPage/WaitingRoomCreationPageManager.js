@@ -3,48 +3,52 @@ class WaitingRoomCreationPageManager {
 		console.log("Create Waiting Room Page!");
 		app.innerHTML = this._getHTML();
 
-		this.titleInput = document.querySelector('#titleInput');
-		this.modeButtons = document.getElementsByName('mode');
-		this.humanCountButtons = document.getElementsByName('humanCount');
+		this.completeButtonEnabled = false;
 		this.completeButton = document.querySelector('#completeButton');
 
-		// window.addEventListener('click', this._checkSelectedAll.bind(this));
+		this.titleInput = document.querySelector('#titleInput');
+		this.modeSelection = document.querySelector('.selectionGroup:nth-of-type(2)');
+		this.modeButtons = [...document.getElementsByName('mode')];
+		this.countSelection = document.querySelector('.selectionGroup:last-of-type');
+		this.humanCountButtons = [...document.getElementsByName('humanCount')];
 
-		// this.titleInput.addEventListener('input', () => {
-		// 	console.log('titleInput changed');
-		// });
-		// this.modeButtons.forEach((modeButton) => {
-		// 	modeButton.addEventListener('change', () => {
-		// 		console.log('mode button changed');
-		// 	});
-		// });
-		// this.humanCountButtons.forEach((humanCountButton) => {
-		// 	humanCountButton.addEventListener('change', () => {
-		// 		console.log('human count button changed');
-		// 	});
-		// });
+		this._addEventListeners();
+	}
+	
+	_addEventListeners() {
+		this.titleInput.addEventListener('input', this._checkSelected.bind(this));
+		this.modeButtons.forEach((button) => {
+			button.addEventListener('change', this._checkSelected.bind(this));
+		});
+		this.humanCountButtons.forEach((button) => {
+			button.addEventListener('change', this._checkSelected.bind(this));
+		});
 	}
 
-	_checkSelectedAll() {
-		let isSelectedTitle = false;
-		let isSelectedMode = false;
+	_checkSelected() {
+		const isSelectedTitle = this.titleInput.value !== "";
+		const selectedModeButton = this.modeButtons.find((button) => button.checked);
+		const isSelectedMode = selectedModeButton !== undefined;
 		let isSelectedHumanCount = false;
 
-		if (this.titleInput.value !== "")
-			isSelectedTitle = true;
-		console.log(this.titleInput.value);
-		this.modeButtons.forEach((modeButton) => {
-			if (modeButton.checked === true)
-				isSelectedMode = true;
-		})
-		this.humanCountButtons.forEach((humanCountButton) => {
-			if (humanCountButton.checked === true)
+		if (isSelectedMode) {
+			if (selectedModeButton.value === "vampireVsHuman") {
+				this.countSelection.classList.replace('invisibleSelectionGroup', 'visibleSelectionGroup');
+				this.modeSelection.style.marginBottom = '8%';
+				isSelectedHumanCount = this.humanCountButtons.find((button) => button.checked) !== undefined;
+			} else {
+				this.countSelection.classList.replace('visibleSelectionGroup', 'invisibleSelectionGroup');
+				this.modeSelection.style.marginBottom = '0%';
 				isSelectedHumanCount = true;
-		})
+			}
+		}
 
+		console.log(isSelectedTitle, isSelectedMode, isSelectedHumanCount);
 		if (isSelectedTitle && isSelectedMode && isSelectedHumanCount) {
+			this.completeButtonEnabled = true;
 			this.completeButton.classList.replace('disabledButton', 'activatedButton');
 		} else {
+			this.completeButtonEnabled = false;
 			this.completeButton.classList.replace('activatedButton', 'disabledButton');
 		}
 	}
@@ -55,7 +59,9 @@ class WaitingRoomCreationPageManager {
 			<div id="roomSettingContainer">
 				<div class="selectionGroup">${this._getTitleSelectionHTML()}</div>
 				<div class="selectionGroup">${this._getModeSelectionHTML()}</div>
-				<div class="selectionGroup">${this._getPlayerCountSelectionHTML()}</div>
+				<div class="selectionGroup invisibleSelectionGroup">
+					${this._getPlayerCountSelectionHTML()}
+				</div>
 			</div>
 			<button id="completeButton" class="disabledButton">방 생성하기</button>
 		`;
@@ -99,8 +105,8 @@ class WaitingRoomCreationPageManager {
 			<div id="vsText">VS</div>
 			<label class="selectionLabel" id="vampireLabel">뱀파이어</label>
 			<div class="countButtonGroup" id="vampireCounButtonGroup">
-			<input type="radio" name="vampireCountInput" id="vampire1", value="1" checked="checked">
-			<label for="vampire1" class="countButton">2</label>
+				<input type="radio" name="vampireCountInput" id="vampire1", value="1" checked="checked">
+				<label for="vampire1" class="countButton">2</label>
 			</div>
 			<div class="countText">명</div>
 		`;
