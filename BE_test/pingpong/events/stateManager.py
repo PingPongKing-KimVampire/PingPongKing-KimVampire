@@ -5,29 +5,31 @@ class StateManager:
         self.clients = {}
         self.rooms = {}
 
-    def add_client(self, client):
-        client_id = str(uuid.uuid4())
-        self.clients[client_id] = client
-        return client_id
+    def addClient(self, client):
+        clientId = str(uuid.uuid4())
+        self.clients[clientId] = client
+        return clientId
 
-    def remove_client(self, client_id):
-        if client_id in self.clients:
-            del self.clients[client_id]
+    def removeClient(self, clientId):
+        if clientId in self.clients:
+            del self.clients[clientId]
 
-    def create_room(self, client):
-        room_id = str(uuid.uuid4())
-        self.rooms[room_id] = {
+    def createRoom(self, client, gameInfo):
+        roomId = str(uuid.uuid4())
+        self.rooms[roomId] = {
             'referee': client,
-            'players': []
+            'players': [],
+            'gameInfo': gameInfo,
+            'state': 'WAITING'
         }
-        return room_id
+        return roomId
 
-    def add_player_to_room(self, room_id, player):
-        if room_id in self.rooms:
-            self.rooms[room_id]['players'].append(player)
+    def addPlayerToRoom(self, roomId, player):
+        if roomId in self.rooms:
+            self.rooms[roomId]['players'].append(player)
 
-    def get_room_list(self):
+    def getRoomList(self):
         return list(self.rooms.keys())
 
-    def get_room(self, room_id):
-        return self.rooms.get(room_id, None)
+    def getRoom(self, roomId):
+        return self.rooms.get(roomId, None)

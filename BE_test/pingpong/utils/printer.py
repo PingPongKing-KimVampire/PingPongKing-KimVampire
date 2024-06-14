@@ -12,7 +12,7 @@ class Printer:
     
     @staticmethod
     def log(message, color="magenta"):
-        color_code = Printer.COLORS.get(color, Printer.COLORS["magenta"])
-        reset_code = Printer.COLORS["reset"]
+        colorCode = Printer.COLORS.get(color, Printer.COLORS["magenta"])
+        resetCode = Printer.COLORS["reset"]
         
-        print(f"{color_code}{message}{reset_code}")
+        print(f"{colorCode}{message}{resetCode}")
