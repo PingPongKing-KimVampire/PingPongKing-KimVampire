@@ -1,10 +1,17 @@
+#container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
 #roomSettingContainer {
 	display: flex;
 	flex-direction: column;
-	/* justify-content: space-between; */
 	justify-content: center;
-	width: 70%;
-	height: 40%;
+	width: 75%;
 }
 
 .selectionGroup {
@@ -15,37 +22,30 @@
 	width: 100%;
 	transition-duration: 0.5s;
 }
-.selectionGroup:nth-of-type(1) { /* 모드 선택 */
+.selectionGroupBottomMargin {
 	margin-bottom: 8%;
-}
-.invisibleSelectionGroup { /* 인원 선택 (표시되지 않음) */
-	height: 0;
-	opacity: 0;
-	visibility: hidden;
-	overflow: hidden;
-}
-.visibleSelectionGroup { /* 인원 선택 (표시됨) */
-	height: auto;
-	opacity: 1;
-	visibility: visible;
 }
 
 .selectionLabel {
-	width: 12%;
-	margin-right: 6%;
-	font-size: 2.5rem;
+	width: 20%;
+	font-size: 3rem;
 	font-weight: 800;
-	text-align: end;
+}
+
+.selectionBox {
+	display: flex;
+	flex-direction: row;
+	width: 80%;
 }
 
 #titleInput {
-	width: 70%;
+	width: 80%;
 	background-color: rgb(1, 4, 37);
 	border: 0.15rem solid white;
 	border-radius: 50px;
 	color: white;
 	font-size: 1.5rem;
-	padding: 1.5% 2.5%;
+	padding: 2% 3%;
 }
 
 input[type="radio"] {
@@ -56,25 +56,24 @@ input[type="radio"] {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 18%;
+	width: 22%;
 	aspect-ratio: 1/1.05;
-	margin-right: 5%;
+	margin-right: 5.5%;
 	border: 0.15rem solid white;
-	border-radius: 30px;
+	border-radius: 18%;
 	font-size: 1.2rem;
 	font-weight: 500;
 }
-
 .modeButton:hover, #humanCountButtonGroup .countButton:hover {
 	cursor: pointer;
 }
-
 .modeButton:hover, .countButton:hover,
 input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countButton {
 	background-color: rgb(213, 112, 255);
 	border: 0.15rem solid rgb(213, 112, 255);
 	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
-	transition-duration: 0.15s;
+	transition-property: background-color, border, box-shadow;
+	transition-duration: 0.5s;
 }
 
 .countButtonGroup {
@@ -121,10 +120,44 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 }
 
 #completeButton {
+	width: 15%;
 	position: absolute;
-	padding: 1% 1.5%;
-	/* width: 13%; */
-	aspect-ratio: 4/1;
 	bottom: 9%;
 	right: 6%;
+	padding: 1% 1.5%;
+	aspect-ratio: 4/1;
+}
+
+@media (orientation: portrait) {
+	#roomSettingContainer {
+		height: 80%;
+		width: 100%;
+	}
+	.selectionGroup {
+		flex-direction: column;
+		margin-top: 5% 0;
+	}
+	.selectionLabel {
+		margin: 0 0 4%;
+		width: auto;
+	}
+	.selectionBox {
+		justify-content: center;
+	}
+	.modeButton {
+		margin: 0 2.5%;
+		width: 24%;
+	}
+	#titleInput {
+		padding: 3% 3%;
+	}
+	#completeButton {
+		width: 30%;
+		position: absolute;
+		position: static;
+		bottom: 6%;
+		right: 9%;
+		padding: 1% 1.5%;
+		aspect-ratio: 4/1;
+	}
 }
