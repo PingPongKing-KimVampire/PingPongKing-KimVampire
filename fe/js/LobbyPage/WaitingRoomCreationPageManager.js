@@ -7,10 +7,16 @@ class WaitingRoomCreationPageManager {
 		this.completeButton = document.querySelector('#completeButton');
 
 		this.titleInput = document.querySelector('#titleInput');
+
 		this.modeSelection = document.querySelector('.selectionGroup:nth-of-type(2)');
 		this.modeButtons = [...document.getElementsByName('mode')];
+
 		this.countSelection = document.querySelector('.selectionGroup:last-of-type');
-		this.humanCountButtons = [...document.getElementsByName('humanCount')];
+		this.humanCountButton = document.querySelector('#humanCountButton');
+		this.humanCountButtonText = document.querySelector('#humanCountButton div');
+		this.humanCountArrowImg = document.querySelector('#humanCountButton img');
+		this.humanCountOptionBox = document.querySelector('#humanCountOptionBox');
+		this.humanCountOptionButtons = [...document.getElementsByClassName('humanCountOptionButton')];
 
 		this._addEventListeners();
 	}
@@ -20,31 +26,50 @@ class WaitingRoomCreationPageManager {
 		this.modeButtons.forEach((button) => {
 			button.addEventListener('change', this._checkSelected.bind(this));
 		});
-		this.humanCountButtons.forEach((button) => {
-			button.addEventListener('change', this._checkSelected.bind(this));
-		});
+		this.humanCountButton.addEventListener('click', this._humanCountButtonClicked.bind(this));
+		this.humanCountOptionButtons.forEach((button) => {
+			button.addEventListener('click', this._humanCountOptionButtonClicked.bind(this))
+		})
+	}
+
+	_humanCountButtonClicked() {
+		this.humanCountArrowImg.classList.toggle('selectedArrowImg');
+		this.humanCountOptionBox.classList.toggle('visible');
+		this.humanCountOptionBox.classList.toggle('invisible');
+	}
+
+	_humanCountOptionButtonClicked(event) {
+		this._humanCountButtonClicked();
+		
+		const clickedValue = event.target.value;
+		this.humanCountButton.value = clickedValue;
+		this.humanCountButtonText.innerText = `${clickedValue}명`;
+
+		let count = 2;
+		for (const button of this.humanCountOptionButtons) {
+			if (count === parseInt(clickedValue)) count++;
+			button.innerText = `${count}명`;
+			button.value = count;
+			count++;
+		}
 	}
 
 	_checkSelected() {
 		const isSelectedTitle = this.titleInput.value !== "";
 		const selectedModeButton = this.modeButtons.find((button) => button.checked);
 		const isSelectedMode = selectedModeButton !== undefined;
-		let isSelectedHumanCount = false;
 
 		if (isSelectedMode) {
 			if (selectedModeButton.value === 'vampireVsHuman') {
 				this.countSelection.classList.replace('invisible', 'visible');
 				this.modeSelection.classList.add('selectionGroupBottomMargin');
-				isSelectedHumanCount = this.humanCountButtons.find((button) => button.checked) !== undefined;
 			} else {
 				this.countSelection.classList.replace('visible', 'invisible');
 				this.modeSelection.classList.remove('selectionGroupBottomMargin');
-				isSelectedHumanCount = true;
 			}
 		}
 
-		console.log(isSelectedTitle, isSelectedMode, isSelectedHumanCount);
-		if (isSelectedTitle && isSelectedMode && isSelectedHumanCount) {
+		if (isSelectedTitle && isSelectedMode) {
 			this.completeButtonEnabled = true;
 			this.completeButton.classList.replace('disabledButton', 'activatedButton');
 		} else {
@@ -55,18 +80,16 @@ class WaitingRoomCreationPageManager {
 
 	_getHTML() {
 		return `
-			<div id="container">
-				<button class="exitButton"></button>
-				<div id="roomSettingContainer">
-					<div class="selectionGroup selectionGroupBottomMargin">
-						${this._getTitleSelectionHTML()}
-					</div>
-					<div class="selectionGroup">
-						${this._getModeSelectionHTML()}
-					</div>
-					<div class="selectionGroup invisible">
-						${this._getPlayerCountSelectionHTML()}
-					</div>
+			<button class="exitButton"></button>
+			<div id="roomSettingContainer">
+				<div class="selectionGroup selectionGroupBottomMargin">
+					${this._getTitleSelectionHTML()}
+				</div>
+				<div class="selectionGroup">
+					${this._getModeSelectionHTML()}
+				</div>
+				<div class="selectionGroup invisible">
+					${this._getPlayerCountSelectionHTML()}
 				</div>
 				<button id="completeButton" class="disabledButton">방 생성하기</button>
 			</div>
@@ -98,28 +121,26 @@ class WaitingRoomCreationPageManager {
 
 	_getPlayerCountSelectionHTML() {
 		return `
-			<label class="selectionLabel">인간</label>
+			<label class="selectionLabel">인원</label>
 			<div class="selectionBox">
-				<div class="countButtonGroup" id="humanCountButtonGroup">
-					<input type="radio" name="humanCount" id="human2" , value="2">
-					<label for="human2" class="countButton">2</label>
-					<input type="radio" name="humanCount" id="human3" , value="3">
-					<label for="human3" class="countButton">3</label>
-					<input type="radio" name="humanCount" id="human4" , value="4">
-					<label for="human4" class="countButton">4</label>
-					<input type="radio" name="humanCount" id="human5" , value="5">
-					<label for="human5" class="countButton">5</label>
-					<input type="radio" name="humanCount" id="human6" , value="6">
-					<label for="human6" class="countButton">6</label>
+				<div class="countSelectionBox">
+					<div class="teamText">뱀파이어</div>
+					<button id="vampireCountButton">3명</button>
 				</div>
-				<div class="countText">명</div>
 				<div id="vsText">VS</div>
-				<label class="selectionLabel" id="vampireLabel">뱀파이어</label>
-				<div class="countButtonGroup" id="vampireCounButtonGroup">
-					<input type="radio" name="vampireCountInput" id="vampire1", value="1" checked="checked">
-					<label for="vampire1" class="countButton">2</label>
+				<div class="countSelectionBox">
+					<div class="teamText">인간</div>
+					<button id="humanCountButton" value="3">
+						<div>3명</div>
+						<img src="images/arrowImg.png">
+					</button>
 				</div>
-				<div class="countText">명</div>
+				<ul id="humanCountOptionBox" class="invisible">
+					<li><button class="humanCountOptionButton" value="2">2명</button></li>
+					<li><button class="humanCountOptionButton" value="4">4명</button></li>
+					<li><button class="humanCountOptionButton" value="5">5명</button></li>
+					<li><button class="humanCountOptionButton" value="6">6명</button></li>
+				</ul>
 			</div>
 		`;
 	}
