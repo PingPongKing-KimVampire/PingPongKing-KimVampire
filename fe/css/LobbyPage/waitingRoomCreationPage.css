@@ -186,11 +186,12 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 
 @media (orientation: portrait) {
 	#roomSettingContainer {
-		/* margin-top: 10%; */
 		height: auto;
 	}
 	.selectionGroup {
 		flex-direction: column;
+	}
+	.selectionGroupBottomMargin {
 		margin-bottom: 11%;
 	}
 	.selectionGroup:nth-of-type(1) { /* 제목 선택 그룹 */
@@ -231,20 +232,6 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 		width: 100%;
 		aspect-ratio: 2.2/1;
 	}
-	#humanCountOptionBox.visible {
-		width: 9%;
-		height: 130%;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		margin-left: 1%;
-		margin-top: 12%;
-		padding: 0.3%;
-		background-color: rgb(1, 4, 37);
-		border: 0.1rem solid white;
-		border-radius: 15px;
-		transition-duration: 0.5s;
-	}
 	#vsText {
 		margin: 0 12%;
 	}
@@ -266,6 +253,9 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 35%;
 	}
+	#completeButton {
+		width: 16%;
+	}
 }
 @media (max-width: 1500px) and (orientation: landscape) {
 	.selectionLabel {
@@ -276,6 +266,12 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	}
 	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 30%;
+	}
+	.countSelectionBox {
+		width: 17%;
+	}
+	#completeButton {
+		width: 17%;
 	}
 }
 @media (max-width: 1350px) and (orientation: landscape) {
@@ -288,6 +284,12 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 25%;
 	}
+	.countSelectionBox {
+		width: 19%;
+	}
+	#completeButton {
+		width: 18%;
+	}
 }
 @media (max-width: 1150px) and (orientation: landscape) {
 	.selectionLabel {
@@ -298,5 +300,24 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	}
 	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 20%;
+	}
+	.countSelectionBox {
+		width: 23%;
+	}
+	#completeButton {
+		width: 19%;
+	}
+}
+
+@media (min-width: 600px) and (orientation: portrait) {
+	#roomSettingContainer {
+		margin-bottom: 7%;
+		width: 65%;
+	}
+}
+@media (min-width: 750px) and (orientation: portrait) {
+	#roomSettingContainer {
+		margin-bottom: 10%;
+		width: 55%;
 	}
 }
