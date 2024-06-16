@@ -1,17 +1,23 @@
 import WaitingRoom from "../PingpongPage/WaitingRoom.js";
 
 class LobbyPageManager {
-  constructor(app, clientInfo, onEnterSuccess) {
+  constructor(app, clientInfo, onEnterSuccess, onEnterNewLobby) {
     console.log("Lobby Page!");
     app.innerHTML = this._getHTML();
     this.clientInfo = clientInfo;
     this.onEnterSuccess = onEnterSuccess;
+    this.onEnterNewLobby = onEnterNewLobby;
 
     this._setCreateWaitingRoomButton();
     this._setEnterWaitingRoomButton();
     this._setSearchWaitingRoomListButton();
-
     this.clientInfo.socket.addEventListener("message", this.listener);
+
+    const enterNewLobbyButton = document.querySelector(".enterNewLobbyButton");
+    enterNewLobbyButton.addEventListener("click", () => {
+      this.onEnterNewLobby();
+      this.clientInfo.socket.removeEventListener("message", this.listener);
+    });
   }
 
   _setCreateWaitingRoomButton() {
@@ -150,6 +156,7 @@ class LobbyPageManager {
 			<input type="text" id="roomIdInput">
 			<button class="enterWaitingRoomButton">대기실 입장</button>
 			<button class="getWaitingRoomListButoon">대기실 조회</button>
+      <button class="enterNewLobbyButton">뉴 로비 입장</button>
 		`;
   }
 }

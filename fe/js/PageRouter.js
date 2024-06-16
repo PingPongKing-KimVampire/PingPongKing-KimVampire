@@ -15,6 +15,7 @@ class PageRouter {
       roomId: null,
       isReferee: false,
     };
+    this.gameInfo;
   }
 
   async renderPage(url) {
@@ -39,6 +40,9 @@ class PageRouter {
           this.clientInfo.roomId = roomId;
           this.gameInfo = gameInfo; // TODO : 개선하기
           this.renderPage("game");
+        },
+        () => {
+          this.renderPage("newLobby");
         }
       );
     } else if (url === "game") {
@@ -54,8 +58,22 @@ class PageRouter {
       let waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(
         this.app
       );
-    } else if (url === "newLobbyPageManager") {
-      new NewLobbyPageManager(this.app);
+    } else if (url === "newLobby") {
+      const lobbyPageManager = new NewLobbyPageManager(
+        this.app,
+        this.clientInfo,
+        () => {
+          this.renderPage("waitingRoomCreation");
+        },
+        (roomId, gameInfo) => {
+          console.log(roomId);
+          console.log(gameInfo);
+          this.clientInfo.roomId = roomId;
+          this.gameInfo = gameInfo;
+          this.renderPage("game");
+        }
+      );
+      await lobbyPageManager.initPage();
     }
   }
 }

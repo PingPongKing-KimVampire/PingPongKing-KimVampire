@@ -1,50 +1,91 @@
 class LobbyPageManager {
-  constructor(app) {
-    console.log("Create Lobby Page!");
+  constructor(
+    app,
+    clientInfo,
+    onClickWatingRoomCreationButton,
+    onCLickWaitingRoomButton
+  ) {
+    console.log("Lobby Page!");
     app.innerHTML = this._getHTML();
+    this.clientInfo = {
+      socket: null,
+      id: null,
+      nickname: null,
+      roomId: null,
+      isReferee: false,
+    };
+    this.clientInfo = clientInfo;
+    this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
+    this.onCLickWaitingRoomButton = onCLickWaitingRoomButton;
 
-    // 테스트용 대기실
-    this._appendWaitingRoom();
+    this._setCreateWaitingRoomButton();
+    window.addEventListener("resize", this._adjustButtonSize);
+    window.addEventListener("resize", this._autoSetScollTrackColor);
+  }
+
+  async initPage() {
+    const waitingRoomList = await this._getWaitingRoomList();
+    this._renderWaitingRoom(waitingRoomList);
 
     this._autoSetScollTrackColor();
     this._adjustButtonSize();
-
-    window.addEventListener("resize", this._adjustButtonSize);
-    window.addEventListener("resize", this._autoSetScollTrackColor);
-    this._manageExitRoom();
   }
 
-  _manageExitRoom() {
-    const exitButton = document.querySelector('.exitButton');
-    const exitYesButton = document.querySelector('.exitModal .activatedButton:nth-of-type(1)');
-    const exitNoButton = document.querySelector('.exitModal .activatedButton:nth-of-type(2)');
-    const exitModal = document.querySelector('.exitModal');
-    exitButton.addEventListener('click', this._exitButtonClicked.bind(this, exitModal));
-    exitYesButton.addEventListener('click', this._exitYesButtonClicked.bind(this));
-    exitNoButton.addEventListener('click', this._exitNoButtonClicked.bind(this, exitModal));
-}
-_exitButtonClicked(exitModal) {
-    exitModal.style.display = 'flex';
-}
-_exitYesButtonClicked() {
-    const sendGiveUpMsg = () => {
-        const giveUpMessage = {
-            sender: "player",
-            receiver: ["referee", "player"],
-            event: "giveUpGame",
-            content: {
-                roomId: this.clientInfo.roomId,
-                clientId: this.clientInfo.id,
-            }
+  _setCreateWaitingRoomButton() {
+    const createWaitingRoomButton = document.querySelector(
+      ".createWaitingRoomButton"
+    );
+    createWaitingRoomButton.addEventListener("click", () => {
+      this.onClickWatingRoomCreationButton();
+    });
+  }
+
+  _renderWaitingRoom(waitingRoomList) {
+    waitingRoomList.forEach((waitingRoom) => {
+      const { currentPlayerCount, mode, totalPlayerCount, roomId } =
+        waitingRoom;
+      const waitingRoomListContainer = document.querySelector(
+        ".waitingRoomListContainer"
+      );
+      //방 아이디 추가하기
+      waitingRoomListContainer.appendChild(
+        this._getWaitingRoomelement(
+          roomId,
+          "임시모드",
+          mode,
+          "대기실 제목 추가해야함",
+          currentPlayerCount,
+          totalPlayerCount
+        )
+      );
+    });
+  }
+
+  async _getWaitingRoomList() {
+    const getWaitingRoomLisMessage = {
+      sender: "client",
+      receiver: ["server"],
+      event: "getWaitingRoomList",
+      content: {},
+    };
+    this.clientInfo.socket.send(JSON.stringify(getWaitingRoomLisMessage));
+    const waitingRoomList = await this._getWaitingRoomListMsg();
+    return waitingRoomList;
+  }
+
+  _getWaitingRoomListMsg() {
+    return new Promise((resolve, reject) => {
+      const listener = (messageEvent) => {
+        const message = JSON.parse(messageEvent.data);
+        const { sender, receiver, event, content } = message;
+        if (event === "getWaitingRoomResponse") {
+          this.clientInfo.socket.removeEventListener("message", listener);
+          resolve(content.gameInfoList);
         }
-        this.clientInfo.socket.send(JSON.stringify(giveUpMessage));
-    }
-    sendGiveUpMsg();
-    this._exitPingpongPage();
-}
-_exitNoButtonClicked(exitModal) {
-    exitModal.style.display = 'none';
-}
+      };
+      this.clientInfo.socket.addEventListener("message", listener);
+    });
+  }
 
   _getHTML() {
     return `
@@ -54,12 +95,11 @@ _exitNoButtonClicked(exitModal) {
         ${this._getWaitingRoomListContainerHtml()}
     </div>
   </div>
-  ${this._getExitModalHTML()}
   `;
   }
 
   _getWaitingRoomCreationButtonHtml() {
-    return `<button class="createWatingRoombButton">탁구장 생성하기</button>`;
+    return `<button class="createWaitingRoomButton">탁구장 생성하기</button>`;
   }
 
   _getWaitingRoomListContainerHtml() {
@@ -72,7 +112,7 @@ _exitNoButtonClicked(exitModal) {
   }
 
   _adjustButtonSize() {
-    const button = document.querySelector(".createWatingRoombButton");
+    const button = document.querySelector(".createWaitingRoomButton");
     const viewWidth = window.innerWidth;
     const viewHeight = window.innerHeight;
 
@@ -101,65 +141,8 @@ _exitNoButtonClicked(exitModal) {
     }
   }
 
-  _getExitModalHTML() {
-    return `
-        <button class="exitButton"></button>
-        <div class="exitModal">
-            <div class="questionBox">
-                <div class="question">상대에게 승리를 선사하시겠습니까?</div>
-                <div class="buttonGroup">
-                    <button class="activatedButton">네</button>
-                    <button class="activatedButton">아니오</button>
-                </div>
-            </div>
-        </div>
-    `;
-  }
-
-  _appendWaitingRoom() {
-    let waitingRoomListContainer = document.querySelector(
-      ".waitingRoomListContainer"
-    );
-    waitingRoomListContainer.appendChild(
-      this._getWaitingRoomelement("뱀파이어", "인간", "개쩌는 탁구장", 1, 6)
-    );
-    waitingRoomListContainer.appendChild(
-      this._getWaitingRoomelement("뱀파이어", "인간", "개쩌는 탁구장", 2, 6)
-    );
-    waitingRoomListContainer.appendChild(
-      this._getWaitingRoomelement("뱀파이어", "인간", "개쩌는 탁구장", 3, 6)
-    );
-    waitingRoomListContainer.appendChild(
-      this._getWaitingRoomelement("인간", "인간", "겜제목", 4, 6)
-    );
-    waitingRoomListContainer.appendChild(
-      this._getWaitingRoomelement("인간", "뱀파이어", "겜제목", 5, 6)
-    );
-    waitingRoomListContainer.appendChild(
-      this._getWaitingRoomelement(
-        "인간",
-        "인간",
-        "인간모드입니다 초보만 드루와",
-        5,
-        6
-      )
-    );
-    waitingRoomListContainer.appendChild(
-      this._getWaitingRoomelement(
-        "인간",
-        "인간",
-        `      짱짱긴 제목입니다 짱짱길어서 진짜 짱짱김짱짱긴
-      제목입니다짱짱길어서 진짜 짱짱김짱짱긴 제목입니다 짱짱길어서
-      진짜짱짱김짱짱긴 제목입니다 짱짱길어서 진짜 짱짱김짱짱긴
-      제목입니다짱짱길어서 진짜 짱짱김짱짱긴 제목입니다 짱짱길어서
-      진짜`,
-        5,
-        6
-      )
-    );
-  }
-
   _getWaitingRoomelement(
+    roomId,
     team1,
     team2,
     gameTitle,
@@ -203,7 +186,43 @@ _exitNoButtonClicked(exitModal) {
     waitingRoomContainer.appendChild(matchName);
     waitingRoomContainer.appendChild(gameName);
     waitingRoomContainer.appendChild(matchPlayerCount);
+
+    waitingRoomContainer.addEventListener("click", async () => {
+      this._enterWaitingRoom(roomId);
+      await new Promise((resolve, reject) => {
+        const listener = (messageEvent) => {
+          const message = JSON.parse(messageEvent.data);
+          const { sender, receiver, event, content } = message;
+          if (event === "enterWaitingRoomResponse") {
+            this.clientInfo.socket.removeEventListener("message", listener);
+            resolve();
+          }
+        };
+        this.clientInfo.socket.addEventListener("message", listener);
+      });
+
+      //하드코딩되어있음
+      const gameInfo = {
+        mode: "normal",
+        totalPlayerCount,
+      };
+      this.onCLickWaitingRoomButton(roomId, gameInfo);
+    });
     return waitingRoomContainer;
+  }
+
+  _enterWaitingRoom(roomId) {
+    const enterMessage = {
+      sender: "client",
+      receiver: ["waitingRoom"],
+      event: "enterWaitingRoom",
+      content: {
+        roomId,
+        clientId: this.clientInfo.id,
+        clientNickname: this.clientInfo.nickname,
+      },
+    };
+    this.clientInfo.socket.send(JSON.stringify(enterMessage));
   }
 }
 

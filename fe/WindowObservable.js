@@ -41,7 +41,6 @@ class WindowObserverble extends Observerble {
   subscribeOrientationChange(observer) {
     this._subscribe("orientationChange", observer);
   }
-
   unsubscribeResize(observer) {
     this._unsubscibe("resize", observer);
   }
