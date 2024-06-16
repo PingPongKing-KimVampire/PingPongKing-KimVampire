@@ -89,7 +89,6 @@ class WaitingRoomCreationPageManager {
 		}
 	}
 
-<<<<<<< HEAD
 	async _createAndEnterRoom() {
 		const title = this.titleInput.value;
 		// const mode = this.modeButtons.find((button) => button.checked).value;
