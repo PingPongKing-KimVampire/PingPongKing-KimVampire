@@ -1,35 +1,73 @@
+import WaitingRoom from "../PingpongPage/WaitingRoom.js";
+
 class WaitingRoomCreationPageManager {
-	constructor(app) {
+	constructor(app, clientInfo, onEnterSuccess) {
 		console.log("Create Waiting Room Page!");
 		app.innerHTML = this._getHTML();
+		this.clientInfo = clientInfo;
+		this.onEnterSuccess = onEnterSuccess;
 
-		this.completeButtonEnabled = false;
-		this.completeButton = document.querySelector('#completeButton');
-
+		// HTML 요소
 		this.titleInput = document.querySelector('#titleInput');
-
 		this.modeSelection = document.querySelector('.selectionGroup:nth-of-type(2)');
 		this.modeButtons = [...document.getElementsByName('mode')];
-
 		this.countSelection = document.querySelector('.selectionGroup:last-of-type');
 		this.humanCountButton = document.querySelector('#humanCountButton');
 		this.humanCountButtonText = document.querySelector('#humanCountButton div');
 		this.humanCountArrowImg = document.querySelector('#humanCountButton img');
 		this.humanCountOptionBox = document.querySelector('#humanCountOptionBox');
 		this.humanCountOptionButtons = [...document.getElementsByClassName('humanCountOptionButton')];
+		this.completeButton = document.querySelector('#completeButton');
+		this.completeButton.disabled = true;
 
-		this._addEventListeners();
+		this._setTitleModeSelection();
+		this._setHumanCountSelection();
+		this._setCompleteButtonSelection();
 	}
-	
-	_addEventListeners() {
-		this.titleInput.addEventListener('input', this._checkSelected.bind(this));
+
+	_setTitleModeSelection() {
+		// 방 제목 or 모드 입력이 변경될 때마다 _checkSelectedAll 호출
+		this.titleInput.addEventListener('input', this._checkSelectedAll.bind(this));
 		this.modeButtons.forEach((button) => {
-			button.addEventListener('change', this._checkSelected.bind(this));
+			button.addEventListener('change', this._checkSelectedAll.bind(this));
 		});
+	}
+
+	_setHumanCountSelection() {
+		// humanCount 버튼 or humanCountOption 버튼 클릭 시 반응
 		this.humanCountButton.addEventListener('click', this._humanCountButtonClicked.bind(this));
 		this.humanCountOptionButtons.forEach((button) => {
 			button.addEventListener('click', this._humanCountOptionButtonClicked.bind(this))
 		})
+	}
+
+	_setCompleteButtonSelection() {
+		// complete 버튼 클릭 시 대기실 생성 메시지 전송
+		this.completeButton.addEventListener('click', this._sendRoomCreateMsg.bind(this));
+		// this.clientInfo.socket.addEventListener("message", this.listener);
+	}
+
+	_checkSelectedAll() {
+		// 모두 선택되었는지 확인하고 complete 버튼 활성화 or 비활성화
+		const isSelectedTitle = this.titleInput.value !== "";
+		const selectedModeButton = this.modeButtons.find((button) => button.checked);
+		const isSelectedMode = selectedModeButton !== undefined;
+		if (isSelectedMode) {
+			if (selectedModeButton.value === 'vampireVsHuman') {
+				this.countSelection.classList.replace('invisible', 'visible');
+				this.modeSelection.classList.add('selectionGroupBottomMargin');
+			} else {
+				this.countSelection.classList.replace('visible', 'invisible');
+				this.modeSelection.classList.remove('selectionGroupBottomMargin');
+			}
+		}
+		if (isSelectedTitle && isSelectedMode) {
+			this.completeButton.disabled = false;
+			this.completeButton.classList.replace('disabledButton', 'activatedButton');
+		} else {
+			this.completeButton.disabled = true;
+			this.completeButton.classList.replace('activatedButton', 'disabledButton');
+		}
 	}
 
 	_humanCountButtonClicked() {
@@ -40,11 +78,9 @@ class WaitingRoomCreationPageManager {
 
 	_humanCountOptionButtonClicked(event) {
 		this._humanCountButtonClicked();
-		
 		const clickedValue = event.target.value;
 		this.humanCountButton.value = clickedValue;
 		this.humanCountButtonText.innerText = `${clickedValue}명`;
-
 		let count = 2;
 		for (const button of this.humanCountOptionButtons) {
 			if (count === parseInt(clickedValue)) count++;
@@ -54,28 +90,57 @@ class WaitingRoomCreationPageManager {
 		}
 	}
 
-	_checkSelected() {
-		const isSelectedTitle = this.titleInput.value !== "";
-		const selectedModeButton = this.modeButtons.find((button) => button.checked);
-		const isSelectedMode = selectedModeButton !== undefined;
+	_sendRoomCreateMsg() {
+		const roomTitle = this.titleInput.value;
+		const mode = this.modeButtons.find((button) => button.checked).value;
+		const humanCount = this.humanCountButton.value;
+		const totalPlayerCount = mode === 'vampireVsHuman' ? humanCount + 1 : 2;
 
-		if (isSelectedMode) {
-			if (selectedModeButton.value === 'vampireVsHuman') {
-				this.countSelection.classList.replace('invisible', 'visible');
-				this.modeSelection.classList.add('selectionGroupBottomMargin');
-			} else {
-				this.countSelection.classList.replace('visible', 'invisible');
-				this.modeSelection.classList.remove('selectionGroupBottomMargin');
+		const createRoomMessage = {
+			sender: "client",
+			receiver: ["server"],
+			event: "createWaitingRoom",
+			content: {
+				clientId: `${this.clientInfo.id}`,
+				waitingRoomInfo: {
+					title: roomTitle,
+					mode: mode,
+					totalPlayerCount: totalPlayerCount,
+				}
 			}
 		}
+		// this.clientInfo.socket.send(JSON.stringify(createRoomMessage));
+	}
 
-		if (isSelectedTitle && isSelectedMode) {
-			this.completeButtonEnabled = true;
-			this.completeButton.classList.replace('disabledButton', 'activatedButton');
-		} else {
-			this.completeButtonEnabled = false;
-			this.completeButton.classList.replace('activatedButton', 'disabledButton');
+	// TODO : appointWaitingRoom 제외하고는 로비 페이지에서도 동일한 코드가 있을 것 같은데, 재사용 어렵나?
+	listener = (messageEvent) => {
+		const message = JSON.parse(messageEvent.data);
+		const { sender, receiver, event, content } = message;
+
+		if (receiver.includes('client') && event === 'appointWaitingRoom') {
+			// 대기실 임명 응답
+			this.clientInfo.roomId = content.roomId;
+			const gameInfo = content.gameInfo;
+			new WaitingRoom(this.clientInfo, gameInfo);
+			this._sendEnterWaitingRoomMsg(this.clientInfo.roomId);
+		} else if (event === "enterWaitingRoomResponse") {
+			// 대기실 입장 응답
+			this.onEnterSuccess(content.roomId, content.gameInfo);
+			// this.clientInfo.socket.removeEventListener('message', this.listener);
 		}
+	}
+	_sendEnterWaitingRoomMsg(roomId) {
+		const enterRoomMessage = {
+			sender: "client",
+			receiver: ["waitingRoom"],
+			event: "enterWaitingRoom",
+			content: {
+			  roomId,
+			  clientId: this.clientInfo.id,
+			  clientNickname: this.clientInfo.nickname,
+			},
+		}
+		// this.clientInfo.socket.send(JSON.stringify(enterRoomMessage));
 	}
 
 	_getHTML() {
@@ -144,6 +209,34 @@ class WaitingRoomCreationPageManager {
 			</div>
 		`;
 	}
+
+	// _getPlayerCountSelectionHTML() {
+	// 	return `
+	// 		<label class="selectionLabel">인원</label>
+	// 		<div class="selectionBox">
+	// 			<div class="countSelectionBox">
+	// 				<div class="teamText">뱀파이어</div>
+	// 				<button id="vampireCountButton">3명</button>
+	// 			</div>
+	// 			<div id="vsText">VS</div>
+	// 			<div id="humanCountSelectionBox">
+	// 				<div class="countSelectionBox">
+	// 					<div class="teamText">인간</div>
+	// 					<button id="humanCountButton" value="3">
+	// 						<div>3명</div>
+	// 						<img src="images/arrowImg.png">
+	// 					</button>
+	// 				</div>
+	// 				<ul id="humanCountOptionBox" class="invisible">
+	// 					<li><button class="humanCountOptionButton" value="2">2명</button></li>
+	// 					<li><button class="humanCountOptionButton" value="4">4명</button></li>
+	// 					<li><button class="humanCountOptionButton" value="5">5명</button></li>
+	// 					<li><button class="humanCountOptionButton" value="6">6명</button></li>
+	// 				</ul>
+	// 			</div>
+	// 		</div>
+	// 	`;
+	// }
 
 }
 
