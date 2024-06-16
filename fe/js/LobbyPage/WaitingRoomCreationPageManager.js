@@ -9,9 +9,9 @@ class WaitingRoomCreationPageManager {
 
 		// HTML 요소
 		this.titleInput = document.querySelector('#titleInput');
-		this.modeSelection = document.querySelector('.selectionGroup:nth-of-type(2)');
+		this.modeSelection = document.querySelector('.selectionContainer:nth-of-type(2)');
 		this.modeButtons = [...document.getElementsByName('mode')];
-		this.countSelection = document.querySelector('.selectionGroup:last-of-type');
+		this.countSelection = document.querySelector('.selectionContainer:last-of-type');
 		this.humanCountButton = document.querySelector('#humanCountButton');
 		this.humanCountButtonText = document.querySelector('#humanCountButton div');
 		this.humanCountArrowImg = document.querySelector('#humanCountButton img');
@@ -43,7 +43,7 @@ class WaitingRoomCreationPageManager {
 
 	_setCompleteButtonSelection() {
 		// complete 버튼 클릭 시 대기실 생성 메시지 전송
-		this.completeButton.addEventListener('click', this._sendRoomCreateMsg.bind(this));
+		this.completeButton.addEventListener('click', this._createAndEnterRoom.bind(this));
 		// this.clientInfo.socket.addEventListener("message", this.listener);
 	}
 
@@ -90,12 +90,24 @@ class WaitingRoomCreationPageManager {
 		}
 	}
 
-	_sendRoomCreateMsg() {
-		const roomTitle = this.titleInput.value;
-		const mode = this.modeButtons.find((button) => button.checked).value;
+	async _createAndEnterRoom() {
+		const title = this.titleInput.value;
+		// const mode = this.modeButtons.find((button) => button.checked).value;
+		const mode = 'vampire'; // 임시 모드 하드 코딩
 		const humanCount = this.humanCountButton.value;
 		const totalPlayerCount = mode === 'vampireVsHuman' ? humanCount + 1 : 2;
 
+		this._sendCreateRoomMsg(title, mode, totalPlayerCount);
+		console.log(1);
+		await this._handleCreateRoomResponse(title, mode, totalPlayerCount);
+		console.log(2);
+		this._sendEnterRoomMsg();
+		console.log(3);
+		await this._handleEnterRoomResponse();
+		console.log(4);
+	}
+
+	_sendCreateRoomMsg(title, mode, totalPlayerCount) {
 		const createRoomMessage = {
 			sender: "client",
 			receiver: ["server"],
@@ -103,57 +115,73 @@ class WaitingRoomCreationPageManager {
 			content: {
 				clientId: `${this.clientInfo.id}`,
 				waitingRoomInfo: {
-					title: roomTitle,
-					mode: mode,
-					totalPlayerCount: totalPlayerCount,
+					title,
+					mode,
+					totalPlayerCount,
 				}
 			}
 		}
-		// this.clientInfo.socket.send(JSON.stringify(createRoomMessage));
+		this.clientInfo.socket.send(JSON.stringify(createRoomMessage));
 	}
-
-	// TODO : appointWaitingRoom 제외하고는 로비 페이지에서도 동일한 코드가 있을 것 같은데, 재사용 어렵나?
-	listener = (messageEvent) => {
-		const message = JSON.parse(messageEvent.data);
-		const { sender, receiver, event, content } = message;
-
-		if (receiver.includes('client') && event === 'appointWaitingRoom') {
-			// 대기실 임명 응답
-			this.clientInfo.roomId = content.roomId;
-			const gameInfo = content.gameInfo;
-			new WaitingRoom(this.clientInfo, gameInfo);
-			this._sendEnterWaitingRoomMsg(this.clientInfo.roomId);
-		} else if (event === "enterWaitingRoomResponse") {
-			// 대기실 입장 응답
-			this.onEnterSuccess(content.roomId, content.gameInfo);
-			// this.clientInfo.socket.removeEventListener('message', this.listener);
-		}
+	_handleCreateRoomResponse(title, mode, totalPlayerCount) {
+		return new Promise((resolve, reject) => {
+			const listener = (messageEvent) => {
+				const message = JSON.parse(messageEvent.data);
+				const { sender, receiver, event, content } = message;
+				if (receiver.includes('client') && event === 'appointWaitingRoom') {
+					this.clientInfo.socket.removeEventListener('message', listener);
+					this.clientInfo.roomId = content.roomId;
+					const gameInfo = {
+						title,
+						mode,
+						totalPlayerCount,
+					}
+					new WaitingRoom(this.clientInfo, gameInfo);
+					resolve();
+				}
+			}
+			this.clientInfo.socket.addEventListener('message', listener);
+		})
 	}
-	_sendEnterWaitingRoomMsg(roomId) {
+	_sendEnterRoomMsg() {
 		const enterRoomMessage = {
 			sender: "client",
 			receiver: ["waitingRoom"],
 			event: "enterWaitingRoom",
 			content: {
-			  roomId,
-			  clientId: this.clientInfo.id,
-			  clientNickname: this.clientInfo.nickname,
+				roomId: this.clientInfo.roomId,
+				clientId: this.clientInfo.id,
+				clientNickname: this.clientInfo.nickname,
 			},
 		}
-		// this.clientInfo.socket.send(JSON.stringify(enterRoomMessage));
+		this.clientInfo.socket.send(JSON.stringify(enterRoomMessage));
+	}
+	_handleEnterRoomResponse() {
+		return new Promise((resolve, reject) => {
+			const listener = (messageEvent) => {
+				const message = JSON.parse(messageEvent.data);
+				const { sender, receiver, event, content } = message;
+				if (receiver.includes('client') && event === 'enterWaitingRoomResponse') {
+					this.clientInfo.socket.removeEventListener('message', listener);
+					this.onEnterSuccess(content.roomId, content.gameInfo);
+					resolve();
+				}
+			}
+			this.clientInfo.socket.addEventListener('message', listener);
+		})
 	}
 
 	_getHTML() {
 		return `
 			<button class="exitButton"></button>
 			<div id="roomSettingContainer">
-				<div class="selectionGroup selectionGroupBottomMargin">
+				<div class="selectionContainer selectionGroupBottomMargin">
 					${this._getTitleSelectionHTML()}
 				</div>
-				<div class="selectionGroup">
+				<div class="selectionContainer">
 					${this._getModeSelectionHTML()}
 				</div>
-				<div class="selectionGroup invisible">
+				<div class="selectionContainer invisible">
 					${this._getPlayerCountSelectionHTML()}
 				</div>
 				<button id="completeButton" class="disabledButton">방 생성하기</button>
@@ -184,59 +212,62 @@ class WaitingRoomCreationPageManager {
 		`;
 	}
 
-	_getPlayerCountSelectionHTML() {
-		return `
-			<label class="selectionLabel">인원</label>
-			<div class="selectionBox">
-				<div class="countSelectionBox">
-					<div class="teamText">뱀파이어</div>
-					<button id="vampireCountButton">3명</button>
-				</div>
-				<div id="vsText">VS</div>
-				<div class="countSelectionBox">
-					<div class="teamText">인간</div>
-					<button id="humanCountButton" value="3">
-						<div>3명</div>
-						<img src="images/arrowImg.png">
-					</button>
-				</div>
-				<ul id="humanCountOptionBox" class="invisible">
-					<li><button class="humanCountOptionButton" value="2">2명</button></li>
-					<li><button class="humanCountOptionButton" value="4">4명</button></li>
-					<li><button class="humanCountOptionButton" value="5">5명</button></li>
-					<li><button class="humanCountOptionButton" value="6">6명</button></li>
-				</ul>
-			</div>
-		`;
-	}
-
 	// _getPlayerCountSelectionHTML() {
 	// 	return `
 	// 		<label class="selectionLabel">인원</label>
 	// 		<div class="selectionBox">
-	// 			<div class="countSelectionBox">
+	// 			<div class="countBox">
 	// 				<div class="teamText">뱀파이어</div>
 	// 				<button id="vampireCountButton">3명</button>
 	// 			</div>
 	// 			<div id="vsText">VS</div>
-	// 			<div id="humanCountSelectionBox">
-	// 				<div class="countSelectionBox">
-	// 					<div class="teamText">인간</div>
-	// 					<button id="humanCountButton" value="3">
-	// 						<div>3명</div>
-	// 						<img src="images/arrowImg.png">
-	// 					</button>
-	// 				</div>
-	// 				<ul id="humanCountOptionBox" class="invisible">
-	// 					<li><button class="humanCountOptionButton" value="2">2명</button></li>
-	// 					<li><button class="humanCountOptionButton" value="4">4명</button></li>
-	// 					<li><button class="humanCountOptionButton" value="5">5명</button></li>
-	// 					<li><button class="humanCountOptionButton" value="6">6명</button></li>
-	// 				</ul>
+	// 			<div class="countBox">
+	// 				<div class="teamText">인간</div>
+	// 				<button id="humanCountButton" value="3">
+	// 					<div>3명</div>
+	// 					<img src="images/arrowImg.png">
+	// 				</button>
 	// 			</div>
+	// 			<ul id="humanCountOptionBox" class="invisible">
+	// 				<li><button class="humanCountOptionButton" value="2">2명</button></li>
+	// 				<li><button class="humanCountOptionButton" value="4">4명</button></li>
+	// 				<li><button class="humanCountOptionButton" value="5">5명</button></li>
+	// 				<li><button class="humanCountOptionButton" value="6">6명</button></li>
+	// 			</ul>
 	// 		</div>
 	// 	`;
 	// }
+
+	_getPlayerCountSelectionHTML() {
+		return `
+			<label class="selectionLabel">인원</label>
+			<div class="selectionBox">
+				<div class="countBox" id="vampireCountBox">
+					<div class="teamText">뱀파이어</div>
+					<button id="vampireCountButton">3명</button>
+				</div>
+				<div id="vsText">VS</div>
+				<div id="humanCountSelectionBox">
+					<div class="countBox" id="humanCountBox">
+						<div class="teamText">인간</div>
+						<button id="humanCountButton" value="3">
+							<div>3명</div>
+							<img src="images/arrowImg.png">
+						</button>
+					</div>
+					<div class="countBox" id="humanCountBox">
+						<div class="teamText"></div>
+						<ul id="humanCountOptionBox" class="invisible">
+							<li><button class="humanCountOptionButton" value="2">2명</button></li>
+							<li><button class="humanCountOptionButton" value="4">4명</button></li>
+							<li><button class="humanCountOptionButton" value="5">5명</button></li>
+							<li><button class="humanCountOptionButton" value="6">6명</button></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		`;
+	}
 
 }
 

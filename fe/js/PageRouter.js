@@ -56,7 +56,13 @@ class PageRouter {
       );
     } else if (url === "waitingRoomCreation") {
       let waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(
-        this.app
+        this.app,
+        this.clientInfo,
+        (roomId, gameInfo) => {
+          this.clientInfo.roomId = roomId;
+          this.gameInfo = gameInfo;
+          this.renderPage("game");
+        }
       );
     } else if (url === "newLobby") {
       const lobbyPageManager = new NewLobbyPageManager(
