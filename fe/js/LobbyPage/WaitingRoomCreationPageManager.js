@@ -44,7 +44,6 @@ class WaitingRoomCreationPageManager {
 	_setCompleteButtonSelection() {
 		// complete 버튼 클릭 시 대기실 생성 메시지 전송
 		this.completeButton.addEventListener('click', this._createAndEnterRoom.bind(this));
-		// this.clientInfo.socket.addEventListener("message", this.listener);
 	}
 
 	_checkSelectedAll() {
@@ -90,6 +89,7 @@ class WaitingRoomCreationPageManager {
 		}
 	}
 
+<<<<<<< HEAD
 	async _createAndEnterRoom() {
 		const title = this.titleInput.value;
 		// const mode = this.modeButtons.find((button) => button.checked).value;
@@ -169,6 +169,19 @@ class WaitingRoomCreationPageManager {
 			}
 			this.clientInfo.socket.addEventListener('message', listener);
 		})
+	}
+	_sendEnterWaitingRoomMsg(roomId) {
+		const enterRoomMessage = {
+			sender: "client",
+			receiver: ["waitingRoom"],
+			event: "enterWaitingRoom",
+			content: {
+			  roomId,
+			  clientId: this.clientInfo.id,
+			  clientNickname: this.clientInfo.nickname,
+			},
+		}
+		// this.clientInfo.socket.send(JSON.stringify(enterRoomMessage));
 	}
 
 	_getHTML() {
@@ -268,6 +281,34 @@ class WaitingRoomCreationPageManager {
 			</div>
 		`;
 	}
+
+	// _getPlayerCountSelectionHTML() {
+	// 	return `
+	// 		<label class="selectionLabel">인원</label>
+	// 		<div class="selectionBox">
+	// 			<div class="countSelectionBox">
+	// 				<div class="teamText">뱀파이어</div>
+	// 				<button id="vampireCountButton">3명</button>
+	// 			</div>
+	// 			<div id="vsText">VS</div>
+	// 			<div id="humanCountSelectionBox">
+	// 				<div class="countSelectionBox">
+	// 					<div class="teamText">인간</div>
+	// 					<button id="humanCountButton" value="3">
+	// 						<div>3명</div>
+	// 						<img src="images/arrowImg.png">
+	// 					</button>
+	// 				</div>
+	// 				<ul id="humanCountOptionBox" class="invisible">
+	// 					<li><button class="humanCountOptionButton" value="2">2명</button></li>
+	// 					<li><button class="humanCountOptionButton" value="4">4명</button></li>
+	// 					<li><button class="humanCountOptionButton" value="5">5명</button></li>
+	// 					<li><button class="humanCountOptionButton" value="6">6명</button></li>
+	// 				</ul>
+	// 			</div>
+	// 		</div>
+	// 	`;
+	// }
 
 }
 
