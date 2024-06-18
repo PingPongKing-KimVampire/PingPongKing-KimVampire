@@ -27,7 +27,7 @@ class StateManager:
         await discard_group(consumer, 'lobby')
 
     ### Room
-    async def _create_room(self, consumer, clientId, content):
+    async def _create_room(self, content):
         roomId = str(uuid.uuid4())
         while roomId in self.rooms:
             roomId = str(uuid.uuid4())
