@@ -8,7 +8,7 @@ stateManager = StateManager()
 class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.client_id = None
-        self.room_id = self.scope['url_route']['kwargs']['self.room_id']
+        self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.state = stateManager.rooms[self.room_id]['state']
         await self.accept()
         # url을 수동으로 입력하면 접근이 가능한건가?
