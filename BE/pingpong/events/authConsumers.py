@@ -36,7 +36,7 @@ class AuthConsumer(AsyncWebsocketConsumer):
 
     async def init_client(self, client_id, client_nickname):
         if client_id in stateManager.clients:
-            self.close()
+            await self.close()
         
         self.is_init = True
         self.client_id = client_id
@@ -48,4 +48,5 @@ class AuthConsumer(AsyncWebsocketConsumer):
                 'message': 'OK'
             }
         }
-        await self.send(data)
+        # Ensure the data is sent as a JSON encoded string
+        await self.send(text_data=json.dumps(data))

@@ -28,8 +28,8 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         content = message.get('content')
 
         if not self.is_init:
-            if event == 'initClient':
-                await self.init_client(content['clientId'], content['clientNickname'])
+            if event == 'enterLobby':
+                await self.enter_lobby()
             else:
                 await self.close()
             return
@@ -64,6 +64,15 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
         Printer.log(f"Client {self.client_id} initialized with nickname {self.nickname}", "cyan")
 
+    async def enter_lobby(self):
+        data = {
+            'event': 'enterLobbyResponse',
+            'content': {
+                'message': 'OK'
+            }
+        }
+        self.send(json.dumps(data))
+
     async def create_waiting_room(self, content):
         room_id = stateManager._create_room(self.client_id, content['waitingRoomInfo'])
         await self._send(event='createWaitingRoomResponse', 
@@ -79,7 +88,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
                          content={'waitingRoomList': room_list})
 
     async def _send(self, event, content):
-        await self.send(json.dumps({
+        await self.send(json.dumps(text_data={
             'event': event,
             'content': content
         }))

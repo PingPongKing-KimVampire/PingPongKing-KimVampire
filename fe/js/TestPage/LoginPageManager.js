@@ -1,4 +1,4 @@
-import SERVER_ADDRESS from "./../PageRouter.js";
+import { SERVER_ADDRESS } from "./../PageRouter.js";
 
 class LoginPageManager {
   constructor(app, onLoginSuccess) {
@@ -16,7 +16,7 @@ class LoginPageManager {
       this.id = parseInt(document.querySelector("#id").value);
       if (isNaN(parseInt(this.id))) return;
       this.nickname = document.querySelector("#nickname").value;
-      this.socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws`);
+      this.socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`);
       await new Promise((resolve) => {
         this.socket.addEventListener("open", () => {
           resolve();
@@ -43,7 +43,7 @@ class LoginPageManager {
         });
       });
 
-      this.onLoginSuccess(this.socket, thid.id, this.nickname);
+      this.onLoginSuccess(this.socket, this.id, this.nickname);
     });
   }
 

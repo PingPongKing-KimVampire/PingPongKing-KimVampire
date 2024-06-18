@@ -34,22 +34,22 @@ class PageRouter {
     if (url === "login") {
       const loginPageManager = new LoginPageManager(
         this.app,
-        this._onLoginSuccess
+        this._onLoginSuccess.bind(this)
       );
       await loginPageManager.initPage();
     } else if (url === "lobby") {
       const lobbyPageManager = new NewLobbyPageManager(
         this.app,
         this.clientInfo,
-        this._onClickWatingRoomCreationButton,
-        this._onEnterWaitingRoom
+        this._onClickWatingRoomCreationButton.bind(this),
+        this._onEnterWaitingRoom.bind(this)
       );
       await lobbyPageManager.initPage();
     } else if (url === "waitingRoomCreation") {
       const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(
         this.app,
         this.clientInfo,
-        this._onEnterWaitingRoom
+        this._onEnterWaitingRoom.bind(this)
       );
     } else if (url === "game") {
       const pingpongPageManager = new PingpongPageManager(
@@ -64,6 +64,7 @@ class PageRouter {
   }
 
   _onLoginSuccess(socket, id, nickname) {
+    console.log(this);
     this.clientInfo.socket = socket;
     this.clientInfo.id = id;
     this.clientInfo.nickname = nickname;

@@ -1,5 +1,8 @@
 import windowObservable from "../../WindowObservable.js";
 
+import { SERVER_ADDRESS } from "./../PageRouter.js";
+import { SERVER_PORT } from "./../PageRouter.js";
+
 class LobbyPageManager {
   constructor(
     app,
@@ -34,7 +37,7 @@ class LobbyPageManager {
 
   async initPage() {
     this.lobbySocket = new WebSocket(
-      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
     );
 
     await new Promise((resolve) => {
