@@ -7,7 +7,8 @@ class Printer:
         "magenta": "\033[95m",
         "cyan": "\033[96m",
         "white": "\033[97m",
-        "reset": "\033[0m"
+        "reset": "\033[0m",
+        "purple": "\033[35m",
     }
     
     @staticmethod

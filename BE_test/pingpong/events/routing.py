@@ -1,6 +1,10 @@
-from django.urls import re_path
-from .consumers import PingpongConsumer
+from django.urls import path
+from .authConsumers import AuthConsumer
+from .lobbyConsumers import LobbyConsumer
+from .pingpongRoomConsumers import PingpongRoomConsumer
 
 websocket_urlpatterns = [
-    re_path(r'ws/pingpong/$', PingpongConsumer.as_asgi()),
+    path('ws/', AuthConsumer.as_asgi()),
+    path('ws/lobby/', LobbyConsumer.as_asgi()),
+    path('ws/waitingroom/<str:room_id>/', PingpongRoomConsumer.as_asgi()),
 ]
