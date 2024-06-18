@@ -32,6 +32,65 @@ class LobbyPageManager {
     this.enterModalTitle = document.querySelector(".questionModal .title");
   }
 
+  async initPage() {
+    this.lobbySocket = new WebSocket(
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`
+    );
+
+    await new Promise((resolve) => {
+      this.lobbySocket.addEventListener("open", () => {
+        resolve();
+      });
+    });
+
+    const enterLobbyMessage = {
+      event: "enterLobby",
+      content: {
+        clientId: this.clientInfo.id,
+      },
+    };
+    this.lobbySocket.send(JSON.stringify(enterLobbyMessage));
+
+    await new Promise((resolve) => {
+      this.lobbySocket.addEventListener(
+        "message",
+        function listener(messageEvent) {
+          const { event, content } = JSON.parse(messageEvent.data);
+          if (event === "enterLobbyResponse" && content.message === "OK") {
+            this.lobbySocket.removeEventListener("message", listener);
+            resolve();
+          }
+        }.bind(this)
+      );
+    });
+
+    const waitingRoomList = await this._getWaitingRoomList();
+    this._renderWaitingRoom(waitingRoomList);
+
+    this._autoSetScollTrackColor();
+    this._adjustButtonSize();
+  }
+
+  async _getWaitingRoomList() {
+    const getWaitingRoomLisMessage = {
+      event: "getWaitingRoomList",
+      content: {},
+    };
+    this.lobbySocket.send(JSON.stringify(getWaitingRoomLisMessage));
+    const waitingRoomList = await new Promise(
+      function listener(resolve) {
+        this.clientInfo.socket.addEventListener("message", (messageEvent) => {
+          const { event, content } = JSON.parse(messageEvent.data);
+          if (event === "getWaitingRoomResponse") {
+            this.lobbySocket.removeEventListener("message", listener);
+            resolve(content.gameInfoList);
+          }
+        });
+      }.bind(this)
+    );
+    return waitingRoomList;
+  }
+
   _subscribeWindow() {
     this._adjustButtonSizeRef = this._adjustButtonSize.bind(this);
     windowObservable.subscribeResize(_adjustButtonSizeRef);
@@ -54,44 +113,16 @@ class LobbyPageManager {
     });
   }
 
-  async initPage() {
-    const waitingRoomList = await this._getWaitingRoomList();
-    this._renderWaitingRoom(waitingRoomList);
-
-    this._autoSetScollTrackColor();
-    this._adjustButtonSize();
-  }
-
-  async _getWaitingRoomList() {
-    const getWaitingRoomLisMessage = {
-      sender: "client",
-      receiver: ["server"],
-      event: "getWaitingRoomList",
-      content: {},
-    };
-    this.clientInfo.socket.send(JSON.stringify(getWaitingRoomLisMessage));
-    const waitingRoomList = await this._getWaitingRoomListMsg();
-    return waitingRoomList;
-  }
-
-  _getWaitingRoomListMsg() {
-    return new Promise((resolve, reject) => {
-      const listener = (messageEvent) => {
-        const message = JSON.parse(messageEvent.data);
-        const { sender, receiver, event, content } = message;
-        if (event === "getWaitingRoomResponse") {
-          this.clientInfo.socket.removeEventListener("message", listener);
-          resolve(content.gameInfoList);
-        }
-      };
-      this.clientInfo.socket.addEventListener("message", listener);
-    });
-  }
-
   _renderWaitingRoom(waitingRoomList) {
     waitingRoomList.forEach((waitingRoom) => {
-      const { currentPlayerCount, mode, totalPlayerCount, roomId } =
-        waitingRoom;
+      const {
+        roomId,
+        title,
+        leftMode,
+        rightMode,
+        currentPlayerCount,
+        maxPlayerCount,
+      } = waitingRoom;
       const waitingRoomListContainer = document.querySelector(
         ".waitingRoomListContainer"
       );
@@ -99,11 +130,11 @@ class LobbyPageManager {
       waitingRoomListContainer.appendChild(
         this._getWaitingRoomelement(
           roomId,
-          "임시모드",
-          mode,
-          "대기실 제목 추가해야함",
+          leftMode,
+          rightMode,
+          title,
           currentPlayerCount,
-          totalPlayerCount
+          maxPlayerCount
         )
       );
     });
@@ -191,7 +222,7 @@ class LobbyPageManager {
       const enterRoomListenerRef = this._enterWaitingRoom.bind(
         this,
         roomId,
-        totalPlayerCount
+        gameTitle
       );
       const hideModalLisenerRef = () => {
         this.enterRoomModal.style.display = "none";
@@ -205,40 +236,50 @@ class LobbyPageManager {
     return waitingRoomContainer;
   }
 
-  async _enterWaitingRoom(roomId, totalPlayerCount) {
-    const enterMessage = {
-      sender: "client",
-      receiver: ["waitingRoom"],
-      event: "enterWaitingRoom",
-      content: {
-        roomId,
-        clientId: this.clientInfo.id,
-        clientNickname: this.clientInfo.nickname,
-      },
-    };
-    this.clientInfo.socket.send(JSON.stringify(enterMessage));
+  async _enterWaitingRoom(roomId, gameTitle) {
+    const pingpongRoomSocket = new WebSocket(
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpongRoom/${roomId}`
+    );
 
-    await new Promise((resolve, reject) => {
-      const listener = (messageEvent) => {
-        const message = JSON.parse(messageEvent.data);
-        const { sender, receiver, event, content } = message;
-        if (event === "enterWaitingRoomResponse") {
-          this.clientInfo.socket.removeEventListener("message", listener);
-          resolve();
-        }
-      };
-      this.clientInfo.socket.addEventListener("message", listener);
+    await new Promise((resolve) => {
+      pingpongRoomSocket.addEventListener("open", () => {
+        resolve();
+      });
     });
 
-    //하드코딩되어있음
+    const enterWaitingRoomMessage = {
+      event: "enterWaitingRoom",
+      content: {
+        clientId: this.clientInfo.id,
+      },
+    };
+    this.pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
+
+    const { teamLeftList, teamRightList } = await new Promise((resolve) => {
+      pingpongRoomSocket.addEventListener(
+        "message",
+        function listener(messageEvent) {
+          const { event, content } = JSON.parse(messageEvent.data);
+          if (event === "enterWaitingRoomResponse") {
+            this.pingpongRoomSocket.removeEventListener("message", listener);
+            resolve(content);
+          }
+        }.bind(this)
+      );
+    });
+
     const gameInfo = {
-      mode: "normal",
-      totalPlayerCount,
+      pingpongRoomSocket,
+      roomId,
+      title: gameTitle,
+      teamLeftList,
+      teamRightList,
     };
     this._unsubscribeWindow();
+    this.lobbySocket.close();
 
     //페이지 이동
-    this.onCLickWaitingRoomButton(roomId, gameInfo);
+    this.onCLickWaitingRoomButton(gameInfo);
   }
 
   _getHTML() {

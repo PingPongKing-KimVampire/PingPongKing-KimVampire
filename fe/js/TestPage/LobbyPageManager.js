@@ -1,5 +1,8 @@
 import WaitingRoom from "../PingpongPage/WaitingRoom.js";
 
+import SERVER_ADDRESS from "./../PageRouter.js";
+import SERVER_PORT from "./../PageRouter.js";
+
 class LobbyPageManager {
   constructor(app, clientInfo, onEnterSuccess, onEnterNewLobby) {
     console.log("Lobby Page!");
@@ -18,6 +21,16 @@ class LobbyPageManager {
       this.onEnterNewLobby();
       this.clientInfo.socket.removeEventListener("message", this.listener);
     });
+
+    // this.lobbySocket = new WebSocket(
+    //   `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`
+    // );
+
+    // await new Promise((resolve) => {
+    //   this.lobbySocket.addEventListener("open", () => {
+    //     resolve();
+    //   });
+    // });
   }
 
   _setCreateWaitingRoomButton() {

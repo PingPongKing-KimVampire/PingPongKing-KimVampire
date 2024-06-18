@@ -1,4 +1,4 @@
-const SERVER_ADDRESS = "127.0.0.1";
+import SERVER_ADDRESS from "./../PageRouter.js";
 
 class LoginPageManager {
   constructor(app, onLoginSuccess) {
@@ -7,28 +7,43 @@ class LoginPageManager {
     this._setRandomId();
     this._setRandomNickname();
     this.onLoginSuccess = onLoginSuccess;
+  }
 
-    // 로그인
+  async initPage() {
     const loginButton = document.querySelector("#loginButton");
-    loginButton.addEventListener("click", (event) => {
+    loginButton.addEventListener("click", async (event) => {
       event.preventDefault();
-      this.socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001`);
-      this.socket.addEventListener("open", () => {
-        this.id = parseInt(document.querySelector("#id").value);
-        if (isNaN(parseInt(this.id))) return;
-        this.nickname = document.querySelector("#nickname").value;
-        const initClientMessage = {
-          sender: "unauthenticatedClient",
-          receiver: ["server"],
-          event: "initClient",
-          content: {
-            clientId: parseInt(this.id),
-            clientNickname: this.nickname,
-          },
-        };
-        this.socket.send(JSON.stringify(initClientMessage));
+      this.id = parseInt(document.querySelector("#id").value);
+      if (isNaN(parseInt(this.id))) return;
+      this.nickname = document.querySelector("#nickname").value;
+      this.socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws`);
+      await new Promise((resolve) => {
+        this.socket.addEventListener("open", () => {
+          resolve();
+        });
       });
-      this.socket.addEventListener("message", this.listener);
+
+      const initClientMessage = {
+        event: "initClient",
+        content: {
+          clientId: parseInt(this.id),
+          clientNickname: this.nickname,
+        },
+      };
+      this.socket.send(JSON.stringify(initClientMessage));
+      await new Promise((resolve) => {
+        this.socket.addEventListener("message", (messageEvent) => {
+          const { event, content } = JSON.parse(messageEvent.data);
+          if (event === "initClientResponse") {
+            if (content.message === "OK") {
+              resolve();
+            }
+            console.log(content.message);
+          }
+        });
+      });
+
+      this.onLoginSuccess(this.socket, thid.id, this.nickname);
     });
   }
 
@@ -61,20 +76,6 @@ class LoginPageManager {
 		</form>
 		`;
   }
-
-  listener = (messageEvent) => {
-    this.socket.removeEventListener("message", this.listener);
-    const message = JSON.parse(messageEvent.data);
-    if (message.receiver.includes("unauthenticatedClient")) {
-      if (message.event === "registerClientSuccess") {
-        // 로그인 성공
-        this.onLoginSuccess(this.socket, this.id, this.nickname);
-      } else if (message.event == "duplicateClientId") {
-        // 중복 ID
-        console.log("duplicated ID!");
-      }
-    }
-  };
 }
 
 export default LoginPageManager;
