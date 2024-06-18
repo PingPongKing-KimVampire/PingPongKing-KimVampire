@@ -15,7 +15,7 @@ class WaitingRoomCreationPageManager {
 		this.humanCountButton = document.querySelector('#humanCountButton');
 		this.humanCountButtonText = document.querySelector('#humanCountButton div');
 		this.humanCountArrowImg = document.querySelector('#humanCountButton img');
-		this.humanCountOptionBox = document.querySelector('#humanCountOptionBox');
+		this.humanCountOptionBox = document.querySelector('#humanCountBox:last-of-type');
 		this.humanCountOptionButtons = [...document.getElementsByClassName('humanCountOptionButton')];
 		this.completeButton = document.querySelector('#completeButton');
 		this.completeButton.disabled = true;
@@ -70,6 +70,7 @@ class WaitingRoomCreationPageManager {
 	}
 
 	_humanCountButtonClicked() {
+		this.humanCountArrowImg.classList.toggle('nonSelectedArrowImg');
 		this.humanCountArrowImg.classList.toggle('selectedArrowImg');
 		this.humanCountOptionBox.classList.toggle('visible');
 		this.humanCountOptionBox.classList.toggle('invisible');
@@ -97,13 +98,9 @@ class WaitingRoomCreationPageManager {
 		const totalPlayerCount = mode === 'vampireVsHuman' ? humanCount + 1 : 2;
 
 		this._sendCreateRoomMsg(title, mode, totalPlayerCount);
-		console.log(1);
 		await this._handleCreateRoomResponse(title, mode, totalPlayerCount);
-		console.log(2);
 		this._sendEnterRoomMsg();
-		console.log(3);
 		await this._handleEnterRoomResponse();
-		console.log(4);
 	}
 
 	_sendCreateRoomMsg(title, mode, totalPlayerCount) {
@@ -168,19 +165,6 @@ class WaitingRoomCreationPageManager {
 			}
 			this.clientInfo.socket.addEventListener('message', listener);
 		})
-	}
-	_sendEnterWaitingRoomMsg(roomId) {
-		const enterRoomMessage = {
-			sender: "client",
-			receiver: ["waitingRoom"],
-			event: "enterWaitingRoom",
-			content: {
-			  roomId,
-			  clientId: this.clientInfo.id,
-			  clientNickname: this.clientInfo.nickname,
-			},
-		}
-		// this.clientInfo.socket.send(JSON.stringify(enterRoomMessage));
 	}
 
 	_getHTML() {
@@ -264,12 +248,12 @@ class WaitingRoomCreationPageManager {
 						<div class="teamText">인간</div>
 						<button id="humanCountButton" value="3">
 							<div>3명</div>
-							<img src="images/arrowImg.png">
+							<img src="images/arrowImg.png" class="nonSelectedArrowImg">
 						</button>
 					</div>
-					<div class="countBox" id="humanCountBox">
+					<div class="countBox invisible" id="humanCountBox">
 						<div class="teamText"></div>
-						<ul id="humanCountOptionBox" class="invisible">
+						<ul id="humanCountOptionBox">
 							<li><button class="humanCountOptionButton" value="2">2명</button></li>
 							<li><button class="humanCountOptionButton" value="4">4명</button></li>
 							<li><button class="humanCountOptionButton" value="5">5명</button></li>

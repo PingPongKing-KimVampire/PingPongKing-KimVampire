@@ -8,7 +8,7 @@
 	height: 70%;
 }
 
-.selectionGroup {
+.selectionContainer {
 	/* background-color: blue; */
 	display: flex;
 	flex-direction: row;
@@ -20,14 +20,14 @@
 .selectionGroupBottomMargin {
 	margin-bottom: 6%;
 }
-.selectionGroup:nth-of-type(1) { /* 제목 선택 그룹 */
+.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
 	height: 15%;
 }
-.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
+.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
 	height: 37%;
 }
-.selectionGroup:nth-of-type(3).visible { /* 인원 선택 그룹 */
-	height: 17%;
+.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+	height: 15%;
 }
 
 .selectionLabel {
@@ -39,7 +39,7 @@
 
 .selectionBox {
 	/* background-color: brown; */
-	width: 80%;
+	width: 100%;
 	height: 100%;
 	display: flex;
 	flex-direction: row;
@@ -85,23 +85,49 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	transition-duration: 0.5s;
 }
 
-.countSelectionBox {
+#humanCountSelectionBox {
 	height: 100%;
-	width: 15%;
 	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
+	flex-direction: row;
 }
 
-.countSelectionBox .teamText {
+.countBox {
+	/* background-color: aquamarine; */
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+}
+.countBox:last-of-type {
+	height: 200%;
+	align-items: flex-start;
+	/* background-color: red; */
+}
+.countBox .teamText {
 	font-size: 1.5rem;
 	font-weight: 300;
-	margin-bottom: 10%;
+	height: 40%;
+}
+.countBox:last-of-type .teamText {
+	height: 20%;
+}
+
+#vampireCountBox {
+	width: 13%;
+}
+#humanCountSelectionBox {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	width: 26%;
+}
+#humanCountBox {
+	width: 50%;
 }
 
 #vampireCountButton, #humanCountButton {
-	height: 50%;
+	height: 60%;
 	width: 100%;
 	border: 0.1rem solid white;
 	color: white;
@@ -127,6 +153,9 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	right: 8%;
 	transition: transform 0.5s;
 }
+.nonSelectedArrowImg {
+	transform: rotate(0deg);
+}
 .selectedArrowImg {
 	transform: rotate(180deg);
 }
@@ -134,14 +163,13 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	cursor: pointer;
 }
 
-#humanCountOptionBox.visible {
-	width: 9%;
-	height: 130%;
+#humanCountBox.visible #humanCountOptionBox {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	margin-left: 1%;
-	margin-top: 12%;
+	width: 70%;
+	height: 80%;
+	margin-left: 5%;
 	padding: 0.3%;
 	background-color: rgb(1, 4, 37);
 	border: 0.1rem solid white;
@@ -149,12 +177,12 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	transition-duration: 0.5s;
 }
 
-#humanCountOptionBox.visible li {
+#humanCountBox.visible #humanCountOptionBox li {
 	width: 100%;
 	height: 24%;
 }
 
-#humanCountOptionBox.visible .humanCountOptionButton {
+#humanCountBox.visible #humanCountOptionBox .humanCountOptionButton {
 	width: 100%;
 	height: 100%;
 	background-color: rgb(1, 4, 37);
@@ -163,7 +191,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	font-size: 1.25rem;
 	font-weight: 300;
 }
-#humanCountOptionBox.visible .humanCountOptionButton:hover {
+#humanCountBox.visible #humanCountOptionBox .humanCountOptionButton:hover {
 	background-color: rgb(234, 183, 255);
 	color: rgb(1, 4, 37);
 	transition: background-color 0.1s;
@@ -188,19 +216,19 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	#roomSettingContainer {
 		height: auto;
 	}
-	.selectionGroup {
+	.selectionContainer {
 		flex-direction: column;
 	}
 	.selectionGroupBottomMargin {
 		margin-bottom: 11%;
 	}
-	.selectionGroup:nth-of-type(1) { /* 제목 선택 그룹 */
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
 		height: auto;
 	}
-	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: auto;
 	}
-	.selectionGroup:nth-of-type(3).visible { /* 인원 선택 그룹 */
+	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
 		height: auto;
 	}
 	.selectionLabel {
@@ -209,8 +237,10 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	}
 	.selectionBox {
 		height: auto;
-		width: 100%;
 		justify-content: center;
+	}
+	.selectionContainer:nth-of-type(3).visible .selectionBox {
+		align-items: flex-start;
 	}
 	#titleInput {
 		width: 100%;
@@ -224,13 +254,45 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.modeButton:nth-of-type(2) {
 		margin: 0 7%;
 	}
-	.countSelectionBox {
-		width: 22%;
-		height: auto;
+	#vampireCountBox {
+		width: 25%;
+	}
+	#humanCountSelectionBox {
+		position: relative;
+		flex-direction: column;
+		width: 25%;
+	}
+	#humanCountBox {
+		height: 50%;
+		width: 100%;
+	}
+	#humanCountBox:last-of-type {
+		position: absolute;
+		height: 200%;
+		z-index: 1;
+		top: 100%;
+	}
+	#humanCountBox:last-of-type .teamText {
+		margin-bottom: 5%;
+		height: 0;
+	}
+	#humanCountBox.visible #humanCountOptionBox {
+		width: 100%;
+		height: 100%;
+		margin-left: 0;
+	}
+	.countBox .teamText {
+		margin-bottom: 10%;
 	}
 	#vampireCountButton, #humanCountButton {
 		width: 100%;
 		aspect-ratio: 2.2/1;
+	}
+	.nonSelectedArrowImg {
+		transform: rotate(90deg);
+	}
+	.selectedArrowImg {
+		transform: rotate(270deg);
 	}
 	#vsText {
 		margin: 0 12%;
@@ -247,11 +309,20 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionLabel {
 		width: 16%;
 	}
-	.selectionGroup:nth-of-type(1) { /* 제목 선택 그룹 */
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
 		height: 14%;
 	}
-	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 35%;
+	}
+	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+		height: 13.5%;
+	}
+	#vampireCountBox {
+		width: 14%;
+	}
+	#humanCountSelectionBox {
+		width: 28%;
 	}
 	#completeButton {
 		width: 16%;
@@ -261,14 +332,20 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionLabel {
 		width: 18%;
 	}
-	.selectionGroup:nth-of-type(1) { /* 제목 선택 그룹 */
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
 		height: 13.5%;
 	}
-	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
-		height: 30%;
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 32%;
 	}
-	.countSelectionBox {
-		width: 17%;
+	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+		height: 12%;
+	}
+	#vampireCountBox {
+		width: 15%;
+	}
+	#humanCountSelectionBox {
+		width: 30%;
 	}
 	#completeButton {
 		width: 17%;
@@ -278,14 +355,11 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionLabel {
 		width: 20%;
 	}
-	.selectionGroup:nth-of-type(1) { /* 제목 선택 그룹 */
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
 		height: 13%;
 	}
-	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
-		height: 25%;
-	}
-	.countSelectionBox {
-		width: 19%;
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 28%;
 	}
 	#completeButton {
 		width: 18%;
@@ -295,14 +369,17 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionLabel {
 		width: 25%;
 	}
-	.selectionGroup:nth-of-type(1) { /* 제목 선택 그룹 */
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
 		height: 12%;
 	}
-	.selectionGroup:nth-of-type(2) { /* 모드 선택 그룹 */
-		height: 20%;
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 25%;
 	}
-	.countSelectionBox {
-		width: 23%;
+	#vampireCountBox {
+		width: 19%;
+	}
+	#humanCountSelectionBox {
+		width: 38%;
 	}
 	#completeButton {
 		width: 19%;
