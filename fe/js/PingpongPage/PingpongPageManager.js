@@ -19,7 +19,7 @@ class PingpongPageManager {
 
 			this.pingpongRenderer = new PingpongRenderer(
 				this.clientInfo,
-				this.playerList,
+				this.playerList, // TODO : playerList, sizeInfo가 설정되지 않은 상태
 				this.sizeInfo,
 				this.gameInfo
 			);
@@ -27,7 +27,8 @@ class PingpongPageManager {
 			this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 
 			this._manageExitRoom(); // 탁구장 나가기 처리
-			this.clientInfo.socket.addEventListener('message', this.closeRoomListener); // 탁구장 폐쇠 감지
+			this.exitPingpongPageRef = this._exitPingpongPage.bind(this);
+			this.clientInfo.socket.addEventListener('close', this.exitPingpongPageRef); // 탁구장 폐쇄 감지
 		});
 	}
 
@@ -35,22 +36,14 @@ class PingpongPageManager {
 		return new Promise((res, rej) => {
 			const listener = (messageEvent) => {
 				const message = JSON.parse(messageEvent.data);
-				const { sender, receiver, event, content } = message;
-				if (receiver.includes("player") && event === "startGame") {
+				const { event, content } = message;
+				if (event === "notifyGameStart") {
 					socket.removeEventListener("message", listener);
-					const { playerList, sizeInfo } = content;
-					this.sizeInfo = sizeInfo;
-					this.playerList = playerList;
-					this.leftPlayer = this.playerList.find(
-						(player) => player.team === "left"
-					);
-					this.rightPlayer = this.playerList.find(
-						(player) => player.team === "right"
-					);
+					// TODO : 원래 여기서 sizeInfo, playerList를 설정했었음.
+					// 이제 그냥 다 생성자로 받으면 되는 건가?
 					res();
 				}
 			};
-
 			socket.addEventListener("message", listener);
 		});
 	}
@@ -68,37 +61,16 @@ class PingpongPageManager {
 		questionModal.style.display = 'flex';
 	}
 	_exitYesButtonClicked() {
-		const sendGiveUpMsg = () => {
-			const giveUpMessage = {
-				sender: "player",
-				receiver: ["referee", "player"],
-				event: "giveUpGame",
-				content: {
-					roomId: this.clientInfo.roomId,
-					clientId: this.clientInfo.id,
-				}
-			}
-			this.clientInfo.socket.send(JSON.stringify(giveUpMessage));
-		}
-		sendGiveUpMsg();
+		this.clientInfo.socket.close();
 		this._exitPingpongPage();
 	}
 	_exitNoButtonClicked(questionModal) {
 		questionModal.style.display = 'none';
 	}
 
-	closeRoomListener = (messageEvent) => {
-		const message = JSON.parse(messageEvent.data);
-		const { sender, receiver, event, content } = message;
-
-		if (receiver.includes('player') && event === 'closePingpongRoom') {
-			this._exitPingpongPage();
-		}
-	}
-
 	_exitPingpongPage() {
 		// PingpongPageManager, PingpongRenderer, Player에서 소켓과의 모든 상호작용 삭제
-		this.clientInfo.socket.removeEventListener('message', this.closeRoomListener);
+		this.clientInfo.socket.removeEventListener('close', this.exitPingpongPageRef);
 		this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
 		this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
 		this.player.unsubscribeWindow.call(this.player);

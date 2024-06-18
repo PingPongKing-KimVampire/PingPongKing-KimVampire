@@ -2,14 +2,14 @@ import windowObservable from "../../WindowObservable.js";
 
 class PingpongRenderer {
 	constructor(clientInfo, playerList, sizeInfo, gameInfo) {
-		this._initGaneObjectRenderer(clientInfo, playerList, sizeInfo);
+		this._initPingpongRenderer(clientInfo, playerList, sizeInfo);
 		this._setDisplayBoard(gameInfo.mode, gameInfo.totalPlayerCount);
 		this.clientInfo.socket.addEventListener('message', this.listener);
 		this._subscribeWindow();
 		this._updateGameContainer();
 	}
 
-	_initGaneObjectRenderer(clientInfo, playerList, sizeInfo) {
+	_initPingpongRenderer(clientInfo, playerList, sizeInfo) {
 		this.clientInfo = clientInfo;
 		this.players = [];
 		this.me = null;
@@ -85,22 +85,19 @@ class PingpongRenderer {
 	
 	listener = (messageEvent) => {
 		const message = JSON.parse(messageEvent.data);
-		const { sender, receiver, event, content } = message;
-		// TODO : 혹시 roomId도 확인해야 하나?
-		if (receiver.includes('player')) {
-			if (event === 'updatePaddleLocation') { // 패들 위치 변경
-				this._updatePaddle(content);
-				this._renderPaddle(content);
-			} else if (event === 'updateBallLocation') { // 공 위치 변경
-				this._updateBall(content);
-				this._renderBall(content);
-			} else if (event === 'updateScore') { // 점수 변경
-				this._updateScore(content);
-			} else if (event === 'winGame') { // 게임 승리
-				this._winGame(content);
-			} else if (event === 'giveUpGame') { // 누군가의 기권 선언 // TODO : giveUpGame 리시버로 player 추가
-				this._removePlayer(content);
-			}
+		const { event, content } = message;
+		if (event === 'notifyPaddleLocationUpdate') { // 패들 위치 변경
+			this._updatePaddle(content);
+			this._renderPaddle(content);
+		} else if (event === 'notifyBallLocationUpdate') { // 공 위치 변경
+			this._updateBall(content);
+			this._renderBall(content);
+		} else if (event === 'notifyScoreUpdate') { // 점수 변경
+			this._updateScore(content);
+		} else if (event === 'notifyGameEnd') { // 게임 승리
+			this._endGame(content);
+		} else if (event === 'notifyGameGiveUp') { // 누군가의 기권 선언
+			this._removePlayer(content);
 		}
 	}
 	removeListener() {
@@ -242,8 +239,8 @@ class PingpongRenderer {
 		}
 	}
 
-	_winGame({ team }) {
-		const winBoard = this.me.team === team ? this.rightBoard : this.leftBoard;
+	_endGame({ winTeam }) {
+		const winBoard = this.me.team === winTeam ? this.rightBoard : this.leftBoard;
 		const loseBoard = this.me.team === team ? this.leftBoard : this.rightBoard;
 		winBoard.style.backgroundColor = "blue";
 		loseBoard.style.backgroundColor = "red";

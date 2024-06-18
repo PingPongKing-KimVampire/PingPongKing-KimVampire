@@ -92,12 +92,8 @@ class Player {
     }
 
     const msg = {
-      sender: "player",
-      receiver: ["player", "pingpongBoard"],
       event: "updatePaddleLocation",
       content: {
-        roomId: this.clientInfo.roomId,
-        clientId: this.clientInfo.id,
         xPosition: x,
         yPosition: y,
       },
