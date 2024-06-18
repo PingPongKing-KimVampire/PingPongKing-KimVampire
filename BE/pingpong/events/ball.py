@@ -5,23 +5,23 @@ class Ball:
     def __init__(self, speed, radius):
         self.speed = speed
         self.radius = radius
-        self.xPos = 0
-        self.yPos = 0
+        self.pos_x = 0
+        self.pos_y = 0
         self.angle = 0
         self.dx = 0
         self.dy = 0
 
     def reset_ball(self, x, y, angle):
-        self.xPos = x
-        self.yPos = y
+        self.pos_x = x
+        self.pos_y = y
         self.angle = angle
         dir = self._calculate_ball_direction()
         self.dx = dir['dx']
         self.dy = dir['dy']
 
     def move(self):
-        self.xPos += self.dx
-        self.yPos += self.dy
+        self.pos_x += self.dx
+        self.pos_y += self.dy
 
     def _calculate_ball_direction(self):
         angle_radians = (self.angle * math.pi) / 180
@@ -43,13 +43,13 @@ class Ball:
         self.dy = dir['dy']
 
     def get_right_x(self):
-        return self.xPos + self.radius
+        return self.pos_x + self.radius
 
     def get_left_x(self):
-        return self.xPos - self.radius
+        return self.pos_x - self.radius
 
     def get_top_y(self):
-        return self.yPos - self.radius
+        return self.pos_y - self.radius
 
     def get_bottom_y(self):
-        return self.yPos + self.radius
+        return self.pos_y + self.radius

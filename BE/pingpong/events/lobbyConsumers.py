@@ -20,12 +20,19 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             stateManager._remove_client(self, self.client_id)
             Printer.log(f"Client {self.client_id} disconnected", "red")
 
+    async def _send(self, event, content):
+        Printer.log(f">>>>> LOBBY sent >>>>>", "cyan")
+        Printer.log(f"event : {event}", "cyan")
+        Printer.log(f"conetnt : {content}", "cyan")
+        await self.send(json.dumps({ 'event': event, 'content': content }))
+
     async def receive(self, text_data):
         message = json.loads(text_data)
-        Printer.log(f"Received message: {message}", "purple")
-        
         event = message.get('event')
         content = message.get('content')
+        Printer.log("<<<<<< LOBBY recieve <<<<<<", "cyan")
+        Printer.log(f"event : {event}", "cyan")
+        Printer.log(f"content : {content}", "cyan")
 
         if not self.is_init:
             if event == 'enterLobby':
@@ -34,23 +41,13 @@ class LobbyConsumer(AsyncWebsocketConsumer):
                 await self.close()
             return
 
-        Printer.log('create')
         await self.handle_event(event, content)
 
-    ### Event Handlers
-    #   - createWaitingRoom()
-    #   - enterWaitingRoom()
-    #   - leaveWaitingRoom()
-    #   - getWaitingRoomList()
     async def handle_event(self, event, content):
         if event == 'createWaitingRoom':
             await self.create_waiting_room(content)
-        elif event == 'enterWaitingRoom':
-            await self.enter_waiting_room(content)
         elif event == 'getWaitingRoomList':
             await self.get_waiting_room_List()
-    ### Event Handlers
-
 
     async def init_client(self, client_id, client_nickname):
         if client_id in stateManager.clients:
@@ -66,14 +63,8 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Client {self.client_id} initialized with nickname {self.nickname}", "cyan")
 
     async def enter_lobby(self):
-        self.is_init = True
-        data = {
-            'event': 'enterLobbyResponse',
-            'content': {
-                'message': 'OK'
-            }
-        }
-        self.send(json.dumps(data))
+        self.is_init = True # 인증으로 바꿔야함
+        self._send(event='enterLobbyResponse', content={'message': 'OK'})
 
     async def create_waiting_room(self, content):
         room_id = await stateManager._create_room(content['waitingRoomInfo'])
@@ -88,11 +79,3 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         room_list = stateManager._get_waiting_room_list()
         await self._send(event='getWaitingRoomResponse', 
                          content={'waitingRoomList': room_list})
-
-    async def _send(self, event, content):
-        Printer.log(f"Sent message: {event}", "magenta")
-        Printer.log(f"Sent message: {content}", "magenta")
-        await self.send(json.dumps({
-            'event': event,
-            'content': content
-        }))

@@ -28,10 +28,10 @@ class StateManager:
 
     ### Room
     async def _create_room(self, content):
-        roomId = str(uuid.uuid4())
-        while roomId in self.rooms:
-            roomId = str(uuid.uuid4())
-        self.rooms[roomId] = {
+        room_id = str(uuid.uuid4())
+        while room_id in self.rooms:
+            room_id = str(uuid.uuid4())
+        self.rooms[room_id] = {
             'title': content['title'],
             'leftMode': content['leftMode'],
             'rightMode': content['rightMode'],
@@ -39,9 +39,10 @@ class StateManager:
             'rightMaxPlayerCount': content['rightPlayerCount'],
             'teamLeft': {},
             'teamRight': {},
-            'gameManager': GameManager(roomId)
+            'gameManager': GameManager(room_id),
+            'state': 'waiting'
         }
-        return roomId
+        return room_id
 
     async def _enter_waiting_room(self, consumer, room_id, client_id):
         if room_id not in self.rooms:
