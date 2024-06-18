@@ -1,3 +1,5 @@
+import windowObservable from "../../WindowObservable.js";
+
 class LobbyPageManager {
   constructor(
     app,
@@ -7,6 +9,7 @@ class LobbyPageManager {
   ) {
     console.log("Lobby Page!");
     app.innerHTML = this._getHTML();
+
     this.clientInfo = {
       socket: null,
       id: null,
@@ -17,10 +20,38 @@ class LobbyPageManager {
     this.clientInfo = clientInfo;
     this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
     this.onCLickWaitingRoomButton = onCLickWaitingRoomButton;
-
     this._setCreateWaitingRoomButton();
-    window.addEventListener("resize", this._adjustButtonSize);
-    window.addEventListener("resize", this._autoSetScollTrackColor);
+
+    this.enterRoomModal = document.querySelector(".questionModal");
+    this.enterYesButton = document.querySelector(
+      ".questionModal .activatedButton:nth-of-type(1)"
+    );
+    this.enterNoButton = document.querySelector(
+      ".questionModal .activatedButton:nth-of-type(2)"
+    );
+    this.enterModalTitle = document.querySelector(".questionModal .title");
+  }
+
+  _subscribeWindow() {
+    this._adjustButtonSizeRef = this._adjustButtonSize.bind(this);
+    windowObservable.subscribeResize(_adjustButtonSizeRef);
+    this._autoSetScollTrackColorRef = this._autoSetScollTrackColor.bind(this);
+    windowObservable.subscribeResize(_autoSetScollTrackColorRef);
+  }
+
+  _unsubscribeWindow() {
+    windowObservable.unsubscribeResize(this._adjustButtonSizeRef);
+    windowObservable.unsubscribeResize(this._autoSetScollTrackColorRef);
+  }
+
+  _setCreateWaitingRoomButton() {
+    const createWaitingRoomButton = document.querySelector(
+      ".createWaitingRoomButton"
+    );
+    createWaitingRoomButton.addEventListener("click", () => {
+      this._unsubscribeWindow();
+      this.onClickWatingRoomCreationButton();
+    });
   }
 
   async initPage() {
@@ -29,36 +60,6 @@ class LobbyPageManager {
 
     this._autoSetScollTrackColor();
     this._adjustButtonSize();
-  }
-
-  _setCreateWaitingRoomButton() {
-    const createWaitingRoomButton = document.querySelector(
-      ".createWaitingRoomButton"
-    );
-    createWaitingRoomButton.addEventListener("click", () => {
-      this.onClickWatingRoomCreationButton();
-    });
-  }
-
-  _renderWaitingRoom(waitingRoomList) {
-    waitingRoomList.forEach((waitingRoom) => {
-      const { currentPlayerCount, mode, totalPlayerCount, roomId } =
-        waitingRoom;
-      const waitingRoomListContainer = document.querySelector(
-        ".waitingRoomListContainer"
-      );
-      //방 아이디 추가하기
-      waitingRoomListContainer.appendChild(
-        this._getWaitingRoomelement(
-          roomId,
-          "임시모드",
-          mode,
-          "대기실 제목 추가해야함",
-          currentPlayerCount,
-          totalPlayerCount
-        )
-      );
-    });
   }
 
   async _getWaitingRoomList() {
@@ -87,28 +88,25 @@ class LobbyPageManager {
     });
   }
 
-  _getHTML() {
-    return `
-    <div class="lobby">
-    <div class="lobbyInner">
-        ${this._getWaitingRoomCreationButtonHtml()}
-        ${this._getWaitingRoomListContainerHtml()}
-    </div>
-  </div>
-  `;
-  }
-
-  _getWaitingRoomCreationButtonHtml() {
-    return `<button class="createWaitingRoomButton">탁구장 생성하기</button>`;
-  }
-
-  _getWaitingRoomListContainerHtml() {
-    return `<div class="outerContainer">
-    <div class="waitingRoomListContainer">
-
-    </div>
-  </div>
-  `;
+  _renderWaitingRoom(waitingRoomList) {
+    waitingRoomList.forEach((waitingRoom) => {
+      const { currentPlayerCount, mode, totalPlayerCount, roomId } =
+        waitingRoom;
+      const waitingRoomListContainer = document.querySelector(
+        ".waitingRoomListContainer"
+      );
+      //방 아이디 추가하기
+      waitingRoomListContainer.appendChild(
+        this._getWaitingRoomelement(
+          roomId,
+          "임시모드",
+          mode,
+          "대기실 제목 추가해야함",
+          currentPlayerCount,
+          totalPlayerCount
+        )
+      );
+    });
   }
 
   _adjustButtonSize() {
@@ -188,30 +186,26 @@ class LobbyPageManager {
     waitingRoomContainer.appendChild(matchPlayerCount);
 
     waitingRoomContainer.addEventListener("click", async () => {
-      this._enterWaitingRoom(roomId);
-      await new Promise((resolve, reject) => {
-        const listener = (messageEvent) => {
-          const message = JSON.parse(messageEvent.data);
-          const { sender, receiver, event, content } = message;
-          if (event === "enterWaitingRoomResponse") {
-            this.clientInfo.socket.removeEventListener("message", listener);
-            resolve();
-          }
-        };
-        this.clientInfo.socket.addEventListener("message", listener);
-      });
-
-      //하드코딩되어있음
-      const gameInfo = {
-        mode: "normal",
-        totalPlayerCount,
+      this.enterModalTitle.innerText = `"${gameTitle}"`;
+      this.enterRoomModal.style.display = "flex";
+      const enterRoomListenerRef = this._enterWaitingRoom.bind(
+        this,
+        roomId,
+        totalPlayerCount
+      );
+      const hideModalLisenerRef = () => {
+        this.enterRoomModal.style.display = "none";
+        this.enterYesButton.removeEventListener("click", enterRoomListenerRef);
+        this.enterNoButton.removeEventListener("click", hideModalLisenerRef);
       };
-      this.onCLickWaitingRoomButton(roomId, gameInfo);
+
+      this.enterYesButton.addEventListener("click", enterRoomListenerRef);
+      this.enterNoButton.addEventListener("click", hideModalLisenerRef);
     });
     return waitingRoomContainer;
   }
 
-  _enterWaitingRoom(roomId) {
+  async _enterWaitingRoom(roomId, totalPlayerCount) {
     const enterMessage = {
       sender: "client",
       receiver: ["waitingRoom"],
@@ -223,6 +217,68 @@ class LobbyPageManager {
       },
     };
     this.clientInfo.socket.send(JSON.stringify(enterMessage));
+
+    await new Promise((resolve, reject) => {
+      const listener = (messageEvent) => {
+        const message = JSON.parse(messageEvent.data);
+        const { sender, receiver, event, content } = message;
+        if (event === "enterWaitingRoomResponse") {
+          this.clientInfo.socket.removeEventListener("message", listener);
+          resolve();
+        }
+      };
+      this.clientInfo.socket.addEventListener("message", listener);
+    });
+
+    //하드코딩되어있음
+    const gameInfo = {
+      mode: "normal",
+      totalPlayerCount,
+    };
+    this._unsubscribeWindow();
+
+    //페이지 이동
+    this.onCLickWaitingRoomButton(roomId, gameInfo);
+  }
+
+  _getHTML() {
+    return `
+    <div class="lobby">
+      <div class="lobbyInner">
+          ${this._getWaitingRoomCreationButtonHtml()}
+          ${this._getWaitingRoomListContainerHtml()}
+      </div>
+    </div>
+    ${this._getEnterWaitingRoomModalHTML()};
+  `;
+  }
+
+  _getWaitingRoomCreationButtonHtml() {
+    return `<button class="createWaitingRoomButton">탁구장 생성하기</button>`;
+  }
+
+  _getWaitingRoomListContainerHtml() {
+    return `<div class="outerContainer">
+    <div class="waitingRoomListContainer">
+
+    </div>
+  </div>
+  `;
+  }
+
+  _getEnterWaitingRoomModalHTML() {
+    return `
+			<div class="questionModal">
+				<div class="questionBox">
+          <div class="title"></div>
+					<div class="question">입장 하시겠습니까?</div>
+					<div class="buttonGroup">
+						<button class="activatedButton">네</button>
+						<button class="activatedButton">아니오</button>
+					</div>
+				</div>
+			</div>
+		`;
   }
 }
 

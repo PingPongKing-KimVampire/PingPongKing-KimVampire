@@ -57,15 +57,15 @@ class PingpongPageManager {
 
 	_manageExitRoom() {
 		const exitButton = document.querySelector('.exitButton');
-		const exitYesButton = document.querySelector('.exitModal .activatedButton:nth-of-type(1)');
-		const exitNoButton = document.querySelector('.exitModal .activatedButton:nth-of-type(2)');
-		const exitModal = document.querySelector('.exitModal');
-		exitButton.addEventListener('click', this._exitButtonClicked.bind(this, exitModal));
+		const exitYesButton = document.querySelector('.questionModal .activatedButton:nth-of-type(1)');
+		const exitNoButton = document.querySelector('.questionModal .activatedButton:nth-of-type(2)');
+		const questionModal = document.querySelector('.questionModal');
+		exitButton.addEventListener('click', this._exitButtonClicked.bind(this, questionModal));
 		exitYesButton.addEventListener('click', this._exitYesButtonClicked.bind(this));
-		exitNoButton.addEventListener('click', this._exitNoButtonClicked.bind(this, exitModal));
+		exitNoButton.addEventListener('click', this._exitNoButtonClicked.bind(this, questionModal));
 	}
-	_exitButtonClicked(exitModal) {
-		exitModal.style.display = 'flex';
+	_exitButtonClicked(questionModal) {
+		questionModal.style.display = 'flex';
 	}
 	_exitYesButtonClicked() {
 		const sendGiveUpMsg = () => {
@@ -83,8 +83,8 @@ class PingpongPageManager {
 		sendGiveUpMsg();
 		this._exitPingpongPage();
 	}
-	_exitNoButtonClicked(exitModal) {
-		exitModal.style.display = 'none';
+	_exitNoButtonClicked(questionModal) {
+		questionModal.style.display = 'none';
 	}
 
 	closeRoomListener = (messageEvent) => {
@@ -113,7 +113,7 @@ class PingpongPageManager {
 				${this._getDisplayBoardHTML()}
 				${this._getPlayBoardHTML()}
 			</div>
-			${this._getExitModalHTML()}
+			${this._getquestionModalHTML()}
 		`;
 	}
 
@@ -151,10 +151,10 @@ class PingpongPageManager {
 		`;
 	}
 
-	_getExitModalHTML() {
+	_getquestionModalHTML() {
 		return `
 			<button class="exitButton"></button>
-			<div class="exitModal">
+			<div class="questionModal">
 				<div class="questionBox">
 					<div class="question">상대에게 승리를 선사하시겠습니까?</div>
 					<div class="buttonGroup">

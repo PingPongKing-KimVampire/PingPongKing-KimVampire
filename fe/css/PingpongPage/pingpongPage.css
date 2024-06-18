@@ -133,7 +133,7 @@
 	background-color: white;
 }
 
-.exitModal {
+.questionModal {
 	display: none;
 	/* display: flex; */
 	width: 100vw;
@@ -145,7 +145,7 @@
 	background-color: rgba(0, 0, 0, 0.7);
 }
 
-.exitModal .questionBox {
+.questionModal .questionBox {
 	width: 80%;
 	height: 20%;
 	display: flex;
@@ -156,13 +156,20 @@
 	font-weight: 900;
 }
 
-.exitModal .question {
+.questionModal .question {
 	padding-bottom: 1.5%;
 	text-align: center;
 	line-height: 1.5;
 }
 
-.exitModal .buttonGroup {
+.questionModal .title {
+	padding-bottom: 1%;
+	text-align: center;
+	font-weight: 400;
+	font-size: 2rem;
+}
+
+.questionModal .buttonGroup {
 	width: 40%;
 	display: flex;
 	flex-direction: row;
@@ -170,7 +177,7 @@
 	padding-top: 1.5%;
 }
 
-.exitModal .buttonGroup button {
+.questionModal .buttonGroup button {
 	width: 45%;
 	padding: 2.5% 2.5%;
 }
@@ -226,25 +233,25 @@
 		height: 3%;
 		aspect-ratio: 1/1;
 	}
-	.exitModal .questionBox {
+	.questionModal .questionBox {
 		height: 30%;
 	}
-	.exitModal .question {
+	.questionModal .question {
 		padding-bottom: 3%;
 	}
-	.exitModal .buttonGroup {
+	.questionModal .buttonGroup {
 		width: 60%;
 		flex-direction: column;
 		align-items: center;
 		padding-top: 3%;
 	}
-	.exitModal .buttonGroup button:nth-child(1) {
+	.questionModal .buttonGroup button:nth-child(1) {
 		margin-bottom: 2.5%;
 	}
-	.exitModal .buttonGroup button:nth-child(2) {
+	.questionModal .buttonGroup button:nth-child(2) {
 		margin-top: 2.5%;
 	}
-	.exitModal .buttonGroup button {
+	.questionModal .buttonGroup button {
 		width: 100%;
 		padding: 3.5% 0;
 	}
