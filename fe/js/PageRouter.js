@@ -1,6 +1,5 @@
 import PingpongPageManager from "./PingpongPage/PingpongPageManager.js";
 import LoginPageManager from "./TestPage/LoginPageManager.js";
-import LobbyPageManager from "./TestPage/LobbyPageManager.js";
 import WaitingRoomCreationPageManager from "./LobbyPage/WaitingRoomCreationPageManager.js";
 
 import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";

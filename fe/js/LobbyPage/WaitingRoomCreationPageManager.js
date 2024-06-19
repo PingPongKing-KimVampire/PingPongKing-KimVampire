@@ -1,4 +1,5 @@
-import WaitingRoom from "../PingpongPage/WaitingRoom.js";
+import { SERVER_ADDRESS } from "./../PageRouter.js";
+import { SERVER_PORT } from "./../PageRouter.js";
 
 class WaitingRoomCreationPageManager {
   constructor(app, clientInfo, onEnterSuccess) {
@@ -121,16 +122,22 @@ class WaitingRoomCreationPageManager {
   async _createAndEnterRoom() {
     const title = this.titleInput.value;
     // const mode = this.modeButtons.find((button) => button.checked).value;
-    const humanCount = this.humanCountButton.value;
-    const totalPlayerCount = mode === "vampire" ? humanCount + 1 : 2;
+    // const humanCount = this.humanCountButton.value;
+    // const totalPlayerCount = mode === "vampire" ? humanCount + 1 : 2;
 
     const leftMode = "vampire"; // 임시 모드 하드 코딩
     const leftPlayerCount = 1;
     const rightMode = "normal"; // 임시 모드 하드 코딩
-    const rightPlayerCount = 4;
+    const rightPlayerCount = 1;
 
-    this._sendCreateRoomMsg(title, mode, totalPlayerCount);
-    await this._handleCreateRoomResponse(
+    this._sendCreateRoomMsg(
+      title,
+      leftMode,
+      leftPlayerCount,
+      rightMode,
+      rightPlayerCount
+    );
+    const roomId = await this._handleCreateRoomResponse(
       title,
       leftMode,
       leftPlayerCount,
@@ -140,6 +147,54 @@ class WaitingRoomCreationPageManager {
     // this._sendEnterRoomMsg();
     // await this._handleEnterRoomResponse();
     //소켓연결 후 입장. 재사용할 생각해야함
+    await this._enterWaitingRoom(roomId, title);
+  }
+
+  async _enterWaitingRoom(roomId, gameTitle) {
+    const pingpongRoomSocket = new WebSocket(
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
+    );
+
+    this.pingpongRoomSocket = pingpongRoomSocket;
+
+    await new Promise((resolve) => {
+      pingpongRoomSocket.addEventListener("open", () => {
+        resolve();
+      });
+    });
+
+    const enterWaitingRoomMessage = {
+      event: "enterWaitingRoom",
+      content: {
+        clientId: this.clientInfo.id,
+      },
+    };
+    this.pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
+
+    const { teamLeftList, teamRightList } = await new Promise((resolve) => {
+      pingpongRoomSocket.addEventListener(
+        "message",
+        function listener(messageEvent) {
+          const { event, content } = JSON.parse(messageEvent.data);
+          if (event === "enterWaitingRoomResponse") {
+            this.pingpongRoomSocket.removeEventListener("message", listener);
+            resolve(content);
+          }
+        }.bind(this)
+      );
+    });
+
+    const gameInfo = {
+      pingpongRoomSocket,
+      roomId,
+      title: gameTitle,
+      teamLeftList,
+      teamRightList,
+    };
+    this.lobbySocket.close();
+
+    //페이지 이동
+    this.onEnterSuccess(gameInfo);
   }
 
   _sendCreateRoomMsg(
@@ -168,6 +223,7 @@ class WaitingRoomCreationPageManager {
       const listener = (messageEvent) => {
         const message = JSON.parse(messageEvent.data);
         const { event, content } = message;
+
         if (event === "createWaitingRoomResponse") {
           if (content.message === "OK") {
             this.clientInfo.socket.removeEventListener("message", listener);
@@ -175,7 +231,7 @@ class WaitingRoomCreationPageManager {
           }
         }
       };
-      this.clientInfo.socket.addEventListener("message", listener);
+      this.clientInfo.lobbySocket.addEventListener("message", listener);
     });
   }
   //   _sendEnterRoomMsg() {

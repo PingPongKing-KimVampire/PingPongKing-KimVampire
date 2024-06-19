@@ -15,6 +15,7 @@ class LobbyPageManager {
 
     this.clientInfo = {
       socket: null,
+      lobbySocket: null,
       id: null,
       nickname: null,
       roomId: null,
@@ -39,6 +40,7 @@ class LobbyPageManager {
     this.lobbySocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
     );
+    this.clientInfo.lobbySocket = this.lobbySocket;
 
     await new Promise((resolve) => {
       this.lobbySocket.addEventListener("open", () => {
