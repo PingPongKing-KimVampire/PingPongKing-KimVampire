@@ -144,9 +144,6 @@ class WaitingRoomCreationPageManager {
       rightMode,
       rightPlayerCount
     );
-    // this._sendEnterRoomMsg();
-    // await this._handleEnterRoomResponse();
-    //소켓연결 후 입장. 재사용할 생각해야함
     await this._enterWaitingRoom(roomId, title);
   }
 
@@ -154,8 +151,6 @@ class WaitingRoomCreationPageManager {
     const pingpongRoomSocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
     );
-
-    this.pingpongRoomSocket = pingpongRoomSocket;
 
     await new Promise((resolve) => {
       pingpongRoomSocket.addEventListener("open", () => {
@@ -169,7 +164,7 @@ class WaitingRoomCreationPageManager {
         clientId: this.clientInfo.id,
       },
     };
-    this.pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
+    pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 
     const { teamLeftList, teamRightList } = await new Promise((resolve) => {
       pingpongRoomSocket.addEventListener(
@@ -177,7 +172,7 @@ class WaitingRoomCreationPageManager {
         function listener(messageEvent) {
           const { event, content } = JSON.parse(messageEvent.data);
           if (event === "enterWaitingRoomResponse") {
-            this.pingpongRoomSocket.removeEventListener("message", listener);
+            pingpongRoomSocket.removeEventListener("message", listener);
             resolve(content);
           }
         }.bind(this)
@@ -191,7 +186,7 @@ class WaitingRoomCreationPageManager {
       teamLeftList,
       teamRightList,
     };
-    this.lobbySocket.close();
+    this.clientInfo.lobbySocket.close();
 
     //페이지 이동
     this.onEnterSuccess(gameInfo);
@@ -234,36 +229,6 @@ class WaitingRoomCreationPageManager {
       this.clientInfo.lobbySocket.addEventListener("message", listener);
     });
   }
-  //   _sendEnterRoomMsg() {
-  //     const enterRoomMessage = {
-  //       sender: "client",
-  //       receiver: ["waitingRoom"],
-  //       event: "enterWaitingRoom",
-  //       content: {
-  //         roomId: this.clientInfo.roomId,
-  //         clientId: this.clientInfo.id,
-  //         clientNickname: this.clientInfo.nickname,
-  //       },
-  //     };
-  //     this.clientInfo.socket.send(JSON.stringify(enterRoomMessage));
-  //   }
-  //   _handleEnterRoomResponse() {
-  //     return new Promise((resolve, reject) => {
-  //       const listener = (messageEvent) => {
-  //         const message = JSON.parse(messageEvent.data);
-  //         const { sender, receiver, event, content } = message;
-  //         if (
-  //           receiver.includes("client") &&
-  //           event === "enterWaitingRoomResponse"
-  //         ) {
-  //           this.clientInfo.socket.removeEventListener("message", listener);
-  //           this.onEnterSuccess(content.roomId, content.gameInfo);
-  //           resolve();
-  //         }
-  //       };
-  //       this.clientInfo.socket.addEventListener("message", listener);
-  //     });
-  //   }
 
   _getHTML() {
     return `
