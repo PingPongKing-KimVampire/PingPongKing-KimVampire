@@ -20,10 +20,10 @@ async def change_group(consumer, old_group, new_group):
     return new_group
 
 async def notify_group(consumer, group, event, content):
-    Printer.log(f"!!!!! notify group !!!!!", "pink")
-    Printer.log(f"group: {group}", "pink")
-    Printer.log(f"event: {event}", "pink")
-    Printer.log(f"content: {content}", "pink")
+    Printer.log(f"!!!!! notify group !!!!!", "cyan")
+    Printer.log(f"group: {group}", "cyan")
+    Printer.log(f"event: {event}", "cyan")
+    Printer.log(f"content: {content}", "cyan")
     await consumer.channel_layer.group_send(
         group,
         {

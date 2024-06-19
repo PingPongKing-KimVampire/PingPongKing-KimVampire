@@ -21,18 +21,18 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             Printer.log(f"Client {self.client_id} disconnected", "red")
 
     async def _send(self, event, content):
-        Printer.log(f">>>>> LOBBY sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
-        Printer.log(f"conetnt : {content}", "cyan")
+        Printer.log(f">>>>> LOBBY sent >>>>>", "bright_cyan")
+        Printer.log(f"event : {event}", "bright_cyan")
+        Printer.log(f"conetnt : {content}", "bright_cyan")
         await self.send(json.dumps({ 'event': event, 'content': content }))
 
     async def receive(self, text_data):
         message = json.loads(text_data)
         event = message.get('event')
         content = message.get('content')
-        Printer.log("<<<<<< LOBBY recieve <<<<<<", "cyan")
-        Printer.log(f"event : {event}", "cyan")
-        Printer.log(f"content : {content}", "cyan")
+        Printer.log("<<<<<< LOBBY recieve <<<<<<", "bright_cyan")
+        Printer.log(f"event : {event}", "bright_cyan")
+        Printer.log(f"content : {content}", "bright_cyan")
 
         if not self.is_init:
             if event == 'enterLobby':
