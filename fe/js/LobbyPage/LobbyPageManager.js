@@ -162,7 +162,8 @@ class LobbyPageManager {
 
     const teamName1 = document.createElement("span");
     teamName1.className = "teamName";
-    teamName1.textContent = team1;
+    if (team1 === "human") teamName1.textContent = "인간";
+    else if (team1 === "vampire") teamName1.textContent = "뱀파이어";
 
     const vsName = document.createElement("span");
     vsName.className = "vsName";
@@ -170,7 +171,9 @@ class LobbyPageManager {
 
     const teamName2 = document.createElement("span");
     teamName2.className = "teamName";
-    teamName2.textContent = team2;
+
+    if (team2 === "human") teamName2.textContent = "인간";
+    else if (team2 === "vampire") teamName2.textContent = "뱀파이어";
 
     gameTypeContainer.appendChild(teamName1);
     gameTypeContainer.appendChild(vsName);
