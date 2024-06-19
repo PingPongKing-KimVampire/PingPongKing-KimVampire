@@ -3,6 +3,7 @@ import uuid
 from utils.group import add_group, discard_group, change_group, notify_group
 from pingpongRoom.gameManage.gameManager import GameManager
 import asyncio
+from utils.printer import Printer
 
 class StateManager:
     _instance = None
@@ -75,6 +76,7 @@ class StateManager:
             'nickname': client_nickname,
             'state': 'NOTREADY'
         }
+        Printer.log(room[team][client_id])
         if count == 0:
             await notify_group(consumer, 'lobby', 
                                event='notifyWaitingRoomCreated', 

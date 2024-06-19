@@ -83,7 +83,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             
     async def enter_waiting_room(self, content):
         self.client_id = content['clientId']
-        if not stateManager._enter_waiting_room(self, self.room_id, self.client_id):
+        if not await stateManager._enter_waiting_room(self, self.room_id, self.client_id):
             # 실패시 처리 추가해야 할 듯?
             await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
             Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
