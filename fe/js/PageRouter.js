@@ -62,7 +62,7 @@ class PageRouter {
     }
   }
 
-  _onLoginSuccess(socket, id, nickname, lobbySocket) {
+  _onLoginSuccess(socket, lobbySocket, id, nickname) {
     console.log(this);
     this.clientInfo.socket = socket;
     this.clientInfo.lobbySocket = lobbySocket;

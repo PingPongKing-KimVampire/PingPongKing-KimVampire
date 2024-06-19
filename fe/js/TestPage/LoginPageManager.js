@@ -12,75 +12,80 @@ class LoginPageManager {
 
   async initPage() {
     const loginButton = document.querySelector("#loginButton");
-    loginButton.addEventListener("click", async (event) => {
-      event.preventDefault();
-      this.id = parseInt(document.querySelector("#id").value);
-      if (isNaN(parseInt(this.id))) return;
-      this.nickname = document.querySelector("#nickname").value;
-      this.socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`);
-      await new Promise((resolve) => {
-        this.socket.addEventListener("open", () => {
-          resolve();
-        });
-      });
+    loginButton.addEventListener("click", this._loginListener.bind(this));
+  }
 
-      const initClientMessage = {
-        event: "initClient",
-        content: {
-          clientId: parseInt(this.id),
-          clientNickname: this.nickname,
-        },
-      };
-      this.socket.send(JSON.stringify(initClientMessage));
-      await new Promise((resolve) => {
-        this.socket.addEventListener("message", (messageEvent) => {
+  async _connectLobbySocket(id) {
+    const lobbySocket = new WebSocket(
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
+    );
+    await new Promise((resolve) => {
+      lobbySocket.addEventListener("open", () => {
+        resolve();
+      });
+    });
+    const enterLobbyMessage = {
+      event: "enterLobby",
+      content: {
+        clientId: id,
+      },
+    };
+    lobbySocket.send(JSON.stringify(enterLobbyMessage));
+
+    await new Promise((resolve) => {
+      lobbySocket.addEventListener(
+        "message",
+        function listener(messageEvent) {
           const { event, content } = JSON.parse(messageEvent.data);
-          if (event === "initClientResponse") {
-            if (content.message === "OK") {
-              resolve();
-            }
-            console.log(content.message);
+          if (event === "enterLobbyResponse" && content.message === "OK") {
+            lobbySocket.removeEventListener("message", listener);
+            resolve();
           }
-        });
-      });
-
-      const lobbySocket = new WebSocket(
-        `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
-      );
-      this.lobbySocket = lobbySocket;
-      await new Promise((resolve) => {
-        this.lobbySocket.addEventListener("open", () => {
-          resolve();
-        });
-      });
-      const enterLobbyMessage = {
-        event: "enterLobby",
-        content: {
-          clientId: this.id,
-        },
-      };
-      this.lobbySocket.send(JSON.stringify(enterLobbyMessage));
-
-      await new Promise((resolve) => {
-        this.lobbySocket.addEventListener(
-          "message",
-          function listener(messageEvent) {
-            const { event, content } = JSON.parse(messageEvent.data);
-            if (event === "enterLobbyResponse" && content.message === "OK") {
-              this.lobbySocket.removeEventListener("message", listener);
-              resolve();
-            }
-          }.bind(this)
-        );
-      });
-
-      this.onLoginSuccess(
-        this.socket,
-        this.id,
-        this.nickname,
-        this.lobbySocket
+        }.bind(this)
       );
     });
+
+    return lobbySocket;
+  }
+
+  async _loginListener(event) {
+    event.preventDefault();
+    const id = parseInt(document.querySelector("#id").value);
+    if (isNaN(parseInt(id))) return;
+    const nickname = document.querySelector("#nickname").value;
+    const socket = await this._connectGlobalSocket(id, nickname);
+    const lobbySocket = await this._connectLobbySocket(id);
+    this.onLoginSuccess(socket, lobbySocket, id, nickname);
+  }
+
+  async _connectGlobalSocket(id, nickname) {
+    const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`);
+    await new Promise((resolve) => {
+      socket.addEventListener("open", () => {
+        resolve();
+      });
+    });
+
+    const initClientMessage = {
+      event: "initClient",
+      content: {
+        clientId: parseInt(id),
+        clientNickname: nickname,
+      },
+    };
+    socket.send(JSON.stringify(initClientMessage));
+    await new Promise((resolve) => {
+      socket.addEventListener("message", (messageEvent) => {
+        const { event, content } = JSON.parse(messageEvent.data);
+        if (event === "initClientResponse") {
+          if (content.message === "OK") {
+            resolve();
+          }
+        }
+      });
+    });
+
+    return socket;
   }
 
   _setRandomId() {
