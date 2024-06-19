@@ -36,7 +36,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
         if not self.is_init:
             if event == 'enterLobby':
-                await self.enter_lobby(content)
+                await self.enter_lobby(content['clientId'])
             else:
                 await self.close()
             return
@@ -63,10 +63,11 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Client {self.client_id} initialized with nickname {self.nickname}", "cyan")
 
     async def enter_lobby(self, client_id):
+        Printer.log(f"Client {client_id} entered lobby", "cyan")
         self.is_init = True # 인증으로 바꿔야함
         self.nickname = "test"
-        stateManager._add_client(self, client_id, self.nickname)
-        self._send(event='enterLobbyResponse', content={'message': 'OK'})
+        await stateManager._add_client(self, client_id, self.nickname)
+        await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 
     async def create_waiting_room(self, content):
         room_id = await stateManager._create_room(content['waitingRoomInfo'])
@@ -78,6 +79,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Waiting room {room_id} created", "blue")
 
     async def get_waiting_room_List(self):
-        room_list = stateManager._get_waiting_room_list()
+        room_list = await stateManager._get_waiting_room_list()
         await self._send(event='getWaitingRoomResponse', 
                          content={'waitingRoomList': room_list})
