@@ -43,6 +43,36 @@ class LoginPageManager {
         });
       });
 
+      // const lobbySocket = new WebSocket(
+      //   `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
+      // );
+      // this.clientInfo.lobbySocket = lobbySocket;
+      // await new Promise((resolve) => {
+      //   this.lobbySocket.addEventListener("open", () => {
+      //     resolve();
+      //   });
+      // });
+      // const enterLobbyMessage = {
+      //   event: "enterLobby",
+      //   content: {
+      //     clientId: this.clientInfo.id,
+      //   },
+      // };
+      // this.lobbySocket.send(JSON.stringify(enterLobbyMessage));
+
+      // await new Promise((resolve) => {
+      //   this.lobbySocket.addEventListener(
+      //     "message",
+      //     function listener(messageEvent) {
+      //       const { event, content } = JSON.parse(messageEvent.data);
+      //       if (event === "enterLobbyResponse" && content.message === "OK") {
+      //         this.lobbySocket.removeEventListener("message", listener);
+      //         resolve();
+      //       }
+      //     }.bind(this)
+      //   );
+      // });
+
       this.onLoginSuccess(this.socket, this.id, this.nickname);
     });
   }

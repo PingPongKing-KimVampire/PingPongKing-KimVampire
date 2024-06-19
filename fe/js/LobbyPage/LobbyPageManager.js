@@ -37,6 +37,7 @@ class LobbyPageManager {
   }
 
   async initPage() {
+    ////////
     this.lobbySocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
     );
@@ -57,20 +58,19 @@ class LobbyPageManager {
     this.lobbySocket.send(JSON.stringify(enterLobbyMessage));
 
     await new Promise((resolve) => {
-      this.lobbySocket.addEventListener(
-        "message",
-        function listener(messageEvent) {
-          const { event, content } = JSON.parse(messageEvent.data);
-          if (event === "enterLobbyResponse" && content.message === "OK") {
-            this.lobbySocket.removeEventListener("message", listener);
-            resolve();
-          }
-        }.bind(this)
-      );
+      const listener = (messageEvent) => {
+        const { event, content } = JSON.parse(messageEvent.data);
+        if (event === "enterLobbyResponse" && content.message === "OK") {
+          this.lobbySocket.removeEventListener("message", listener);
+          resolve();
+        }
+      };
+      this.lobbySocket.addEventListener("message", listener.bind(this));
     });
+    /////////////////
 
-    const waitingRoomList = await this._getWaitingRoomList();
-    this._renderWaitingRoom(waitingRoomList);
+    const waitingRoomInfoList = await this._getWaitingRoomList();
+    this._renderWaitingRoom(waitingRoomInfoList);
 
     this._autoSetScollTrackColor();
     this._adjustButtonSize();
@@ -82,17 +82,16 @@ class LobbyPageManager {
       content: {},
     };
     this.lobbySocket.send(JSON.stringify(getWaitingRoomLisMessage));
-    const waitingRoomList = await new Promise(
-      function listener(resolve) {
-        this.clientInfo.socket.addEventListener("message", (messageEvent) => {
-          const { event, content } = JSON.parse(messageEvent.data);
-          if (event === "getWaitingRoomResponse") {
-            this.lobbySocket.removeEventListener("message", listener);
-            resolve(content.gameInfoList);
-          }
-        });
-      }.bind(this)
-    );
+    const waitingRoomList = await new Promise((resolve) => {
+      const listener = (messageEvent) => {
+        const { event, content } = JSON.parse(messageEvent.data);
+        if (event === "getWaitingRoomResponse") {
+          this.lobbySocket.removeEventListener("message", listener);
+          resolve(content.waitingRoomInfoList);
+        }
+      };
+      this.lobbySocket.addEventListener("message", listener);
+    });
     return waitingRoomList;
   }
 
