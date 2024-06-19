@@ -37,38 +37,6 @@ class LobbyPageManager {
   }
 
   async initPage() {
-    ////////
-    this.lobbySocket = new WebSocket(
-      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
-    );
-    this.clientInfo.lobbySocket = this.lobbySocket;
-
-    await new Promise((resolve) => {
-      this.lobbySocket.addEventListener("open", () => {
-        resolve();
-      });
-    });
-
-    const enterLobbyMessage = {
-      event: "enterLobby",
-      content: {
-        clientId: this.clientInfo.id,
-      },
-    };
-    this.lobbySocket.send(JSON.stringify(enterLobbyMessage));
-
-    await new Promise((resolve) => {
-      const listener = (messageEvent) => {
-        const { event, content } = JSON.parse(messageEvent.data);
-        if (event === "enterLobbyResponse" && content.message === "OK") {
-          this.lobbySocket.removeEventListener("message", listener);
-          resolve();
-        }
-      };
-      this.lobbySocket.addEventListener("message", listener.bind(this));
-    });
-    /////////////////
-
     const waitingRoomInfoList = await this._getWaitingRoomList();
     this._renderWaitingRoom(waitingRoomInfoList);
 
@@ -81,16 +49,16 @@ class LobbyPageManager {
       event: "getWaitingRoomList",
       content: {},
     };
-    this.lobbySocket.send(JSON.stringify(getWaitingRoomLisMessage));
+    this.clientInfo.lobbySocket.send(JSON.stringify(getWaitingRoomLisMessage));
     const waitingRoomList = await new Promise((resolve) => {
       const listener = (messageEvent) => {
         const { event, content } = JSON.parse(messageEvent.data);
         if (event === "getWaitingRoomResponse") {
-          this.lobbySocket.removeEventListener("message", listener);
+          this.clientInfo.lobbySocket.removeEventListener("message", listener);
           resolve(content.waitingRoomInfoList);
         }
       };
-      this.lobbySocket.addEventListener("message", listener);
+      this.clientInfo.lobbySocket.addEventListener("message", listener);
     });
     return waitingRoomList;
   }
@@ -242,7 +210,7 @@ class LobbyPageManager {
 
   async _enterWaitingRoom(roomId, gameTitle) {
     const pingpongRoomSocket = new WebSocket(
-      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpongRoom/${roomId}`
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpongRoom/${roomId}/`
     );
 
     await new Promise((resolve) => {
@@ -280,7 +248,7 @@ class LobbyPageManager {
       teamRightList,
     };
     this._unsubscribeWindow();
-    this.lobbySocket.close();
+    this.clientInfo.lobbySocket.close();
 
     //페이지 이동
     this.onCLickWaitingRoomButton(gameInfo);
