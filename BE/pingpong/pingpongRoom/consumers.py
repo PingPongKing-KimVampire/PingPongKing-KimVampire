@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from utils.printer import Printer
-from .stateManager import StateManager
+from coreManage.stateManager import StateManager
 
 stateManager = StateManager()
 
@@ -97,9 +97,11 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     Notify methods
     """
     async def notify_game_give_up(self, content):
+        self.state = 'waiting'
         await self._send(event='notifyGameGiveUp', content=content)
         
     async def notify_game_end(self, content):
+        self.state = 'waiting'
         await self._send(event='notifyGameEnd', content=content)
 
     async def notify_paddle_location_update(self, content):
@@ -126,4 +128,5 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyGameReady', content=content)
 
     async def notify_game_start(self, content):
+        self.state = 'playing'
         await self._send(event='notifyGameStart', content=content)

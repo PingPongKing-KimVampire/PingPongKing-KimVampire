@@ -2,7 +2,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 import asyncio
 from utils.printer import Printer
-from .stateManager import StateManager
+from coreManage.stateManager import StateManager
 
 stateManager = StateManager()
 
@@ -23,6 +23,12 @@ class AuthConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         Printer.log("WebSocket connection closed", "red")
+        
+    async def _send(self, event, content):
+        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
+        Printer.log(f"event : {event}", "cyan")
+        Printer.log(f"conetnt : {content}", "cyan")
+        await self.send(json.dumps({ 'event': event, 'content': content }))
 
     async def receive(self, text_data):
         message = json.loads(text_data)
@@ -42,11 +48,4 @@ class AuthConsumer(AsyncWebsocketConsumer):
         self.client_id = client_id
         self.client_nickname = client_nickname
         stateManager._add_client(self, client_id, client_nickname)
-        data = {
-            'event': 'initClientResponse',
-            'content': {
-                'message': 'OK'
-            }
-        }
-        # Ensure the data is sent as a JSON encoded string
-        await self.send(text_data=json.dumps(data))
+        await self._send('initClientResponse', {'message': 'OK'})

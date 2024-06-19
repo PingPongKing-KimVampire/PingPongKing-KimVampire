@@ -1,7 +1,7 @@
 from django.urls import path
-from .authConsumers import AuthConsumer
-from .lobbyConsumers import LobbyConsumer
-from .pingpongRoomConsumers import PingpongRoomConsumer
+from authentication.consumers import AuthConsumer
+from lobby.consumers import LobbyConsumer
+from pingpongRoom.consumers import PingpongRoomConsumer
 
 websocket_urlpatterns = [
     path('ws/', AuthConsumer.as_asgi()),

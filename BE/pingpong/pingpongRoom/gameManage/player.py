@@ -3,6 +3,7 @@ class Player:
         self.pos_x = 0
         self.pos_y = 0
         self.team = None
+        self.mode = None
         self.paddle_width = paddle_width
         self.paddle_height = paddle_height
         
@@ -12,3 +13,9 @@ class Player:
         
     def get_pos(self):
         return self.pos_x, self.pos_y
+    
+    def set_team(self, team):
+        self.team = team
+        
+    def set_mode(self, mode):
+        self.mode = mode

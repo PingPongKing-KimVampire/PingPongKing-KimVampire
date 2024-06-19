@@ -13,4 +13,4 @@ COPY . /app/
 
 WORKDIR /app/pingpong
 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "3001", "pingpong.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "3001", "kimVampire.asgi:application"]

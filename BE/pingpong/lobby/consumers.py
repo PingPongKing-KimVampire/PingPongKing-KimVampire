@@ -1,6 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-from .stateManager import StateManager
+from coreManage.stateManager import StateManager
 from utils.printer import Printer
 
 stateManager = StateManager()

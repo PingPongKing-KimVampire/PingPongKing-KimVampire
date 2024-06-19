@@ -10,10 +10,12 @@ LEFT = 0
 RIGHT = 1
 
 class GameManager:
-    def __init__(self, room_id):
+    def __init__(self, room_id, left_mode, right_mode):
         self.room_id = room_id
         self.left_team = []
         self.right_team = []
+        self.left_mode = left_mode
+        self.right_mode = right_mode
         self.clients = {}
         self.board_width = 1550
         self.board_height = 1000
@@ -22,18 +24,20 @@ class GameManager:
         self.is_playing = False
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
-        self.serve_turn = LEFT  # 서브 턴 초기 설정
+        self.serve_turn = LEFT
         
     def set_teams(self, left_team, right_team):
         self.left_team = left_team
         self.right_team = right_team
         team_width = self.board_width / 8
         for player in self.left_team:
-            player.team = LEFT
+            player.set_team(LEFT)
+            player.set_mode(self.left_mode)
             player.update_pos(team_width, self.board_height / 2)
             self.clients[player.client_id] = player
         for player in self.right_team:
-            player.team = RIGHT
+            player.set_team(RIGHT)
+            player.set_mode(self.right_mode)
             player.update_pos(self.board_width - team_width, self.board_height / 2)
             self.clients[player.client_id] = player
 
@@ -62,15 +66,17 @@ class GameManager:
                            content=content)
     
     async def _add_score(self, consumer):
-        if self.serve_turn == LEFT:
-            self.score[RIGHT] += 1
-        else:
+        if self.ball.dx > 0:
             self.score[LEFT] += 1
-        win_team = LEFT if self.serve_turn == RIGHT else RIGHT
+            win_team = 'left'
+        else:
+            self.score[RIGHT] += 1
+            win_team = 'right'
+        team_idx = LEFT if win_team == 'left' else RIGHT
         consumer = self.clients[0].consumer
         await notify_group(consumer, self.room_id, 
                            event='notifyScoreUpdate', 
-                           content={'team': win_team, 'score': self.score[win_team]})
+                           content={'team': win_team, 'score': self.score[team_idx]})
             
     async def _check_game_end(self, consumer):
         if self.score[LEFT] >= 5 or self.score[RIGHT] >= 5:
@@ -78,9 +84,8 @@ class GameManager:
             self._end_game()
             await notify_group(consumer, self.room_id, 
                                event='notifyGameEnd', 
-                               content={'team': team })
+                               content={'winTeam': team })
         
-            
     def _detect_collisions(self):
         if self.ball.get_right_x() >= self.board_width:
             self.serve_turn = LEFT
@@ -117,9 +122,9 @@ class GameManager:
     async def _end_round(self):
         await self._add_score()
         await self._check_game_end()
-        self._reset_round()
+        await self._reset_round()
 
-    def _reset_round(self, team):
+    async def _reset_round(self, team):
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
         self.ball.reset_ball(serve_position, self.board_height / 2, 0)
         
