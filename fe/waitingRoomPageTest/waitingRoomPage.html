@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="../css/common.css">
+	<link rel="stylesheet" href="waitingRoomPage.css">
+</head>
+
+<body>
+	<div id="app">
+		<button class="exitButton"></button>
+
+		<div id="container">
+			<div id="header">
+				<div id="title">개쩌는 탁구장</div>
+				<div id="mode">인간 VS 인간 모드</div>
+			</div>
+			<div id="panel">
+				<div class="teamPanel">
+					<div class="status">
+						<img class="teamIcon" src="../images/humanIcon.png">
+						<div class="readyText">
+							Ready!
+							<div class="readyStroke">Ready!</div>
+						</div>
+					</div>
+					<div class="name">짱구</div>
+					<div class="avatar">
+						<img class="avatarImg" src="../images/playerB.png"">
+					</div>
+				</div>
+				<div id="vsText">VS</div>
+				<div class="teamPanel" id="rightTeamPanel">
+					<div class="status">
+						<img class="teamIcon" src="../images/humanIcon.png">
+						<div class="readyText">
+							Ready!
+							<div class="readyStroke on">Ready!</div>
+						</div>
+					</div>
+					<div class="name">짱구</div>
+					<div class="avatar">
+						<img class="avatarImg on" src="../images/playerA.png"">
+					</div>
+				</div>
+			</div>
+			<button class="generalButton" id="readyButton">Ready</button>
+		</div>
+
+	</div>
+	
+</body>
+</html>
