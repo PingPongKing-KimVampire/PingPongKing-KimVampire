@@ -210,7 +210,7 @@ class LobbyPageManager {
 
   async _enterWaitingRoom(roomId, gameTitle) {
     const pingpongRoomSocket = new WebSocket(
-      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpongRoom/${roomId}/`
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
     );
 
     await new Promise((resolve) => {
@@ -225,7 +225,7 @@ class LobbyPageManager {
         clientId: this.clientInfo.id,
       },
     };
-    this.pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
+    pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 
     const { teamLeftList, teamRightList } = await new Promise((resolve) => {
       pingpongRoomSocket.addEventListener(
@@ -233,7 +233,7 @@ class LobbyPageManager {
         function listener(messageEvent) {
           const { event, content } = JSON.parse(messageEvent.data);
           if (event === "enterWaitingRoomResponse") {
-            this.pingpongRoomSocket.removeEventListener("message", listener);
+            pingpongRoomSocket.removeEventListener("message", listener);
             resolve(content);
           }
         }.bind(this)
