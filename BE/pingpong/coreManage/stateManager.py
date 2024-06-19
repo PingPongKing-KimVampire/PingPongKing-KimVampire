@@ -1,6 +1,6 @@
 from typing import Any
 import uuid
-from utils.group import add_group, discard_group, change_group, notify_group
+from .group import add_group, discard_group, change_group, notify_group
 from pingpongRoom.gameManage.gameManager import GameManager
 import asyncio
 from utils.printer import Printer
@@ -20,6 +20,8 @@ class StateManager:
 
     ### Client
     async def _add_client(self, consumer, clientId, nickname):
+        if self.clients.__len__() == 0:
+            self.lobby_channel = consumer.channel_layer
         self.clients[clientId] = nickname
         await add_group(consumer, 'lobby')
 
@@ -27,6 +29,9 @@ class StateManager:
         if clientId in self.clients:
             del self.clients[clientId]
         await discard_group(consumer, 'lobby')
+
+    async def _notify_lobby(self, event, content):
+        await notify_group(self.lobby_channel, 'lobby', event, content)
 
     ### Room
     async def _create_room(self, content):
@@ -56,15 +61,15 @@ class StateManager:
             team = 'teamRight'
         else:
             return False
-        await change_group(consumer, old_group='lobby', new_group=room_id)
+        await add_group(consumer, room_id)
         await self._add_client_to_room(consumer, room_id, client_id, team)
         return True
         
     async def _leave_waiting_room(self, consumer, room_id, client_id):
-        await self._remove_player_from_room(room_id, client_id)
+        await self._remove_player_from_room(consumer, room_id, client_id)
         # 무조건 lobby로 그룹 변경이 맞는가?
         await change_group(consumer, old_group=room_id, new_group='lobby')
-        await notify_group(consumer, room_id, 
+        await notify_group(consumer.channel_layer, room_id, 
                            event='notifyWaitingRoomExit', 
                            content={'clientId': client_id})
 
@@ -78,22 +83,26 @@ class StateManager:
         }
         Printer.log(room[team][client_id])
         if count == 0:
-            await notify_group(consumer, 'lobby', 
-                               event='notifyWaitingRoomCreated', 
-                               content={'roomId': room_id})
-        await notify_group(consumer, 'lobby', 
+            await self._notify_lobby('notifyWaitingRoomCreated', {'roomId': room_id})
+        await notify_group(consumer.channel_layer, room_id, 
                            event='notifyCurrentPlayerCountChange', 
-                           content={'clientId': client_id, 'currentPlayerCount': count + 1})
-        await notify_group(consumer, room_id, 
+                           content={'currentPlayerCount': count + 1})
+        await notify_group(consumer.channel_layer, room_id, 
                            event='notifyWaitingRoomEnter', 
                            content={'clientId': client_id, 'clientNickname': client_nickname, 'team': team})
 
-    async def _remove_player_from_room(self, room_id, client_id):
+    async def _remove_player_from_room(self, consumer, room_id, client_id):
         if room_id in self.rooms:
             for team in ['teamLeft', 'teamRight']:
                 if client_id in self.rooms[room_id][team]:
                     del self.rooms[room_id][team][client_id]
                     break
+            if len(self.rooms[room_id]['teamLeft']) + len(self.rooms[room_id]['teamRight']) == 0:
+                del self.rooms[room_id]
+                await notify_group(consumer.channel_layer, 'lobby', 
+                                   event='notifyWaitingRoomClosed', 
+                                   content={ 'waitingRoomInfo': {
+                                            'roomId': room_id } })
 
     async def _get_waiting_room_list(self):
         room_data = []
@@ -116,7 +125,7 @@ class StateManager:
             if client_id in room[team]:
                 room[team][client_id]['state'] = 'READY' if is_ready else 'NOTREADY'
                 break
-        await notify_group(consumer, room_id, 
+        await notify_group(consumer.channel_layer, room_id, 
                            event='notifyReadyStateChange', 
                            content={'clientId': client_id, 'isReady': is_ready})
         await self._check_game_ready(consumer, room_id)
@@ -126,16 +135,14 @@ class StateManager:
         team_left_ready = all([info['state'] == 'READY' for info in room['teamLeft'].values()])
         team_right_ready = all([info['state'] == 'READY' for info in room['teamRight'].values()])
         if team_left_ready and team_right_ready:
-            await notify_group(consumer, room_id, event='notifyGameReady', content={})
+            await notify_group(consumer.channel_layer, room_id, event='notifyGameReady', content={})
             asyncio.sleep(3)
             await self._start_game(consumer, room_id)
 
     async def _start_game(self, consumer, room_id):
         game_manager = self.rooms[room_id]['gameManager']
-        await notify_group(consumer, room_id, event='notifyGameStart', content={})
-        await notify_group(consumer, 'lobby', 
-                           event='notifyWaitingRoomClosed', 
-                           content={ 'roomId': room_id })
+        await notify_group(consumer.channel_layer, room_id, event='notifyGameStart', content={})
+        await self._notify_lobby('notifyWaitingRoomClosed', {'roomId': room_id})
         left_team = [player for player in self.rooms[room_id]['teamLeft'].keys()]
         right_team = [player for player in self.rooms[room_id]['teamRight'].keys()]
         game_manager.set_teams(left_team, right_team)

@@ -82,3 +82,10 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         room_list = await stateManager._get_waiting_room_list()
         await self._send(event='getWaitingRoomResponse', 
                          content={'waitingRoomInfoList': room_list})
+        
+    async def notifyWaitingRoomCreated(self, content):
+        await self._send(event='notifyWaitingRoomCreated', content=content)
+        
+    async def notifyCurrentPlayerCountChange(self, content):
+        await self._send(event='notifyCurrentPlayerCountChange', content=content)
+    

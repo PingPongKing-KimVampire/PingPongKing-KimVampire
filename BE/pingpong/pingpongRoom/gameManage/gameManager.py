@@ -2,7 +2,7 @@ import asyncio
 import random
 from .ball import Ball
 from .player import Player
-from utils.group import notify_group
+from coreManage.group import notify_group
 
 FRAME_PER_SECOND = 60
 
@@ -45,7 +45,7 @@ class GameManager:
         self.is_playing = True
         self.is_end = False
         self._reset_round()
-        await notify_group(consumer, self.room_id, event='notifyGameStart', content={})
+        await notify_group(consumer.channel_layer, self.room_id, event='notifyGameStart', content={})
         await self._game_loop(consumer)
 
     async def _game_loop(self, consumer):
@@ -61,7 +61,7 @@ class GameManager:
         pos_y = content['yPosition']
         player = self.clients[client_id]
         player.update_pos(pos_x, pos_y)
-        await notify_group(consumer, self.room_id, 
+        await notify_group(consumer.channel_layer, self.room_id, 
                            event='notifyPaddleLocationUpdate', 
                            content=content)
     
@@ -74,7 +74,7 @@ class GameManager:
             win_team = 'right'
         team_idx = LEFT if win_team == 'left' else RIGHT
         consumer = self.clients[0].consumer
-        await notify_group(consumer, self.room_id, 
+        await notify_group(consumer.channel_layer, self.room_id, 
                            event='notifyScoreUpdate', 
                            content={'team': win_team, 'score': self.score[team_idx]})
             
@@ -82,7 +82,7 @@ class GameManager:
         if self.score[LEFT] >= 5 or self.score[RIGHT] >= 5:
             team = 'left' if self.score[LEFT] >= 5 else 'right'
             self._end_game()
-            await notify_group(consumer, self.room_id, 
+            await notify_group(consumer.channel_layer, self.room_id, 
                                event='notifyGameEnd', 
                                content={'winTeam': team })
         
@@ -113,7 +113,7 @@ class GameManager:
         return False
 
     async def _send_ball_update(self, consumer):
-        await notify_group(consumer, self.room_id, 
+        await notify_group(consumer.channel_layer, self.room_id, 
                            event='notifyBallLocationUpdate', 
                            content={
                                 'xPosition': self.ball.pos_x,
@@ -138,7 +138,7 @@ class GameManager:
     async def _give_up_game(self, consumer):
         self._end_game()
         client_id = consumer.client_id
-        await notify_group(consumer, self.room_id, 
+        await notify_group(consumer.channel_layer, self.room_id, 
                            event='notifyGameGiveUp', content={'clientId': client_id})
 
     def _end_game(self):

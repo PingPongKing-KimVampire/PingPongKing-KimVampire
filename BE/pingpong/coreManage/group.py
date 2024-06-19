@@ -1,4 +1,5 @@
 from utils.printer import Printer
+import json
 
 async def add_group(consumer, group):
     await consumer.channel_layer.group_add(
@@ -15,28 +16,20 @@ async def discard_group(consumer, group):
     return group
 
 async def change_group(consumer, old_group, new_group):
-    discard_group(consumer, old_group)
-    add_group(consumer, new_group)
+    Printer.log("someone change group old to new", "cyan")
+    await discard_group(consumer, old_group)
+    await add_group(consumer, new_group)
     return new_group
 
-async def notify_group(consumer, group, event, content):
+async def notify_group(channel_layer, group, event, content):
     Printer.log(f"!!!!! notify group !!!!!", "cyan")
     Printer.log(f"group: {group}", "cyan")
-    Printer.log(f"event: {event}", "cyan")
+    Printer.log(f"type: {event}", "cyan")
     Printer.log(f"content: {content}", "cyan")
-    await consumer.channel_layer.group_send(
+    await channel_layer.group_send(
         group,
         {
-            'event': event,
-            'content': content
-        }
-    )
-    
-async def notify_group(consumer, group, event, content):
-    await consumer.channel_layer.group_send(
-        group,
-        {
-            'event': event,
-            'content': content
+            'type': event,
+            'content': json.dumps(content)
         }
     )
