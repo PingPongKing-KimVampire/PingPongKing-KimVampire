@@ -81,4 +81,4 @@ class LobbyConsumer(AsyncWebsocketConsumer):
     async def get_waiting_room_List(self):
         room_list = await stateManager._get_waiting_room_list()
         await self._send(event='getWaitingRoomResponse', 
-                         content={'waitingRoomList': room_list})
+                         content={'waitingRoomInfoList': room_list})

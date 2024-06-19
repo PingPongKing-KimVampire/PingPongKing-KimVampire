@@ -25,21 +25,3 @@ class Printer:
         resetCode = Printer.COLORS["reset"]
         
         print(f"{colorCode}{message}{resetCode}")
-
-# 예제 출력
-Printer.log("This is a black message", "black")
-Printer.log("This is a red message", "red")
-Printer.log("This is a green message", "green")
-Printer.log("This is a yellow message", "yellow")
-Printer.log("This is a blue message", "blue")
-Printer.log("This is a magenta message", "magenta")
-Printer.log("This is a cyan message", "cyan")
-Printer.log("This is a white message", "white")
-Printer.log("This is a bright black message", "bright_black")
-Printer.log("This is a bright red message", "bright_red")
-Printer.log("This is a bright green message", "bright_green")
-Printer.log("This is a bright yellow message", "bright_yellow")
-Printer.log("This is a bright blue message", "bright_blue")
-Printer.log("This is a bright magenta message", "bright_magenta")
-Printer.log("This is a bright cyan message", "bright_cyan")
-Printer.log("This is a bright white message", "bright_white")
