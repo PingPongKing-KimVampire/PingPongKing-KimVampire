@@ -2,8 +2,9 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class LoginPageManager {
-  constructor(app, onLoginSuccess) {
+  constructor(app, clientInfo, onLoginSuccess) {
     console.log("Login Page!");
+    this.clientInfo = clientInfo;
     app.innerHTML = this._getHTML();
     this._setRandomId();
     this._setRandomNickname();
@@ -55,7 +56,12 @@ class LoginPageManager {
     const nickname = document.querySelector("#nickname").value;
     const socket = await this._connectGlobalSocket(id, nickname);
     const lobbySocket = await this._connectLobbySocket(id);
-    this.onLoginSuccess(socket, lobbySocket, id, nickname);
+
+    this.clientInfo.id = id;
+    this.clientInfo.nickname = nickname;
+    this.clientInfo.socket = socket;
+    this.clientInfo.lobbySocket = lobbySocket;
+    this.onLoginSuccess();
   }
 
   async _connectGlobalSocket(id, nickname) {

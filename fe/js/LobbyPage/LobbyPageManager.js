@@ -15,11 +15,16 @@ class LobbyPageManager {
 
     this.clientInfo = {
       socket: null,
-      lobbySocket: null,
       id: null,
       nickname: null,
-      roomId: null,
-      isReferee: false,
+      lobbySocket: null,
+      gameInfo: {
+        pingpongRoomSocket: null,
+        roomId: null,
+        title: null,
+        teamLeftList: null,
+        teamRightList: null,
+      },
     };
     this.clientInfo = clientInfo;
     this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
@@ -45,11 +50,11 @@ class LobbyPageManager {
   }
 
   async _getWaitingRoomList() {
-    const getWaitingRoomLisMessage = {
+    const getWaitingRoomListMessage = {
       event: "getWaitingRoomList",
       content: {},
     };
-    this.clientInfo.lobbySocket.send(JSON.stringify(getWaitingRoomLisMessage));
+    this.clientInfo.lobbySocket.send(JSON.stringify(getWaitingRoomListMessage));
     const waitingRoomList = await new Promise((resolve) => {
       const listener = (messageEvent) => {
         const { event, content } = JSON.parse(messageEvent.data);
@@ -98,9 +103,8 @@ class LobbyPageManager {
       const waitingRoomListContainer = document.querySelector(
         ".waitingRoomListContainer"
       );
-      //방 아이디 추가하기
       waitingRoomListContainer.appendChild(
-        this._getWaitingRoomelement(
+        this._getWaitingRoomElement(
           roomId,
           leftMode,
           rightMode,
@@ -142,11 +146,11 @@ class LobbyPageManager {
     }
   }
 
-  _getWaitingRoomelement(
+  _getWaitingRoomElement(
     roomId,
     team1,
     team2,
-    gameTitle,
+    title,
     currendPlayerCount,
     totalPlayerCount
   ) {
@@ -177,7 +181,7 @@ class LobbyPageManager {
 
     const gameName = document.createElement("div");
     gameName.className = "gameName";
-    gameName.textContent = gameTitle;
+    gameName.textContent = title;
 
     const matchPlayerCount = document.createElement("div");
     matchPlayerCount.className = "matchPlayerCount";
@@ -189,12 +193,12 @@ class LobbyPageManager {
     waitingRoomContainer.appendChild(matchPlayerCount);
 
     waitingRoomContainer.addEventListener("click", async () => {
-      this.enterModalTitle.innerText = `"${gameTitle}"`;
+      this.enterModalTitle.innerText = `"${title}"`;
       this.enterRoomModal.style.display = "flex";
       const enterRoomListenerRef = this._enterWaitingRoom.bind(
         this,
         roomId,
-        gameTitle
+        title
       );
       const hideModalLisenerRef = () => {
         this.enterRoomModal.style.display = "none";
@@ -208,7 +212,7 @@ class LobbyPageManager {
     return waitingRoomContainer;
   }
 
-  async _enterWaitingRoom(roomId, gameTitle) {
+  async _enterWaitingRoom(roomId, title) {
     const pingpongRoomSocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
     );
@@ -249,8 +253,8 @@ class LobbyPageManager {
     };
     this._unsubscribeWindow();
     this.clientInfo.lobbySocket.close();
-
-    //페이지 이동
+    this.clientInfo.lobbySocket = null;
+    this.clientInfo.gameInfo = gameInfo;
     this.onCLickWaitingRoomButton(gameInfo);
   }
 

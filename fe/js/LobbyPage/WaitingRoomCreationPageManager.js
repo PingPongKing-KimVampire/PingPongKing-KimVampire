@@ -2,13 +2,12 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class WaitingRoomCreationPageManager {
-  constructor(app, clientInfo, onEnterSuccess) {
+  constructor(app, clientInfo, onEnterWaitingRoom) {
     console.log("Create Waiting Room Page!");
     app.innerHTML = this._getHTML();
     this.clientInfo = clientInfo;
-    this.onEnterSuccess = onEnterSuccess;
+    this.onEnterWaitingRoom = onEnterWaitingRoom;
 
-    // HTML 요소
     this.titleInput = document.querySelector("#titleInput");
     this.modeSelection = document.querySelector(
       ".selectionContainer:nth-of-type(2)"
@@ -121,14 +120,31 @@ class WaitingRoomCreationPageManager {
 
   async _createAndEnterRoom() {
     const title = this.titleInput.value;
-    // const mode = this.modeButtons.find((button) => button.checked).value;
-    // const humanCount = this.humanCountButton.value;
-    // const totalPlayerCount = mode === "vampire" ? humanCount + 1 : 2;
-
-    const leftMode = "vampire"; // 임시 모드 하드 코딩
-    const leftPlayerCount = 1;
-    const rightMode = "normal"; // 임시 모드 하드 코딩
-    const rightPlayerCount = 1;
+    const mode = this.modeButtons.find((button) => button.checked).value;
+    let leftMode;
+    let leftPlayerCount;
+    let rightMode;
+    let rightPlayerCount;
+    console.log(mode);
+    if (mode === "humanVsHuman") {
+      leftMode = "human";
+      rightMode = "human";
+      leftPlayerCount = 1;
+      rightPlayerCount = 1;
+    } else if (mode === "vampireVsVampire") {
+      console.log("here");
+      leftMode = "vampire";
+      rightMode = "vampire";
+      leftPlayerCount = 1;
+      rightPlayerCount = 1;
+    } else if (mode === "vampireVsHuman") {
+      const humanCount = parseInt(this.humanCountButton.value);
+      if (isNaN(humanCount)) return;
+      leftMode = "vampire";
+      rightMode = "human";
+      leftPlayerCount = 1;
+      rightPlayerCount = humanCount;
+    }
 
     this._sendCreateRoomMsg(
       title,
@@ -186,10 +202,11 @@ class WaitingRoomCreationPageManager {
       teamLeftList,
       teamRightList,
     };
+    this.clientInfo.gameInfo = gameInfo;
     this.clientInfo.lobbySocket.close();
+    this.clientInfo.lobbySocket = null;
 
-    //페이지 이동
-    this.onEnterSuccess(gameInfo);
+    this.onEnterWaitingRoom();
   }
 
   _sendCreateRoomMsg(
