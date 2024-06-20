@@ -187,9 +187,9 @@
 .avatarImgFrame.emptyFrame {
 	align-items: center;
 }
+
 .avatarImg {
 	width: 90%;
-	/* aspect-ratio: 1/1; */
 	filter: blur(2px);
 	opacity: 50%;
 }
