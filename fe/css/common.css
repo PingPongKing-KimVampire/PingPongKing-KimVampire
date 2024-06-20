@@ -118,3 +118,10 @@ body {
 	opacity: 1;
 	visibility: visible;
 }
+
+@media (orientation: portrait) {
+	.exitButton {
+		top: 2%;
+		left: 3%;
+	}
+}
