@@ -204,13 +204,76 @@
 	transition-duration: 0.2s;
 }
 
-/* @media (orientation: portrait) {
-	#container {
-		background-color: red;
+@media (orientation: portrait) {
+	#header {
+		height: 12%;
 	}
-} */
+	#title {
+		font-size: 2.8rem;
+	}
+	#mode {
+		font-size: 1rem;
+		padding: 1.5% 5%;
+	}
+	#panel {
+		height: 75%;
+		flex-direction: column;
+		margin-bottom: 0;
+	}
+	#vsText {
+		margin: 4% 0;
+		font-size: 2.8rem;
+	}
+	.teamPanel {
+		position: relative;
+		width: 30%;
+		height: auto;
+	}
+	.teamPanel:first-of-type {
+		align-items: center;
+	}
+	.teamPanel:last-of-type {
+		align-items: center;
+	}
+	.teamPanel:last-of-type .status {
+		flex-direction: row;
+	}
+	.status {
+		position: absolute;
+		top: 0%;
+		right: 24%;
+	}
+	.name {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 5/1;
+		font-size: 1.6rem;
+		font-weight: 700;
+	}
+	.avatar {
+		width: 100%;
+	}
+	.abilityButton {
+		font-size: 1.3rem;
+		line-height: 1.5rem;
+		letter-spacing: 0.1rem;
+	}
+	.teamPanel:first-of-type .abilityButton {
+		left: 108%;
+	}
+}
+@media (orientation: portrait) and (max-width: 600px) {
+	.teamPanel {
+		width: 45%;
+	}
+}
+@media (orientation: portrait) and (max-width: 450px) {
+	.teamPanel {
+		width: 55%;
+	}
+}
 
-@media (max-width: 1500px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 1500px) {
 	#container {
 		width: 85%;
 	}
@@ -219,7 +282,7 @@
 		line-height: 2.2rem;
 	}
 }
-@media (max-width: 1350px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 1350px) {
 	#container {
 		height: 82%;
 		width: 90%;
@@ -229,7 +292,7 @@
 		line-height: 2rem;
 	}
 }
-@media (max-width: 1150px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-width: 1150px){
 	#container {
 		height: 80%;
 	}
@@ -246,12 +309,12 @@
 	}
 }
 
-@media (max-height: 600px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-height: 600px) {
 	.teamPanel {
 		width: 28%;
 	}
 }
-@media (max-height: 500px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-height: 500px) {
 	#container {
 		height: 90%;
 	}
