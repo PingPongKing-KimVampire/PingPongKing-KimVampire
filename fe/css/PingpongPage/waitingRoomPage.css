@@ -83,12 +83,11 @@
 	width: 15%;
 	aspect-ratio: 1/1;
 }
-.teamPanel:first-of-type .teamIcon {
-	filter: drop-shadow(0px 0px 10px rgb(63, 142, 239));
+.teamIcon.vampireIcon {
+	filter: drop-shadow(0px 0px 10px rgb(255, 37, 0));
 }
-.teamPanel:last-of-type .teamIcon {
+.teamIcon.humanIcon {
 	filter: drop-shadow(0px 0px 10px rgb(63, 142, 239));
-	/* filter: drop-shadow(0px 0px 10px rgb(255, 37, 0)); */
 }
 
 .readyText {

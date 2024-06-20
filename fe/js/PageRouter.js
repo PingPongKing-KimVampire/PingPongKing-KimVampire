@@ -1,7 +1,7 @@
 import PingpongPageManager from "./PingpongPage/PingpongPageManager.js";
 import LoginPageManager from "./TestPage/LoginPageManager.js";
 import WaitingRoomCreationPageManager from "./LobbyPage/WaitingRoomCreationPageManager.js";
-
+import WaitingRoomPageManager from "./PingpongPage/WaitingRoomPageManager.js";
 import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
@@ -55,7 +55,12 @@ class PageRouter {
         this.clientInfo,
         this._onExitPingpongGame.bind(this)
       );
-      pingpongPageManager.initPage();
+      await pingpongPageManager.initPage();
+    } else if (url === "waitingRoom") {
+      const waitingRoomPageManager = new WaitingRoomPageManager(
+        this.app,
+        this.clientInfo
+      );
     }
   }
 
@@ -68,7 +73,7 @@ class PageRouter {
   }
 
   _onEnterWaitingRoom() {
-    this.renderPage("game");
+    this.renderPage("waitingRoom");
   }
 
   _onExitPingpongGame() {
