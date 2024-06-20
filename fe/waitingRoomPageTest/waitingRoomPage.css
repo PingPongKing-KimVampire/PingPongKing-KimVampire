@@ -44,7 +44,6 @@
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
-	margin-bottom: 3%;
 }
 
 #vsText {
@@ -81,7 +80,6 @@
 }
 
 .teamIcon {
-	/* height: 100%; */
 	width: 15%;
 	aspect-ratio: 1/1;
 }
@@ -116,9 +114,17 @@
 	filter: drop-shadow(0px 0px 12px rgba(255, 255, 255, 0.5));
 }
 
-.name {
-	height: 13%;
+.info {
 	width: 85%;
+	aspect-ratio: 1/1.1;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.name {
+	width: 100%;
+	height: 16%;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -131,14 +137,10 @@
 	border-radius: 1.5rem;
 }
 
-#readButton {
-	height: 10%;
-}
-
 .avatar {
 	position: relative;
-	width: 85%;
-	aspect-ratio: 1.1/1;
+	width: 100%;
+	height: 80%;
 }
 
 .abilityButton {
@@ -177,16 +179,65 @@
 	background: linear-gradient(to bottom, rgb(50, 26, 81), rgb(2, 4, 31));
 	filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5));
 }
-
 .avatarImg {
 	width: 90%;
-	aspect-ratio: 1/1;
+	/* aspect-ratio: 1/1; */
 	filter: blur(2px);
 	opacity: 50%;
 }
 .avatarImg.on {
 	filter: blur(0px);
 	opacity: 100%;
+}
+
+.listItem {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 100%;
+	height: 19%;
+}
+.listItem .avatarImgFrame {
+	position: relative;
+	height: 100%;
+	width: 24%;
+	border-radius: 0.7rem;
+	overflow: hidden;
+}
+.listItem .avatarImg {
+	width: 87%;
+}
+.listItem .listName {
+	width: 76%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	font-size: 2rem;
+	font-weight: 700;
+	color: white;
+}
+
+.listItem.me {
+	background-color: rgb(213, 112, 255);
+	border-radius: 1rem;
+}
+.listItem.me .listName {
+	color: rgb(1, 4, 37);
+}
+
+.diagonal-1, .diagonal-2 {
+	position: absolute;
+	top: 50%;
+	width: 130%;
+	height: 0.12rem;
+	background-color: rgb(213, 112, 255);
+}
+.diagonal-1 {
+	transform: rotate(40deg);
+}
+.diagonal-2 {
+	transform: rotate(-40deg);
 }
 
 #readyButton {
@@ -209,16 +260,16 @@
 		height: 12%;
 	}
 	#title {
-		font-size: 2.8rem;
+		font-size: 3rem;
 	}
 	#mode {
-		font-size: 1rem;
-		padding: 1.5% 5%;
+		font-size: 1.1rem;
+		padding: 1.6% 6%;
 	}
 	#panel {
 		height: 75%;
 		flex-direction: column;
-		margin-bottom: 0;
+		/* margin-bottom: 0; */
 	}
 	#vsText {
 		margin: 4% 0;
@@ -226,7 +277,7 @@
 	}
 	.teamPanel {
 		position: relative;
-		width: 30%;
+		width: 35%;
 		height: auto;
 	}
 	.teamPanel:first-of-type {
@@ -241,12 +292,13 @@
 	.status {
 		position: absolute;
 		top: 0%;
-		right: 24%;
+		right: 15%;
+		height: auto;
+	}
+	.info {
+		height: 100%;
 	}
 	.name {
-		width: 100%;
-		height: auto;
-		aspect-ratio: 5/1;
 		font-size: 1.6rem;
 		font-weight: 700;
 	}
@@ -262,14 +314,22 @@
 		left: 108%;
 	}
 }
+@media (orientation: portrait) and (max-width: 750px) {
+	.teamPanel {
+		width: 50%;
+	}
+}
 @media (orientation: portrait) and (max-width: 600px) {
 	.teamPanel {
-		width: 45%;
+		width: 50%;
 	}
 }
 @media (orientation: portrait) and (max-width: 450px) {
 	.teamPanel {
-		width: 55%;
+		width: 65%;
+	}
+	#vsText {
+		margin: 5% 0;
 	}
 }
 
