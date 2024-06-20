@@ -5,6 +5,8 @@ import WaitingRoomCreationPageManager from "./LobbyPage/WaitingRoomCreationPageM
 
 import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";
 
+import WaitingRoomPageManager from "./PingpongPage/WaitingRoomPageManager.js";
+
 class PageRouter {
   constructor() {
     this.app = document.querySelector("#app");
@@ -80,6 +82,11 @@ class PageRouter {
         }
       );
       await lobbyPageManager.initPage();
+    } else if (url === "waitingRoom") {
+      const waitingRoomPageManager = new WaitingRoomPageManager(
+        this.app,
+        this.clientInfo
+      )
     }
   }
 }
