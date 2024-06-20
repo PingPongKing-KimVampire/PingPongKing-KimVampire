@@ -250,7 +250,7 @@ class LobbyPageManager {
     const gameInfo = {
       pingpongRoomSocket,
       roomId,
-      title: gameTitle,
+      title,
       teamLeftList,
       teamRightList,
     };
