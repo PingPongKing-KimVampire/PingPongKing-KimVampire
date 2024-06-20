@@ -89,3 +89,5 @@ class LobbyConsumer(AsyncWebsocketConsumer):
     async def notifyCurrentPlayerCountChange(self, content):
         await self._send(event='notifyCurrentPlayerCountChange', content=content)
     
+    async def notifyWaitingRoomClosed(self, content):
+        await self._send(event='notifyWaitingRoomClosed', content=content)

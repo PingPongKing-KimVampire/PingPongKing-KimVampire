@@ -99,10 +99,7 @@ class StateManager:
                     break
             if len(self.rooms[room_id]['teamLeft']) + len(self.rooms[room_id]['teamRight']) == 0:
                 del self.rooms[room_id]
-                await notify_group(consumer.channel_layer, 'lobby', 
-                                   event='notifyWaitingRoomClosed', 
-                                   content={ 'waitingRoomInfo': {
-                                            'roomId': room_id } })
+                await self._notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo' : { 'roomId': room_id} })
 
     async def _get_waiting_room_list(self):
         room_data = []
