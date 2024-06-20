@@ -51,11 +51,9 @@ class PageRouter {
       const pingpongPageManager = new PingpongPageManager(
         this.app,
         this.clientInfo,
-        this.gameInfo,
-        () => {
-          this.renderPage("lobby");
-        }
+        this._onExitPingpongGame.bind(this)
       );
+      pingpongPageManager.initPage();
     }
   }
 
@@ -69,6 +67,10 @@ class PageRouter {
 
   _onEnterWaitingRoom() {
     this.renderPage("game");
+  }
+
+  _onExitPingpongGame() {
+    this.renderPage("lobby");
   }
 }
 
