@@ -21,6 +21,8 @@ class PageRouter {
         title: null,
         teamLeftList: null,
         teamRightList: null,
+        teamLeftMode: null,
+        teamRightMode: null,
       },
     };
   }
