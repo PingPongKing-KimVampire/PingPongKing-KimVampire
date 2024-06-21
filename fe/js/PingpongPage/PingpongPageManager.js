@@ -32,7 +32,7 @@ class PingpongPageManager {
         state: "READY",
       },
     };
-    this.clientInfo.gameInfo.pingpongRoomSocket.send(readyMessage);
+    this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(readyMessage));
 
     await this._getStartGameResponse(
       this.clientInfo.gameInfo.pingpongRoomSocket
