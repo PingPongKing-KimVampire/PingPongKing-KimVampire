@@ -28,6 +28,14 @@ class StateManager:
         self.clients = {}
         self.rooms = {}
 
+    async def _notify_lobby(self, event, content):
+        Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
+        await notify_group(self.lobby_channel, 'lobby', event, content)
+
+    async def _notify_room(self, room_id, event, content):
+        Printer.log(f"!!!!! notify ROOM {room_id} !!!!!", "cyan")
+        await notify_group(self.lobby_channel, room_id, event, content)
+
     ### Client
     async def _add_client(self, consumer, clientId, nickname):
         if self.clients.__len__() == 0:
@@ -39,14 +47,6 @@ class StateManager:
         if clientId in self.clients:
             del self.clients[clientId]
         await discard_group(consumer, 'lobby')
-
-    async def _notify_lobby(self, event, content):
-        Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
-        await notify_group(self.lobby_channel, 'lobby', event, content)
-
-    async def _notify_room(self, room_id, event, content):
-        Printer.log(f"!!!!! notify ROOM {room_id} !!!!!", "cyan")
-        await notify_group(self.lobby_channel, room_id, event, content)
 
     ### Room
     async def _create_room(self, content):
@@ -80,7 +80,7 @@ class StateManager:
             return False
         await add_group(consumer, room_id)
         await discard_group(consumer, 'lobby')
-        await self._add_client_to_room(consumer, room_id, client_id, team)
+        await self._add_client_to_room(room_id, client_id, team)
         return True
         
     async def _leave_waiting_room(self, consumer, room_id, client_id):
@@ -90,7 +90,7 @@ class StateManager:
                            event='notifyWaitingRoomExit', 
                            content={'clientId': client_id})
 
-    async def _add_client_to_room(self, consumer, room_id, client_id, team):
+    async def _add_client_to_room(self, room_id, client_id, team):
         room = self.rooms[room_id]
         count = len(room['teamLeft']) + len(room['teamRight'])
         client_nickname = self.clients[client_id]
@@ -99,15 +99,11 @@ class StateManager:
             'state': 'NOTREADY',
             'ability': 'human'
         }
-        Printer.log(room[team][client_id])
+        data = { 'clientId': client_id, 'clientNickname': client_nickname, 'team': team }
         if count == 0:
             await self._notify_lobby('notifyWaitingRoomCreated', {'roomId': room_id})
-        await self._notify_room(room_id, 
-                           event='notifyCurrentPlayerCountChange', 
-                           content={'currentPlayerCount': count + 1})
-        await self._notify_room(room_id, 
-                           event='notifyWaitingRoomEnter', 
-                           content={'clientId': client_id, 'clientNickname': client_nickname, 'team': team})
+        await self._notify_room(room_id, event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
+        await self._notify_room(room_id, event='notifyWaitingRoomEnter', content=data)
 
     async def _remove_player_from_room(self, consumer, room_id, client_id):
         if room_id in self.rooms:
@@ -140,10 +136,8 @@ class StateManager:
             if client_id in room[team]:
                 room[team][client_id]['state'] = is_ready
                 break
-        await self._notify_room(room_id, 
-                           event='notifyReadyStateChange', 
-                           content={'clientId': client_id, 'state': is_ready})
-        if await self._check_room_full(room_id):
+        await self._notify_room(room_id, event='notifyReadyStateChange', content={'clientId': client_id, 'state': is_ready})
+        if self._check_room_full(room_id):
             await self._check_game_ready(consumer, room_id)
             
     async def _check_game_ready(self, consumer, room_id):
@@ -180,6 +174,6 @@ class StateManager:
             })
         return team_left_list, team_right_list
 
-    async def _check_room_full(self, room_id):
+    def _check_room_full(self, room_id):
         room = self.rooms[room_id]
         return len(room['teamLeft']) + len(room['teamRight']) == room['leftMaxPlayerCount'] + room['rightMaxPlayerCount']

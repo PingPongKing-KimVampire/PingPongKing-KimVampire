@@ -52,15 +52,15 @@ class GameManager:
         self.channel_layer = consumer.channel_layer
         self.is_playing = True
         self.is_end = False
-        self._reset_round()
+        await self._reset_round()
         await self._notify_game_room('notifyGameStart', {})
-        await self._game_loop(consumer)
+        await self._game_loop()
 
-    async def _game_loop(self, consumer):
+    async def _game_loop(self):
         while self.is_playing and not self.is_end:
             self.ball.move()
             self._detect_collisions()
-            await self._send_ball_update(consumer)
+            await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
     async def _update_paddle_location(self, content):
