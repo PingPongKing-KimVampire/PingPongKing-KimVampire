@@ -86,9 +86,7 @@ class StateManager:
     async def _leave_waiting_room(self, consumer, room_id, client_id):
         await self._remove_player_from_room(consumer, room_id, client_id)
         await discard_group(consumer, room_id)
-        await self._notify_room(room_id, 
-                           event='notifyWaitingRoomExit', 
-                           content={'clientId': client_id})
+        await self._notify_room(room_id, event='notifyWaitingRoomExit', content={'clientId': client_id})
 
     async def _add_client_to_room(self, room_id, client_id, team):
         room = self.rooms[room_id]
@@ -154,7 +152,7 @@ class StateManager:
         await game_manager.set_team(self.rooms[room_id])
         await self._notify_room(room_id, event='notifyGameStart', content={})
         await self._notify_lobby('notifyWaitingRoomClosed', {'roomId': room_id})
-        game_manager.start_game(consumer)
+        await game_manager.start_game(consumer)
 
     async def _get_waiting_room_player_list(self, room_id):
         team_left_list = []

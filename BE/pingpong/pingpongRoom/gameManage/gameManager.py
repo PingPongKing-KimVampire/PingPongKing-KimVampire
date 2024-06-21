@@ -35,13 +35,6 @@ class GameManager:
             }
         )
     
-    def remove_client_from_team(self, client_id):
-        for team in [self.left_team, self.right_team]:
-            for player in team:
-                if player.client_id == client_id:
-                    team.remove(player)
-                    return
-
     async def set_team(self, room):
         team_left = room['teamLeft']
         team_right = room['teamRight']
@@ -116,9 +109,9 @@ class GameManager:
     async def _end_round(self):
         await self._add_score()
         await self._check_game_end()
-        await self._reset_round()
+        self._reset_round()
 
-    async def _reset_round(self):
+    def _reset_round(self):
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
         self.ball.reset_ball(serve_position, self.board_height / 2, 0)
         
@@ -137,3 +130,13 @@ class GameManager:
     def _end_game(self):
         self.is_playing = False
         self.is_end = True
+        self._reset_game()
+        
+    def _reset_game(self):
+        self.score = {LEFT: 0, RIGHT: 0}
+        self.serve_turn = LEFT
+        self.is_playing = False
+        self.is_end = False
+        self.left_team = {}
+        self.right_team = {}
+        self._reset_round()
