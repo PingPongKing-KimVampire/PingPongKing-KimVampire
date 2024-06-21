@@ -23,8 +23,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def _send(self, event=str, content=str):
         Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
-        Printer.log(f"event : {event}", "magenta")
-        Printer.log(f"conetnt : {content}", "magenta")
+        Printer.log(f"event : {event}", "white")
+        Printer.log(f"conetnt : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
 
@@ -34,21 +34,16 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         event = message.get('event')
         content = message.get('content')
         Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
-        Printer.log(f"event : {event}", "magenta")
-        Printer.log(f"content : {content}", "magenta")
+        Printer.log(f"event : {event}", "white")
+        Printer.log(f"content : {content}\n", "white")
         
-        await self.handle_waiting_event(event, content)
+        await self.handle_event(event, content)
 
-    """
-    waiting event
-    """
-    async def handle_waiting_event(self, event, content):
+    async def handle_event(self, event, content):
         if event == 'changeReadyState':
             await self.change_ready_state(content)
         elif event == 'enterWaitingRoom':
             await self.enter_waiting_room(content)
-        elif event == 'notifyWaitingRoomCreated':
-            await self.notifyWaitingRoomCreated(content)
 
     async def change_ready_state(self, content):
         await stateManager._change_ready_state(self, self.room_id, self.client_id, content['state'])
@@ -89,9 +84,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         client_id = content['clientId']
         state = content['state']
         await self._send(event='notifyReadyStateChange', content={'clientId': client_id, 'state': state})
-
-    async def notifyWaitingRoomCreated(self, event):
-        await self._send(event='notifyWaitingRoomCreated', content=event)
 
     async def notifyWaitingRoomEnter(self, content):
         await self._send(event='notifyWaitingRoomEnter', content=content)

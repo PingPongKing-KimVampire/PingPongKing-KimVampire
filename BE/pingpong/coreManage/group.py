@@ -15,17 +15,9 @@ async def discard_group(consumer, group):
     )
     return group
 
-async def change_group(consumer, old_group, new_group):
-    Printer.log("someone change group old to new", "cyan")
-    await discard_group(consumer, old_group)
-    await add_group(consumer, new_group)
-    return new_group
-
 async def notify_group(channel_layer, group, event, content):
-    Printer.log(f"!!!!! notify group !!!!!", "cyan")
-    Printer.log(f"group: {group}", "cyan")
-    Printer.log(f"type: {event}", "cyan")
-    Printer.log(f"content: {content}", "cyan")
+    Printer.log(f"type: {event}", "white")
+    Printer.log(f"content: {content}\n", "white")
     await channel_layer.group_send(
         group,
         {
