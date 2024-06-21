@@ -178,6 +178,9 @@
 	background: linear-gradient(to bottom, rgb(50, 26, 81), rgb(2, 4, 31));
 	filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5));
 }
+.avatarImgFrame.emptyFrame {
+	align-items: center;
+}
 .avatarImg {
 	width: 90%;
 	/* aspect-ratio: 1/1; */
@@ -223,6 +226,12 @@
 }
 .listItem.me .listName {
 	color: rgb(1, 4, 37);
+}
+
+.avatarQuestionMark {
+	font-size: 1.8rem;
+	font-weight: 500;
+	color: rgb(213, 112, 255);
 }
 
 .diagonal-1, .diagonal-2 {
