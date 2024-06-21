@@ -36,10 +36,16 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
         Printer.log(f"event : {event}", "white")
         Printer.log(f"content : {content}\n", "white")
-        
-        await self.handle_event(event, content)
+        if self.state == 'playing':
+            await self.handle_playeing_event(event, content)
+        else:
+            await self.handle_waiting_event(event, content)
 
-    async def handle_event(self, event, content):
+    async def handle_playeing_event(self, event, content):
+        if event == 'updatePaddleLocation':
+            await self.game_manager._update_paddle_location(self, content)
+        
+    async def handle_waiting_event(self, event, content):
         if event == 'changeReadyState':
             await self.change_ready_state(content)
         elif event == 'enterWaitingRoom':

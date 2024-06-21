@@ -12,6 +12,7 @@ RIGHT = 'right'
 
 class GameManager:
     def __init__(self, room_id, left_mode, right_mode):
+        self.channel_layer = None
         self.room_id = room_id
         self.left_team = {}
         self.right_team = {}
@@ -25,6 +26,15 @@ class GameManager:
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
         self.serve_turn = LEFT
+
+    async def _notify_game_room(self, event, content):
+        await self.channel_layer.group_send(
+            self.room_id,
+            {
+                'type': event,
+                'content': content
+            }
+        )
     
     def remove_client_from_team(self, client_id):
         for team in [self.left_team, self.right_team]:
@@ -40,10 +50,11 @@ class GameManager:
         self.team_right = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_right.items()}
         
     async def start_game(self, consumer):
+        self.channel_layer = consumer.channel_layer
         self.is_playing = True
         self.is_end = False
         self._reset_round()
-        await notify_group(consumer.channel_layer, self.room_id, event='notifyGameStart', content={})
+        await self._notify_game_room('notifyGameStart', {})
         await self._game_loop(consumer)
 
     async def _game_loop(self, consumer):
@@ -53,35 +64,28 @@ class GameManager:
             await self._send_ball_update(consumer)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
-    async def _update_paddle_location(self, consumer, content):
+    async def _update_paddle_location(self, content):
         client_id = content['clientId']
         pos_x = content['xPosition']
         pos_y = content['yPosition']
         player = self.clients[client_id]
         player.update_pos(pos_x, pos_y)
-        await notify_group(consumer.channel_layer, self.room_id, 
-                           event='notifyPaddleLocationUpdate', 
-                           content=content)
+        await self._notify_game_room('notifyPaddleLocationUpdate', content)
     
-    async def _add_score(self, consumer):
+    async def _add_score(self):
         if self.ball.dx > 0:
             self.score[LEFT] += 1
             win_team = 'left'
         else:
             self.score[RIGHT] += 1
             win_team = 'right'
-        consumer = self.clients[0].consumer
-        await notify_group(consumer.channel_layer, self.room_id, 
-                           event='notifyScoreUpdate', 
-                           content={'team': win_team, 'score': self.score[win_team]})
+        await self._notify_game_room('notifyScoreUpdate', {'team': win_team, 'score': self.score[win_team]})
             
-    async def _check_game_end(self, consumer):
+    async def _check_game_end(self):
         if self.score[LEFT] >= 5 or self.score[RIGHT] >= 5:
             team = 'left' if self.score[LEFT] >= 5 else 'right'
             self._end_game()
-            await notify_group(consumer.channel_layer, self.room_id, 
-                               event='notifyGameEnd', 
-                               content={'winTeam': team })
+            await self._notify_game_room('notifyGameEnd', {'winTeam': team})
         
     def _detect_collisions(self):
         if self.ball.get_right_x() >= self.board_width:
@@ -109,19 +113,16 @@ class GameManager:
                 return True
         return False
 
-    async def _send_ball_update(self, consumer):
-        await notify_group(consumer.channel_layer, self.room_id, 
-                           event='notifyBallLocationUpdate', 
-                           content={
-                                'xPosition': self.ball.pos_x,
-                                'yPosition': self.ball.pos_y })
+    async def _send_ball_update(self):
+        await self._notify_game_room('notifyBallLocationUpdate',
+                                        {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
     async def _end_round(self):
         await self._add_score()
         await self._check_game_end()
         await self._reset_round()
 
-    async def _reset_round(self, team):
+    async def _reset_round(self):
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
         self.ball.reset_ball(serve_position, self.board_height / 2, 0)
         
@@ -135,8 +136,7 @@ class GameManager:
     async def _give_up_game(self, consumer):
         self._end_game()
         client_id = consumer.client_id
-        await notify_group(consumer.channel_layer, self.room_id, 
-                           event='notifyGameGiveUp', content={'clientId': client_id})
+        await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
 
     def _end_game(self):
         self.is_playing = False
