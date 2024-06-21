@@ -1,11 +1,14 @@
 class Player:
-    def __init__(self, paddle_width=15, paddle_height=150):
+    def __init__(self, nickname, ability):
+        self.nickname = nickname
         self.pos_x = 0
         self.pos_y = 0
         self.team = None
         self.mode = None
-        self.paddle_width = paddle_width
-        self.paddle_height = paddle_height
+        self.paddle_width = 10
+        self.paddle_height = 150
+        if ability is not 'human':
+            self.set_player_ability(ability) #TODO
         
     def update_pos(self, x, y):
         self.pos_x = x
@@ -19,3 +22,7 @@ class Player:
         
     def set_mode(self, mode):
         self.mode = mode
+
+    def set_player_ability(self, ability):
+        # TODO
+        pass

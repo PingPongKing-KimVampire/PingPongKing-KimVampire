@@ -96,7 +96,8 @@ class StateManager:
         client_nickname = self.clients[client_id]
         room[team][client_id] = {
             'nickname': client_nickname,
-            'state': 'NOTREADY'
+            'state': 'NOTREADY',
+            'ability': 'human'
         }
         Printer.log(room[team][client_id])
         if count == 0:
@@ -156,11 +157,9 @@ class StateManager:
 
     async def _start_game(self, consumer, room_id):
         game_manager = self.rooms[room_id]['gameManager']
+        await game_manager.set_team(self.rooms[room_id])
         await self._notify_room(room_id, event='notifyGameStart', content={})
         await self._notify_lobby('notifyWaitingRoomClosed', {'roomId': room_id})
-        left_team = [player for player in self.rooms[room_id]['teamLeft']]
-        right_team = [player for player in self.rooms[room_id]['teamRight']]
-        game_manager.set_teams(left_team, right_team)
         game_manager.start_game(consumer)
 
     async def _get_waiting_room_player_list(self, room_id):

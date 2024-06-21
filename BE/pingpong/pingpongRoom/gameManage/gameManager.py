@@ -3,20 +3,20 @@ import random
 from .ball import Ball
 from .player import Player
 from coreManage.group import notify_group
+from utils.printer import Printer
 
 FRAME_PER_SECOND = 60
 
-LEFT = 0
-RIGHT = 1
+LEFT = 'left'
+RIGHT = 'right'
 
 class GameManager:
     def __init__(self, room_id, left_mode, right_mode):
         self.room_id = room_id
-        self.left_team = []
-        self.right_team = []
+        self.left_team = {}
+        self.right_team = {}
         self.left_mode = left_mode
         self.right_mode = right_mode
-        self.clients = {}
         self.board_width = 1550
         self.board_height = 1000
         self.ball_radius = 25
@@ -25,22 +25,20 @@ class GameManager:
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
         self.serve_turn = LEFT
-        
-    def set_teams(self, left_team, right_team):
-        self.left_team = left_team
-        self.right_team = right_team
-        team_width = self.board_width / 8
-        for player in self.left_team:
-            player.set_team(LEFT)
-            player.set_mode(self.left_mode)
-            player.update_pos(team_width, self.board_height / 2)
-            self.clients[player.client_id] = player
-        for player in self.right_team:
-            player.set_team(RIGHT)
-            player.set_mode(self.right_mode)
-            player.update_pos(self.board_width - team_width, self.board_height / 2)
-            self.clients[player.client_id] = player
+    
+    def remove_client_from_team(self, client_id):
+        for team in [self.left_team, self.right_team]:
+            for player in team:
+                if player.client_id == client_id:
+                    team.remove(player)
+                    return
 
+    async def set_team(self, room):
+        team_left = room['teamLeft']
+        team_right = room['teamRight']
+        self.team_left = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_left.items()}
+        self.team_right = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_right.items()}
+        
     async def start_game(self, consumer):
         self.is_playing = True
         self.is_end = False
@@ -72,11 +70,10 @@ class GameManager:
         else:
             self.score[RIGHT] += 1
             win_team = 'right'
-        team_idx = LEFT if win_team == 'left' else RIGHT
         consumer = self.clients[0].consumer
         await notify_group(consumer.channel_layer, self.room_id, 
                            event='notifyScoreUpdate', 
-                           content={'team': win_team, 'score': self.score[team_idx]})
+                           content={'team': win_team, 'score': self.score[win_team]})
             
     async def _check_game_end(self, consumer):
         if self.score[LEFT] >= 5 or self.score[RIGHT] >= 5:
