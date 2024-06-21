@@ -140,7 +140,8 @@ class StateManager:
                 room[team][client_id]['state'] = is_ready
                 break
         await self._notify_room(room_id, event='notifyReadyStateChange', content={'clientId': client_id, 'state': is_ready})
-        if self._check_room_full(room_id):
+        asyncio.sleep(0.1)
+        if await self._check_room_full(room_id):
             await self._check_game_ready(consumer, room_id)
             
     async def _check_game_ready(self, consumer, room_id):
@@ -148,9 +149,11 @@ class StateManager:
         team_left_ready = all([info['state'] == 'READY' for info in room['teamLeft'].values()])
         team_right_ready = all([info['state'] == 'READY' for info in room['teamRight'].values()])
         if team_left_ready and team_right_ready:
+            Printer.log(f"Both teams are ready in room {room_id}. Notifying game ready.", "green")
             await self._notify_room(room_id, event='notifyGameReady', content={})
-            asyncio.sleep(3)
+            await asyncio.sleep(3)
             await self._start_game(consumer, room_id)
+
 
     async def _start_game(self, consumer, room_id):
         game_manager = self.rooms[room_id]['gameManager']
@@ -178,6 +181,6 @@ class StateManager:
             })
         return team_left_list, team_right_list
 
-    def _check_room_full(self, room_id):
+    async def _check_room_full(self, room_id):
         room = self.rooms[room_id]
         return len(room['teamLeft']) + len(room['teamRight']) == room['leftMaxPlayerCount'] + room['rightMaxPlayerCount']
