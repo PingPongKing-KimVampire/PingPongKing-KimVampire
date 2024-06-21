@@ -1,9 +1,10 @@
 import windowObservable from "../../WindowObservable.js";
 
 class WaitingRoomPageManager {
-	constructor(app, clientInfo) {
+	constructor(app, clientInfo, onExitWaitingRoom) {
 		console.log("Waiting Room Page!");
 		this.clientInfo = clientInfo;
+		this.onExitWaitingRoom = onExitWaitingRoom;
 
 		// TODO : 임시 하드 코딩
 		this.teamLeftList = [{
@@ -34,6 +35,7 @@ class WaitingRoomPageManager {
 		const orientation = windowObservable.getOrientation();
 		this._toggleReadyTextVisible(orientation);
 		this._subscribeWindow();
+		// this.clientInfo.socket.addEventListener('click', this.onExitWaitingRoom);
 	}
 
 	_subscribeWindow() {
@@ -99,7 +101,9 @@ class WaitingRoomPageManager {
 	_getPlayerInfoHTML(mode, player) {
 		const abilityBtnHTML = '<button class="abilityButton generalButton">능력<br>선택</button>';
 		return `
-			<div class="name">${player.clientNickname}</div>
+			<div class="nameContainer">
+				<div class="name">${player.clientNickname}</div>
+			</div>
 			<div class="avatar">
 				${mode === 'vampire' ? abilityBtnHTML : ''}
 				<div class="avatarImgFrame">
@@ -142,14 +146,17 @@ class WaitingRoomPageManager {
 
 	_getPlayerInfoListHTML(playerList) {
 		let listHTML = '';
-		playerList.forEach((player) => { // TODO : 아직 들어오지 않은 자리 구현 (?)
+		playerList.forEach((player) => {
 			listHTML += `
 				<div class="listItem ${player.clientId === this.clientInfo.id ? 'me' : ''}">
 					${this._getPlayerInfoItemHTML(player)}
 				</div>`;
 		});
-		for (let i = 0; i < 5 - playerList.length; i++) {
-			listHTML += `<div class="listItem">${this._getEmptyInfoItemHTML()}</div>`;
+		for (let i = 0; i < this.totalPlayerCount - playerList.length; i++) {
+			listHTML += `<div class="listItem">${this._getEmptyItemHTML()}</div>`;
+		}
+		for (let i = 0; i < 5 - this.totalPlayerCount; i++) {
+			listHTML += `<div class="listItem">${this._getXItemHTML()}</div>`;
 		}
 		return listHTML;
 	}
