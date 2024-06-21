@@ -73,9 +73,9 @@ class StateManager:
             return False
         room = self.rooms[room_id]
         if len(room['teamLeft']) < room['leftMaxPlayerCount']:
-            team = 'teamLeft'
+            team = 'left'
         elif len(room['teamRight']) < room['rightMaxPlayerCount']:
-            team = 'teamRight'
+            team = 'right'
         else:
             return False
         await add_group(consumer, room_id)
@@ -149,6 +149,7 @@ class StateManager:
 
     async def _start_game(self, consumer, room_id):
         game_manager = self.rooms[room_id]['gameManager']
+        await game_manager.set_game_mode(self.rooms[room_id]['leftMode'], self.rooms[room_id]['rightMode'])
         await game_manager.set_team(self.rooms[room_id])
         await self._notify_room(room_id, event='notifyGameStart', content={})
         await self._notify_lobby('notifyWaitingRoomClosed', {'roomId': room_id})
