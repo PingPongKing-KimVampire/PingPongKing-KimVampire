@@ -64,6 +64,8 @@ class StateManager:
             'gameManager': GameManager(room_id, content['leftMode'], content['rightMode']),
             'state': 'waiting'
         }
+        Printer.log(f"Room {room_id} created", "blue")
+        Printer.log(self.rooms[room_id])
         return room_id
 
     async def _enter_waiting_room(self, consumer, room_id, client_id):
@@ -135,12 +137,13 @@ class StateManager:
         room = self.rooms[room_id]
         for team in ['teamLeft', 'teamRight']:
             if client_id in room[team]:
-                room[team][client_id]['state'] = 'READY' if is_ready else 'NOTREADY'
+                room[team][client_id]['state'] = is_ready
                 break
         await self._notify_room(room_id, 
                            event='notifyReadyStateChange', 
-                           content={'clientId': client_id, 'isReady': is_ready})
-        await self._check_game_ready(consumer, room_id)
+                           content={'clientId': client_id, 'state': is_ready})
+        if await self._check_room_full(room_id):
+            await self._check_game_ready(consumer, room_id)
             
     async def _check_game_ready(self, consumer, room_id):
         room = self.rooms[room_id]
@@ -155,8 +158,8 @@ class StateManager:
         game_manager = self.rooms[room_id]['gameManager']
         await self._notify_room(room_id, event='notifyGameStart', content={})
         await self._notify_lobby('notifyWaitingRoomClosed', {'roomId': room_id})
-        left_team = [player for player in self.rooms[room_id]['teamLeft'].keys()]
-        right_team = [player for player in self.rooms[room_id]['teamRight'].keys()]
+        left_team = [player for player in self.rooms[room_id]['teamLeft']]
+        right_team = [player for player in self.rooms[room_id]['teamRight']]
         game_manager.set_teams(left_team, right_team)
         game_manager.start_game(consumer)
 
@@ -177,3 +180,7 @@ class StateManager:
                 'readyState': info['state']
             })
         return team_left_list, team_right_list
+
+    async def _check_room_full(self, room_id):
+        room = self.rooms[room_id]
+        return len(room['teamLeft']) + len(room['teamRight']) == room['leftMaxPlayerCount'] + room['rightMaxPlayerCount']

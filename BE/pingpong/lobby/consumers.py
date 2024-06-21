@@ -76,7 +76,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
                 'message': 'OK',
                 'roomId': room_id
         })
-        Printer.log(f"Waiting room {room_id} created", "blue")
 
     async def get_waiting_room_List(self):
         room_list = await stateManager._get_waiting_room_list()

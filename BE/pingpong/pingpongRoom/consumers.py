@@ -81,6 +81,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyScoreUpdate', content=content)
 
     async def notifyReadyStateChange(self, content):
+        content = content['content']
         client_id = content['clientId']
         state = content['state']
         await self._send(event='notifyReadyStateChange', content={'clientId': client_id, 'state': state})
