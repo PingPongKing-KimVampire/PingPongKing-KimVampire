@@ -73,9 +73,9 @@ class StateManager:
             return False
         room = self.rooms[room_id]
         if len(room['teamLeft']) < room['leftMaxPlayerCount']:
-            team = 'left'
+            team = 'teamLeft'
         elif len(room['teamRight']) < room['rightMaxPlayerCount']:
-            team = 'right'
+            team = 'teamRight'
         else:
             return False
         await add_group(consumer, room_id)
@@ -97,6 +97,10 @@ class StateManager:
             'state': 'NOTREADY',
             'ability': 'human'
         }
+        if team == 'teamLeft':
+            team = 'left'
+        else:
+            team = 'right'
         data = { 'clientId': client_id, 'clientNickname': client_nickname, 'team': team }
         if count == 0:
             await self._notify_lobby('notifyWaitingRoomCreated', {'roomId': room_id})
