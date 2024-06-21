@@ -7,10 +7,10 @@ services:
       - .:/app
     ports:
       - "3001:3001"
-    depends_on:
-      - db
-    networks:
-      - vampire
+    # depends_on:
+    #   - db
+    # networks:
+    #   - vampire
 
   # db:
   #   image: postgres:13
@@ -22,7 +22,6 @@ services:
   #     - "5432:5432"
   #   networks:
   #     - vampire
-
 # networks:
 #   vampire:
 #     driver: bridge
