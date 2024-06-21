@@ -3,6 +3,7 @@ import PingpongRenderer from "./PingpongRenderer.js";
 
 class PingpongPageManager {
   constructor(app, clientInfo, onExitPingpong) {
+    this.app = app;
     this.clientInfo = {
       socket: null,
       id: null,
@@ -19,28 +20,11 @@ class PingpongPageManager {
       },
     };
     this.clientInfo = clientInfo;
-    // this.gameInfo = gameInfo;
     this.onExitPingpong = onExitPingpong;
     this.playerList = [];
-    // this.leftPlayer = { clientId: null, clientNickname: null };
-    // this.rightPlayer = { clientId: null, clientNickname: null };
-    app.innerHTML = "WAIT START GAME";
   }
 
   async initPage() {
-    const readyMessage = {
-      event: "changeReadyState",
-      content: {
-        state: "READY",
-      },
-    };
-    this.clientInfo.gameInfo.pingpongRoomSocket.send(
-      JSON.stringify(readyMessage)
-    );
-
-    await this._getStartGameResponse(
-      this.clientInfo.gameInfo.pingpongRoomSocket
-    );
     //추후 API에 추가해야함
     //게임 사이즈관련 정보가 API에 없다.
     this.sizeInfo = {
@@ -50,7 +34,7 @@ class PingpongPageManager {
       paddleHeight: 200,
       ballRadius: 25,
     };
-    app.innerHTML = this._getPingpongHTML();
+    this.app.innerHTML = this._getPingpongHTML();
 
     this.pingpongRenderer = new PingpongRenderer(
       this.clientInfo,
@@ -64,22 +48,6 @@ class PingpongPageManager {
     this._manageExitRoom(); // 탁구장 나가기 처리
     this.exitPingpongPageRef = this._exitPingpongPage.bind(this);
     this.clientInfo.socket.addEventListener("close", this.exitPingpongPageRef); // 탁구장 폐쇄 감지
-  }
-
-  _getStartGameResponse(socket) {
-    return new Promise((res, rej) => {
-      const listener = (messageEvent) => {
-        const message = JSON.parse(messageEvent.data);
-        const { event, content } = message;
-        if (event === "notifyGameStart") {
-          socket.removeEventListener("message", listener);
-          // TODO : 원래 여기서 sizeInfo, playerList를 설정했었음.
-          // 이제 그냥 다 생성자로 받으면 되는 건가?
-          res();
-        }
-      };
-      socket.addEventListener("message", listener);
-    });
   }
 
   _manageExitRoom() {

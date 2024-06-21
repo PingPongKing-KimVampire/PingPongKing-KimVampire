@@ -5,6 +5,23 @@ class WaitingRoomCreationPageManager {
   constructor(app, clientInfo, onEnterWaitingRoom) {
     console.log("Create Waiting Room Page!");
     app.innerHTML = this._getHTML();
+    this.clientInfo = {
+      socket: null,
+      id: null,
+      nickname: null,
+      lobbySocket: null,
+      gameInfo: {
+        pingpongRoomSocket: null,
+        roomId: null,
+        title: null,
+        teamLeftList: null,
+        teamRightList: null,
+        teamLeftMode: null,
+        teamRightMode: null,
+        teamLeftTotalPlayerCount: null,
+        teamRightTotalPlayerCount: null,
+      },
+    };
     this.clientInfo = clientInfo;
     this.onEnterWaitingRoom = onEnterWaitingRoom;
 
@@ -160,10 +177,24 @@ class WaitingRoomCreationPageManager {
       rightMode,
       rightPlayerCount
     );
-    await this._enterWaitingRoom(roomId, title, leftMode, rightMode);
+    await this._enterWaitingRoom(
+      roomId,
+      title,
+      leftMode,
+      rightMode,
+      leftPlayerCount,
+      rightPlayerCount
+    );
   }
 
-  async _enterWaitingRoom(roomId, gameTitle, teamLeftMode, teamRightMode) {
+  async _enterWaitingRoom(
+    roomId,
+    gameTitle,
+    teamLeftMode,
+    teamRightMode,
+    teamLeftTotalPlayerCount,
+    teamRightTotalPlayerCount
+  ) {
     const pingpongRoomSocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
     );
@@ -203,6 +234,8 @@ class WaitingRoomCreationPageManager {
       teamRightList,
       teamLeftMode,
       teamRightMode,
+      teamLeftTotalPlayerCount,
+      teamRightTotalPlayerCount,
     };
     this.clientInfo.gameInfo = gameInfo;
     this.clientInfo.lobbySocket.close();

@@ -26,6 +26,8 @@ class LobbyPageManager {
         teamRightList: null,
         teamLeftMode: null,
         teamRightMode: null,
+        teamLeftTotalPlayerCount: null,
+        teamRightTotalPlayerCount: null,
       },
     };
     this.clientInfo = clientInfo;
@@ -205,7 +207,9 @@ class LobbyPageManager {
         roomId,
         title,
         leftMode,
-        rightMode
+        rightMode,
+        1,
+        totalPlayerCount-1
       );
       const hideModalLisenerRef = () => {
         this.enterRoomModal.style.display = "none";
@@ -219,7 +223,14 @@ class LobbyPageManager {
     return waitingRoomContainer;
   }
 
-  async _enterWaitingRoom(roomId, title, teamLeftMode, teamRightMode) {
+  async _enterWaitingRoom(
+    roomId,
+    title,
+    teamLeftMode,
+    teamRightMode,
+    teamLeftTotalPlayerCount,
+    teamRightTotalPlayerCount
+  ) {
     const pingpongRoomSocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
     );
@@ -259,6 +270,8 @@ class LobbyPageManager {
       teamRightList,
       teamLeftMode,
       teamRightMode,
+      teamLeftTotalPlayerCount,
+      teamRightTotalPlayerCount,
     };
     this._unsubscribeWindow();
     this.clientInfo.lobbySocket.close();

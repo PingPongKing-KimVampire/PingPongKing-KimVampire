@@ -104,7 +104,8 @@ class StateManager:
         data = { 'clientId': client_id, 'clientNickname': client_nickname, 'team': team }
         if count == 0:
             await self._notify_lobby('notifyWaitingRoomCreated', {'roomId': room_id})
-        await self._notify_room(room_id, event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
+        await self._notify_lobby(event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
+        # await self._notify_room(room_id, event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
         await self._notify_room(room_id, event='notifyWaitingRoomEnter', content=data)
 
     async def _remove_player_from_room(self, consumer, room_id, client_id):

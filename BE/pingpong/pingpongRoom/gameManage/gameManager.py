@@ -34,6 +34,9 @@ class GameManager:
                 'content': content
             }
         )
+
+    async def set_game_mode(self, left_mode, right_mode):
+        pass
     
     async def set_team(self, room):
         team_left = room['teamLeft']
@@ -45,7 +48,7 @@ class GameManager:
         self.channel_layer = consumer.channel_layer
         self.is_playing = True
         self.is_end = False
-        await self._reset_round()
+        self._reset_round()
         await self._notify_game_room('notifyGameStart', {})
         await self._game_loop()
 
@@ -123,7 +126,7 @@ class GameManager:
         #     player.update_pos(self.board_width - team_width, self.board_height / 2)
 
     async def _give_up_game(self, consumer):
-        await self._end_game()
+        self._end_game()
         client_id = consumer.client_id
         await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
 
