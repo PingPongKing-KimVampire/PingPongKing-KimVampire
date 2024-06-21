@@ -125,7 +125,7 @@ class WaitingRoomCreationPageManager {
     let leftPlayerCount;
     let rightMode;
     let rightPlayerCount;
-    console.log(mode);
+
     if (mode === "humanVsHuman") {
       leftMode = "human";
       rightMode = "human";
@@ -160,10 +160,10 @@ class WaitingRoomCreationPageManager {
       rightMode,
       rightPlayerCount
     );
-    await this._enterWaitingRoom(roomId, title);
+    await this._enterWaitingRoom(roomId, title, leftMode, rightMode);
   }
 
-  async _enterWaitingRoom(roomId, gameTitle) {
+  async _enterWaitingRoom(roomId, gameTitle, teamLeftMode, teamRightMode) {
     const pingpongRoomSocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
     );
@@ -201,6 +201,8 @@ class WaitingRoomCreationPageManager {
       title: gameTitle,
       teamLeftList,
       teamRightList,
+      teamLeftMode,
+      teamRightMode,
     };
     this.clientInfo.gameInfo = gameInfo;
     this.clientInfo.lobbySocket.close();

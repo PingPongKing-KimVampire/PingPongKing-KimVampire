@@ -14,6 +14,8 @@ class PingpongPageManager {
         title: null,
         teamLeftList: null,
         teamRightList: null,
+        teamLeftMode: null,
+        teamRightMode: null,
       },
     };
     this.clientInfo = clientInfo;
@@ -32,13 +34,15 @@ class PingpongPageManager {
         state: "READY",
       },
     };
-    this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(readyMessage));
+    this.clientInfo.gameInfo.pingpongRoomSocket.send(
+      JSON.stringify(readyMessage)
+    );
 
     await this._getStartGameResponse(
       this.clientInfo.gameInfo.pingpongRoomSocket
     );
     //추후 API에 추가해야함
-	//게임 사이즈관련 정보가 API에 없다.
+    //게임 사이즈관련 정보가 API에 없다.
     this.sizeInfo = {
       boardWidth: 1300,
       boardHeight: 1000,
