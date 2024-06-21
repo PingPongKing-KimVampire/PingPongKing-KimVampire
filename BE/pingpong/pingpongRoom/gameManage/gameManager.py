@@ -65,11 +65,8 @@ class GameManager:
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
     async def _update_paddle_location(self, content):
-        client_id = content['clientId']
-        pos_x = content['xPosition']
-        pos_y = content['yPosition']
-        player = self.clients[client_id]
-        player.update_pos(pos_x, pos_y)
+        player = self.clients[content['clientId']]
+        player.update_pos(content['xPosition'], content['yPosition'])
         await self._notify_game_room('notifyPaddleLocationUpdate', content)
     
     async def _add_score(self):
