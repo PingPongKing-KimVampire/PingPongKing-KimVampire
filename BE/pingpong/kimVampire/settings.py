@@ -25,11 +25,11 @@ SECRET_KEY = "django-insecure-is(^1gr$nbc@qc&w9ws30n+8h0l^4f+7ix+n!hd45_whqz92ij
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
-
+# channel 이후 직접 추가
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'authentication',
     'lobby',
     'pingpongRoom',
+    'chatting',
+    'domain'
 ]
 
 MIDDLEWARE = [
@@ -74,7 +76,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "kimVampire.wsgi.application"
 
 
-# Database
+# Database 
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
@@ -126,6 +128,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# web socket
 ASGI_APPLICATION = 'kimVampire.asgi.application'
 
 CHANNEL_LAYERS = {

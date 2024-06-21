@@ -7,3 +7,16 @@ services:
       - .:/app
     ports:
       - "3001:3001"
+  postgres:
+    container_name: postgres-server
+    image: postgres:15
+    restart: always
+    volumes:
+      - /Users/yuikim/volume/pingpong:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pingpong
