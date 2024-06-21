@@ -2,7 +2,6 @@ import asyncio
 import random
 from .ball import Ball
 from .player import Player
-from coreManage.group import notify_group
 from utils.printer import Printer
 
 FRAME_PER_SECOND = 60
@@ -100,7 +99,7 @@ class GameManager:
         players_to_check = self.right_team if self.ball.dx > 0 else self.left_team
         for player in players_to_check:
             if self._is_ball_colliding_with_paddle(player):
-                break
+                self.ball.reversal_random_dx()
 
     def _is_ball_colliding_with_paddle(self, player):
         if (self.ball.pos_y >= player.pos_y - player.paddle_height / 2 and
@@ -131,7 +130,7 @@ class GameManager:
         #     player.update_pos(self.board_width - team_width, self.board_height / 2)
 
     async def _give_up_game(self, consumer):
-        self._end_game()
+        await self._end_game()
         client_id = consumer.client_id
         await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
 
