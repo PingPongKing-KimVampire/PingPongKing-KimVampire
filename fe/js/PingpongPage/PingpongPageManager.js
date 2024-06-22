@@ -17,6 +17,13 @@ class PingpongPageManager {
         teamRightList: null,
         teamLeftMode: null,
         teamRightMode: null,
+        sizeInfo: {
+          boardWidth: null,
+          boardHeight: null,
+          paddleWidth: null,
+          paddleHeight: null,
+          ballRadius: null,
+        },
       },
     };
     this.clientInfo = clientInfo;
@@ -27,7 +34,7 @@ class PingpongPageManager {
   async initPage() {
     //추후 API에 추가해야함
     //게임 사이즈관련 정보가 API에 없다.
-    this.sizeInfo = {
+    this.clientInfo.gameInfo.sizeInfo = {
       boardWidth: 1300,
       boardHeight: 1000,
       paddleWidth: 50,
@@ -36,13 +43,7 @@ class PingpongPageManager {
     };
     this.app.innerHTML = this._getPingpongHTML();
 
-    this.pingpongRenderer = new PingpongRenderer(
-      this.clientInfo,
-      this.playerList, // TODO : playerList, sizeInfo가 설정되지 않은 상태
-      this.sizeInfo,
-      this.gameInfo
-    );
-
+    this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
     this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 
     this._manageExitRoom(); // 탁구장 나가기 처리
