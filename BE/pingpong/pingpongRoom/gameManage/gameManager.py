@@ -35,6 +35,11 @@ class GameManager:
             }
         )
 
+    async def _notify_game_ready_and_start(self):
+        await self._notify_game_room('notifyGameReady', {})
+        await asyncio.sleep(3)
+        await self._notify_game_room('notifyGameStart', {})
+
     async def set_game_mode(self, left_mode, right_mode):
         pass
     
@@ -52,12 +57,11 @@ class GameManager:
         self.is_playing = True
         self.is_end = False
         self._reset_round()
-        await self._notify_game_room('notifyGameReady', {})
-        await asyncio.sleep(3)
-        await self._notify_game_room('notifyGameStart', {})
+        asyncio.create_task(self._notify_game_ready_and_start())
         self.game_task = asyncio.create_task(self._game_loop())
 
     async def _game_loop(self):
+        await asyncio.sleep(3)
         while self.is_playing and not self.is_end:
             self.ball.move()
             self._detect_collisions()
