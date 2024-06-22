@@ -1,5 +1,4 @@
 import asyncio
-import random
 from .ball import Ball
 from .player import Player
 from utils.printer import Printer
@@ -12,6 +11,7 @@ RIGHT = 'right'
 class GameManager:
     def __init__(self, room_id, left_mode, right_mode):
         self.channel_layer = None
+        self.game_task = None
         self.room_id = room_id
         self.left_team = {}
         self.right_team = {}
@@ -38,19 +38,24 @@ class GameManager:
     async def set_game_mode(self, left_mode, right_mode):
         pass
     
-    async def set_team(self, room):
+    async def set_game_manager(self, room, consumer):
+        self.channel_layer = consumer.channel_layer
         team_left = room['teamLeft']
         team_right = room['teamRight']
         self.team_left = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_left.items()}
         self.team_right = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_right.items()}
+        left_mode = room['leftMode']
+        right_mode = room['rightMode']
+        self.set_game_mode(left_mode, right_mode)
         
-    async def start_game(self, consumer):
-        self.channel_layer = consumer.channel_layer
+    async def trigger_game(self):
         self.is_playing = True
         self.is_end = False
         self._reset_round()
+        await self._notify_game_room('notifyGameReady', {})
+        await asyncio.sleep(3)
         await self._notify_game_room('notifyGameStart', {})
-        await self._game_loop()
+        self.game_task = asyncio.create_task(self._game_loop())
 
     async def _game_loop(self):
         while self.is_playing and not self.is_end:

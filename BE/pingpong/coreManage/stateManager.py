@@ -150,18 +150,15 @@ class StateManager:
         team_right_ready = all([info['state'] == 'READY' for info in room['teamRight'].values()])
         if team_left_ready and team_right_ready:
             Printer.log(f"Both teams are ready in room {room_id}. Notifying game ready.", "green")
-            await self._notify_room(room_id, event='notifyGameReady', content={})
-            await asyncio.sleep(3)
             await self._start_game(consumer, room_id)
 
 
     async def _start_game(self, consumer, room_id):
         game_manager = self.rooms[room_id]['gameManager']
-        await game_manager.set_game_mode(self.rooms[room_id]['leftMode'], self.rooms[room_id]['rightMode'])
-        await game_manager.set_team(self.rooms[room_id])
+        await game_manager.set_game_manager(self.rooms[room_id], consumer)
         await self._notify_room(room_id, event='notifyGameStart', content={})
         await self._notify_lobby('notifyWaitingRoomClosed', {'roomId': room_id})
-        await game_manager.start_game(consumer)
+        await game_manager.trigger_game()
 
     async def _get_waiting_room_player_list(self, room_id):
         team_left_list = []
