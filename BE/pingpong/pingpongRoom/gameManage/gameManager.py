@@ -64,7 +64,7 @@ class GameManager:
         await asyncio.sleep(3)
         while self.is_playing and not self.is_end:
             self.ball.move()
-            self._detect_collisions()
+            await self._detect_collisions()
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
@@ -88,13 +88,13 @@ class GameManager:
             self._end_game()
             await self._notify_game_room('notifyGameEnd', {'winTeam': team})
         
-    def _detect_collisions(self):
+    async def _detect_collisions(self):
         if self.ball.get_right_x() >= self.board_width:
             self.serve_turn = LEFT
-            self._end_round()
+            await self._end_round()
         elif self.ball.get_left_x() <= 0:
             self.serve_turn = RIGHT
-            self._end_round()
+            await self._end_round()
         elif self.ball.get_top_y() <= 0 or self.ball.get_bottom_y() >= self.board_height:
             self.ball.dy = -self.ball.dy
         else:
@@ -121,9 +121,9 @@ class GameManager:
     async def _end_round(self):
         await self._add_score()
         await self._check_game_end()
-        self._reset_round()
+        await self._reset_round()
 
-    def _reset_round(self):
+    async def _reset_round(self):
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
         self.ball.reset_ball(serve_position, self.board_height / 2, 0)
         
