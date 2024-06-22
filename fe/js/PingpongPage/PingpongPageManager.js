@@ -35,10 +35,10 @@ class PingpongPageManager {
     //추후 API에 추가해야함
     //게임 사이즈관련 정보가 API에 없다.
     this.clientInfo.gameInfo.sizeInfo = {
-      boardWidth: 1300,
+      boardWidth: 1550,
       boardHeight: 1000,
-      paddleWidth: 50,
-      paddleHeight: 200,
+      paddleWidth: 15,
+      paddleHeight: 150,
       ballRadius: 25,
     };
     this.app.innerHTML = this._getPingpongHTML();
