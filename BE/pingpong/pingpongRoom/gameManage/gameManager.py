@@ -51,6 +51,8 @@ class GameManager:
         self.team_right = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_right.items()}
         left_mode = room['leftMode']
         right_mode = room['rightMode']
+        # key: client_id, value: Player instance
+        self.clients = {**self.team_left, **self.team_right}
         self.set_game_mode(left_mode, right_mode)
         
     async def trigger_game(self):
@@ -61,15 +63,15 @@ class GameManager:
         self.game_task = asyncio.create_task(self._game_loop())
 
     async def _game_loop(self):
-        await asyncio.sleep(3)
+        await asyncio.sleep(1.5)
         while self.is_playing and not self.is_end:
             self.ball.move()
             await self._detect_collisions()
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
-    async def _update_paddle_location(self, content):
-        player = self.clients[content['clientId']]
+    async def _update_paddle_location(self, client_id, content):
+        player = self.clients[client_id]
         player.update_pos(content['xPosition'], content['yPosition'])
         await self._notify_game_room('notifyPaddleLocationUpdate', content)
     

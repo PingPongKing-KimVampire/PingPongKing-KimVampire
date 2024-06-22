@@ -37,13 +37,13 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"event : {event}", "white")
         Printer.log(f"content : {content}\n", "white")
         if self.state == 'playing':
-            await self.handle_playeing_event(event, content)
+            await self.handle_playing_event(event, content)
         else:
             await self.handle_waiting_event(event, content)
 
-    async def handle_playeing_event(self, event, content):
+    async def handle_playing_event(self, event, content):
         if event == 'updatePaddleLocation':
-            await self.game_manager._update_paddle_location(self, content)
+            await self.game_manager._update_paddle_location(self.client_id, content)
         
     async def handle_waiting_event(self, event, content):
         if event == 'changeReadyState':
