@@ -73,6 +73,7 @@ class GameManager:
     async def _update_paddle_location(self, client_id, content):
         player = self.clients[client_id]
         player.update_pos(content['xPosition'], content['yPosition'])
+        content = {'clientId': client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
         await self._notify_game_room('notifyPaddleLocationUpdate', content)
     
     async def _add_score(self):
