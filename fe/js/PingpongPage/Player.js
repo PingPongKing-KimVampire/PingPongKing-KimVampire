@@ -9,15 +9,15 @@ class Player {
   _initPlayerProperty(clientInfo) {
     this.clientInfo = clientInfo;
     if (
-      this.clientInfo.gameInfo.teamLeftList.find((player) => {
-        player.clientId === clientInfo.id;
-      })
+      this.clientInfo.gameInfo.teamLeftList.find(
+        (player) => player.clientId === clientInfo.id
+      )
     )
       this.myTeam = "left";
     if (
-      this.clientInfo.gameInfo.teamRightList.find((player) => {
-        player.clientId === clientInfo.id;
-      })
+      this.clientInfo.gameInfo.teamRightList.find(
+        (player) => player.clientId === clientInfo.id
+      )
     )
       this.myTeam = "right";
     this.sizeInfo = {
@@ -67,7 +67,6 @@ class Player {
     let x, y;
     const yPos = e.clientY - this.subBoardRect.top;
     const xPos = e.clientX - this.subBoardRect.left;
-    console.log(xPos, yPos);
 
     if (this.orientation === "landscape") {
       y = (yPos / this.subBoardRect.height) * this.sizeInfo.boardHeight;
