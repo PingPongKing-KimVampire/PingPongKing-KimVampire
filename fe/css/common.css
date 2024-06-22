@@ -68,6 +68,15 @@ body {
 	color: white;
 }
 
+.generalButton {
+	font-size: 2rem;
+	font-weight: 700;
+	border-radius: 30rem;
+	background-color: rgb(1, 4, 37);
+	border: 0.14rem solid white;
+	color: white;
+}
+
 .activatedButton {
 	font-size: 2rem;
 	font-weight: 700;
@@ -108,4 +117,11 @@ body {
 	width: auto;
 	opacity: 1;
 	visibility: visible;
+}
+
+@media (orientation: portrait) {
+	.exitButton {
+		top: 2%;
+		left: 3%;
+	}
 }

@@ -1,8 +1,8 @@
 import PingpongPageManager from "./PingpongPage/PingpongPageManager.js";
 import LoginPageManager from "./TestPage/LoginPageManager.js";
 import WaitingRoomCreationPageManager from "./LobbyPage/WaitingRoomCreationPageManager.js";
-
 import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";
+import WaitingRoomPageManager from "./WaitingRoomPage/WaitingRoomPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -21,6 +21,10 @@ class PageRouter {
         title: null,
         teamLeftList: null,
         teamRightList: null,
+        teamLeftMode: null,
+        teamRightMode: null,
+        teamLeftTotalPlayerCount: null,
+        teamRightTotalPlayerCount: null,
       },
     };
   }
@@ -47,13 +51,19 @@ class PageRouter {
         this.clientInfo,
         this._onEnterWaitingRoom.bind(this)
       );
-    } else if (url === "game") {
+    } else if (url === "pingpong") {
       const pingpongPageManager = new PingpongPageManager(
         this.app,
         this.clientInfo,
         this._onExitPingpongGame.bind(this)
       );
-      pingpongPageManager.initPage();
+      await pingpongPageManager.initPage();
+    } else if (url === "waitingRoom") {
+      const waitingRoomPageManager = new WaitingRoomPageManager(
+        this.app,
+        this.clientInfo,
+        this._onStartPingpongGame.bind(this)
+      );
     }
   }
 
@@ -66,7 +76,11 @@ class PageRouter {
   }
 
   _onEnterWaitingRoom() {
-    this.renderPage("game");
+    this.renderPage("waitingRoom");
+  }
+
+  _onStartPingpongGame() {
+    this.renderPage("pingpong");
   }
 
   _onExitPingpongGame() {

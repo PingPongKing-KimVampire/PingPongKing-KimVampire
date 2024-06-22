@@ -24,6 +24,10 @@ class LobbyPageManager {
         title: null,
         teamLeftList: null,
         teamRightList: null,
+        teamLeftMode: null,
+        teamRightMode: null,
+        teamLeftTotalPlayerCount: null,
+        teamRightTotalPlayerCount: null,
       },
     };
     this.clientInfo = clientInfo;
@@ -148,8 +152,8 @@ class LobbyPageManager {
 
   _getWaitingRoomElement(
     roomId,
-    team1,
-    team2,
+    leftMode,
+    rightMode,
     title,
     currendPlayerCount,
     totalPlayerCount
@@ -162,8 +166,8 @@ class LobbyPageManager {
 
     const teamName1 = document.createElement("span");
     teamName1.className = "teamName";
-    if (team1 === "human") teamName1.textContent = "인간";
-    else if (team1 === "vampire") teamName1.textContent = "뱀파이어";
+    if (leftMode === "human") teamName1.textContent = "인간";
+    else if (leftMode === "vampire") teamName1.textContent = "뱀파이어";
 
     const vsName = document.createElement("span");
     vsName.className = "vsName";
@@ -172,8 +176,8 @@ class LobbyPageManager {
     const teamName2 = document.createElement("span");
     teamName2.className = "teamName";
 
-    if (team2 === "human") teamName2.textContent = "인간";
-    else if (team2 === "vampire") teamName2.textContent = "뱀파이어";
+    if (rightMode === "human") teamName2.textContent = "인간";
+    else if (rightMode === "vampire") teamName2.textContent = "뱀파이어";
 
     gameTypeContainer.appendChild(teamName1);
     gameTypeContainer.appendChild(vsName);
@@ -201,7 +205,11 @@ class LobbyPageManager {
       const enterRoomListenerRef = this._enterWaitingRoom.bind(
         this,
         roomId,
-        title
+        title,
+        leftMode,
+        rightMode,
+        1,
+        totalPlayerCount-1
       );
       const hideModalLisenerRef = () => {
         this.enterRoomModal.style.display = "none";
@@ -215,7 +223,14 @@ class LobbyPageManager {
     return waitingRoomContainer;
   }
 
-  async _enterWaitingRoom(roomId, title) {
+  async _enterWaitingRoom(
+    roomId,
+    title,
+    teamLeftMode,
+    teamRightMode,
+    teamLeftTotalPlayerCount,
+    teamRightTotalPlayerCount
+  ) {
     const pingpongRoomSocket = new WebSocket(
       `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`
     );
@@ -253,6 +268,10 @@ class LobbyPageManager {
       title,
       teamLeftList,
       teamRightList,
+      teamLeftMode,
+      teamRightMode,
+      teamLeftTotalPlayerCount,
+      teamRightTotalPlayerCount,
     };
     this._unsubscribeWindow();
     this.clientInfo.lobbySocket.close();

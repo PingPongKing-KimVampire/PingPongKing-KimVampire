@@ -36,10 +36,16 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
         Printer.log(f"event : {event}", "white")
         Printer.log(f"content : {content}\n", "white")
-        
-        await self.handle_event(event, content)
+        if self.state == 'playing':
+            await self.handle_playeing_event(event, content)
+        else:
+            await self.handle_waiting_event(event, content)
 
-    async def handle_event(self, event, content):
+    async def handle_playeing_event(self, event, content):
+        if event == 'updatePaddleLocation':
+            await self.game_manager._update_paddle_location(self, content)
+        
+    async def handle_waiting_event(self, event, content):
         if event == 'changeReadyState':
             await self.change_ready_state(content)
         elif event == 'enterWaitingRoom':
@@ -63,33 +69,27 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     """
     Notify methods
     """
-    async def notifyGameGiveUp(self, content):
-        self.state = 'waiting'
-        await self._send(event='notifyGameGiveUp', content=content)
-        
-    async def notifyGameEnd(self, content):
-        self.state = 'waiting'
-        await self._send(event='notifyGameEnd', content=content)
 
     async def notifyPaddleLocationUpdate(self, content):
-        await self._send(event='notifyPaddleLocationUpdate', content=content)
+        await self._send(event='notifyPaddleLocationUpdate', content=content['content'])
 
     async def notifyBallLocationUpdate(self, content):
-        await self._send(event='notifyBallLocationUpdate', content=content)
+        await self._send(event='notifyBallLocationUpdate', content=content['content'])
 
     async def notifyScoreUpdate(self, content):
-        await self._send(event='notifyScoreUpdate', content=content)
+        await self._send(event='notifyScoreUpdate', content=content['content'])
 
     async def notifyReadyStateChange(self, content):
+        content = content['content']
         client_id = content['clientId']
         state = content['state']
         await self._send(event='notifyReadyStateChange', content={'clientId': client_id, 'state': state})
 
     async def notifyWaitingRoomEnter(self, content):
-        await self._send(event='notifyWaitingRoomEnter', content=content)
+        await self._send(event='notifyWaitingRoomEnter', content=content['content'])
 
     async def notifyWaitingRoomExit(self, content):
-        await self._send(event='notifyWaitingRoomExit', content=content)
+        await self._send(event='notifyWaitingRoomExit', content=content['content'])
 
     async def notifyGameReady(self, content):
         await self._send(event='notifyGameReady', content=content)
@@ -98,5 +98,10 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.state = 'playing'
         await self._send(event='notifyGameStart', content=content)
 
-    async def notifyCurrentPlayerCountChange(self, content):
-        await self._send(event='notifyCurrentPlayerCountChange', content=content)
+    async def notifyGameGiveUp(self, content):
+        self.state = 'waiting'
+        await self._send(event='notifyGameGiveUp', content=content['content'])
+        
+    async def notifyGameEnd(self, content):
+        self.state = 'waiting'
+        await self._send(event='notifyGameEnd', content=content['content'])

@@ -22,6 +22,6 @@ async def notify_group(channel_layer, group, event, content):
         group,
         {
             'type': event,
-            'content': json.dumps(content)
+            'content': content
         }
     )
