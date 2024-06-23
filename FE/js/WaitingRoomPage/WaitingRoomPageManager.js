@@ -4,6 +4,7 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class WaitingRoomPageManager {
+<<<<<<< HEAD
   constructor(app, clientInfo, _onStartPingpongGame, _onExitWaitingRoom) {
     this.app = app;
     this._onStartPingpongGame = _onStartPingpongGame;
@@ -26,28 +27,52 @@ class WaitingRoomPageManager {
         teamRightTotalPlayerCount: null,
       },
     };
+=======
+	constructor(app, clientInfo, _onStartPingpongGame) {
+		this.app = app;
+		this._onStartPingpongGame = _onStartPingpongGame;
+		console.log("Waiting Room Page!");
+		this.clientInfo = {
+			socket: null,
+			id: null,
+			nickname: null,
+			lobbySocket: null,
+			gameInfo: {
+				pingpongRoomSocket: null,
+				roomId: null,
+				title: null,
+				teamLeftList: null,
+				teamRightList: null,
+				teamLeftMode: null,
+				teamRightMode: null,
+				teamLeftTotalPlayerCount: null,
+				teamRightTotalPlayerCount: null,
+			},
+		};
+>>>>>>> feat: 뱀파이어 능력 선택 모달 구현
 
-    // const playerInfo = {
-    // 	clientId: null,
-    // 	clientNickname: null,
-    // 	readyState: null
-    // }
-    this.clientInfo = clientInfo;
+		// const playerInfo = {
+		// 	clientId: null,
+		// 	clientNickname: null,
+		// 	readyState: null
+		// }
+		this.clientInfo = clientInfo;
 
-    this._initPage();
-    this._listenWaitingRoomEvent();
-  }
+		this._initPage();
+		this._listenWaitingRoomEvent();
+	}
 
-  _initPage() {
-    this.app.innerHTML = this._getHTML();
+	_initPage() {
+		this.app.innerHTML = this._getHTML();
 
-    this.leftReadyText = document.querySelector(
-      ".teamPanel:first-of-type .readyText"
-    );
-    this.rightReadyText = document.querySelector(
-      ".teamPanel:last-of-type .readyText"
-    );
+		this.leftReadyText = document.querySelector(
+			".teamPanel:first-of-type .readyText"
+		);
+		this.rightReadyText = document.querySelector(
+			".teamPanel:last-of-type .readyText"
+		);
 
+<<<<<<< HEAD
     const orientation = windowObservable.getOrientation();
     this._toggleReadyTextVisible(orientation);
     this._subscribeWindow();
@@ -138,95 +163,163 @@ class WaitingRoomPageManager {
       listener
     );
   }
+=======
+		const orientation = windowObservable.getOrientation();
+		this._toggleReadyTextVisible(orientation);
+		this._subscribeWindow();
+		document
+			.querySelector("#readyButton")
+			.addEventListener(
+				"click",
+				this._sendMyReadyStateChangeMessage.bind(this)
+			);
 
-  _pushNewPlayer(clientId, clientNickname, team) {
-    if (this.clientInfo.id === clientId) return;
-    if (team === "left")
-      this.clientInfo.gameInfo.teamLeftList.push({
-        clientId,
-        clientNickname,
-        readyState: "NOTREADY",
-      });
-    if (team === "right")
-      this.clientInfo.gameInfo.teamRightList.push({
-        clientId,
-        clientNickname,
-        readyState: "NOTREADY",
-      });
-  }
+		// TODO : 두 개의 ability 버튼 고려하기, 나의 ability 버튼에만 이벤트 등록
+		this.abilityButton = document.querySelector('.abilityButton');
+		this.abilityModal = document.querySelector('.abilitySelectionModal');
+		this.abilityButton.addEventListener('click', this._abilityButtonClicked.bind(this));
+	}
+>>>>>>> feat: 뱀파이어 능력 선택 모달 구현
 
-  _popPlayer(clientId) {
-    this.clientInfo.gameInfo.teamLeftList =
-      this.clientInfo.gameInfo.teamLeftList.filter((player) => {
-        player.clientId !== clientId;
-      });
-    this.clientInfo.gameInfo.teamRightList =
-      this.clientInfo.gameInfo.teamRightList.filter((player) => {
-        player.clientId !== clientId;
-      });
-  }
+	_listenWaitingRoomEvent() {
+		const listener = (messageEvent) => {
+			const message = JSON.parse(messageEvent.data);
+			const { event, content } = message;
+			//   console.log(message);
+			if (event === "notifyWaitingRoomEnter") {
+				const { clientId, clientNickname, team } = content;
+				this._pushNewPlayer(clientId, clientNickname, team);
+				this._initPage();
+			} else if (event === "notifyWaitingRoomExit") {
+				const clientId = content.clientId;
+				this._popPlayer(clientId);
+				this._initPage();
+			} else if (event === "notifyReadyStateChange") {
+				const { clientId, state } = content;
+				this._updateReadyState(clientId, state);
+				this._initPage();
+			} else if (event === "notifyGameReady") {
+				//3, 2, 1 추후 구현
+			} else if (event === "notifyGameStart") {
+				this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
+					"message",
+					listener
+				);
+				this._onStartPingpongGame();
+			}
+		};
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener(
+			"message",
+			listener
+		);
+	}
 
-  _updateReadyState(clientId, readyState) {
-    this.clientInfo.gameInfo.teamLeftList.forEach((player) => {
-      if (player.clientId === clientId) player.readyState = readyState;
-    });
-    this.clientInfo.gameInfo.teamRightList.forEach((player) => {
-      if (player.clientId === clientId) player.readyState = readyState;
-    });
-  }
+	_pushNewPlayer(clientId, clientNickname, team) {
+		if (this.clientInfo.id === clientId) return;
+		if (team === "left")
+			this.clientInfo.gameInfo.teamLeftList.push({
+				clientId,
+				clientNickname,
+				readyState: "NOTREADY",
+			});
+		if (team === "right")
+			this.clientInfo.gameInfo.teamRightList.push({
+				clientId,
+				clientNickname,
+				readyState: "NOTREADY",
+			});
+	}
 
-  _sendMyReadyStateChangeMessage() {
-    let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(
-      (player) => player.clientId === this.clientInfo.id
-    );
-    if (!myPlayer)
-      myPlayer = this.clientInfo.gameInfo.teamRightList.find(
-        (player) => player.clientId === this.clientInfo.id
-      );
+	_popPlayer(clientId) {
+		this.clientInfo.gameInfo.teamLeftList =
+			this.clientInfo.gameInfo.teamLeftList.filter((player) => {
+				player.clientId !== clientId;
+			});
+		this.clientInfo.gameInfo.teamRightList =
+			this.clientInfo.gameInfo.teamRightList.filter((player) => {
+				player.clientId !== clientId;
+			});
+	}
 
-    const changedReadyState =
-      myPlayer.readyState === "READY" ? "NOTREADY" : "READY";
-    const readyMessage = {
-      event: "changeReadyState",
-      content: {
-        state: changedReadyState,
-      },
-    };
-    this.clientInfo.gameInfo.pingpongRoomSocket.send(
-      JSON.stringify(readyMessage)
-    );
-  }
+	_updateReadyState(clientId, readyState) {
+		this.clientInfo.gameInfo.teamLeftList.forEach((player) => {
+			if (player.clientId === clientId) player.readyState = readyState;
+		});
+		this.clientInfo.gameInfo.teamRightList.forEach((player) => {
+			if (player.clientId === clientId) player.readyState = readyState;
+		});
+	}
 
-  _changeMyReadyState(clientId) {
-    let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(
-      (player) => player.clientId === clientId
-    );
-    if (!targetPlayer)
-      targetPlayer = this.clientInfo.gameInfo.teamRightList.find(
-        (player) => player.clientId === clientId
-      );
-    targetPlayer.readyState === "READY"
-      ? (targetPlayer.readyState = "NOTREADY")
-      : (targetPlayer.readyState = "READY");
-  }
+	_sendMyReadyStateChangeMessage() {
+		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(
+			(player) => player.clientId === this.clientInfo.id
+		);
+		if (!myPlayer)
+			myPlayer = this.clientInfo.gameInfo.teamRightList.find(
+				(player) => player.clientId === this.clientInfo.id
+			);
 
-  _subscribeWindow() {
-    this.toggleReadyTextVisibleRef = this._toggleReadyTextVisible.bind(this);
-    windowObservable.subscribeOrientationChange(this.toggleReadyTextVisibleRef);
-  }
+		const changedReadyState =
+			myPlayer.readyState === "READY" ? "NOTREADY" : "READY";
+		const readyMessage = {
+			event: "changeReadyState",
+			content: {
+				state: changedReadyState,
+			},
+		};
+		this.clientInfo.gameInfo.pingpongRoomSocket.send(
+			JSON.stringify(readyMessage)
+		);
+	}
 
-  _toggleReadyTextVisible(orientation) {
-    if (orientation === "landscape") {
-      this.leftReadyText.classList.remove("invisible");
-      this.rightReadyText.classList.remove("invisible");
-    } else if (orientation === "portrait") {
-      this.leftReadyText.classList.add("invisible");
-      this.rightReadyText.classList.add("invisible");
-    }
-  }
+	_changeMyReadyState(clientId) {
+		let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(
+			(player) => player.clientId === clientId
+		);
+		if (!targetPlayer)
+			targetPlayer = this.clientInfo.gameInfo.teamRightList.find(
+				(player) => player.clientId === clientId
+			);
+		targetPlayer.readyState === "READY"
+			? (targetPlayer.readyState = "NOTREADY")
+			: (targetPlayer.readyState = "READY");
+	}
 
-  _getHTML() {
-    return `
+	_subscribeWindow() {
+		this.toggleReadyTextVisibleRef = this._toggleReadyTextVisible.bind(this);
+		windowObservable.subscribeOrientationChange(this.toggleReadyTextVisibleRef);
+	}
+
+	_toggleReadyTextVisible(orientation) {
+		if (orientation === "landscape") {
+			this.leftReadyText.classList.remove("invisible");
+			this.rightReadyText.classList.remove("invisible");
+		} else if (orientation === "portrait") {
+			this.leftReadyText.classList.add("invisible");
+			this.rightReadyText.classList.add("invisible");
+		}
+	}
+
+	_abilityButtonClicked() {
+		this.abilityModal.style.display = 'flex';
+		this.abilityModal.addEventListener('click', this._modalClicked);
+	}
+	_modalClicked = (event) => {
+		const selectedItem = event.target.closest('.abilityItem');
+		if (selectedItem === null)
+			return;
+		const selectedAbility = selectedItem.value;
+		this.abilityButton.innerHTML = `
+			<div class="abilityImgFrame">
+				<img class="abilityImg" src="images/ability/${selectedAbility}.png">
+			</div>
+		`;
+		this.abilityModal.style.display = 'none';
+		this.abilityModal.removeEventListener('click', this._modalClicked);
+	}
+
+	_getHTML() {
+		return `
 			<button class="exitButton"></button>
 			<div id="container">
 				<div id="header">
@@ -235,41 +328,42 @@ class WaitingRoomPageManager {
 				</div>
 				<div id="panel">
 					${this._getTeamPanelHTML(
-            this.clientInfo.gameInfo.teamLeftMode,
-            this.clientInfo.gameInfo.teamLeftList,
-            this.clientInfo.gameInfo.teamLeftTotalPlayerCount
-          )}
+			this.clientInfo.gameInfo.teamLeftMode,
+			this.clientInfo.gameInfo.teamLeftList,
+			this.clientInfo.gameInfo.teamLeftTotalPlayerCount
+		)}
 					<div id="vsText">VS</div>
 					${this._getTeamPanelHTML(
-            this.clientInfo.gameInfo.teamRightMode,
-            this.clientInfo.gameInfo.teamRightList,
-            this.clientInfo.gameInfo.teamRightTotalPlayerCount
-          )}
+			this.clientInfo.gameInfo.teamRightMode,
+			this.clientInfo.gameInfo.teamRightList,
+			this.clientInfo.gameInfo.teamRightTotalPlayerCount
+		)}
 				</div>
 				<button class="generalButton" id="readyButton">Ready</button>
 			</div>
+			${this._getAbilityModalHTML()}
 		`;
-  }
-  _getMode() {
-    const left =
-      this.clientInfo.gameInfo.teamLeftMode === "vampire" ? "뱀파이어" : "인간";
-    const right =
-      this.clientInfo.gameInfo.teamRightMode === "vampire"
-        ? "뱀파이어"
-        : "인간";
-    return `${left} VS ${right} 모드`;
-  }
+	}
+	_getMode() {
+		const left =
+			this.clientInfo.gameInfo.teamLeftMode === "vampire" ? "뱀파이어" : "인간";
+		const right =
+			this.clientInfo.gameInfo.teamRightMode === "vampire"
+				? "뱀파이어"
+				: "인간";
+		return `${left} VS ${right} 모드`;
+	}
 
-  _getTeamPanelHTML(mode, teamList, totalPlayerCount) {
-    let infoHTML;
-    if (totalPlayerCount === 1) {
-      if (teamList.length === 0) infoHTML = this._getPlayerEmptyInfoHTML(mode);
-      else infoHTML = this._getPlayerInfoHTML(mode, teamList[0]);
-    } else {
-      infoHTML = this._getPlayerInfoListHTML(teamList, totalPlayerCount);
-    }
-    const readyAll = teamList.every((player) => player.readyState === "READY");
-    return `
+	_getTeamPanelHTML(mode, teamList, totalPlayerCount) {
+		let infoHTML;
+		if (totalPlayerCount === 1) {
+			if (teamList.length === 0) infoHTML = this._getPlayerEmptyInfoHTML(mode);
+			else infoHTML = this._getPlayerInfoHTML(mode, teamList[0]);
+		} else {
+			infoHTML = this._getPlayerInfoListHTML(teamList, totalPlayerCount);
+		}
+		const readyAll = teamList.every((player) => player.readyState === "READY");
+		return `
 			<div class="teamPanel">
 				<div class="status">
 					<img class="teamIcon ${mode}Icon" src="images/${mode}Icon.png">
@@ -281,13 +375,15 @@ class WaitingRoomPageManager {
 				<div class="info">${infoHTML}</div>
 			</div>
 		`;
-  }
+	}
 
-  _getPlayerEmptyInfoHTML(mode) {
-    const abilityBtnHTML =
-      '<button class="abilityButton generalButton">능력<br>선택</button>';
-    return `
-			<div class="name">?</div>
+	_getPlayerEmptyInfoHTML(mode) {
+		const abilityBtnHTML =
+			'<button class="abilityButton generalButton">능력<br>선택</button>';
+		return `
+			<div class="nameContainer">
+				<div class="name">?</div>
+			</div>
 			<div class="avatar">
 				${mode === "vampire" ? abilityBtnHTML : ""}
 				<div class="avatarImgFrame emptyFrame">
@@ -295,68 +391,111 @@ class WaitingRoomPageManager {
 				</div>
 			</div>
 		`;
-  }
+	}
 
-  _getPlayerInfoHTML(mode, player) {
-    const abilityBtnHTML =
-      '<button class="abilityButton generalButton">능력<br>선택</button>';
-    return `
-			<div class="name">${player.clientNickname}</div>
+	_getPlayerInfoHTML(mode, player) {
+		const abilityBtnHTML =
+			'<button class="abilityButton generalButton">능력<br>선택</button>';
+		return `
+			<div class="nameContainer">
+				<div class="name">${player.clientNickname}</div>
+			</div>
 			<div class="avatar">
 				${mode === "vampire" ? abilityBtnHTML : ""}
 				<div class="avatarImgFrame">
-					<img class="avatarImg ${
-            player.readyState === "READY" ? "on" : ""
-          }" src="images/playerA.png">
+					<img class="avatarImg ${player.readyState === "READY" ? "on" : ""
+			}" src="images/playerA.png">
 				</div>
 			</div>
 		`;
-  }
+	}
 
-  _getPlayerInfoListHTML(playerList, totalPlayerCount) {
-    let listHTML = "";
-    playerList.forEach((player) => {
-      // TODO : 아직 들어오지 않은 자리 구현 (?)
-      listHTML += `
+	_getPlayerInfoListHTML(playerList, totalPlayerCount) {
+		let listHTML = "";
+		playerList.forEach((player) => {
+			listHTML += `
 				<div class="listItem ${player.clientId === this.clientInfo.id ? "me" : ""}">
 					${this._getPlayerInfoItemHTML(player)}
 				</div>`;
-    });
-    for (let i = 0; i < totalPlayerCount - playerList.length; i++) {
-      // TODO : 물음표 리스트 아이템 띄우기
-      listHTML += `<div class="listItem">${this._getEmptyItemHTML()}</div>`;
-    }
-    for (let i = 0; i < 5 - this.clientInfo.gameInfo.totalPlayerCount; i++) {
-      listHTML += `<div class="listItem">${this._getXItemHTML()}</div>`;
-    }
-    return listHTML;
-  }
-  _getPlayerInfoItemHTML(player) {
-    return `
+		});
+		for (let i = 0; i < totalPlayerCount - playerList.length; i++) {
+			// TODO : 물음표 리스트 아이템 띄우기
+			listHTML += `<div class="listItem">${this._getEmptyItemHTML()}</div>`;
+		}
+		for (let i = 0; i < 5 - this.clientInfo.gameInfo.totalPlayerCount; i++) {
+			listHTML += `<div class="listItem">${this._getXItemHTML()}</div>`;
+		}
+		return listHTML;
+	}
+	_getPlayerInfoItemHTML(player) {
+		return `
 			<div class="avatarImgFrame">
-				<img class="avatarImg ${
-          player.readyState === "READY" ? "on" : ""
-        }" src="images/playerA.png">
+				<img class="avatarImg ${player.readyState === "READY" ? "on" : ""
+			}" src="images/playerA.png">
 			</div>
 			<div class="listName">${player.clientNickname}</div>
 		`;
-  }
-  _getEmptyItemHTML() {
-    return `
+	}
+	_getEmptyItemHTML() {
+		return `
 			<div class="avatarImgFrame emptyFrame">
 				<div class="avatarQuestionMark">?</div>
 			</div>
 			<div class="listName">?</div>
 		`;
-  }
-  _getXItemHTML() {
-    return `
+	}
+	_getXItemHTML() {
+		return `
 			<div class="avatarImgFrame">
 				<div class="diagonal-1"></div>
 				<div class="diagonal-2"></div>
 			</div>
 		`;
-  }
+	}
+
+	_getAbilityModalHTML() {
+		return `
+			<div class="abilitySelectionModal">
+			<div class="abilityContainer">
+				<div class="abilitySubContainer">
+					${this._getAbilityItemHTML(
+						'자이언트 블로커',
+						'giantBlocker',
+						'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
+					)}
+					${this._getAbilityItemHTML(
+						'스피드 트위스터',
+						'speedTwister',
+						'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
+					)}
+				</div>
+				<div class="abilitySubContainer">
+					${this._getAbilityItemHTML(
+						'일루젼 페이커',
+						'illusionFaker',
+						'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
+					)}
+					${this._getAbilityItemHTML(
+						'고스트 스매셔',
+						'ghostSmasher',
+						'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
+					)}
+				</div>
+			</div>
+		</div>
+		`;
+	}
+	_getAbilityItemHTML(koName, enName, description) {
+		return `
+			<button class="abilityItem" value="${enName}">
+				<div class="abilityName">${koName}</div>
+				<div class="abilityImgFrame">
+					<img class="abilityImg" src="images/ability/${enName}.png">
+				</div>
+				<div class="abilityDescription">${description}</div>
+			</button>
+		`;
+	}
 }
 
 export default WaitingRoomPageManager;

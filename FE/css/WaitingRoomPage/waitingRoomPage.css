@@ -156,6 +156,7 @@
 	border-radius: 1.5rem;
 	letter-spacing: 0.2rem;
 	line-height: 2.5rem;
+	overflow: hidden;
 }
 .teamPanel:first-of-type .abilityButton {
 	right: 108%;
@@ -169,6 +170,12 @@
 	border: 0.14rem;
 	transition-property: background-color, color, border;
 	transition-duration: 0.2s;
+}
+.abilityButton .abilityImgFrame {
+	width: 100%;
+	height: 100%;
+	border: 0;
+	border-radius: 0;
 }
 
 .avatarImgFrame {
