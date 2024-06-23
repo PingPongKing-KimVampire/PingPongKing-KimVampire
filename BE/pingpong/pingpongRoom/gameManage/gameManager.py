@@ -64,10 +64,8 @@ class GameManager:
     async def _game_loop(self):
         await asyncio.sleep(1.5)
         while self.is_playing and not self.is_end:
-            ball_position = (self.ball.pos_x, self.ball.pos_y)
-            players_copy = {client_id: (player.pos_x, player.pos_y) for client_id, player in self.clients.items()}
             self.ball.move()
-            if self._detect_collisions(players_copy, ball_position):
+            if self._detect_collisions():
                 await self._handle_round_end()
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
@@ -77,6 +75,7 @@ class GameManager:
             while not self.queue.empty():
                 client_id, content = await self.queue.get()
                 self._update_paddle_position(client_id, content)
+                await self._notify_paddle_location_update(client_id, content)
             await asyncio.sleep(0.01)
 
     async def _handle_round_end(self):
@@ -142,7 +141,7 @@ class GameManager:
         self.team_right = {}
         self._reset_round()
 
-    def _detect_collisions(self, players_copy, ball_position):
+    def _detect_collisions(self):
         if self.ball.get_right_x() >= self.board_width:
             self.serve_turn = LEFT
             return True
@@ -152,20 +151,19 @@ class GameManager:
         elif self.ball.get_top_y() <= 0 or self.ball.get_bottom_y() >= self.board_height:
             self.ball.dy = -self.ball.dy
         else:
-            self._detect_paddle_collision(players_copy, ball_position)
-        return False 
+            self._detect_paddle_collision()
+        return False
 
-    def _detect_paddle_collision(self, players_copy, ball_position):
-        players_to_check = players_copy if self.ball.dx > 0 else players_copy
-        for player_id, (player_pos_x, player_pos_y) in players_to_check.items():
-            if self._is_ball_colliding_with_paddle(player_pos_x, player_pos_y, ball_position):
+    def _detect_paddle_collision(self):
+        players_to_check = self.team_right.values() if self.ball.dx > 0 else self.team_left.values()
+        for player in players_to_check:
+            if self._is_ball_colliding_with_paddle(player):
                 self.ball.reversal_random_dx()
 
-    def _is_ball_colliding_with_paddle(self, player_pos_x, player_pos_y, ball_position):
-        ball_x, ball_y = ball_position
-        if (ball_y >= player_pos_y - 50 / 2 and
-                ball_y <= player_pos_y + 50 / 2):  # Assuming paddle height is 50
-            if (self.ball.dx > 0 and self.ball.get_right_x() >= player_pos_x - 10 / 2) or \
-               (self.ball.dx < 0 and self.ball.get_left_x() <= player_pos_x + 10 / 2):  # Assuming paddle width is 10
+    def _is_ball_colliding_with_paddle(self, player):
+        if (self.ball.pos_y >= player.pos_y - 150 / 2 and
+                self.ball.pos_y <= player.pos_y + 150 / 2):  # Assuming paddle height is 50
+            if (self.ball.dx > 0 and self.ball.get_right_x() >= player.pos_x - 10 / 2) or \
+               (self.ball.dx < 0 and self.ball.get_left_x() <= player.pos_x + 10 / 2):  # Assuming paddle width is 10
                 return True
         return False
