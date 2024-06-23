@@ -53,6 +53,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await self.change_ready_state(content)
         elif event == 'enterWaitingRoom':
             await self.enter_waiting_room(content)
+        elif event == 'selectAbility':
+            await self.select_ability(content)
 
     async def change_ready_state(self, content):
         await stateManager._change_ready_state(self, self.room_id, self.client_id, content['state'])
@@ -69,6 +71,11 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
                          content={'teamLeftList': team_left_list, 'teamRightList': team_right_list})
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
 
+    async def select_ability(self, content):
+        ability = content['ability']
+        await stateManager._select_ability(self.room_id, self.client_id, ability)
+        Printer.log(f"Client {self.client_id} selected ability {content['ability']}", "blue")
+
     """
     Notify methods
     """
@@ -81,6 +88,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def notifyScoreUpdate(self, content):
         await self._send(event='notifyScoreUpdate', content=content['content'])
+    
+    async def notifySelectAbility(self, content):
+        await self._send(event='notifySelectAbility', content=content['content'])
 
     async def notifyReadyStateChange(self, content):
         content = content['content']
