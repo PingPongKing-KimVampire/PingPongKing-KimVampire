@@ -43,14 +43,66 @@ class LobbyPageManager {
       ".questionModal .activatedButton:nth-of-type(2)"
     );
     this.enterModalTitle = document.querySelector(".questionModal .title");
+    this.waitingRoomListContainer = document.querySelector(
+      ".waitingRoomListContainer"
+    );
+    this.allWaitingRoomElement = {};
   }
 
   async initPage() {
     const waitingRoomInfoList = await this._getWaitingRoomList();
     this._renderWaitingRoom(waitingRoomInfoList);
+    this._listenWaitingRoomUpdate();
 
     this._autoSetScollTrackColor();
     this._adjustButtonSize();
+  }
+
+  _listenWaitingRoomUpdate() {
+    const lobbySocket = this.clientInfo.lobbySocket;
+    lobbySocket.addEventListener("message", (messageEvent) => {
+      const { event, content } = JSON.parse(messageEvent.data);
+      if (event === "notifyWaitingRoomCreated") {
+        const {
+          roomId,
+          title,
+          leftMode,
+          rightMode,
+          currentPlayerCount,
+          totalPlayerCount,
+        } = content.waitingRoomInfo;
+        const newWaitingRoomElement = this._getWaitingRoomElement(
+          roomId,
+          leftMode,
+          rightMode,
+          title,
+          currentPlayerCount,
+          totalPlayerCount
+        );
+        this.allWaitingRoomElement[roomId] = {
+          element: newWaitingRoomElement,
+          totalPlayerCount,
+        };
+        this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
+      } else if (event === "notifyWaitingRoomClosed") {
+        const { roomId } = content.waitingRoomInfo;
+        if (this.allWaitingRoomElement[roomId]) {
+          this.allWaitingRoomElement[roomId].element.remove();
+          delete this.allWaitingRoomElement[roomId];
+        }
+      } else if (event === "notifyCurrentPlayerCountChange") {
+        const { roomId, currentPlayerCount } = content;
+        if (this.allWaitingRoomElement[roomId]) {
+          const waitingRoomElement = this.allWaitingRoomElement[roomId].element;
+          const totalPlayerCount =
+            this.allWaitingRoomElement[roomId].totalPlayerCount;
+          for (const children of waitingRoomElement.children) {
+            if (children.className === "matchPlayerCount")
+              children.textContent = `${currentPlayerCount} / ${totalPlayerCount}`;
+          }
+        }
+      }
+    });
   }
 
   async _getWaitingRoomList() {
@@ -104,19 +156,20 @@ class LobbyPageManager {
         currentPlayerCount,
         maxPlayerCount,
       } = waitingRoom;
-      const waitingRoomListContainer = document.querySelector(
-        ".waitingRoomListContainer"
+      const newWaitingRoomElement = this._getWaitingRoomElement(
+        roomId,
+        leftMode,
+        rightMode,
+        title,
+        currentPlayerCount,
+        maxPlayerCount
       );
-      waitingRoomListContainer.appendChild(
-        this._getWaitingRoomElement(
-          roomId,
-          leftMode,
-          rightMode,
-          title,
-          currentPlayerCount,
-          maxPlayerCount
-        )
-      );
+      this.allWaitingRoomElement[roomId] = {
+        element: newWaitingRoomElement,
+        totalPlayerCount: maxPlayerCount,
+      };
+      this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
+      this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
     });
   }
 
@@ -135,9 +188,7 @@ class LobbyPageManager {
   }
 
   _autoSetScollTrackColor() {
-    let waitingRoomListContainer = document.querySelector(
-      ".waitingRoomListContainer"
-    );
+    const waitingRoomListContainer = this.waitingRoomListContainer;
     if (
       waitingRoomListContainer.scrollHeight >
       waitingRoomListContainer.clientHeight
@@ -209,7 +260,7 @@ class LobbyPageManager {
         leftMode,
         rightMode,
         1,
-        totalPlayerCount-1
+        totalPlayerCount - 1
       );
       const hideModalLisenerRef = () => {
         this.enterRoomModal.style.display = "none";
