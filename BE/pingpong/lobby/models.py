@@ -4,6 +4,16 @@ class User(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255, null=False)
     image = models.CharField(max_length=255, blank=True, null=True)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
+    bio = models.TextField(blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    join_date = models.DateTimeField(auto_now_add=True)
+
+class UserStat(models.Model):
+    user = models.OneToOneField(User, related_name='stats', on_delete=models.CASCADE)
     win = models.IntegerField(default=0)
     lose = models.IntegerField(default=0)
 
@@ -15,8 +25,8 @@ class Friendship(models.Model):
 
 class BlockedUser(models.Model):
     id = models.BigAutoField(primary_key=True)
-    blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE)
-    blocked_user = models.ForeignKey(User, related_name='blocked_users', on_delete=models.CASCADE)
+    blocker = models.ForeignKey(User, related_name='blocking', on_delete=models.CASCADE)
+    blocked_user = models.ForeignKey(User, related_name='blocked_by', on_delete=models.CASCADE)
 
 class Team(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -25,7 +35,7 @@ class Team(models.Model):
 
 class TeamUser(models.Model):
     id = models.BigAutoField(primary_key=True)
-    team = models.ForeignKey(Team, related_name='team_members', on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, related_name='members', on_delete=models.CASCADE)
     user = models.ForeignKey(User, related_name='teams', on_delete=models.CASCADE)
 
 class Game(models.Model):
@@ -37,6 +47,19 @@ class Round(models.Model):
     id = models.BigAutoField(primary_key=True)
     game = models.ForeignKey(Game, related_name='rounds', on_delete=models.CASCADE)
     win_team = models.ForeignKey(Team, related_name='wins', on_delete=models.CASCADE)
+
+class Match(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    game = models.ForeignKey(Game, related_name='matches', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='matches', on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, related_name='team_matches', on_delete=models.CASCADE)
+    is_win = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', '-created_at']),  # 유저별 최근 경기를 빠르게 조회하기 위해 인덱스 추가
+        ]
 
 class Message(models.Model):
     id = models.BigAutoField(primary_key=True)
