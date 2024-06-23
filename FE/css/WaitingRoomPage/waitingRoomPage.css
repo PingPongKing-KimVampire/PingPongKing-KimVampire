@@ -270,6 +270,9 @@
 	font-size: 2.2rem;
 	padding: 1.2% 5%;
 }
+#readyButton {
+	cursor: pointer;
+}
 .clickedReadyButton {
 	background-color: rgb(213, 112, 255);
 	border-color: rgb(213, 112, 255);
