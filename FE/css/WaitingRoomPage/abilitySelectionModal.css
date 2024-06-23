@@ -1,0 +1,104 @@
+.abilitySelectionModal {
+	display: none;
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.abilityContainer {
+	width: 80%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.abilitySubContainer {
+	width: 47.5%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.abilityItem {
+	width: 44.75%;
+	display: flex;
+	flex-direction: column;
+	background-color: transparent;
+}
+
+.abilityName {
+	width: 100%;
+	aspect-ratio: 4/1;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	background-color: rgb(1, 4, 37);
+	color: rgb(128, 129, 146);
+	border: 0.1rem solid rgb(128, 129, 146);
+	box-sizing: border-box;
+	font-size: 2.4rem;
+	font-weight: 800;
+}
+.abilityItem:hover .abilityName {
+	color: white;
+	border-color: white;
+	transition-property: color, border-color;
+	transition-duration: 0.2s;
+}
+
+.abilityImgFrame {
+	width: 100%;
+	aspect-ratio: 1.1/1;
+	border-left: 0.1rem solid rgb(128, 129, 146);
+	border-right: 0.1rem solid rgb(128, 129, 146);
+	border-bottom: 0.1rem solid rgb(128, 129, 146);
+	border-bottom-left-radius: 2rem;
+	border-bottom-right-radius: 2rem;
+	box-sizing: border-box;
+	margin-bottom: 10%;
+	overflow: hidden;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+.abilityItem:hover .abilityImgFrame {
+	border-color: white;
+	transition-property: border-color;
+	transition-duration: 0.2s;
+}
+
+.abilityImg {
+	width: 100%;
+}
+
+.abilityDescription {
+	width: 100%;
+	aspect-ratio: 2/1;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	padding: 12% 8%;
+	background-color: rgb(1, 4, 37);
+	color: rgb(128, 129, 146);
+	border: 0.1rem solid rgb(128, 129, 146);
+	border-radius: 1.5rem;
+	box-sizing: border-box;
+	font-size: 1.3rem;
+	font-weight: 300;
+	line-height: 2rem;
+	text-align: center;
+}
+.abilityItem:hover .abilityDescription {
+	color: white;
+	border-color: white;
+	transition-property: color, border-color;
+	transition-duration: 0.2s;
+}
+
