@@ -2,6 +2,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
+import asyncio
 
 stateManager = StateManager()
 
@@ -44,6 +45,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def handle_playing_event(self, event, content):
         if event == 'updatePaddleLocation':
             await self.game_manager._update_paddle_location(self.client_id, content)
+            content = {'clientId': self.client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
+            await stateManager._notify_room(self.room_id, 'notifyPaddleLocationUpdate', content)
         
     async def handle_waiting_event(self, event, content):
         if event == 'changeReadyState':

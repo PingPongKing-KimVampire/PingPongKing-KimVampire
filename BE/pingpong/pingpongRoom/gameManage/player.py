@@ -1,3 +1,5 @@
+from utils.printer import Printer
+
 class Player:
     def __init__(self, nickname, ability):
         self.nickname = nickname
