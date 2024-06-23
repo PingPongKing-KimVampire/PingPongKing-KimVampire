@@ -49,23 +49,10 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         elif event == 'getWaitingRoomList':
             await self.get_waiting_room_List()
 
-    async def init_client(self, client_id, client_nickname):
-        if client_id in stateManager.clients:
-            Printer.log(f"Duplicate clientId attempted: {self.client_id}", "red")
-            await self.close()
-            return
-
-        self.client_id = client_id
-        self.nickname = client_nickname
-        self.is_init = True
-        stateManager._add_client(self, client_id, self.nickname)
-
-        Printer.log(f"Client {self.client_id} initialized with nickname {self.nickname}", "cyan")
-
     async def enter_lobby(self, client_id):
-        Printer.log(f"Client {client_id} entered lobby", "cyan")
         self.is_init = True # 인증으로 바꿔야함
-        self.nickname = "test"
+        self.nickname = stateManager._get_client_nickname(client_id)
+        Printer.log(f"Client {client_id} entered lobby : {self.nickname}", "blue")
         await stateManager._add_client(self, client_id, self.nickname)
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 

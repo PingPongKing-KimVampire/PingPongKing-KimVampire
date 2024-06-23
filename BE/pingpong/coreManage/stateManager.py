@@ -42,6 +42,9 @@ class StateManager:
             self.lobby_channel = consumer.channel_layer
         self.clients[clientId] = nickname
         await add_group(consumer, 'lobby')
+    
+    def _get_client_nickname(self, clientId):
+        return self.clients[clientId]
 
     async def _remove_client(self, consumer, clientId):
         if clientId in self.clients:
@@ -113,7 +116,7 @@ class StateManager:
             }
             await self._notify_lobby('notifyWaitingRoomCreated', room_data)
         else:
-            await self._notify_lobby(event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
+            await self._notify_lobby(event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1, 'roomId': room_id})
         enter_data = { 'clientId': client_id, 'clientNickname': client_nickname, 'team': team }
         await self._notify_room(room_id, event='notifyWaitingRoomEnter', content=enter_data)
 
@@ -126,6 +129,9 @@ class StateManager:
             if len(self.rooms[room_id]['teamLeft']) + len(self.rooms[room_id]['teamRight']) == 0:
                 del self.rooms[room_id]
                 await self._notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo' : { 'roomId': room_id} })
+            else:
+                count = len(self.rooms[room_id]['teamLeft']) + len(self.rooms[room_id]['teamRight'])
+                await self._notify_lobby('notifyCurrentPlayerCountChange', {'currentPlayerCount': count, 'roomId': room_id})
 
     async def _get_waiting_room_list(self):
         room_data = []
