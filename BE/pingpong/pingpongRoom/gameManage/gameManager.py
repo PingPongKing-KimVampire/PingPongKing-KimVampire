@@ -39,19 +39,40 @@ class GameManager:
         await asyncio.sleep(1.5)
         await self._notify_game_room('notifyGameStart', {})
 
-    async def set_game_mode(self, left_mode, right_mode):
-        pass
+    def set_game_mode(self, left_mode, right_mode):
+        self.set_left_mode(left_mode)
+        self.set_right_mode(right_mode)    
     
-    async def set_game_manager(self, room, consumer):
+    def set_left_mode(self, mode):
+        if mode == 'human':
+            pass
+        elif mode == 'jiantBlocker':
+            for player in self.team_right.values():
+                player.set_paddle_small()
+            for player in self.team_left.values():
+                player.set_paddle_big()
+                
+    def set_right_mode(self, mode):
+        if mode == 'human':
+            pass
+        elif mode == 'jiantBlocker':
+            for player in self.team_left.values():
+                player.set_paddle_small()
+            for player in self.team_right.values():
+                player.set_paddle_big()
+    
+    def set_game_manager(self, room, consumer):
         self.channel_layer = consumer.channel_layer
-        team_left = room['teamLeft']
-        team_right = room['teamRight']
-        self.team_left = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_left.items()}
-        self.team_right = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_right.items()}
+        self.team_left = self.set_team(room['left'])
+        self.team_right = self.set_team(room['right'])
         left_mode = room['leftMode']
         right_mode = room['rightMode']
         self.clients = {**self.team_left, **self.team_right}
-        await self.set_game_mode(left_mode, right_mode)
+        self.set_game_mode(left_mode, right_mode)
+
+    def set_team(self, team):
+        player_count = len(team)
+        team = {client_id: Player(info['nickname'], info['ability'], player_count) for client_id, info in team.items()}
         
     async def trigger_game(self):
         self.is_playing = True
