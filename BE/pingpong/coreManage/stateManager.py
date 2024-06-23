@@ -166,7 +166,7 @@ class StateManager:
         game_manager = self.rooms[room_id]['gameManager']
         await game_manager.set_game_manager(self.rooms[room_id], consumer)
         # await self._notify_room(room_id, event='notifyGameStart', content={})
-        await self._notify_lobby('notifyWaitingRoomClosed', {'roomId': room_id})
+        await self._notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo' : {'roomId': room_id}})
         await game_manager.trigger_game()
 
     async def _get_waiting_room_player_list(self, room_id):

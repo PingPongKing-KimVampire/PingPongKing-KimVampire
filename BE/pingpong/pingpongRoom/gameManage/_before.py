@@ -1,15 +1,19 @@
 import asyncio
 from .ball import Ball
 from .player import Player
+from utils.printer import Printer
 from asyncio import Queue
 
 FRAME_PER_SECOND = 60
+
 LEFT = 'left'
 RIGHT = 'right'
 
 class GameManager:
     def __init__(self, room_id, left_mode, right_mode):
         self.channel_layer = None
+        self.game_task = None
+        self.input_task = None
         self.room_id = room_id
         self.team_left = {}
         self.team_right = {}
@@ -23,7 +27,7 @@ class GameManager:
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
         self.serve_turn = LEFT
-        self.queue = Queue()
+        self.queue = Queue()  # Queue 추가
 
     async def _notify_game_room(self, event, content):
         await self.channel_layer.group_send(
@@ -51,7 +55,7 @@ class GameManager:
         left_mode = room['leftMode']
         right_mode = room['rightMode']
         self.clients = {**self.team_left, **self.team_right}
-        await self.set_game_mode(left_mode, right_mode)
+        self.set_game_mode(left_mode, right_mode)
         
     async def trigger_game(self):
         self.is_playing = True
@@ -59,7 +63,7 @@ class GameManager:
         self._reset_round()
         asyncio.create_task(self._notify_game_ready_and_start())
         asyncio.create_task(self._game_loop())
-        asyncio.create_task(self._input_loop())
+        asyncio.create_task(self._input_loop()) 
 
     async def _game_loop(self):
         await asyncio.sleep(1.5)
@@ -70,13 +74,14 @@ class GameManager:
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
+            
     async def _input_loop(self):
         while self.is_playing and not self.is_end:
             while not self.queue.empty():
                 client_id, content = await self.queue.get()
                 self._update_paddle_position(client_id, content)
-                await self._notify_paddle_location_update(client_id, content)
             await asyncio.sleep(0.01)
+            # Printer.log("input loop", "green")
 
     async def _handle_round_end(self):
         self._add_score()
@@ -105,13 +110,13 @@ class GameManager:
         await self._notify_game_room('notifyGameEnd', {'winTeam': team})
         
     async def _send_ball_update(self):
-        await self._notify_game_room('notifyBallLocationUpdate', {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
+        await self._notify_game_room('notifyBallLocationUpdate',
+                                     {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
     async def _give_up_game(self, consumer):
         self._end_game()
         client_id = consumer.client_id
-        if self.is_playing:
-            await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
+        await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
 
     async def _update_paddle_location(self, client_id, content):
         await self.queue.put((client_id, content))
@@ -153,18 +158,18 @@ class GameManager:
             self.ball.dy = -self.ball.dy
         else:
             self._detect_paddle_collision()
-        return False
+        return False 
 
     def _detect_paddle_collision(self):
-        players_to_check = self.team_right.values() if self.ball.dx > 0 else self.team_left.values()
-        for player in players_to_check:
+        players_to_check = self.team_right if self.ball.dx > 0 else self.team_left
+        for player in players_to_check.values():
             if self._is_ball_colliding_with_paddle(player):
                 self.ball.reversal_random_dx()
 
     def _is_ball_colliding_with_paddle(self, player):
-        if (self.ball.pos_y >= player.pos_y - 150 / 2 and
-                self.ball.pos_y <= player.pos_y + 150 / 2):  # Assuming paddle height is 50
-            if (self.ball.dx > 0 and self.ball.get_right_x() >= player.pos_x - 10 / 2) or \
-               (self.ball.dx < 0 and self.ball.get_left_x() <= player.pos_x + 10 / 2):  # Assuming paddle width is 10
+        if (self.ball.pos_y >= player.pos_y - player.paddle_height / 2 and
+                self.ball.pos_y <= player.pos_y + player.paddle_height / 2):
+            if (self.ball.dx > 0 and self.ball.get_right_x() >= player.posX - player.paddle_width / 2) or \
+               (self.ball.dx < 0 and self.ball.get_left_x() <= player.posX + player.paddle_width / 2):
                 return True
         return False
