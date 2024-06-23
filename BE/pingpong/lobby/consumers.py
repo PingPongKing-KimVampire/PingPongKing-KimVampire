@@ -83,10 +83,13 @@ class LobbyConsumer(AsyncWebsocketConsumer):
                          content={'waitingRoomInfoList': room_list})
         
     async def notifyWaitingRoomCreated(self, content):
+        content = content['content']
         await self._send(event='notifyWaitingRoomCreated', content=content)
         
     async def notifyCurrentPlayerCountChange(self, content):
+        content = content['content']
         await self._send(event='notifyCurrentPlayerCountChange', content=content)
     
     async def notifyWaitingRoomClosed(self, content):
+        content = content['content']
         await self._send(event='notifyWaitingRoomClosed', content=content)

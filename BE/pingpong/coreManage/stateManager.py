@@ -101,12 +101,21 @@ class StateManager:
             team = 'left'
         else:
             team = 'right'
-        data = { 'clientId': client_id, 'clientNickname': client_nickname, 'team': team }
         if count == 0:
-            await self._notify_lobby('notifyWaitingRoomCreated', {'roomId': room_id})
-        await self._notify_lobby(event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
-        # await self._notify_room(room_id, event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
-        await self._notify_room(room_id, event='notifyWaitingRoomEnter', content=data)
+            room_data = { "waitingRoomInfo": {
+                    'roomId': room_id,
+                    'title': room['title'],
+                    'leftMode': room['leftMode'],
+                    'rightMode': room['rightMode'],
+                    'currentPlayerCount': count + 1,
+                    'totalPlayerCount': room['leftMaxPlayerCount'] + room['rightMaxPlayerCount'],
+                }
+            }
+            await self._notify_lobby('notifyWaitingRoomCreated', room_data)
+        else:
+            await self._notify_lobby(event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
+        enter_data = { 'clientId': client_id, 'clientNickname': client_nickname, 'team': team }
+        await self._notify_room(room_id, event='notifyWaitingRoomEnter', content=enter_data)
 
     async def _remove_player_from_room(self, consumer, room_id, client_id):
         if room_id in self.rooms:
