@@ -1,17 +1,25 @@
 import windowObservable from "../../WindowObservable.js";
 
 class Player {
-  constructor(clientInfo, playerList, sizeInfo) {
-    this._initPlayerProperty(clientInfo, playerList, sizeInfo);
+  constructor(clientInfo) {
+    this._initPlayerProperty(clientInfo);
     this._subscribeWindow();
   }
 
-  _initPlayerProperty(clientInfo, playerList, sizeInfo) {
+  _initPlayerProperty(clientInfo) {
     this.clientInfo = clientInfo;
-    this.playerList = playerList;
-    this.myTeam = this.playerList.find(
-      (player) => player.clientId === clientInfo.id
-    ).team;
+    if (
+      this.clientInfo.gameInfo.teamLeftList.find(
+        (player) => player.clientId === clientInfo.id
+      )
+    )
+      this.myTeam = "left";
+    if (
+      this.clientInfo.gameInfo.teamRightList.find(
+        (player) => player.clientId === clientInfo.id
+      )
+    )
+      this.myTeam = "right";
     this.sizeInfo = {
       boardWidth: null,
       boardHeight: null,
@@ -19,7 +27,7 @@ class Player {
       paddleHeight: null,
       ballRadius: null,
     };
-    this.sizeInfo = sizeInfo;
+    this.sizeInfo = this.clientInfo.gameInfo.sizeInfo;
     this.subBoard = document.querySelector(".subPlayBoard:nth-of-type(2)");
     this.subBoardRect = {
       top: null,
@@ -92,17 +100,13 @@ class Player {
     }
 
     const msg = {
-      sender: "player",
-      receiver: ["player", "pingpongBoard"],
       event: "updatePaddleLocation",
       content: {
-        roomId: this.clientInfo.roomId,
-        clientId: this.clientInfo.id,
         xPosition: x,
         yPosition: y,
       },
     };
-    this.clientInfo.socket.send(JSON.stringify(msg));
+    this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(msg));
   }
 }
 

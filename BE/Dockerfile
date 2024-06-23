@@ -1,15 +1,16 @@
-FROM node:22-alpine
+FROM python:3.9-alpine
 
-WORKDIR /usr/src/app
+ENV PYTHONUNBUFFERED 1
 
-RUN npm i -g @nestjs/cli
+WORKDIR /app
 
-# 스크립트 파일 복사
-COPY start.sh ./start.sh
-# 실행 권한 부여
-RUN chmod +x ./start.sh
+COPY requirements.txt /app/
+RUN pip install --upgrade pip
+RUN apk add --no-cache gcc musl-dev libffi-dev \
+	&& pip install -r requirements.txt
 
+COPY . /app/
 
-WORKDIR /usr/src/app/pingpong
+WORKDIR /app/pingpong
 
-CMD ["/usr/src/app/start.sh"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "3001", "kimVampire.asgi:application"]

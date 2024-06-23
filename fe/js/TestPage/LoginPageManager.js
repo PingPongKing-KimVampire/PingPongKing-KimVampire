@@ -1,35 +1,97 @@
-const SERVER_ADDRESS = "127.0.0.1";
+import { SERVER_ADDRESS } from "./../PageRouter.js";
+import { SERVER_PORT } from "./../PageRouter.js";
 
 class LoginPageManager {
-  constructor(app, onLoginSuccess) {
+  constructor(app, clientInfo, onLoginSuccess) {
     console.log("Login Page!");
+    this.clientInfo = clientInfo;
     app.innerHTML = this._getHTML();
     this._setRandomId();
     this._setRandomNickname();
     this.onLoginSuccess = onLoginSuccess;
+  }
 
-    // 로그인
+  async initPage() {
     const loginButton = document.querySelector("#loginButton");
-    loginButton.addEventListener("click", (event) => {
-      event.preventDefault();
-      this.socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001`);
-      this.socket.addEventListener("open", () => {
-        this.id = parseInt(document.querySelector("#id").value);
-        if (isNaN(parseInt(this.id))) return;
-        this.nickname = document.querySelector("#nickname").value;
-        const initClientMessage = {
-          sender: "unauthenticatedClient",
-          receiver: ["server"],
-          event: "initClient",
-          content: {
-            clientId: parseInt(this.id),
-            clientNickname: this.nickname,
-          },
-        };
-        this.socket.send(JSON.stringify(initClientMessage));
+    loginButton.addEventListener("click", this._loginListener.bind(this));
+  }
+
+  async _connectLobbySocket(id) {
+    const lobbySocket = new WebSocket(
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
+    );
+    await new Promise((resolve) => {
+      lobbySocket.addEventListener("open", () => {
+        resolve();
       });
-      this.socket.addEventListener("message", this.listener);
     });
+    const enterLobbyMessage = {
+      event: "enterLobby",
+      content: {
+        clientId: id,
+      },
+    };
+    lobbySocket.send(JSON.stringify(enterLobbyMessage));
+
+    await new Promise((resolve) => {
+      lobbySocket.addEventListener(
+        "message",
+        function listener(messageEvent) {
+          const { event, content } = JSON.parse(messageEvent.data);
+          if (event === "enterLobbyResponse" && content.message === "OK") {
+            lobbySocket.removeEventListener("message", listener);
+            resolve();
+          }
+        }.bind(this)
+      );
+    });
+
+    return lobbySocket;
+  }
+
+  async _loginListener(event) {
+    event.preventDefault();
+    const id = parseInt(document.querySelector("#id").value);
+    if (isNaN(parseInt(id))) return;
+    const nickname = document.querySelector("#nickname").value;
+    const socket = await this._connectGlobalSocket(id, nickname);
+    const lobbySocket = await this._connectLobbySocket(id);
+
+    this.clientInfo.id = id;
+    this.clientInfo.nickname = nickname;
+    this.clientInfo.socket = socket;
+    this.clientInfo.lobbySocket = lobbySocket;
+    this.onLoginSuccess();
+  }
+
+  async _connectGlobalSocket(id, nickname) {
+    const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`);
+    await new Promise((resolve) => {
+      socket.addEventListener("open", () => {
+        resolve();
+      });
+    });
+
+    const initClientMessage = {
+      event: "initClient",
+      content: {
+        clientId: parseInt(id),
+        clientNickname: nickname,
+      },
+    };
+    socket.send(JSON.stringify(initClientMessage));
+    await new Promise((resolve) => {
+      socket.addEventListener("message", (messageEvent) => {
+        const { event, content } = JSON.parse(messageEvent.data);
+        if (event === "initClientResponse") {
+          if (content.message === "OK") {
+            resolve();
+          }
+        }
+      });
+    });
+
+    return socket;
   }
 
   _setRandomId() {
@@ -61,20 +123,6 @@ class LoginPageManager {
 		</form>
 		`;
   }
-
-  listener = (messageEvent) => {
-    this.socket.removeEventListener("message", this.listener);
-    const message = JSON.parse(messageEvent.data);
-    if (message.receiver.includes("unauthenticatedClient")) {
-      if (message.event === "registerClientSuccess") {
-        // 로그인 성공
-        this.onLoginSuccess(this.socket, this.id, this.nickname);
-      } else if (message.event == "duplicateClientId") {
-        // 중복 ID
-        console.log("duplicated ID!");
-      }
-    }
-  };
 }
 
 export default LoginPageManager;

@@ -1,0 +1,400 @@
+#roomSettingContainer {
+	/* background-color: blueviolet; */
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 75%;
+	height: 70%;
+}
+
+.selectionContainer {
+	/* background-color: blue; */
+	display: flex;
+	flex-direction: row;
+	justify-content: start;
+	align-items: center;
+	width: 100%;
+	transition: margin 0.5s;
+}
+.selectionGroupBottomMargin {
+	margin-bottom: 6%;
+}
+.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
+	height: 15%;
+}
+.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+	height: 37%;
+}
+.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+	height: 15%;
+}
+
+.selectionLabel {
+	/* background-color: yellowgreen; */
+	width: 15%;
+	font-size: 3rem;
+	font-weight: 800;
+}
+
+.selectionBox {
+	/* background-color: brown; */
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+#titleInput {
+	width: 80%;
+	height: 80%;
+	background-color: rgb(1, 4, 37);
+	border: 0.15rem solid white;
+	border-radius: 50px;
+	color: white;
+	font-size: 1.7rem;
+	padding: 0 3%;
+}
+
+input[type="radio"] {
+	display: none;
+}
+
+.modeButton {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	aspect-ratio: 1/1;
+	margin-right: 5.5%;
+	border: 0.15rem solid white;
+	border-radius: 18%;
+	font-size: 1.2rem;
+	font-weight: 500;
+}
+.modeButton:hover, #humanCountButtonGroup .countButton:hover {
+	cursor: pointer;
+}
+.modeButton:hover, .countButton:hover,
+input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countButton {
+	background-color: rgb(213, 112, 255);
+	border: 0.15rem solid rgb(213, 112, 255);
+	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
+	transition-property: background-color, border, box-shadow;
+	transition-duration: 0.5s;
+}
+
+#humanCountSelectionBox {
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+}
+
+.countBox {
+	/* background-color: aquamarine; */
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+}
+.countBox:last-of-type {
+	height: 200%;
+	align-items: flex-start;
+	/* background-color: red; */
+}
+.countBox .teamText {
+	font-size: 1.5rem;
+	font-weight: 300;
+	height: 40%;
+}
+.countBox:last-of-type .teamText {
+	height: 20%;
+}
+
+#vampireCountBox {
+	width: 13%;
+}
+#humanCountSelectionBox {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	width: 26%;
+}
+#humanCountBox {
+	width: 50%;
+}
+
+#vampireCountButton, #humanCountButton {
+	height: 60%;
+	width: 100%;
+	border: 0.1rem solid white;
+	color: white;
+	background-color: rgb(1, 4, 37);
+	border-radius: 15px;
+	font-size: 2rem;
+	font-weight: 600;
+}
+#humanCountButton {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+	background-color: rgb(213, 112, 255);
+	border: 0.1rem solid rgb(213, 112, 255);
+	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
+}
+#humanCountButton img {
+	height: 50%;
+	aspect-ratio: 2/3;
+	position: absolute;
+	right: 8%;
+	transition: transform 0.5s;
+}
+.nonSelectedArrowImg {
+	transform: rotate(0deg);
+}
+.selectedArrowImg {
+	transform: rotate(180deg);
+}
+#humanCountButton:hover {
+	cursor: pointer;
+}
+
+#humanCountBox.visible #humanCountOptionBox {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 70%;
+	height: 80%;
+	margin-left: 5%;
+	padding: 0.3%;
+	background-color: rgb(1, 4, 37);
+	border: 0.1rem solid white;
+	border-radius: 15px;
+	transition-duration: 0.5s;
+}
+
+#humanCountBox.visible #humanCountOptionBox li {
+	width: 100%;
+	height: 24%;
+}
+
+#humanCountBox.visible #humanCountOptionBox .humanCountOptionButton {
+	width: 100%;
+	height: 100%;
+	background-color: rgb(1, 4, 37);
+	color: white;
+	border-radius: 10px;
+	font-size: 1.25rem;
+	font-weight: 300;
+}
+#humanCountBox.visible #humanCountOptionBox .humanCountOptionButton:hover {
+	background-color: rgb(234, 183, 255);
+	color: rgb(1, 4, 37);
+	transition: background-color 0.1s;
+}
+
+#vsText {
+	font-size: 3rem;
+	font-weight: 800;
+	margin: 0 8%;
+}
+
+#completeButton {
+	width: 15%;
+	position: absolute;
+	bottom: 9%;
+	right: 6%;
+	padding: 1% 1.5%;
+	aspect-ratio: 4/1;
+}
+
+@media (orientation: portrait) {
+	#roomSettingContainer {
+		height: auto;
+	}
+	.selectionContainer {
+		flex-direction: column;
+	}
+	.selectionGroupBottomMargin {
+		margin-bottom: 11%;
+	}
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
+		height: auto;
+	}
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: auto;
+	}
+	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+		height: auto;
+	}
+	.selectionLabel {
+		width: auto;
+		margin-bottom: 5%;
+	}
+	.selectionBox {
+		height: auto;
+		justify-content: center;
+	}
+	.selectionContainer:nth-of-type(3).visible .selectionBox {
+		align-items: flex-start;
+	}
+	#titleInput {
+		width: 100%;
+		aspect-ratio: 9/1;
+		padding: 0 6%;
+	}
+	.modeButton {
+		width: 28%;
+		margin: 0%;
+	}
+	.modeButton:nth-of-type(2) {
+		margin: 0 7%;
+	}
+	#vampireCountBox {
+		width: 25%;
+	}
+	#humanCountSelectionBox {
+		position: relative;
+		flex-direction: column;
+		width: 25%;
+	}
+	#humanCountBox {
+		height: 50%;
+		width: 100%;
+	}
+	#humanCountBox:last-of-type {
+		position: absolute;
+		height: 200%;
+		z-index: 1;
+		top: 100%;
+	}
+	#humanCountBox:last-of-type .teamText {
+		margin-bottom: 5%;
+		height: 0;
+	}
+	#humanCountBox.visible #humanCountOptionBox {
+		width: 100%;
+		height: 100%;
+		margin-left: 0;
+	}
+	.countBox .teamText {
+		margin-bottom: 10%;
+	}
+	#vampireCountButton, #humanCountButton {
+		width: 100%;
+		aspect-ratio: 2.2/1;
+	}
+	.nonSelectedArrowImg {
+		transform: rotate(90deg);
+	}
+	.selectedArrowImg {
+		transform: rotate(270deg);
+	}
+	#vsText {
+		margin: 0 12%;
+	}
+	#completeButton {
+		bottom: 7%;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 30%;
+	}
+}
+
+@media (max-width: 1700px) and (orientation: landscape) {
+	.selectionLabel {
+		width: 16%;
+	}
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
+		height: 14%;
+	}
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 35%;
+	}
+	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+		height: 13.5%;
+	}
+	#vampireCountBox {
+		width: 14%;
+	}
+	#humanCountSelectionBox {
+		width: 28%;
+	}
+	#completeButton {
+		width: 16%;
+	}
+}
+@media (max-width: 1500px) and (orientation: landscape) {
+	.selectionLabel {
+		width: 18%;
+	}
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
+		height: 13.5%;
+	}
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 32%;
+	}
+	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+		height: 12%;
+	}
+	#vampireCountBox {
+		width: 15%;
+	}
+	#humanCountSelectionBox {
+		width: 30%;
+	}
+	#completeButton {
+		width: 17%;
+	}
+}
+@media (max-width: 1350px) and (orientation: landscape) {
+	.selectionLabel {
+		width: 20%;
+	}
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
+		height: 13%;
+	}
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 28%;
+	}
+	#completeButton {
+		width: 18%;
+	}
+}
+@media (max-width: 1150px) and (orientation: landscape) {
+	.selectionLabel {
+		width: 25%;
+	}
+	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
+		height: 12%;
+	}
+	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 25%;
+	}
+	#vampireCountBox {
+		width: 19%;
+	}
+	#humanCountSelectionBox {
+		width: 38%;
+	}
+	#completeButton {
+		width: 19%;
+	}
+}
+
+@media (min-width: 600px) and (orientation: portrait) {
+	#roomSettingContainer {
+		margin-bottom: 7%;
+		width: 65%;
+	}
+}
+@media (min-width: 750px) and (orientation: portrait) {
+	#roomSettingContainer {
+		margin-bottom: 10%;
+		width: 55%;
+	}
+}
