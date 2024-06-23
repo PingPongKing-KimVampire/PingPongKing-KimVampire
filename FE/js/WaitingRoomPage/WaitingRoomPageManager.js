@@ -47,8 +47,14 @@ class WaitingRoomPageManager {
 		const orientation = windowObservable.getOrientation();
 		this._toggleReadyTextVisible(orientation);
 		this._subscribeWindow();
+
 		document
 			.querySelector("#readyButton")
+			.addEventListener("click", (event) => {
+				event.target.classList.toggle('clickedReadyButton');
+				this._sendMyReadyStateChangeMessage.call(this);
+			})
+
 			.addEventListener(
 				"click",
 				this._sendMyReadyStateChangeMessage.bind(this)
@@ -301,7 +307,7 @@ class WaitingRoomPageManager {
 			// TODO : 물음표 리스트 아이템 띄우기
 			listHTML += `<div class="listItem">${this._getEmptyItemHTML()}</div>`;
 		}
-		for (let i = 0; i < 5 - this.clientInfo.gameInfo.totalPlayerCount; i++) {
+		for (let i = 0; i < 5 - totalPlayerCount; i++) {
 			listHTML += `<div class="listItem">${this._getXItemHTML()}</div>`;
 		}
 		return listHTML;
