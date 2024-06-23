@@ -9,6 +9,8 @@ export const SERVER_PORT = "3001";
 
 import WaitingRoomPageManager from "./PingpongPage/WaitingRoomPageManager.js";
 
+import WaitingRoomPageManager from "./PingpongPage/WaitingRoomPageManager.js";
+
 class PageRouter {
   constructor() {
     this.app = document.querySelector("#app");

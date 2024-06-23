@@ -19,10 +19,10 @@ class WaitingRoomPageManager {
 		}, {
 			clientId: 3,
 			clientNickname: "영희",
-			readyState: "READY"
+			readyState: "NOTREADY"
 		}];
-
-		this.clientInfo.id = 3;
+		this.totalPlayerCount = 4;
+		this.clientInfo.id = 2;
 		this.title = "개쩌는 탁구장";
 		this.leftMode = "vampire";
 		this.rightMode = "human";
@@ -113,37 +113,6 @@ class WaitingRoomPageManager {
 		`;
 	}
 
-	// _getPlayerInfoListHTML(playerList) {
-	// 	let listHTML = '';
-	// 	playerList.forEach((player) => { // TODO : 아직 들어오지 않은 자리 구현 (?)
-	// 		listHTML += this._getPlayerInfoItemHTML(player);
-	// 	});
-	// 	for (let i = 0; i < 5 - playerList.length; i++) {
-	// 		listHTML += this._getEmptyInfoItemHTML();
-	// 	}
-	// 	return listHTML;
-	// }
-	// _getPlayerInfoItemHTML(player) {
-	// 	return `
-	// 		<div class="listItem ${player.clientId === this.clientInfo.id ? 'me' : ''}">
-	// 			<div class="avatarImgFrame">
-	// 				<img class="avatarImg ${player.readyState === 'READY' ? 'on' : ''}" src="images/playerA.png">
-	// 			</div>
-	// 			<div class="listName">${player.clientNickname}</div>
-	// 		</div>
-	// 	`;
-	// }
-	// _getEmptyInfoItemHTML() {
-	// 	return `
-	// 		<div class="listItem">
-	// 			<div class="avatarImgFrame">
-	// 				<div class="diagonal-1"></div>
-	// 				<div class="diagonal-2"></div>
-	// 			</div>
-	// 		</div>
-	// 	`;
-	// }
-
 	_getPlayerInfoListHTML(playerList) {
 		let listHTML = '';
 		playerList.forEach((player) => {
@@ -168,7 +137,15 @@ class WaitingRoomPageManager {
 			<div class="listName">${player.clientNickname}</div>
 		`;
 	}
-	_getEmptyInfoItemHTML() {
+	_getEmptyItemHTML() {
+		return `
+			<div class="avatarImgFrame emptyFrame">
+				<div class="avatarQuestionMark">?</div>
+			</div>
+			<div class="listName">?</div>
+		`;
+	}
+	_getXItemHTML() {
 		return `
 			<div class="avatarImgFrame">
 				<div class="diagonal-1"></div>
