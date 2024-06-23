@@ -158,39 +158,6 @@ class WaitingRoomPageManager {
 		);
 	}
 
-	_listenWaitingRoomEvent() {
-		const listener = (messageEvent) => {
-			const message = JSON.parse(messageEvent.data);
-			const { event, content } = message;
-			//   console.log(message);
-			if (event === "notifyWaitingRoomEnter") {
-				const { clientId, clientNickname, team } = content;
-				this._pushNewPlayer(clientId, clientNickname, team);
-				this._initPage();
-			} else if (event === "notifyWaitingRoomExit") {
-				const clientId = content.clientId;
-				this._popPlayer(clientId);
-				this._initPage();
-			} else if (event === "notifyReadyStateChange") {
-				const { clientId, state } = content;
-				this._updateReadyState(clientId, state);
-				this._initPage();
-			} else if (event === "notifyGameReady") {
-				//3, 2, 1 추후 구현
-			} else if (event === "notifyGameStart") {
-				this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
-					"message",
-					listener
-				);
-				this._onStartPingpongGame();
-			}
-		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener(
-			"message",
-			listener
-		);
-	}
-
 	_pushNewPlayer(clientId, clientNickname, team) {
 		if (this.clientInfo.id === clientId) return;
 		if (team === "left")
@@ -435,27 +402,27 @@ class WaitingRoomPageManager {
 			<div class="abilityContainer">
 				<div class="abilitySubContainer">
 					${this._getAbilityItemHTML(
-			'자이언트 블로커',
-			'giantBlocker',
-			'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
-		)}
+						'자이언트 블로커',
+						'giantBlocker',
+						'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
+					)}
 					${this._getAbilityItemHTML(
-			'스피드 트위스터',
-			'speedTwister',
-			'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
-		)}
+						'스피드 트위스터',
+						'speedTwister',
+						'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
+					)}
 				</div>
 				<div class="abilitySubContainer">
 					${this._getAbilityItemHTML(
-			'일루젼 페이커',
-			'illusionFaker',
-			'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
-		)}
+						'일루젼 페이커',
+						'illusionFaker',
+						'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
+					)}
 					${this._getAbilityItemHTML(
-			'고스트 스매셔',
-			'ghostSmasher',
-			'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
-		)}
+						'고스트 스매셔',
+						'ghostSmasher',
+						'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
+					)}
 				</div>
 			</div>
 		</div>
