@@ -42,6 +42,9 @@ class StateManager:
             self.lobby_channel = consumer.channel_layer
         self.clients[clientId] = nickname
         await add_group(consumer, 'lobby')
+    
+    def _get_client_nickname(self, clientId):
+        return self.clients[clientId]
 
     async def _remove_client(self, consumer, clientId):
         if clientId in self.clients:
