@@ -1,9 +1,13 @@
 import windowObservable from "../../WindowObservable.js";
 
+import { SERVER_ADDRESS } from "./../PageRouter.js";
+import { SERVER_PORT } from "./../PageRouter.js";
+
 class WaitingRoomPageManager {
-  constructor(app, clientInfo, _onStartPingpongGame) {
+  constructor(app, clientInfo, _onStartPingpongGame, _onExitWaitingRoom) {
     this.app = app;
     this._onStartPingpongGame = _onStartPingpongGame;
+    this._onExitWaitingRoom = _onExitWaitingRoom;
     console.log("Waiting Room Page!");
     this.clientInfo = {
       socket: null,
@@ -53,13 +57,60 @@ class WaitingRoomPageManager {
         "click",
         this._sendMyReadyStateChangeMessage.bind(this)
       );
+    document
+      .querySelector(".exitButton")
+      .addEventListener("click", this._exitWaitingRoom.bind(this));
+  }
+
+  async _exitWaitingRoom() {
+    this.clientInfo.gameInfo.pingpongRoomSocket.close();
+    this.clientInfo.gameInfo = null;
+    this.clientInfo.lobbySocket = await this._connectLobbySocket(
+      this.clientInfo.id
+    );
+    this._onExitWaitingRoom();
+  }
+
+  //login 페이지와 중복되는 로직임. 어떻게 공유할 것인지 생각해야함.
+  //loginPage의 static 메서드로 만드는것은 어떨까?
+  //this바인딩해서 주면 괜찮을듯
+  async _connectLobbySocket(id) {
+    const lobbySocket = new WebSocket(
+      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
+    );
+    await new Promise((resolve) => {
+      lobbySocket.addEventListener("open", () => {
+        resolve();
+      });
+    });
+    const enterLobbyMessage = {
+      event: "enterLobby",
+      content: {
+        clientId: id,
+      },
+    };
+    lobbySocket.send(JSON.stringify(enterLobbyMessage));
+
+    await new Promise((resolve) => {
+      lobbySocket.addEventListener(
+        "message",
+        function listener(messageEvent) {
+          const { event, content } = JSON.parse(messageEvent.data);
+          if (event === "enterLobbyResponse" && content.message === "OK") {
+            lobbySocket.removeEventListener("message", listener);
+            resolve();
+          }
+        }.bind(this)
+      );
+    });
+
+    return lobbySocket;
   }
 
   _listenWaitingRoomEvent() {
     const listener = (messageEvent) => {
       const message = JSON.parse(messageEvent.data);
       const { event, content } = message;
-      //   console.log(message);
       if (event === "notifyWaitingRoomEnter") {
         const { clientId, clientNickname, team } = content;
         this._pushNewPlayer(clientId, clientNickname, team);

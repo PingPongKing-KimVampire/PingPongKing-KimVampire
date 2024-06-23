@@ -62,7 +62,8 @@ class PageRouter {
       const waitingRoomPageManager = new WaitingRoomPageManager(
         this.app,
         this.clientInfo,
-        this._onStartPingpongGame.bind(this)
+        this._onStartPingpongGame.bind(this),
+        this._onExitPingpongGame.bind(this)
       );
     }
   }
