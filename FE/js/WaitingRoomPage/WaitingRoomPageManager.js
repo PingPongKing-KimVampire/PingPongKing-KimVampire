@@ -35,6 +35,19 @@ class WaitingRoomPageManager {
 	}
 
 	_initPage() {
+		const playerList = [...this.clientInfo.gameInfo.teamLeftList, ...this.clientInfo.gameInfo.teamRightList];
+		const me = playerList.find((player) => player.clientId === this.clientInfo.id);
+		this.ImReady = me.readyState;
+
+		// TODO 버튼 표시 상태 파악하기
+			// 인간 팀이라면
+				// 준비되지 않은 경우 : generalButton
+				// 준비된 경우 : + clickedReadyButton
+			// 뱀파이어라면
+				// 능력 안 고른 경우 : disabledButton
+				// 능력 고른 경우 : generalButton
+				// 준비된 경우 : + clickedReadyButton
+
 		this.app.innerHTML = this._getHTML();
 
 		this.leftReadyText = document.querySelector(
@@ -54,11 +67,6 @@ class WaitingRoomPageManager {
 				event.target.classList.toggle('clickedReadyButton');
 				this._sendMyReadyStateChangeMessage.call(this);
 			})
-
-			.addEventListener(
-				"click",
-				this._sendMyReadyStateChangeMessage.bind(this)
-			);
 
 		// TODO : 두 개의 ability 버튼 고려하기, 나의 ability 버튼에만 이벤트 등록
 		this.abilityButton = document.querySelector('.abilityButton');
@@ -224,7 +232,7 @@ class WaitingRoomPageManager {
 			this.clientInfo.gameInfo.teamRightTotalPlayerCount
 		)}
 				</div>
-				<button class="generalButton" id="readyButton">Ready</button>
+				<button class="disabledButton ${this.ImReady === 'READY' ? 'clickedReadyButton' : ''}" id="readyButton">Ready</button>
 			</div>
 			${this._getAbilityModalHTML()}
 		`;
@@ -304,7 +312,6 @@ class WaitingRoomPageManager {
 				</div>`;
 		});
 		for (let i = 0; i < totalPlayerCount - playerList.length; i++) {
-			// TODO : 물음표 리스트 아이템 띄우기
 			listHTML += `<div class="listItem">${this._getEmptyItemHTML()}</div>`;
 		}
 		for (let i = 0; i < 5 - totalPlayerCount; i++) {
