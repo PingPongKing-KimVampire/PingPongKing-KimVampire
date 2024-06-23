@@ -53,21 +53,15 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         self.is_init = True # 인증으로 바꿔야함
         self.nickname = stateManager._get_client_nickname(client_id)
         Printer.log(f"Client {client_id} entered lobby : {self.nickname}", "blue")
-        await stateManager._add_client(self, client_id, self.nickname)
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 
     async def create_waiting_room(self, content):
         room_id = await stateManager._create_room(content['waitingRoomInfo'])
-        await self._send(event='createWaitingRoomResponse', 
-            content={
-                'message': 'OK',
-                'roomId': room_id
-        })
+        await self._send(event='createWaitingRoomResponse', content={ 'message': 'OK', 'roomId': room_id })
 
     async def get_waiting_room_List(self):
         room_list = await stateManager._get_waiting_room_list()
-        await self._send(event='getWaitingRoomResponse', 
-                         content={'waitingRoomInfoList': room_list})
+        await self._send(event='getWaitingRoomResponse', content={'waitingRoomInfoList': room_list})
         
     async def notifyWaitingRoomCreated(self, content):
         content = content['content']

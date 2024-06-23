@@ -4,6 +4,7 @@ from .group import add_group, discard_group, notify_group
 from pingpongRoom.gameManage.gameManager import GameManager
 import asyncio
 from utils.printer import Printer
+from asgiref.sync import sync_to_async
 
 #   StateManager
 #   1. 클라이언트 관리 : clients: { clientId: nickname }
@@ -38,9 +39,14 @@ class StateManager:
 
     ### Client
     async def _add_client(self, consumer, clientId, nickname):
+        from lobby.models import User
         if self.clients.__len__() == 0:
             self.lobby_channel = consumer.channel_layer
         self.clients[clientId] = nickname
+        await sync_to_async(User.objects.create)(id=clientId, name=nickname)
+        # User create test
+        user = await sync_to_async(User.objects.get)(id=clientId)
+        Printer.log(f"User created : {user.name}", "green")
         await add_group(consumer, 'lobby')
     
     def _get_client_nickname(self, clientId):
@@ -171,7 +177,6 @@ class StateManager:
     async def _start_game(self, consumer, room_id):
         game_manager = self.rooms[room_id]['gameManager']
         await game_manager.set_game_manager(self.rooms[room_id], consumer)
-        # await self._notify_room(room_id, event='notifyGameStart', content={})
         await self._notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo' : {'roomId': room_id}})
         await game_manager.trigger_game()
 
