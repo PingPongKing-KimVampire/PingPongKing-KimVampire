@@ -90,10 +90,11 @@
 	border: 0.1rem solid rgb(128, 129, 146);
 	border-radius: 1.5rem;
 	box-sizing: border-box;
-	font-size: 1.3rem;
+	font-size: 1.4rem;
 	font-weight: 300;
 	line-height: 2rem;
 	text-align: center;
+	overflow: hidden;
 }
 .abilityItem:hover .abilityDescription {
 	color: white;
@@ -102,3 +103,68 @@
 	transition-duration: 0.2s;
 }
 
+@media (orientation: portrait) {
+	.abilityContainer {
+		flex-direction: column;
+	}
+	.abilitySubContainer {
+		width: 100%;
+		margin: 5% 0;
+	}
+}
+@media (orientation: portrait) and (min-aspect-ratio: 1/1.1) and (max-aspect-ratio: 1/1) {
+	.abilityContainer {
+		width: 50%;
+	}
+	.abilityName {
+		font-size: 1.6rem;
+	}
+	.abilityDescription {
+		font-size: 1.2rem;
+		line-height: 1.7rem;
+	}
+}
+@media (orientation: portrait) and (min-aspect-ratio: 1/1.2) and (max-aspect-ratio: 1/1.1) {
+	.abilityContainer {
+		width: 55%;
+	}
+}
+@media (orientation: portrait) and (min-aspect-ratio: 1/1.5) and (max-aspect-ratio: 1/1.2) {
+	.abilityContainer {
+		width: 60%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
+	.abilityContainer {
+		width: 70%;
+	}
+}
+
+@media (orientation: landscape) and (max-width: 1350px) and (max-aspect-ratio: 1.6/1) {
+	.abilityName {
+		font-size: 1.8rem;
+	}
+	.abilityDescription {
+		aspect-ratio: 1.6/1;
+		font-size: 1.1rem;
+		line-height: 1.6rem;
+	}
+}
+@media (orientation: landscape) and (max-width: 1150px) and (max-aspect-ratio: 1.5/1) {
+	.abilityName {
+		font-size: 1.8rem;
+	}
+	.abilityDescription {
+		aspect-ratio: 1.4/1;
+		line-height: 1.5rem;
+	}
+}
+@media (orientation: landscape) and (max-width: 1100px) and (max-aspect-ratio: 1.4/1) {
+	.abilityName {
+		font-size: 1.5rem;
+	}
+	.abilityDescription {
+		aspect-ratio: 1.2/1;
+		line-height: 1.4rem;
+	}
+}
