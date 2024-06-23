@@ -113,7 +113,7 @@ class StateManager:
             }
             await self._notify_lobby('notifyWaitingRoomCreated', room_data)
         else:
-            await self._notify_lobby(event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1})
+            await self._notify_lobby(event='notifyCurrentPlayerCountChange', content={'currentPlayerCount': count + 1, 'roomId': room_id})
         enter_data = { 'clientId': client_id, 'clientNickname': client_nickname, 'team': team }
         await self._notify_room(room_id, event='notifyWaitingRoomEnter', content=enter_data)
 
