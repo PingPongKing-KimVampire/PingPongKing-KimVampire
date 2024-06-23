@@ -4,33 +4,10 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class WaitingRoomPageManager {
-<<<<<<< HEAD
-  constructor(app, clientInfo, _onStartPingpongGame, _onExitWaitingRoom) {
-    this.app = app;
-    this._onStartPingpongGame = _onStartPingpongGame;
-    this._onExitWaitingRoom = _onExitWaitingRoom;
-    console.log("Waiting Room Page!");
-    this.clientInfo = {
-      socket: null,
-      id: null,
-      nickname: null,
-      lobbySocket: null,
-      gameInfo: {
-        pingpongRoomSocket: null,
-        roomId: null,
-        title: null,
-        teamLeftList: null,
-        teamRightList: null,
-        teamLeftMode: null,
-        teamRightMode: null,
-        teamLeftTotalPlayerCount: null,
-        teamRightTotalPlayerCount: null,
-      },
-    };
-=======
-	constructor(app, clientInfo, _onStartPingpongGame) {
+	constructor(app, clientInfo, _onStartPingpongGame, _onExitWaitingRoom) {
 		this.app = app;
 		this._onStartPingpongGame = _onStartPingpongGame;
+		this._onExitWaitingRoom = _onExitWaitingRoom;
 		console.log("Waiting Room Page!");
 		this.clientInfo = {
 			socket: null,
@@ -49,7 +26,6 @@ class WaitingRoomPageManager {
 				teamRightTotalPlayerCount: null,
 			},
 		};
->>>>>>> feat: 뱀파이어 능력 선택 모달 구현
 
 		// const playerInfo = {
 		// 	clientId: null,
@@ -67,14 +43,14 @@ class WaitingRoomPageManager {
 		const me = playerList.find((player) => player.clientId === this.clientInfo.id);
 		this.ImReady = me.readyState;
 
-		// TODO 버튼 표시 상태 파악하기
-			// 인간 팀이라면
-				// 준비되지 않은 경우 : generalButton
-				// 준비된 경우 : + clickedReadyButton
-			// 뱀파이어라면
-				// 능력 안 고른 경우 : disabledButton
-				// 능력 고른 경우 : generalButton
-				// 준비된 경우 : + clickedReadyButton
+		// TODO : 버튼 표시 상태 파악하기
+		// 인간 팀이라면
+			// 준비되지 않은 경우 : generalButton
+			// 준비된 경우 : + clickedReadyButton
+		// 뱀파이어라면
+			// 능력 안 고른 경우 : disabledButton
+			// 능력 고른 경우 : generalButton
+			// 준비된 경우 : + clickedReadyButton
 
 		this.app.innerHTML = this._getHTML();
 
@@ -85,115 +61,102 @@ class WaitingRoomPageManager {
 			".teamPanel:last-of-type .readyText"
 		);
 
-<<<<<<< HEAD
-    const orientation = windowObservable.getOrientation();
-    this._toggleReadyTextVisible(orientation);
-    this._subscribeWindow();
-    document
-      .querySelector("#readyButton")
-      .addEventListener(
-        "click",
-        this._sendMyReadyStateChangeMessage.bind(this)
-      );
-    document
-      .querySelector(".exitButton")
-      .addEventListener("click", this._exitWaitingRoom.bind(this));
-  }
-
-  async _exitWaitingRoom() {
-    this.clientInfo.gameInfo.pingpongRoomSocket.close();
-    this.clientInfo.gameInfo = null;
-    this.clientInfo.lobbySocket = await this._connectLobbySocket(
-      this.clientInfo.id
-    );
-    this._onExitWaitingRoom();
-  }
-
-  //login 페이지와 중복되는 로직임. 어떻게 공유할 것인지 생각해야함.
-  //loginPage의 static 메서드로 만드는것은 어떨까?
-  //this바인딩해서 주면 괜찮을듯
-  async _connectLobbySocket(id) {
-    const lobbySocket = new WebSocket(
-      `ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
-    );
-    await new Promise((resolve) => {
-      lobbySocket.addEventListener("open", () => {
-        resolve();
-      });
-    });
-    const enterLobbyMessage = {
-      event: "enterLobby",
-      content: {
-        clientId: id,
-      },
-    };
-    lobbySocket.send(JSON.stringify(enterLobbyMessage));
-
-    await new Promise((resolve) => {
-      lobbySocket.addEventListener(
-        "message",
-        function listener(messageEvent) {
-          const { event, content } = JSON.parse(messageEvent.data);
-          if (event === "enterLobbyResponse" && content.message === "OK") {
-            lobbySocket.removeEventListener("message", listener);
-            resolve();
-          }
-        }.bind(this)
-      );
-    });
-
-    return lobbySocket;
-  }
-
-  _listenWaitingRoomEvent() {
-    const listener = (messageEvent) => {
-      const message = JSON.parse(messageEvent.data);
-      const { event, content } = message;
-      if (event === "notifyWaitingRoomEnter") {
-        const { clientId, clientNickname, team } = content;
-        this._pushNewPlayer(clientId, clientNickname, team);
-        this._initPage();
-      } else if (event === "notifyWaitingRoomExit") {
-        const clientId = content.clientId;
-        this._popPlayer(clientId);
-        this._initPage();
-      } else if (event === "notifyReadyStateChange") {
-        const { clientId, state } = content;
-        this._updateReadyState(clientId, state);
-        this._initPage();
-      } else if (event === "notifyGameReady") {
-        //3, 2, 1 추후 구현
-      } else if (event === "notifyGameStart") {
-        this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
-          "message",
-          listener
-        );
-        this._onStartPingpongGame();
-      }
-    };
-    this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener(
-      "message",
-      listener
-    );
-  }
-=======
 		const orientation = windowObservable.getOrientation();
 		this._toggleReadyTextVisible(orientation);
 		this._subscribeWindow();
-
 		document
 			.querySelector("#readyButton")
 			.addEventListener("click", (event) => {
 				event.target.classList.toggle('clickedReadyButton');
 				this._sendMyReadyStateChangeMessage.call(this);
 			})
-
+		document
+			.querySelector(".exitButton")
+			.addEventListener("click", this._exitWaitingRoom.bind(this));
+		
 		// TODO : 두 개의 ability 버튼 고려하기, 나의 ability 버튼에만 이벤트 등록
 		this.abilityButton = document.querySelector('.abilityButton');
 		this.abilityModal = document.querySelector('.abilitySelectionModal');
-		this.abilityButton.addEventListener('click', this._abilityButtonClicked.bind(this));
+		if (this.abilityButton)
+			this.abilityButton.addEventListener('click', this._abilityButtonClicked.bind(this));
 	}
->>>>>>> feat: 뱀파이어 능력 선택 모달 구현
+
+	async _exitWaitingRoom() {
+		this.clientInfo.gameInfo.pingpongRoomSocket.close();
+		this.clientInfo.gameInfo = null;
+		this.clientInfo.lobbySocket = await this._connectLobbySocket(
+			this.clientInfo.id
+		);
+		this._onExitWaitingRoom();
+	}
+
+	//login 페이지와 중복되는 로직임. 어떻게 공유할 것인지 생각해야함.
+	//loginPage의 static 메서드로 만드는것은 어떨까?
+	//this바인딩해서 주면 괜찮을듯
+	async _connectLobbySocket(id) {
+		const lobbySocket = new WebSocket(
+			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
+		);
+		await new Promise((resolve) => {
+			lobbySocket.addEventListener("open", () => {
+				resolve();
+			});
+		});
+		const enterLobbyMessage = {
+			event: "enterLobby",
+			content: {
+				clientId: id,
+			},
+		};
+		lobbySocket.send(JSON.stringify(enterLobbyMessage));
+
+		await new Promise((resolve) => {
+			lobbySocket.addEventListener(
+				"message",
+				function listener(messageEvent) {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === "enterLobbyResponse" && content.message === "OK") {
+						lobbySocket.removeEventListener("message", listener);
+						resolve();
+					}
+				}.bind(this)
+			);
+		});
+
+		return lobbySocket;
+	}
+
+	_listenWaitingRoomEvent() {
+		const listener = (messageEvent) => {
+			const message = JSON.parse(messageEvent.data);
+			const { event, content } = message;
+			if (event === "notifyWaitingRoomEnter") {
+				const { clientId, clientNickname, team } = content;
+				this._pushNewPlayer(clientId, clientNickname, team);
+				this._initPage();
+			} else if (event === "notifyWaitingRoomExit") {
+				const clientId = content.clientId;
+				this._popPlayer(clientId);
+				this._initPage();
+			} else if (event === "notifyReadyStateChange") {
+				const { clientId, state } = content;
+				this._updateReadyState(clientId, state);
+				this._initPage();
+			} else if (event === "notifyGameReady") {
+				//3, 2, 1 추후 구현
+			} else if (event === "notifyGameStart") {
+				this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
+					"message",
+					listener
+				);
+				this._onStartPingpongGame();
+			}
+		};
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener(
+			"message",
+			listener
+		);
+	}
 
 	_listenWaitingRoomEvent() {
 		const listener = (messageEvent) => {
@@ -472,27 +435,27 @@ class WaitingRoomPageManager {
 			<div class="abilityContainer">
 				<div class="abilitySubContainer">
 					${this._getAbilityItemHTML(
-						'자이언트 블로커',
-						'giantBlocker',
-						'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
-					)}
+			'자이언트 블로커',
+			'giantBlocker',
+			'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
+		)}
 					${this._getAbilityItemHTML(
-						'스피드 트위스터',
-						'speedTwister',
-						'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
-					)}
+			'스피드 트위스터',
+			'speedTwister',
+			'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
+		)}
 				</div>
 				<div class="abilitySubContainer">
 					${this._getAbilityItemHTML(
-						'일루젼 페이커',
-						'illusionFaker',
-						'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
-					)}
+			'일루젼 페이커',
+			'illusionFaker',
+			'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
+		)}
 					${this._getAbilityItemHTML(
-						'고스트 스매셔',
-						'ghostSmasher',
-						'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
-					)}
+			'고스트 스매셔',
+			'ghostSmasher',
+			'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
+		)}
 				</div>
 			</div>
 		</div>
