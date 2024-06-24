@@ -118,3 +118,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def notifyGameEnd(self, content):
         self.state = 'waiting'
         await self._send(event='notifyGameEnd', content=content['content'])
+
+    async def notifyBallCollision(self, content):
+        await self._send(event='notifyBallCollision', content=content['content'])
