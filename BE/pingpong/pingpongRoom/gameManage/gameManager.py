@@ -39,6 +39,15 @@ class GameManager:
             }
         )
 
+    async def _notify_game_room_group(self, group, event, content):
+        await self.channel_layer.group_send(
+            group,
+            {
+                'type': event,
+                'content': content
+            }
+        )
+
     def _get_player_data(self):
         player_data = []
         for client_id, player in self.clients.items():
@@ -113,12 +122,13 @@ class GameManager:
         else:
             count = self.team_left.__len__()
         for i in range(count - 1):
-            self.fake_ball[i] = Ball(5, self.ball_radius)
+            self.fake_ball[i] = Ball(6, self.ball_radius)
             asyncio.create_task(self._fake_ball_loop(i))
 
     async def _fake_ball_loop(self, index):
+        fake_ball = self.fake_ball[index]
         while self.is_playing and not self.is_end:
-            self.ball.move()
+            fake_ball.move()
             ball_state = self._detect_collisions()
             if ball_state != NORMAL:
                 await self._send_ball_collision(index)
@@ -178,7 +188,15 @@ class GameManager:
         await self._notify_game_room('notifyGameEnd', {'winTeam': team})
         
     async def _send_ball_update(self):
-        await self._notify_game_room('notifyBallLocationUpdate', {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
+        if self.ball.is_vanish:
+            if self.ball.dx < 0:
+                room_id_team = f"{self.room_id}-right"
+            else:
+                room_id_team = f"{self.room_id}-left"
+        else:
+            room_id_team = self.room_id
+        await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
+            {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
     async def _give_up_game(self, consumer):
         self._end_game()
@@ -232,14 +250,18 @@ class GameManager:
     def _detect_paddle_collision(self):
         players_to_check = self.team_right.values() if self.ball.dx > 0 else self.team_left.values()
         team = 'right' if self.ball.dx > 0 else 'left'
+        speed = 5
+        angle = 0
         for player in players_to_check:
             if self._is_ball_colliding_with_paddle(player):
                 if player.ability == 'speedTwister':
-                    self.ball.reversal_random_speed_twister()
+                    speed = 10
+                    angle = 30
                 elif player.ability == 'illusionFaker':
                     asyncio.create_task(self._fake_ball_loop(player, team))
-                else:
-                    self.ball.reversal_random()
+                elif player.ability == 'ghostSmasher':
+                    self.ball.is_vanish = True
+                self.ball.reversal_random(speed, angle)
                 return True
         return False
 

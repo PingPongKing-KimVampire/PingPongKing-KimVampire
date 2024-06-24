@@ -10,6 +10,7 @@ class Ball:
         self.angle = 0
         self.dx = 0
         self.dy = 0
+        self.is_vanish = False
 
     def reset_ball(self, x, y, angle):
         self.pos_x = x
@@ -22,24 +23,20 @@ class Ball:
     def move(self):
         self.pos_x += self.dx
         self.pos_y += self.dy
-
+        if self.is_vanish and self.dx < 0 and self.pos_x < 517:
+            self.is_vanish = False
+        elif self.is_vanish and self.dx > 0 and self.pos_x > 1033:
+            self.is_vanish = False
+            
     def _calculate_ball_direction(self):
         angle_radians = (self.angle * math.pi) / 180
         dx = math.cos(angle_radians) * self.speed
         dy = math.sin(angle_radians) * self.speed
         return {'dx': dx, 'dy': dy}
 
-    def reversal_random(self):
-        self.speed = 5
+    def reversal_random(self, speed=5, angle=None):
+        self.speed = speed
         rand = random.randint(-40, 40)
-        self.angle = max(0, min(45, self.angle + rand))
-        dir = self._calculate_ball_direction()
-        self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
-        self.dy = -dir['dy'] if self.dy < 0 else dir['dy']
-
-    def reversal_random_speed_twister(self):
-        self.speed = 15
-        rand = random.randint(-80, 80)
         self.angle = max(0, min(45, self.angle + rand))
         dir = self._calculate_ball_direction()
         self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
