@@ -93,7 +93,7 @@ class GameManager:
         self.channel_layer = consumer.channel_layer
         self.team_left = self.set_team(room['left'])
         self.team_right = self.set_team(room['right'])
-        self.set_team_speed_twister(self.team_right)
+        self.set_team_ability(self.team_right)
         left_mode = room['leftMode']
         right_mode = room['rightMode']
         self.clients = {**self.team_left, **self.team_right}
@@ -104,7 +104,7 @@ class GameManager:
         team = {client_id: Player(info['nickname'], info['ability'], player_count) for client_id, info in team.items()}
         return team
 
-    def set_team_speed_twister(self, team):
+    def set_team_ability(self, team):
         for player in team.values():
             player.ability = 'speedTwister'
         
@@ -133,7 +133,7 @@ class GameManager:
             if ball_state != NORMAL:
                 await self._send_ball_collision(index)
                 break
-            await self._send_ball_update()
+            await self._send_fake_ball_update(index)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
         del self.fake_ball[index]
 
@@ -197,6 +197,10 @@ class GameManager:
             room_id_team = self.room_id
         await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
             {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
+    # 통합하면 좋을 듯?
+    async def _send_fake_ball_update(self, index):
+        await self._notify_game_room('notifyFakeBallLocationUpdate', 
+            {'ballId': index, 'xPosition': self.fake_ball[index].pos_x, 'yPosition': self.fake_ball[index].pos_y})
 
     async def _give_up_game(self, consumer):
         self._end_game()
@@ -258,7 +262,7 @@ class GameManager:
                     speed = 10
                     angle = 30
                 elif player.ability == 'illusionFaker':
-                    asyncio.create_task(self._fake_ball_loop(player, team))
+                    asyncio.create_task(self._create_fake_ball(player, team))
                 elif player.ability == 'ghostSmasher':
                     self.ball.is_vanish = True
                 self.ball.reversal_random(speed, angle)
