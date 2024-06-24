@@ -10,7 +10,7 @@ from asgiref.sync import sync_to_async
 #   1. 클라이언트 관리 : clients: { clientId: nickname }
 #   2. Room 관리 : rooms: { roomId: { title, leftMode, rightMode, 
 #                         leftMaxPlayerCount, rightMaxPlayerCount, 
-#                         teamLeft, teamRight, 
+#                         left, right, 
 #                         gameManager, state } }
 #   3. lobby_channel: channel_layer
 #   4. 그룹 관리 : add_group, discard_group, notify_group
@@ -28,6 +28,12 @@ class StateManager:
     def _init(self):
         self.clients = {}
         self.rooms = {}
+        
+    async def clear_group(self, group_name):
+        if group_name in self.channel_layer.groups:
+            for client_id, channel_name in self.clients.items():
+                await discard_group(channel_name, group_name)
+                Printer.log(f"Cleared group {group_name} for client {client_id}", "yellow")
 
     async def _notify_lobby(self, event, content):
         Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
@@ -68,8 +74,8 @@ class StateManager:
             'rightMode': content['rightMode'],
             'leftMaxPlayerCount': content['leftPlayerCount'],
             'rightMaxPlayerCount': content['rightPlayerCount'],
-            'teamLeft': {},
-            'teamRight': {},
+            'left': {},
+            'right': {},
             'gameManager': GameManager(room_id, content['leftMode'], content['rightMode']),
             'state': 'waiting'
         }
@@ -81,13 +87,15 @@ class StateManager:
         if room_id not in self.rooms:
             return False
         room = self.rooms[room_id]
-        if len(room['teamLeft']) < room['leftMaxPlayerCount']:
-            team = 'teamLeft'
-        elif len(room['teamRight']) < room['rightMaxPlayerCount']:
-            team = 'teamRight'
+        if len(room['left']) < room['leftMaxPlayerCount']:
+            team = 'left'
+        elif len(room['right']) < room['rightMaxPlayerCount']:
+            team = 'right'
         else:
             return False
         await add_group(consumer, room_id)
+        room_id_team = f"{room_id}-{team}"
+        await add_group(consumer, room_id_team)
         await discard_group(consumer, 'lobby')
         await self._add_client_to_room(room_id, client_id, team)
         return True
@@ -99,17 +107,13 @@ class StateManager:
 
     async def _add_client_to_room(self, room_id, client_id, team):
         room = self.rooms[room_id]
-        count = len(room['teamLeft']) + len(room['teamRight'])
+        count = len(room['left']) + len(room['right'])
         client_nickname = self.clients[client_id]
         room[team][client_id] = {
             'nickname': client_nickname,
             'state': 'NOTREADY',
             'ability': 'human'
         }
-        if team == 'teamLeft':
-            team = 'left'
-        else:
-            team = 'right'
         if count == 0:
             room_data = { "waitingRoomInfo": {
                     'roomId': room_id,
@@ -128,21 +132,26 @@ class StateManager:
 
     async def _remove_player_from_room(self, consumer, room_id, client_id):
         if room_id in self.rooms:
-            for team in ['teamLeft', 'teamRight']:
+            for team in ['left', 'right']:
                 if client_id in self.rooms[room_id][team]:
                     del self.rooms[room_id][team][client_id]
+                    room_id_team = f"{room_id}-{team}"
+                    await discard_group(consumer, room_id_team)
                     break
-            if len(self.rooms[room_id]['teamLeft']) + len(self.rooms[room_id]['teamRight']) == 0:
+            if len(self.rooms[room_id]['left']) + len(self.rooms[room_id]['right']) == 0:
                 del self.rooms[room_id]
+                room_id_left, room_id_right = f"{room_id}-left", f"{room_id}-right"
+                await self.clear_group(room_id_left)
+                await self.clear_group(room_id_right)
                 await self._notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo' : { 'roomId': room_id} })
             else:
-                count = len(self.rooms[room_id]['teamLeft']) + len(self.rooms[room_id]['teamRight'])
+                count = len(self.rooms[room_id]['left']) + len(self.rooms[room_id]['right'])
                 await self._notify_lobby('notifyCurrentPlayerCountChange', {'currentPlayerCount': count, 'roomId': room_id})
 
     async def _get_waiting_room_list(self):
         room_data = []
         for roomId, room in self.rooms.items():
-            current_players = len(room['teamLeft']) + len(room['teamRight'])
+            current_players = len(room['left']) + len(room['right'])
             max_player_count = room['leftMaxPlayerCount'] + room['rightMaxPlayerCount']
             room_data.append({
                 'roomId': roomId,
@@ -156,7 +165,7 @@ class StateManager:
     
     async def _change_ready_state(self, consumer, room_id, client_id, is_ready):
         room = self.rooms[room_id]
-        for team in ['teamLeft', 'teamRight']:
+        for team in ['left', 'right']:
             if client_id in room[team]:
                 room[team][client_id]['state'] = is_ready
                 break
@@ -164,11 +173,20 @@ class StateManager:
         asyncio.sleep(0.1)
         if await self._check_room_full(room_id):
             await self._check_game_ready(consumer, room_id)
-            
+
+    async def _select_ability(self, room_id, client_id, ability):
+        room = self.rooms[room_id]
+        for team in ['left', 'right']:
+            if client_id in room[team]:
+                room[team][client_id]['ability'] = ability
+                break
+        await self._notify_room(room_id, event='notifySelectAbility', content={'team': team,  'ability': ability})
+        Printer.log(f"Client {client_id} selected ability {ability}", "blue")
+    
     async def _check_game_ready(self, consumer, room_id):
         room = self.rooms[room_id]
-        team_left_ready = all([info['state'] == 'READY' for info in room['teamLeft'].values()])
-        team_right_ready = all([info['state'] == 'READY' for info in room['teamRight'].values()])
+        team_left_ready = all([info['state'] == 'READY' for info in room['left'].values()])
+        team_right_ready = all([info['state'] == 'READY' for info in room['right'].values()])
         if team_left_ready and team_right_ready:
             Printer.log(f"Both teams are ready in room {room_id}. Notifying game ready.", "green")
             await self._start_game(consumer, room_id)
@@ -176,7 +194,7 @@ class StateManager:
 
     async def _start_game(self, consumer, room_id):
         game_manager = self.rooms[room_id]['gameManager']
-        await game_manager.set_game_manager(self.rooms[room_id], consumer)
+        game_manager.set_game_manager(self.rooms[room_id], consumer)
         await self._notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo' : {'roomId': room_id}})
         await game_manager.trigger_game()
 
@@ -184,13 +202,13 @@ class StateManager:
         team_left_list = []
         team_right_list = []
         room = self.rooms[room_id]
-        for client_id, info in room['teamLeft'].items():
+        for client_id, info in room['left'].items():
             team_left_list.append({
                 'clientId': client_id,
                 'clientNickname': info['nickname'],
                 'readyState': info['state']
             })
-        for client_id, info in room['teamRight'].items():
+        for client_id, info in room['right'].items():
             team_right_list.append({
                 'clientId': client_id,
                 'clientNickname': info['nickname'],
@@ -200,4 +218,4 @@ class StateManager:
 
     async def _check_room_full(self, room_id):
         room = self.rooms[room_id]
-        return len(room['teamLeft']) + len(room['teamRight']) == room['leftMaxPlayerCount'] + room['rightMaxPlayerCount']
+        return len(room['left']) + len(room['right']) == room['leftMaxPlayerCount'] + room['rightMaxPlayerCount']

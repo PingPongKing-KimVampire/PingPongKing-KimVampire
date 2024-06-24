@@ -7,9 +7,14 @@ FRAME_PER_SECOND = 60
 LEFT = 'left'
 RIGHT = 'right'
 
+NOMAL = 0
+SCORE = 1
+PADDLE = 2
+
 class GameManager:
     def __init__(self, room_id, left_mode, right_mode):
         self.channel_layer = None
+        self.clients = {}
         self.room_id = room_id
         self.team_left = {}
         self.team_right = {}
@@ -34,24 +39,60 @@ class GameManager:
             }
         )
 
+    def _get_player_data(self):
+        player_data = []
+        for client_id, player in self.clients.items():
+            player_data.append({
+                'clientId': client_id,
+                'paddle_width': player.paddle_width,
+                'paddle_height': player.paddle_height,
+                'team': player.team,
+                'ability': player.ability,
+            })
+        return player_data
+
     async def _notify_game_ready_and_start(self):
+        board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height }
+        player_data = self._get_player_data()
         await self._notify_game_room('notifyGameReady', {})
         await asyncio.sleep(1.5)
         await self._notify_game_room('notifyGameStart', {})
 
-    async def set_game_mode(self, left_mode, right_mode):
-        pass
+    def set_game_mode(self, left_mode, right_mode):
+        self.set_left_mode(left_mode)
+        self.set_right_mode(right_mode)    
     
-    async def set_game_manager(self, room, consumer):
+    def set_left_mode(self, mode):
+        if mode == 'human':
+            pass
+        elif mode == 'jiantBlocker':
+            for player in self.team_right.values():
+                player.set_paddle_small()
+            for player in self.team_left.values():
+                player.set_paddle_big()
+                
+    def set_right_mode(self, mode):
+        if mode == 'human':
+            pass
+        elif mode == 'jiantBlocker':
+            for player in self.team_left.values():
+                player.set_paddle_small()
+            for player in self.team_right.values():
+                player.set_paddle_big()
+    
+    def set_game_manager(self, room, consumer):
         self.channel_layer = consumer.channel_layer
-        team_left = room['teamLeft']
-        team_right = room['teamRight']
-        self.team_left = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_left.items()}
-        self.team_right = {client_id: Player(info['nickname'], info['ability']) for client_id, info in team_right.items()}
+        self.team_left = self.set_team(room['left'])
+        self.team_right = self.set_team(room['right'])
         left_mode = room['leftMode']
         right_mode = room['rightMode']
         self.clients = {**self.team_left, **self.team_right}
-        await self.set_game_mode(left_mode, right_mode)
+        self.set_game_mode(left_mode, right_mode)
+
+    def set_team(self, team):
+        player_count = len(team)
+        team = {client_id: Player(info['nickname'], info['ability'], player_count) for client_id, info in team.items()}
+        return team
         
     async def trigger_game(self):
         self.is_playing = True
@@ -65,8 +106,11 @@ class GameManager:
         await asyncio.sleep(1.5)
         while self.is_playing and not self.is_end:
             self.ball.move()
-            if self._detect_collisions():
+            ball_state = self._detect_collisions()
+            if ball_state == SCORE:
                 await self._handle_round_end()
+            elif ball_state == PADDLE:
+                await self._send_ball_collision()
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
@@ -77,6 +121,9 @@ class GameManager:
                 self._update_paddle_position(client_id, content)
                 await self._notify_paddle_location_update(client_id, content)
             await asyncio.sleep(0.01)
+
+    async def _send_ball_collision(self):
+        await self._notify_game_room('notifyBallCollision', {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
     async def _handle_round_end(self):
         self._add_score()
@@ -145,21 +192,24 @@ class GameManager:
     def _detect_collisions(self):
         if self.ball.get_right_x() >= self.board_width:
             self.serve_turn = LEFT
-            return True
+            return SCORE
         elif self.ball.get_left_x() <= 0:
             self.serve_turn = RIGHT
-            return True
+            return SCORE
         elif self.ball.get_top_y() <= 0 or self.ball.get_bottom_y() >= self.board_height:
             self.ball.dy = -self.ball.dy
         else:
-            self._detect_paddle_collision()
-        return False
+            if self._detect_paddle_collision():
+                return PADDLE
+        return NOMAL
 
     def _detect_paddle_collision(self):
         players_to_check = self.team_right.values() if self.ball.dx > 0 else self.team_left.values()
         for player in players_to_check:
             if self._is_ball_colliding_with_paddle(player):
                 self.ball.reversal_random_dx()
+                return True
+        return False
 
     def _is_ball_colliding_with_paddle(self, player):
         if (self.ball.pos_y >= player.pos_y - 150 / 2 and
