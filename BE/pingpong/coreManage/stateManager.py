@@ -45,15 +45,19 @@ class StateManager:
 
     ### Client
     async def _add_client(self, consumer, clientId, nickname):
-        from lobby.models import User
         if self.clients.__len__() == 0:
             self.lobby_channel = consumer.channel_layer
         self.clients[clientId] = nickname
-        await sync_to_async(User.objects.create)(id=clientId, name=nickname)
-        # User create test
-        user = await sync_to_async(User.objects.get)(id=clientId)
-        Printer.log(f"User created : {user.name}", "green")
         await add_group(consumer, 'lobby')
+
+    from channels.db import database_sync_to_async
+    @database_sync_to_async
+    def add_user(self, clientId, nickname):
+        from lobby.models import User
+        self.clients[clientId] = nickname
+        User.objects.create(id=clientId, name=nickname)
+        user = User.objects.get(id=clientId)
+        Printer.log(f"User created : {user.name}", "green")
     
     def _get_client_nickname(self, clientId):
         return self.clients[clientId]
