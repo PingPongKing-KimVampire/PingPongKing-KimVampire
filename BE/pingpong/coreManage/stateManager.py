@@ -28,6 +28,12 @@ class StateManager:
     def _init(self):
         self.clients = {}
         self.rooms = {}
+        
+    async def clear_group(self, group_name):
+        if group_name in self.channel_layer.groups:
+            for client_id, channel_name in self.clients.items():
+                await discard_group(channel_name, group_name)
+                Printer.log(f"Cleared group {group_name} for client {client_id}", "yellow")
 
     async def _notify_lobby(self, event, content):
         Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
@@ -88,6 +94,8 @@ class StateManager:
         else:
             return False
         await add_group(consumer, room_id)
+        room_id_team = f"{room_id}-{team}"
+        await add_group(consumer, room_id_team)
         await discard_group(consumer, 'lobby')
         await self._add_client_to_room(room_id, client_id, team)
         return True
@@ -127,9 +135,14 @@ class StateManager:
             for team in ['left', 'right']:
                 if client_id in self.rooms[room_id][team]:
                     del self.rooms[room_id][team][client_id]
+                    room_id_team = f"{room_id}-{team}"
+                    await discard_group(consumer, room_id_team)
                     break
             if len(self.rooms[room_id]['left']) + len(self.rooms[room_id]['right']) == 0:
                 del self.rooms[room_id]
+                room_id_left, room_id_right = f"{room_id}-left", f"{room_id}-right"
+                await self.clear_group(room_id_left)
+                await self.clear_group(room_id_right)
                 await self._notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo' : { 'roomId': room_id} })
             else:
                 count = len(self.rooms[room_id]['left']) + len(self.rooms[room_id]['right'])
