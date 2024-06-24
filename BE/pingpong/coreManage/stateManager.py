@@ -29,7 +29,7 @@ class StateManager:
         self.rooms = {}
         
     async def clear_group(self, group_name):
-        if group_name in self.channel_layer.groups:
+        if group_name in self.lobby_channel.groups:
             for client_id, channel_name in self.clients.items():
                 await discard_group(channel_name, group_name)
                 Printer.log(f"Cleared group {group_name} for client {client_id}", "yellow")
