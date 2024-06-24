@@ -29,12 +29,21 @@ class Ball:
         dy = math.sin(angle_radians) * self.speed
         return {'dx': dx, 'dy': dy}
 
-    def reversal_random_dx(self):
-        rand = random.randint(-40, 40)  # -40 ~ +40도 사이에서 이동 방향 변화
-        self.angle = max(0, min(45, self.angle + rand))  # 최소 각도 0, 최대 각도 45
+    def reversal_random(self):
+        self.speed = 5
+        rand = random.randint(-40, 40)
+        self.angle = max(0, min(45, self.angle + rand))
         dir = self._calculate_ball_direction()
-        self.dx = dir['dx'] if self.dx < 0 else -dir['dx']  # dx는 부호 반전
-        self.dy = -dir['dy'] if self.dy < 0 else dir['dy']  # dy는 부호 유지
+        self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
+        self.dy = -dir['dy'] if self.dy < 0 else dir['dy']
+
+    def reversal_random_speed_twister(self):
+        self.speed = 15
+        rand = random.randint(-80, 80)
+        self.angle = max(0, min(45, self.angle + rand))
+        dir = self._calculate_ball_direction()
+        self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
+        self.dy = -dir['dy'] if self.dy < 0 else dir['dy']
 
     def change_direction(self, angle):
         self.angle = angle

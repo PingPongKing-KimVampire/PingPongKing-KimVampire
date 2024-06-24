@@ -12,6 +12,8 @@ class Player:
             self.set_player_ability(self.ability) # todo
     
     def set_paddle_size(self, player_count):
+        if player_count == 1:
+            return 10, 150
         board_width = 1550
         board_height = 1000
         base_paddle_height = 150
