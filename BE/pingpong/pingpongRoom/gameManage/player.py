@@ -6,10 +6,10 @@ class Player:
         self.pos_x = 0
         self.pos_y = 0
         self.team = None
-        self.mode = None
+        self.ability = ability
         self.paddle_width, self.paddle_height = self.set_paddle_size(player_count)
-        if ability is not 'human':
-            self.set_player_ability(ability) # todo
+        if self.ability is not 'human':
+            self.set_player_ability(self.ability) # todo
     
     def set_paddle_size(self, player_count):
         board_width = 1550
