@@ -2,8 +2,8 @@ class SignupPageManager {
 	constructor(app, clientInfo) {
 		console.log("Sign up Page!");
 
-		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
+		app.innerHTML = this._getHTML();
 
 		this._initPage();
 	}
