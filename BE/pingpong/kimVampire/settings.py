@@ -33,7 +33,7 @@ SECRET_KEY = "django-insecure-is(^1gr$nbc@qc&w9ws30n+8h0l^4f+7ix+n!hd45_whqz92ij
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '*']
 
 # Application definition
 
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'authentication',
     'lobby',
     'pingpongRoom',
+    'user'
 ]
 
 MIDDLEWARE = [
