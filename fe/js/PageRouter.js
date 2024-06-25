@@ -3,6 +3,7 @@ import LoginPageManager from "./TestPage/LoginPageManager.js";
 import WaitingRoomCreationPageManager from "./LobbyPage/WaitingRoomCreationPageManager.js";
 import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";
 import WaitingRoomPageManager from "./WaitingRoomPage/WaitingRoomPageManager.js";
+import SignupPageManager from "./SignupPage/SignupPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -65,6 +66,11 @@ class PageRouter {
         this._onStartPingpongGame.bind(this),
         this._onExitPingpongGame.bind(this)
       );
+    } else if (url === "signup") {
+      const signupPageManager = new SignupPageManager(
+        this.app,
+        this.clientInfo,
+      )
     }
   }
 
