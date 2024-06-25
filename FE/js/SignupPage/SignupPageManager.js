@@ -1,9 +1,13 @@
+const SERVER = "127.0.0.1";
+const PORT = 3000;
+
 class SignupPageManager {
-	constructor(app, clientInfo) {
+	constructor(app, clientInfo, onSignupSuccess) {
 		console.log("Sign up Page!");
 
 		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
+		this.onSignupSuccess = onSignupSuccess;
 
 		this._initPage();
 	}
@@ -15,8 +19,8 @@ class SignupPageManager {
 		this.nickNameValidState = false;
 
 		this.idInput = document.querySelector('#idInput');
-		this.idInput.addEventListener('input', () => {
-			this._checkId();
+		this.idInput.addEventListener('input', async () => {
+			await this._checkId();
 			this._updateSignupButton();
 		});
 		this.pwInput = document.querySelector('#pwInput');
@@ -30,8 +34,8 @@ class SignupPageManager {
 			this._updateSignupButton();
 		});
 		this.nickNameInput = document.querySelector('#nickNameInput');
-		this.nickNameInput.addEventListener('input', () => {
-			this._checkNickName();
+		this.nickNameInput.addEventListener('input', async () => {
+			await this._checkNickName();
 			this._updateSignupButton();
 		});
 
@@ -42,17 +46,22 @@ class SignupPageManager {
 
 		this.signupButton = document.querySelector('#signupButton');
 		this.signupButton.disabled = true;
-		this.signupButton.addEventListener('click', this._signupButtonClicked);
+		this.signupButton.addEventListener('click', this._signUpUser);
 	}
 
-	_checkId = () => {
+	_checkId = async () => {
 		if (!this._validateId(this.idInput.value)) {
 			const invalidIdMessage = "1에서 20자의 영문, 숫자만 사용 가능합니다.";
 			this.idWarning.textContent = invalidIdMessage;
 			this.idValidState = false;
 			return;
 		}
-		//아이디 중복검사
+		if(!(await this._validateDuplicateId(this.idInput.value))){
+			const duplicateIdMessage = "이미 존재하는 아이디입니다.";
+			this.idWarning.textContent = duplicateIdMessage;
+			this.idValidState = false;
+			return;
+		}
 		this.idValidState = true;
 		this.idWarning.textContent = "";
 	}
@@ -77,7 +86,7 @@ class SignupPageManager {
 		this.rePwValidState = true;
 		this.rePwWarning.textContent = "";
 	}
-	_checkNickName = () => {
+	_checkNickName = async () => {
 		if (!this._validateNickName(this.nickNameInput.value)) {
 			const invalidNickNameMessage =
 				"1에서 20자의 영문, 숫자, 한글만 사용 가능합니다.";
@@ -85,9 +94,56 @@ class SignupPageManager {
 			this.nickNameValidState = false;
 			return;
 		}
-		//아이디 중복검사
+		if(!(await this._validateDuplicateNickName(this.nickNameInput.value))){
+			const duplicateNickNameMessage = "이미 존재하는 닉네임입니다.";
+			this.nickNameWarning.textContent = duplicateNickNameMessage;
+			this.nickNameValidState = false;
+			return;
+		}
 		this.nickNameValidState = true;
 		this.nickNameWarning.textContent = "";
+	}
+
+	async _validateDuplicateId(id) {
+		// const query = new URLSearchParams({ username: id }).toString();
+		// const url = `http://${SERVER}:${PORT}/check-username?${query}`;
+		// try {
+		// 	const response = await fetch(url, {
+		// 		method: 'GET',
+		// 		headers: {
+		// 			'Content-Type': 'application/json'
+		// 		}
+		// 	});
+		// 	if (!response.ok) {
+		// 		throw new Error(`HTTP error! status: ${response.status}`);
+		// 	}
+		// 	const data = await response.json();
+		// 	return data.is_available;
+		// } catch (error) {
+		// 	console.error('Error:', error);
+		// }
+		return true;
+	}
+
+	async _validateDuplicateNickName(nickName) {
+		// const query = new URLSearchParams({ nickname: nickName }).toString();
+		// const url = `http://${SERVER}:${PORT}/check-nickname?${query}`;
+		// try {
+		// 	const response = await fetch(url, {
+		// 		method: 'GET',
+		// 		headers: {
+		// 			'Content-Type': 'application/json'
+		// 		}
+		// 	});
+		// 	if (!response.ok) {
+		// 		throw new Error(`HTTP error! status: ${response.status}`);
+		// 	}
+		// 	const data = await response.json();
+		// 	return data.is_available;
+		// } catch (error) {
+		// 	console.error('Error:', error);
+		// }
+		return true;
 	}
 
 	_validateId(id) {
@@ -110,9 +166,44 @@ class SignupPageManager {
 		return password === passwordConfirm;
 	}
 
-	_signupButtonClicked = () => {
-		console.log("회원가입 버튼이 클릭됨");
+
+	_signUpUser = async () => {
+		// const username = this.idInput.value;
+		// const nickname = this.nickNameInput.value;
+		// const password = this.pwInput.value;
+	
+		// const userData = {
+		// 	username: username,
+		// 	nickname: nickname,
+		// 	password: password
+		// };
+	
+		// const url = `http://${SERVER}:${PORT}/signup`;
+	
+		// try {
+		// 	const response = await fetch(url, {
+		// 		method: 'POST',
+		// 		headers: {
+		// 			'Content-Type': 'application/json'
+		// 		},
+		// 		body: JSON.stringify(userData)
+		// 	});
+	
+		// 	if (!response.ok) {
+		// 		throw new Error(`HTTP error! status: ${response.status}`);
+		// 	}
+	
+		// 	// const data = await response.json();
+		// 	// console.log('회원가입 성공:', data);
+		// 	// 회원가입 성공 후 추가 작업 (예: 리디렉션)
+		// 	this.onSignupSuccess();
+		// } catch (error) {
+		// 	console.error('회원가입 실패:', error);
+		// }
+		this.onSignupSuccess();
 	}
+
+
 
 	_updateSignupButton = () => {
 		if (

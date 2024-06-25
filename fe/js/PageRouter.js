@@ -70,7 +70,8 @@ class PageRouter {
       const signupPageManager = new SignupPageManager(
         this.app,
         this.clientInfo,
-      )
+        this._onSignupSuccess.bind(this)
+      );
     }
   }
 
@@ -92,6 +93,10 @@ class PageRouter {
 
   _onExitPingpongGame() {
     this.renderPage("lobby");
+  }
+
+  _onSignupSuccess() {
+    this.renderPage("login");
   }
 }
 
