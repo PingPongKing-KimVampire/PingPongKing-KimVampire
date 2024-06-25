@@ -1,9 +1,13 @@
 from django.db import models
 
 class User(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=255, null=False)
-    image = models.CharField(max_length=255, blank=True, null=True)
+    id = models.BigAutoField(primary_key=True)  # Big integer as a primary key
+    username = models.CharField(max_length=20, unique=True)
+    password = models.CharField(max_length=20)
+    nickname = models.CharField(max_length=20, unique=True)
+    image_uri = models.URLField(blank=True, null=True)  # Optional field
+    def __str__(self):
+        return self.username
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
