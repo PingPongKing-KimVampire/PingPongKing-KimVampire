@@ -119,6 +119,54 @@ body {
 	visibility: visible;
 }
 
+.questionModal {
+	display: none;
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.questionModal .questionBox {
+	width: 80%;
+	height: 20%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 3rem;
+	font-weight: 900;
+}
+
+.questionModal .question {
+	padding-bottom: 1.5%;
+	text-align: center;
+	line-height: 1.5;
+}
+
+.questionModal .title {
+	padding-bottom: 1%;
+	text-align: center;
+	font-weight: 400;
+	font-size: 2rem;
+}
+
+.questionModal .buttonGroup {
+	width: 40%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding-top: 1.5%;
+}
+
+.questionModal .buttonGroup button {
+	width: 45%;
+	padding: 2.5% 2.5%;
+}
+
 @media (orientation: portrait) {
 	.exitButton {
 		top: 2%;
