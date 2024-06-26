@@ -1,5 +1,5 @@
 const SERVER = "127.0.0.1";
-const PORT = 3000;
+const PORT = 3001;
 
 class SignupPageManager {
 	constructor(app, clientInfo, onSignupSuccess) {
@@ -105,45 +105,43 @@ class SignupPageManager {
 	}
 
 	async _validateDuplicateId(id) {
-		// const query = new URLSearchParams({ username: id }).toString();
-		// const url = `http://${SERVER}:${PORT}/check-username?${query}`;
-		// try {
-		// 	const response = await fetch(url, {
-		// 		method: 'GET',
-		// 		headers: {
-		// 			'Content-Type': 'application/json'
-		// 		}
-		// 	});
-		// 	if (!response.ok) {
-		// 		throw new Error(`HTTP error! status: ${response.status}`);
-		// 	}
-		// 	const data = await response.json();
-		// 	return data.is_available;
-		// } catch (error) {
-		// 	console.error('Error:', error);
-		// }
-		return true;
+		const query = new URLSearchParams({ username: id }).toString();
+		const url = `http://${SERVER}:${PORT}/check-username?${query}`;
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			const data = await response.json();
+			return data.is_available;
+		} catch (error) {
+			console.error('Error:', error);
+		}
 	}
 
 	async _validateDuplicateNickName(nickName) {
-		// const query = new URLSearchParams({ nickname: nickName }).toString();
-		// const url = `http://${SERVER}:${PORT}/check-nickname?${query}`;
-		// try {
-		// 	const response = await fetch(url, {
-		// 		method: 'GET',
-		// 		headers: {
-		// 			'Content-Type': 'application/json'
-		// 		}
-		// 	});
-		// 	if (!response.ok) {
-		// 		throw new Error(`HTTP error! status: ${response.status}`);
-		// 	}
-		// 	const data = await response.json();
-		// 	return data.is_available;
-		// } catch (error) {
-		// 	console.error('Error:', error);
-		// }
-		return true;
+		const query = new URLSearchParams({ nickname: nickName }).toString();
+		const url = `http://${SERVER}:${PORT}/check-nickname?${query}`;
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			const data = await response.json();
+			return data.is_available;
+		} catch (error) {
+			console.error('Error:', error);
+		}
 	}
 
 	_validateId(id) {
@@ -168,38 +166,38 @@ class SignupPageManager {
 
 
 	_signUpUser = async () => {
-		// const username = this.idInput.value;
-		// const nickname = this.nickNameInput.value;
-		// const password = this.pwInput.value;
+		const username = this.idInput.value;
+		const nickname = this.nickNameInput.value;
+		const password = this.pwInput.value;
 	
-		// const userData = {
-		// 	username: username,
-		// 	nickname: nickname,
-		// 	password: password
-		// };
+		const userData = {
+			username: username,
+			nickname: nickname,
+			password: password
+		};
 	
-		// const url = `http://${SERVER}:${PORT}/signup`;
+		const url = `http://${SERVER}:${PORT}/signup`;
 	
-		// try {
-		// 	const response = await fetch(url, {
-		// 		method: 'POST',
-		// 		headers: {
-		// 			'Content-Type': 'application/json'
-		// 		},
-		// 		body: JSON.stringify(userData)
-		// 	});
+		try {
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(userData)
+			});
 	
-		// 	if (!response.ok) {
-		// 		throw new Error(`HTTP error! status: ${response.status}`);
-		// 	}
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
 	
-		// 	// const data = await response.json();
-		// 	// console.log('회원가입 성공:', data);
-		// 	// 회원가입 성공 후 추가 작업 (예: 리디렉션)
-		// 	this.onSignupSuccess();
-		// } catch (error) {
-		// 	console.error('회원가입 실패:', error);
-		// }
+			// const data = await response.json();
+			// console.log('회원가입 성공:', data);
+			// 회원가입 성공 후 추가 작업 (예: 리디렉션)
+			this.onSignupSuccess();
+		} catch (error) {
+			console.error('회원가입 실패:', error);
+		}
 		this.onSignupSuccess();
 	}
 
