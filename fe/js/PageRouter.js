@@ -1,5 +1,5 @@
 import PingpongPageManager from "./PingpongPage/PingpongPageManager.js";
-import LoginPageManager from "./TestPage/LoginPageManager.js";
+import LoginPageManager from "./LoginPage/LoginPageManager.js";
 import WaitingRoomCreationPageManager from "./LobbyPage/WaitingRoomCreationPageManager.js";
 import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";
 import WaitingRoomPageManager from "./WaitingRoomPage/WaitingRoomPageManager.js";
@@ -15,6 +15,7 @@ class PageRouter {
       socket: null,
       id: null,
       nickname: null,
+      avatarUrl: null,
       lobbySocket: null,
       gameInfo: {
         pingpongRoomSocket: null,
@@ -35,7 +36,8 @@ class PageRouter {
       const loginPageManager = new LoginPageManager(
         this.app,
         this.clientInfo,
-        this._onLoginSuccess.bind(this)
+        this._onLoginSuccess.bind(this),
+        this._onEnterSignup.bind(this)
       );
       await loginPageManager.initPage();
     } else if (url === "lobby") {
@@ -77,6 +79,10 @@ class PageRouter {
 
   _onLoginSuccess() {
     this.renderPage("lobby");
+  }
+
+  _onEnterSignup() {
+    this.renderPage("signup");
   }
 
   _onClickWatingRoomCreationButton() {

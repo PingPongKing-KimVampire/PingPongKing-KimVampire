@@ -5,9 +5,9 @@ class SignupPageManager {
 	constructor(app, clientInfo, onSignupSuccess) {
 		console.log("Sign up Page!");
 
-		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
 		this.onSignupSuccess = onSignupSuccess;
+		app.innerHTML = this._getHTML();
 
 		this._initPage();
 	}
