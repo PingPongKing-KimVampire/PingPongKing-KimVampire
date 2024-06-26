@@ -48,10 +48,6 @@ INSTALLED_APPS = [
     'authentication',
     'lobby',
     'pingpongRoom',
-    'user',
-    'rest_framework_simplejwt',
-    'rest_framework',
-    'corsheaders'
 ]
 
 MIDDLEWARE = [
