@@ -122,6 +122,7 @@ class PageRouter {
     // 동적으로 추가된 기존 CSS 파일 제거하기
     const existingLinks = document.querySelectorAll('link[data-dynamic="true"]');
     existingLinks.forEach((link) => {
+      console.log('existingLink: ', link);
       link.remove();
     });
     // 새로운 CSS 파일 동적으로 추가
