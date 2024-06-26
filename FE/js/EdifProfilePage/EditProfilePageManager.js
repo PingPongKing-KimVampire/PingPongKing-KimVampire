@@ -25,6 +25,28 @@ class EditProfilePageManager {
 		this.completeButton = document.querySelector('#completeButton');
 		this.completeButton.disabled = true;
 		this.completeButton.addEventListener('click', this._completeEditProfile);
+
+		this._initExitModal();
+	}
+
+	_initExitModal() {
+		this.exitModal = document.querySelector('.questionModal');
+		this.exitYesButton = document.querySelector('.questionModal button:nth-of-type(1)');
+		this.exitNoButton = document.querySelector('.questionModal button:nth-of-type(2)');
+
+		const exitListenerRef = () => {
+			// TODO : 프로필 편집 페이지에서 뒤로 가는 로직 작성하기
+		}
+		const hideModalListenerRef = () => {
+			this.exitModal.style.display = 'none';
+			this.exitYesButton.removeEventListener(exitListenerRef);
+			this.exitNoButton.removeEventListener(hideModalListenerRef);
+		}
+		this.exitYesButton.addEventListener('click', exitListenerRef);
+		this.exitNoButton.addEventListener('click', hideModalListenerRef);
+		
+		document.querySelector('.exitButton')
+				.addEventListener('click', this._displayExitModal);
 	}
 
 	_editAvatar = () => {
@@ -90,8 +112,13 @@ class EditProfilePageManager {
 		console.log("프로필 편집 완료, 서버에게 요청 보내기");
 	}
 
+	_displayExitModal = () => {
+		this.exitModal.style.display = 'flex';
+	}
+
 	_getHTML() {
 		return `
+			<button class="exitButton"></button>
 			<div id="container">
 				<div id="avatarContainer">
 					<div id="avatarImgFrame">
@@ -105,6 +132,20 @@ class EditProfilePageManager {
 				</div>
 			</div>
 			<button id="completeButton" class="disabledButton">완료</button>
+			${this._getExitModalHTML()}
+		`;
+	}
+	_getExitModalHTML() {
+		return `
+			<div class="questionModal">
+				<div class="questionBox">
+					<div class="question">프로필 편집을 종료하시겠습니다?</div>
+					<div class="buttonGroup">
+						<button class="activatedButton">네</button>
+						<button class="activatedButton">아니오</button>
+					</div>
+				</div>
+			</div>
 		`;
 	}
 }
