@@ -1,0 +1,44 @@
+.avatarSelectionModal {
+	display: none;
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+    align-content: center;
+	background-color: rgba(0, 0, 0, 0.7);
+    flex-wrap: wrap;
+}
+
+.selectionAvatarFrame {
+    width: 26vw;
+    height: 26vw;
+    background-color: #020626;
+    border: 1px solid white;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-Items: center;
+}
+
+.selectionAvatarFrame:hover {
+    cursor: pointer;
+    background-color: rgb(213, 112, 255);
+	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
+	transition-property: background-color;
+	transition-duration: 0.5s;
+}
+
+.selectionAvatarImage {
+    width: auto;
+    height: 100%;
+    /* border-radius: 50%; */
+    max-width: none;
+}
+
+.uploadIconImage {
+    width: auto;
+    height: 50%;
+    max-width: none;
+    /* visibility: none; */
+}

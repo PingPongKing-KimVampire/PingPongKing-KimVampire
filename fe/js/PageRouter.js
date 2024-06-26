@@ -4,6 +4,7 @@ import WaitingRoomCreationPageManager from "./LobbyPage/WaitingRoomCreationPageM
 import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";
 import WaitingRoomPageManager from "./WaitingRoomPage/WaitingRoomPageManager.js";
 import SignupPageManager from "./SignupPage/SignupPageManager.js";
+import TmpAvatarUploadModalPageManager from "./TmpAvatarUploadModalPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -74,6 +75,8 @@ class PageRouter {
         this.clientInfo,
         this._onSignupSuccess.bind(this)
       );
+    } else if (url == "tmp") {
+      new TmpAvatarUploadModalPageManager(this.app, this.clientInfo);
     }
   }
 
