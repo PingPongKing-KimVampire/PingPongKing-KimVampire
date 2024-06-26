@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'user',
     'rest_framework_simplejwt',
     'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -61,6 +62,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5500',
 ]
 
 ROOT_URLCONF = "kimVampire.urls"
