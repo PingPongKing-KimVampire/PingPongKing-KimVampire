@@ -40,8 +40,7 @@
 	right: 6%;
 	width: 18%;
 	height: 18%;
-	background-color: white;
-	border-radius: 10rem;
+	background: url('../../images/avatarEdit.png') center/cover;
 }
 
 #nicknameContainer {
@@ -66,8 +65,11 @@
 }
 #warning {
 	color: red;
+	height: 20%;
 	font-size: 1rem;
 	padding-top: 5%;
+	text-align: center;
+	line-height: 1.5rem;
 }
 
 #completeButton {
