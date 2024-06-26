@@ -94,6 +94,8 @@ def check_nickname(request):
     nickname = request.GET.get('nickname')
     if UserRepository.exists_user_by_nickname(nickname):
         return JsonResponse({"error_code": "USER_04", "error_message": "nickname is invalid"}, status=400)
+    response = JsonResponse({"is_availalbe": True}, status=200)
+    # response['Access-Control-Allow-Origin'] = 'http://localhost:5500' 
     return JsonResponse({"is_availalbe": True}, status=200)
 
 @require_http_methods(["GET"])
