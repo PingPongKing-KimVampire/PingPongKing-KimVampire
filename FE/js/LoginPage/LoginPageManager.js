@@ -116,7 +116,7 @@ class LoginPageManager {
 	}
 	_getAccessTocken() {
 		const cookieString = `; ${document.cookie}`;
-		const parts = cookieString.split(`; AccessToken=`);
+		const parts = cookieString.split(`; accessToken=`);
 		if (parts.length === 2) {
 			return parts.pop().split(';').shift();
 		}

@@ -58,7 +58,7 @@
 	height: 60%;
 	box-sizing: border-box;
 	border-radius: 10rem;
-	background-color: rgb(1, 4, 37);
+	background-color: transparent;
 	border: 0.1rem solid white;
 	padding: 0 8%;
 	color: white;
@@ -76,7 +76,7 @@
 	bottom: 7%;
 	padding: 1% 6%;
 }
-#completeButton:hover {
+#completeButton.generalButton:hover {
 	background-color: rgb(213, 112, 255);
 	border-color: rgb(213, 112, 255);
 	color: rgb(1, 4, 37);
