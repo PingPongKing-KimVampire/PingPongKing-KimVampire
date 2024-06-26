@@ -37,11 +37,6 @@ class LoginPageManager {
 		}
 	}
 
-	// TODO : 로그인 버튼 클릭 시, 이 순서가 맞나?
-		// -> 로그인 요청
-		// -> 성공하면 글로벌 소켓 연결
-		// -> 성공하면 로비 소켓 연결
-		// -> 성공하면 로비 페이지 렌더링
 	async _loginListener(event) {
 		event.preventDefault();
 		const id = this.idInput.value;
@@ -49,17 +44,18 @@ class LoginPageManager {
 
 		// try {
 		// 	await this._loginRequest(id, pw);
-		// 	const socket = await this._connectGlobalSocket(id, pw);
+		// 	const { socket, userData } = await this._connectGlobalSocket(id, pw);
 		// 	const lobbySocket = await this._connectLobbySocket(id);
 
 		// 	this.clientInfo.id = id;
-		// 	// TODO : pw도 저장해야 할까?
+		// 	this.clientInfo.nickname = userData.nickname;
+		// 	this.clientInfo.avatarUrl = userData.avatarUrl;
 		// 	this.clientInfo.socket = socket;
 		// 	this.clientInfo.lobbySocket = lobbySocket;
 		// 	this.onLoginSuccess();
 		// } catch (error) {
 		// 	console.log("로그인 실패: ", error);
-		// 	// TODO : 로그인과 실패 시 반응
+		// 	// TODO : 로그인과 실패 시 처리
 		// }
 		this.onLoginSuccess();
 	}
@@ -81,8 +77,6 @@ class LoginPageManager {
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
-			const data = await response.json();
-			console.log('로그인 성공: ', data);
 		} catch (error) {
 			throw error;
 		}
@@ -95,29 +89,38 @@ class LoginPageManager {
 				resolve();
 			});
 		});
-		console.log('1');
 		const initClientMessage = {
 			event: "initClient",
 			content: {
 				cliendId: id,
-				// TODO : 닉네임을 어떻게 알아오지? pw를 보내야 하는 건가?
+				accessToken: this._getAccessTocken()
 			},
 		};
 		socket.send(JSON.stringify(initClientMessage));
-		await new Promise((resolve) => {
+		const userData = await new Promise((resolve) => {
 			socket.addEventListener(
 				'message', 
 				function listener(messageEvent) {
 					const {event, content} = JSON.parse(messageEvent.data);
 					if (event === "initClientResponse" && content.message === "OK") {
 						socket.removeEventListener('message', listener);
-						resolve();
+						resolve({
+							nickname: content.clientNickname,
+							avatarUrl: content.clientAvatarUrl
+						});
 					}
 				}.bind(this)
 				);
 			});
-		console.log('2');
-		return socket;
+		return { socket, userData };
+	}
+	_getAccessTocken() {
+		const cookieString = `; ${document.cookie}`;
+		const parts = cookieString.split(`; AccessToken=`);
+		if (parts.length === 2) {
+			return parts.pop().split(';').shift();
+		}
+		return null;
 	}
 
 	async _connectLobbySocket(id) {

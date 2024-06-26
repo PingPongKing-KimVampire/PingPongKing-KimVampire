@@ -15,6 +15,7 @@ class PageRouter {
       socket: null,
       id: null,
       nickname: null,
+      avatarUrl: null,
       lobbySocket: null,
       gameInfo: {
         pingpongRoomSocket: null,
