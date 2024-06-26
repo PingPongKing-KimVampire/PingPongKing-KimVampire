@@ -3,7 +3,6 @@
 }
 
 #container {
-	background-color: red;
 	height: 65%;
 	width: 26%;
 	display: flex;
@@ -72,14 +71,66 @@
 	padding-top: 5%;
 }
 
-
 #completeButton {
 	position: absolute;
 	bottom: 7%;
-	padding: 0.8% 5%;
+	padding: 1% 6%;
 }
 #completeButton:hover {
 	background-color: rgb(213, 112, 255);
 	border-color: rgb(213, 112, 255);
 	color: rgb(1, 4, 37);
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.7/1) {
+	#container {
+		width: 35%;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
+	#container {
+		width: 42%;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	#container {
+		width: 50%;
+	}
+}
+
+@media (orientation: portrait) {
+	#completeButton {
+		bottom: 7%;
+		padding: 2.5% 12%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1) {
+	#container {
+		height: 60%;
+		width: 50%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+	#container {
+		height: 55%;
+		width: 55%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+	#container {
+		height: 50%;
+		width: 60%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+	#container {
+		height: 45%;
+		width: 65%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+	#container {
+		height: 40%;
+		width: 70%;
+	}
 }
