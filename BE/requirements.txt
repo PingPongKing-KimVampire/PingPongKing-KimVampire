@@ -4,3 +4,5 @@ channels
 # channels_redis
 daphne
 psycopg2-binary
+djangorestframework-simplejwt
+djangorestframework-simplejwt[crypto]
