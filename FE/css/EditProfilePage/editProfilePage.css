@@ -17,6 +17,7 @@
 	height: 67%;
 	aspect-ratio: 1/1;
 }
+
 #avatarImgFrame {
 	display: flex;
 	flex-direction: row;
@@ -31,9 +32,11 @@
 	filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5));
 	overflow: hidden;
 }
+
 #avatarImg {
 	width: 100%;
 }
+
 #avatarEditButton {
 	position: absolute;
 	bottom: 6%;
@@ -51,6 +54,7 @@
 	justify-content: center;
 	align-items: center;
 }
+
 #nicknameInput {
 	width: 100%;
 	height: 60%;
@@ -63,6 +67,7 @@
 	font-size: 2rem;
 	text-align: center;
 }
+
 #warning {
 	color: red;
 	height: 20%;
@@ -77,10 +82,56 @@
 	bottom: 7%;
 	padding: 1% 6%;
 }
+
 #completeButton.generalButton:hover {
 	background-color: rgb(213, 112, 255);
 	border-color: rgb(213, 112, 255);
 	color: rgb(1, 4, 37);
+}
+
+.avatarSelectionModal {
+	display: none;
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-content: center;
+	background-color: rgba(0, 0, 0, 0.7);
+	flex-wrap: wrap;
+}
+
+.selectionAvatarFrame {
+	width: 26vw;
+	height: 26vw;
+	background-color: #020626;
+	border: 1px solid white;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-Items: center;
+}
+
+.selectionAvatarFrame:hover {
+	cursor: pointer;
+	background-color: rgb(213, 112, 255);
+	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
+	transition-property: background-color;
+	transition-duration: 0.5s;
+}
+
+.selectionAvatarImage {
+	width: auto;
+	height: 100%;
+	/* border-radius: 50%; */
+	max-width: none;
+}
+
+.uploadIconImage {
+	width: auto;
+	height: 50%;
+	max-width: none;
+	/* visibility: none; */
 }
 
 @media (orientation: landscape) and (max-aspect-ratio: 1.7/1) {
@@ -88,11 +139,13 @@
 		width: 35%;
 	}
 }
+
 @media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
 	#container {
 		width: 42%;
 	}
 }
+
 @media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
 	#container {
 		width: 50%;
@@ -105,30 +158,35 @@
 		padding: 2.5% 12%;
 	}
 }
+
 @media (orientation: portrait) and (max-aspect-ratio: 1/1) {
 	#container {
 		height: 60%;
 		width: 50%;
 	}
 }
+
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
 	#container {
 		height: 55%;
 		width: 55%;
 	}
 }
+
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
 	#container {
 		height: 50%;
 		width: 60%;
 	}
 }
+
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
 	#container {
 		height: 45%;
 		width: 65%;
 	}
 }
+
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
 	#container {
 		height: 40%;
@@ -191,21 +249,26 @@
 	.questionModal .questionBox {
 		height: 30%;
 	}
+
 	.questionModal .question {
 		padding-bottom: 3%;
 	}
+
 	.questionModal .buttonGroup {
 		width: 60%;
 		flex-direction: column;
 		align-items: center;
 		padding-top: 3%;
 	}
+
 	.questionModal .buttonGroup button:nth-child(1) {
 		margin-bottom: 2.5%;
 	}
+
 	.questionModal .buttonGroup button:nth-child(2) {
 		margin-top: 2.5%;
 	}
+
 	.questionModal .buttonGroup button {
 		width: 100%;
 		padding: 3.5% 0;

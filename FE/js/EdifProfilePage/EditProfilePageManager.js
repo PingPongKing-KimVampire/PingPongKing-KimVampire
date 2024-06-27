@@ -6,19 +6,34 @@ class EditProfilePageManager {
 		this.clientInfo.avatarUrl = 'images/playerA.png';
 		this.clientInfo.nickname = '김뱀파이어';
 
+		this._setDefaultAvatars();
 		app.innerHTML = this._getHTML();
 		this._initPage();
 	}
 
+	_setDefaultAvatars() {
+		this._addDefaultAvatar("images/playerA.png");
+		this._addDefaultAvatar("images/vampireIcon.png");
+		this._addDefaultAvatar("images/playerA.png");
+		this._addDefaultAvatar("images/humanIcon.png");
+		this._addDefaultAvatar("images/playerB.png");
+	}
+	_addDefaultAvatar(avatarPath) {
+		if (!this._defaultAvatarPathList) this._defaultAvatarPathList = [];
+		this._defaultAvatarPathList.push(avatarPath);
+	}
+
 	_initPage() {
-		document.querySelector('#avatarEditButton')
-				.addEventListener('click', this._editAvatar);
+		this.isNicknameUpdated = false;
+		this.isAvatarUpdated = false;
+		this.isDefaultAvatar;
+
 		this.avatarImg = document.querySelector('#avatarImg');
 
 		this.nicknameInput = document.querySelector('#nicknameInput');
 		this.nicknameInput.addEventListener('input', async () => {
-			const nicknameValidState = await this._checkNickname();
-			this._updateCompleteButton(nicknameValidState);
+			this.isNicknameUpdated = await this._checkNickname();
+			this._updateCompleteButton(this.isNicknameUpdated, this.isAvatarUpdated);
 		});
 		this.nicknameWarning = document.querySelector('#warning');
 
@@ -26,36 +41,13 @@ class EditProfilePageManager {
 		this.completeButton.disabled = true;
 		this.completeButton.addEventListener('click', this._completeEditProfile);
 
+		this._initAvatarSelectionModal();
 		this._initExitModal();
-	}
-
-	_initExitModal() {
-		this.exitModal = document.querySelector('.questionModal');
-		this.exitYesButton = document.querySelector('.questionModal button:nth-of-type(1)');
-		this.exitNoButton = document.querySelector('.questionModal button:nth-of-type(2)');
-
-		const exitListenerRef = () => {
-			// TODO : 프로필 편집 페이지에서 뒤로 가는 로직 작성하기
-		}
-		const hideModalListenerRef = () => {
-			this.exitModal.style.display = 'none';
-			this.exitYesButton.removeEventListener(exitListenerRef);
-			this.exitNoButton.removeEventListener(hideModalListenerRef);
-		}
-		this.exitYesButton.addEventListener('click', exitListenerRef);
-		this.exitNoButton.addEventListener('click', hideModalListenerRef);
-		
-		document.querySelector('.exitButton')
-				.addEventListener('click', this._displayExitModal);
-	}
-
-	_editAvatar = () => {
-		console.log("아바타 변경 모달 띄우기");
 	}
 
 	_checkNickname = async () => {
 		if (!this._validateNickname(this.nicknameInput.value)) {
-			const invalidNicknameMessage = 
+			const invalidNicknameMessage =
 				"1에서 20자의 영문, 숫자, 한글만 사용 가능합니다.";
 			this.nicknameWarning.textContent = invalidNicknameMessage;
 			return false;
@@ -63,7 +55,6 @@ class EditProfilePageManager {
 		if (!(await this._validateDuplicateNickname(this.nicknameInput.value))) {
 			const duplicateNicknameMessage = "이미 존재하는 닉네임입니다.";
 			this.nicknameWarning.textContent = duplicateNicknameMessage;
-			this._updateCompleteButton(false);
 			return false;
 		}
 		this.nicknameWarning.textContent = "";
@@ -94,10 +85,8 @@ class EditProfilePageManager {
 		return true;
 	}
 
-	_updateCompleteButton(abled) {
-		if (abled && // 닉네임이 유효하고
-			this.clientInfo.nickname !== this.nicknameInput.value && // 기존 닉네임, 아바타와 다른 경우에만 완료 버튼 활성화
-			this.clientInfo.avatarUrl !== this.avatarImg.value) {
+	_updateCompleteButton(isNicknameUpdated, isAvatarUpdated) {
+		if (isNicknameUpdated || isAvatarUpdated) {
 			this.completeButton.disabled = false;
 			this.completeButton.classList.add('generalButton');
 			this.completeButton.classList.remove("disabledButton");
@@ -108,12 +97,110 @@ class EditProfilePageManager {
 		}
 	}
 
-	_completeEditProfile = () => {
-		console.log("프로필 편집 완료, 서버에게 요청 보내기");
+	_completeEditProfile = async () => {
+		const editMessage = {
+			event: "updateClientInfo",
+			content: {
+				waitingRoomInfo: {}
+			}
+		}
+		if (this.isNicknameUpdated) {
+			editMessage.content.waitingRoomInfo.nickname = this.nicknameInput.value;
+		}
+		if (this.isAvatarUpdated) {
+			let avatarImage;
+			if (this.isDefaultAvatar) {
+				avatarImage = { imageUrl: this.avatarImg.src };
+			} else {
+				avatarImage = { imageData: this.avatarImg.src };
+			}
+			editMessage.content.waitingRoomInfo.avatarImage = avatarImage;
+		}
+
+		// this.clientInfo.socket.send(JSON.stringify(editMessage));
+		// await new Promise((resolve) => {
+		// 	const listener = (messsageEvent) => {
+		// 		const { event, content } = JSON.parse(messsageEvent.data);
+		// 		if (event === "updateClientInfoResponse" && content.message === 'OK') {
+		// 			resolve();
+		// 		}
+		//		// TODO : 실패 시 처리하기
+		// 	}
+		// 	this.clientInfo.socket.addEventListener('message', listener);
+		// })
+		// TODO : 이후 마이페이지 렌더링하기 
 	}
 
-	_displayExitModal = () => {
+	_initAvatarSelectionModal() {
+		this.avatarSelectionModal = document.querySelector(".avatarSelectionModal");
+		const avatarEditButton = document.querySelector("#avatarEditButton");
+		avatarEditButton.addEventListener("click", this._renderAvatarEditModal.bind(this));
+		this._setUploadAvatarFrame();
+	}
+	_renderAvatarEditModal() {
+		this.avatarSelectionModal.style.display = "flex";
+		const modalClicked = (e) => {
+			if (e.target.className.includes("selectionAvatarImage")) {
+				this.avatarImg.src = e.target.src;
+				this.isAvatarUpdated = e.target.dataset.src !== this.clientInfo.avatarUrl;
+				this.isDefaultAvatar = true;
+				this._hideAvatarEditModal.call(this);
+			}
+			if (e.target.className.includes("avatarSelectionModal")) {
+				this._hideAvatarEditModal.call(this);
+			}
+			this.avatarSelectionModal.removeEventListener("click", modalClicked);
+		}
+		this.avatarSelectionModal.addEventListener("click", modalClicked);
+	}
+	_setUploadAvatarFrame() {
+		const uploadFrame = document.querySelector("#uploadFrame");
+		const fileInput = document.querySelector("#fileInput");
+		uploadFrame.addEventListener("click", () => {
+			fileInput.click();
+		});
+		fileInput.addEventListener("change", (event) => {
+			const file = event.target.files[0];
+			if (file) {
+				//파일을 화면에 렌더링한다.
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					this.avatarImg.src = e.target.result;
+					this.isAvatarUpdated = true;
+					this.isDefaultAvatar = false;
+					this._hideAvatarEditModal.call(this);
+				};
+				reader.readAsDataURL(file);
+			}
+		});
+	}
+	_hideAvatarEditModal() {
+		this._updateCompleteButton(this.isNicknameUpdated, this.isAvatarUpdated);
+		this.avatarSelectionModal.style.display = "none";
+	}
+
+	_initExitModal() {
+		this.exitModal = document.querySelector('.questionModal');
+		this.exitYesButton = document.querySelector('.questionModal button:nth-of-type(1)');
+		this.exitNoButton = document.querySelector('.questionModal button:nth-of-type(2)');
+
+		document.querySelector('.exitButton')
+			.addEventListener('click', () => {
+				this._renderExitModal();
+				this.exitYesButton.addEventListener('click', this._exitEditProfilePage);
+				this.exitNoButton.addEventListener('click', this._hideExitModal);
+			});
+	}
+	_renderExitModal = () => {
 		this.exitModal.style.display = 'flex';
+	}
+	_exitEditProfilePage = () => {
+		// TODO : 프로필 편집 페이지에서 뒤로 가는 로직 작성하기
+	}
+	_hideExitModal = () => {
+		this.exitModal.style.display = 'none';
+		this.exitYesButton.removeEventListener('click', this._exitEditProfilePage);
+		this.exitNoButton.removeEventListener('click', this._hideExitModal);
 	}
 
 	_getHTML() {
@@ -132,8 +219,29 @@ class EditProfilePageManager {
 				</div>
 			</div>
 			<button id="completeButton" class="disabledButton">완료</button>
+			${this._getAvatarSectionModalHTML()}
 			${this._getExitModalHTML()}
 		`;
+	}
+	_getAvatarSectionModalHTML() {
+		if (!this._defaultAvatarPathList) this._defaultAvatarPathList = [];
+		const avatarPathListHtml = this._defaultAvatarPathList.reduce(
+			(acc, path) =>
+				acc +
+				`<div class="selectionAvatarFrame">
+					<img class="selectionAvatarImage" src="${path}" data-src="${path}">
+				</div>`,
+			""
+		);
+		return `
+		  <div class="avatarSelectionModal">
+			${avatarPathListHtml}
+			<div class="selectionAvatarFrame" id="uploadFrame">
+				<img class="uploadIconImage" src="images/uploadIcon.png">
+				<input type="file" id="fileInput" style="display: none;" accept="image/*">
+			</div>
+		  </div>
+		  `;
 	}
 	_getExitModalHTML() {
 		return `
