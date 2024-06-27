@@ -48,7 +48,10 @@ INSTALLED_APPS = [
     'authentication',
     'lobby',
     'pingpongRoom',
+    'kimVampire',
 ]
+
+APPEND_SLASH = False
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -61,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "kimVampire.middleware.AddSlashMiddleware"
 ]
 
 CORS_ORIGIN_WHITELIST = [

@@ -29,6 +29,7 @@ def password_is_valid(password):
 def nickname_is_valid(nickname):
     return re.match(nickname_pattern, nickname) is not None
 
+@csrf_exempt
 @require_http_methods(["POST"])
 def signup(request):
     try:
@@ -50,6 +51,8 @@ def signup(request):
         return JsonResponse({"error_code": "USER_02", "error_message": "password is invalid"}, status=400)
     if not nickname_is_valid(nickname):
         return JsonResponse({"error_code": "USER_03", "error_message": "nickname is invalid"}, status=400)
+    if UserRepository.exists_user_by_username(username):
+        return JsonResponse({"error_code": "USER_06", "error_message": "username already exists"}, status=400)
     user = UserRepository.create_user(username, password, nickname)
     response_data = {
         'userId': user.id
@@ -57,7 +60,7 @@ def signup(request):
     return JsonResponse(response_data, status=201)
 
 
-
+@csrf_exempt
 @require_http_methods(["POST"])
 def login(request):
     try:
@@ -95,15 +98,14 @@ def check_nickname(request):
     if UserRepository.exists_user_by_nickname(nickname):
         return JsonResponse({"error_code": "USER_04", "error_message": "nickname is invalid"}, status=400)
     response = JsonResponse({"is_availalbe": True}, status=200)
-    # response['Access-Control-Allow-Origin'] = 'http://localhost:5500' 
-    return JsonResponse({"is_availalbe": True}, status=200)
+    return JsonResponse({"is_available": True}, status=200)
 
 @require_http_methods(["GET"])
 def check_username(request):
     username = request.GET.get('username')
     if UserRepository.exists_user_by_username(username):
-        return JsonResponse({"error_code": "USER_04", "error_message": "nickname is invalid"}, status=400)
-    return JsonResponse({"is_availalbe": True}, status=200)
+        return JsonResponse({"error_code": "USER_05", "error_message": "username is invalid"}, status=400)
+    return JsonResponse({"is_available": True}, status=200)
 
 # views.py
 from rest_framework_simplejwt.views import TokenObtainPairView
