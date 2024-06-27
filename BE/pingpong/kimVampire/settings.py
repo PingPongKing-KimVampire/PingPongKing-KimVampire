@@ -55,6 +55,7 @@ APPEND_SLASH = False
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+    "kimVampire.middleware.AddSlashMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -64,7 +65,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "kimVampire.middleware.AddSlashMiddleware"
 ]
 
 CORS_ORIGIN_WHITELIST = [
