@@ -17,6 +17,8 @@ class LoginPageManager {
 		this.idInput.addEventListener('input', this._updateLoginButton.bind(this));
 		this.pwInput.addEventListener('input', this._updateLoginButton.bind(this));
 		
+		this.warning = document.querySelector('.warning');
+
 		this.loginButton = document.querySelector('#loginButton');
 		this.loginButton.disabled = true;
 		this.loginButton.addEventListener('click', this._loginListener.bind(this));
@@ -54,10 +56,8 @@ class LoginPageManager {
 			this.clientInfo.lobbySocket = lobbySocket;
 			this.onLoginSuccess();
 		} catch (error) {
-			console.log("로그인 실패: ", error);
-			// TODO : 로그인과 실패 시 처리
+			this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
 		}
-		this.onLoginSuccess();
 	}
 
 	async _loginRequest(id, pw) {
@@ -159,6 +159,7 @@ class LoginPageManager {
 				<img id="logoImg" src="images/logo.png">
 				<form>
 					<div id="inputContainer">
+						<div class="warning"></div>
 						<input class="input" type="text" id="idInput" placeholder="아이디를 입력해주세요.">
 						<input class="input" type="password" id="pwInput" placeholder="비밀번호를 입력해주세요.">
 					</div>
