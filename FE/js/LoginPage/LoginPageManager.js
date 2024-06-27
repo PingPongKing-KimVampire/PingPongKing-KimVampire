@@ -40,24 +40,25 @@ class LoginPageManager {
 	}
 
 	async _loginListener(event) {
-		event.preventDefault();
-		const id = this.idInput.value;
-		const pw = this.pwInput.value;
+		// event.preventDefault();
+		// const id = this.idInput.value;
+		// const pw = this.pwInput.value;
 
-		try {
-			await this._loginRequest(id, pw);
-			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			const lobbySocket = await this._connectLobbySocket(id);
+		// try {
+		// 	await this._loginRequest(id, pw);
+		// 	const { socket, userData } = await this._connectGlobalSocket(id, pw);
+		// 	const lobbySocket = await this._connectLobbySocket(id);
 
-			this.clientInfo.id = id;
-			this.clientInfo.nickname = userData.nickname;
-			this.clientInfo.avatarUrl = userData.avatarUrl;
-			this.clientInfo.socket = socket;
-			this.clientInfo.lobbySocket = lobbySocket;
-			this.onLoginSuccess();
-		} catch (error) {
-			this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
-		}
+		// 	this.clientInfo.id = id;
+		// 	this.clientInfo.nickname = userData.nickname;
+		// 	this.clientInfo.avatarUrl = userData.avatarUrl;
+		// 	this.clientInfo.socket = socket;
+		// 	this.clientInfo.lobbySocket = lobbySocket;
+		// 	this.onLoginSuccess();
+		// } catch (error) {
+		// 	this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+		// }
+		this.onLoginSuccess();
 	}
 
 	async _loginRequest(id, pw) {

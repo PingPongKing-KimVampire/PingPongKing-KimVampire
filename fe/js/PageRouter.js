@@ -5,6 +5,7 @@ import NewLobbyPageManager from "./LobbyPage/LobbyPageManager.js";
 import WaitingRoomPageManager from "./WaitingRoomPage/WaitingRoomPageManager.js";
 import SignupPageManager from "./SignupPage/SignupPageManager.js";
 import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js";
+import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js"
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -48,7 +49,8 @@ class PageRouter {
         this.app,
         this.clientInfo,
         this._onClickWatingRoomCreationButton.bind(this),
-        this._onEnterWaitingRoom.bind(this)
+        this._onEnterWaitingRoom.bind(this),
+        this._renderFriendManagementPage.bind(this)
       );
       await lobbyPageManager.initPage();
     } else if (url === "waitingRoomCreation") {
@@ -87,6 +89,11 @@ class PageRouter {
         this.app,
         this.clientInfo,
       )
+    } else if (url === "friendManagement") {
+      const friendManagementPageManager = new FriendManagementPageManager(
+        this.app,
+        this.clientInfo,
+      )
     }
   }
 
@@ -118,11 +125,14 @@ class PageRouter {
     this.renderPage("login");
   }
 
+  _renderFriendManagementPage() {
+    this.renderPage("friendManagement");
+  }
+
   _loadCSS(filenames) {
     // 동적으로 추가된 기존 CSS 파일 제거하기
     const existingLinks = document.querySelectorAll('link[data-dynamic="true"]');
     existingLinks.forEach((link) => {
-      console.log('existingLink: ', link);
       link.remove();
     });
     // 새로운 CSS 파일 동적으로 추가

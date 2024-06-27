@@ -8,7 +8,8 @@ class LobbyPageManager {
     app,
     clientInfo,
     onClickWatingRoomCreationButton,
-    onCLickWaitingRoomButton
+    onCLickWaitingRoomButton,
+    renderFriendManagementPage,
   ) {
     console.log("Lobby Page!");
     app.innerHTML = this._getHTML();
@@ -33,6 +34,7 @@ class LobbyPageManager {
     this.clientInfo = clientInfo;
     this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
     this.onCLickWaitingRoomButton = onCLickWaitingRoomButton;
+    this.renderFriendManagementPage = renderFriendManagementPage;
     this._setCreateWaitingRoomButton();
 
     this.enterRoomModal = document.querySelector(".questionModal");
@@ -50,12 +52,23 @@ class LobbyPageManager {
   }
 
   async initPage() {
-    const waitingRoomInfoList = await this._getWaitingRoomList();
-    this._renderWaitingRoom(waitingRoomInfoList);
-    this._listenWaitingRoomUpdate();
+    // const waitingRoomInfoList = await this._getWaitingRoomList();
+    // this._renderWaitingRoom(waitingRoomInfoList);
+    // this._listenWaitingRoomUpdate();
 
     this._autoSetScollTrackColor();
     this._adjustButtonSize();
+
+    console.log("여길 안 오나?");
+    this._setFriendManagementButton();
+  }
+
+  _setFriendManagementButton() {
+    this.friendManagementButton = document.querySelector('#friendManagementButton');
+    this.friendManagementButton.addEventListener('click', () => {
+      // this.clientInfo.lobbySocket.close();
+      this.renderFriendManagementPage();
+    })
   }
 
   _listenWaitingRoomUpdate() {
@@ -333,6 +346,10 @@ class LobbyPageManager {
 
   _getHTML() {
     return `
+    <div id="friendTest">
+      <button id="friendManagementButton">친구 관리 페이지</button>
+      <span id="friendRequestCount">1</span>
+    </div>
     <div class="lobby">
       <div class="lobbyInner">
           ${this._getWaitingRoomCreationButtonHtml()}
