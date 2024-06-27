@@ -42,21 +42,21 @@ class LoginPageManager {
 		const id = this.idInput.value;
 		const pw = this.pwInput.value;
 
-		// try {
-		// 	await this._loginRequest(id, pw);
-		// 	const { socket, userData } = await this._connectGlobalSocket(id, pw);
-		// 	const lobbySocket = await this._connectLobbySocket(id);
+		try {
+			await this._loginRequest(id, pw);
+			const { socket, userData } = await this._connectGlobalSocket(id, pw);
+			const lobbySocket = await this._connectLobbySocket(id);
 
-		// 	this.clientInfo.id = id;
-		// 	this.clientInfo.nickname = userData.nickname;
-		// 	this.clientInfo.avatarUrl = userData.avatarUrl;
-		// 	this.clientInfo.socket = socket;
-		// 	this.clientInfo.lobbySocket = lobbySocket;
-		// 	this.onLoginSuccess();
-		// } catch (error) {
-		// 	console.log("로그인 실패: ", error);
-		// 	// TODO : 로그인과 실패 시 처리
-		// }
+			this.clientInfo.id = id;
+			this.clientInfo.nickname = userData.nickname;
+			this.clientInfo.avatarUrl = userData.avatarUrl;
+			this.clientInfo.socket = socket;
+			this.clientInfo.lobbySocket = lobbySocket;
+			this.onLoginSuccess();
+		} catch (error) {
+			console.log("로그인 실패: ", error);
+			// TODO : 로그인과 실패 시 처리
+		}
 		this.onLoginSuccess();
 	}
 
