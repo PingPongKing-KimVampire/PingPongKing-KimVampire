@@ -1,0 +1,276 @@
+#app {
+	background: linear-gradient(rgb(2, 6, 38), rgb(89, 49, 128));
+}
+
+#container {
+	height: 65%;
+	width: 26%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 3%;
+}
+
+#avatarContainer {
+	position: relative;
+	height: 67%;
+	aspect-ratio: 1/1;
+}
+
+#avatarImgFrame {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-end;
+	width: 100%;
+	height: 100%;
+	border-radius: 15rem;
+	border: 0.12rem solid white;
+	box-sizing: border-box;
+	background-color: rgb(1, 4, 37);
+	filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5));
+	overflow: hidden;
+}
+
+#avatarImg {
+	width: 100%;
+}
+
+#avatarEditButton {
+	position: absolute;
+	bottom: 6%;
+	right: 6%;
+	width: 18%;
+	height: 18%;
+	background: url('../../images/avatarEdit.png') center/cover;
+}
+
+#nicknameContainer {
+	height: 25%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#nicknameInput {
+	width: 100%;
+	height: 60%;
+	box-sizing: border-box;
+	border-radius: 10rem;
+	background-color: transparent;
+	border: 0.1rem solid white;
+	padding: 0 8%;
+	color: white;
+	font-size: 2rem;
+	text-align: center;
+}
+
+#warning {
+	color: red;
+	height: 20%;
+	font-size: 1rem;
+	padding-top: 5%;
+	text-align: center;
+	line-height: 1.5rem;
+}
+
+#completeButton {
+	position: absolute;
+	bottom: 7%;
+	padding: 1% 6%;
+}
+
+#completeButton.generalButton:hover {
+	background-color: rgb(213, 112, 255);
+	border-color: rgb(213, 112, 255);
+	color: rgb(1, 4, 37);
+}
+
+.avatarSelectionModal {
+	display: none;
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-content: center;
+	background-color: rgba(0, 0, 0, 0.7);
+	flex-wrap: wrap;
+}
+
+.selectionAvatarFrame {
+	width: 26vw;
+	height: 26vw;
+	background-color: #020626;
+	border: 1px solid white;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-Items: center;
+}
+
+.selectionAvatarFrame:hover {
+	cursor: pointer;
+	background-color: rgb(213, 112, 255);
+	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
+	transition-property: background-color;
+	transition-duration: 0.5s;
+}
+
+.selectionAvatarImage {
+	width: auto;
+	height: 100%;
+	/* border-radius: 50%; */
+	max-width: none;
+}
+
+.uploadIconImage {
+	width: auto;
+	height: 50%;
+	max-width: none;
+	/* visibility: none; */
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.7/1) {
+	#container {
+		width: 35%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
+	#container {
+		width: 42%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	#container {
+		width: 50%;
+	}
+}
+
+@media (orientation: portrait) {
+	#completeButton {
+		bottom: 7%;
+		padding: 2.5% 12%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1) {
+	#container {
+		height: 60%;
+		width: 50%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+	#container {
+		height: 55%;
+		width: 55%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+	#container {
+		height: 50%;
+		width: 60%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+	#container {
+		height: 45%;
+		width: 65%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+	#container {
+		height: 40%;
+		width: 70%;
+	}
+}
+
+/* TODO : common에 추가하고 싹 다 날리기 */
+
+.questionModal {
+	display: none;
+	/* display: flex; */
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.questionModal .questionBox {
+	width: 80%;
+	height: 20%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 3rem;
+	font-weight: 900;
+}
+
+.questionModal .question {
+	padding-bottom: 1.5%;
+	text-align: center;
+	line-height: 1.5;
+}
+
+.questionModal .title {
+	padding-bottom: 1%;
+	text-align: center;
+	font-weight: 400;
+	font-size: 2rem;
+}
+
+.questionModal .buttonGroup {
+	width: 40%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding-top: 1.5%;
+}
+
+.questionModal .buttonGroup button {
+	width: 45%;
+	padding: 2.5% 2.5%;
+}
+
+@media (orientation: portrait) {
+	.questionModal .questionBox {
+		height: 30%;
+	}
+
+	.questionModal .question {
+		padding-bottom: 3%;
+	}
+
+	.questionModal .buttonGroup {
+		width: 60%;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 3%;
+	}
+
+	.questionModal .buttonGroup button:nth-child(1) {
+		margin-bottom: 2.5%;
+	}
+
+	.questionModal .buttonGroup button:nth-child(2) {
+		margin-top: 2.5%;
+	}
+
+	.questionModal .buttonGroup button {
+		width: 100%;
+		padding: 3.5% 0;
+	}
+}
