@@ -90,7 +90,7 @@ def login(request):
         response['Authorization'] = 'Bearer ' + access_token
         return response
     else:
-        return JsonResponse({'detail': 'Invalid credentials'}, status=401)
+        return JsonResponse({"error_code": "USER_07", "error_message": "id or password is wrong"}, status=401)
 
 @require_http_methods(["GET"])
 def check_nickname(request):

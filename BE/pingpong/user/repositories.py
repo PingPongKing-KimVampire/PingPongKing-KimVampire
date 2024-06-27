@@ -3,6 +3,8 @@ from lobby.models import User
 class UserRepository:
     def authenticate(username, password):
         user = User.objects.filter(username=username).first()
+        if user is None:
+            return None
         if user.check_password(password):
             return user
         return None
