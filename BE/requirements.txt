@@ -1,5 +1,9 @@
 Django>=3.1
 djangorestframework
 channels
-channels_redis
+# channels_redis
 daphne
+psycopg2-binary
+djangorestframework-simplejwt
+djangorestframework-simplejwt[crypto]
+django-cors-headers

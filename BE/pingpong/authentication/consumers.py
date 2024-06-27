@@ -47,5 +47,6 @@ class AuthConsumer(AsyncWebsocketConsumer):
         self.is_init = True
         self.client_id = client_id
         self.client_nickname = client_nickname
+        stateManager.add_user(client_id, client_nickname)
         await stateManager._add_client(self, client_id, client_nickname)
         await self._send('initClientResponse', {'message': 'OK'})
