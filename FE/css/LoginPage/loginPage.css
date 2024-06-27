@@ -30,6 +30,16 @@ form {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
+}
+
+.warning {
+	padding-bottom: 2%;
+	text-align: center;
+	color: red;
+	font-size: 1rem;
+	height: 3%;
+	width: 100%;
 }
 
 .input {
@@ -73,9 +83,20 @@ form {
 	font-weight: 300;
 }
 
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
+	#container {
+		width: 40%;
+	}
+}
+
 @media (orientation: portrait) {
 	#container {
 		height: 58%;
 		width: 70%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
+	.warning {
+		height: 9%;
 	}
 }

@@ -12,12 +12,15 @@
 	position: relative;
 	width: 100%;
 	height: 15%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 .label {
 	position: absolute;
 	right: 108%;
-	width: 30%;
+	width: 100%;
 	height: 100%;
 	display: flex;
 	flex-direction: row;
@@ -40,7 +43,9 @@
 }
 
 .warning {
-	padding-top: 2%;
+	position: absolute;
+	top: 120%;
+	width: 150%;
 	text-align: center;
 	color: red;
 	font-size: 1rem;
@@ -63,14 +68,37 @@
 		width: 55%;
 	}
 	.inputContainer  {
-		/* background-color: rebeccapurple; */
 		height: 10%;
 	}
 	.label {
 		right: 0%;
 		bottom: 100%;
-		/* background-color: red; */
 		justify-content: center;
 		width: 100%;
+	}
+	#signupButton {
+		padding: 2% 5%;
+	}
+	.warning {
+		top: 130%;
+	}
+}
+
+@media (orientation: landscape) and (min-aspect-ratio: 1/1) and (max-aspect-ratio: 1.5/1) {
+	#container {
+		height: 50%;
+		margin-left: 2%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
+	#container {
+		height: 55%;
+		width: 65%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/2) {
+	#container {
+		width: 70%;
 	}
 }
