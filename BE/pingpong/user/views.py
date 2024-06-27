@@ -88,6 +88,7 @@ def login(request):
         }
         response = JsonResponse(response_data, status=200)
         response['Authorization'] = 'Bearer ' + access_token
+        response['Access-Control-Expose-Headers'] = 'Authorization'
         return response
     else:
         return JsonResponse({"error_code": "USER_07", "error_message": "id or password is wrong"}, status=401)
