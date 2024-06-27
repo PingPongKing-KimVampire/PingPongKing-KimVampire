@@ -133,9 +133,8 @@
 	background-color: white;
 }
 
-.questionModal {
+/* .questionModal {
 	display: none;
-	/* display: flex; */
 	width: 100vw;
 	height: 100vh;
 	position: absolute;
@@ -180,7 +179,7 @@
 .questionModal .buttonGroup button {
 	width: 45%;
 	padding: 2.5% 2.5%;
-}
+} */
 
 @media (orientation: portrait) {
 	html {
