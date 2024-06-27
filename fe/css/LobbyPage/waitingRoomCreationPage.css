@@ -1,5 +1,4 @@
-#roomSettingContainer {
-	/* background-color: blueviolet; */
+#container {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -9,7 +8,6 @@
 }
 
 .selectionContainer {
-	/* background-color: blue; */
 	display: flex;
 	flex-direction: row;
 	justify-content: start;
@@ -17,7 +15,7 @@
 	width: 100%;
 	transition: margin 0.5s;
 }
-.selectionGroupBottomMargin {
+.marginBottom {
 	margin-bottom: 6%;
 }
 .selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
@@ -30,15 +28,13 @@
 	height: 15%;
 }
 
-.selectionLabel {
-	/* background-color: yellowgreen; */
+.label {
 	width: 15%;
 	font-size: 3rem;
 	font-weight: 800;
 }
 
 .selectionBox {
-	/* background-color: brown; */
 	width: 100%;
 	height: 100%;
 	display: flex;
@@ -85,14 +81,12 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	transition-duration: 0.5s;
 }
 
-#humanCountSelectionBox {
+/* #humanCountSelectionBox {
 	height: 100%;
 	display: flex;
 	flex-direction: row;
 }
-
 .countBox {
-	/* background-color: aquamarine; */
 	height: 100%;
 	display: flex;
 	flex-direction: column;
@@ -102,7 +96,6 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 .countBox:last-of-type {
 	height: 200%;
 	align-items: flex-start;
-	/* background-color: red; */
 }
 .countBox .teamText {
 	font-size: 1.5rem;
@@ -112,7 +105,6 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 .countBox:last-of-type .teamText {
 	height: 20%;
 }
-
 #vampireCountBox {
 	width: 13%;
 }
@@ -125,7 +117,6 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 #humanCountBox {
 	width: 50%;
 }
-
 #vampireCountButton, #humanCountButton {
 	height: 60%;
 	width: 100%;
@@ -161,9 +152,9 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 }
 #humanCountButton:hover {
 	cursor: pointer;
-}
+} */
 
-#humanCountBox.visible #humanCountOptionBox {
+/* #humanCountBox.visible #humanCountOptionBox {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -201,7 +192,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	font-size: 3rem;
 	font-weight: 800;
 	margin: 0 8%;
-}
+} */
 
 #completeButton {
 	width: 15%;
@@ -213,13 +204,13 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 }
 
 @media (orientation: portrait) {
-	#roomSettingContainer {
+	#container {
 		height: auto;
 	}
 	.selectionContainer {
 		flex-direction: column;
 	}
-	.selectionGroupBottomMargin {
+	.marginBottom {
 		margin-bottom: 11%;
 	}
 	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
@@ -231,7 +222,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
 		height: auto;
 	}
-	.selectionLabel {
+	.label {
 		width: auto;
 		margin-bottom: 5%;
 	}
@@ -239,9 +230,9 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 		height: auto;
 		justify-content: center;
 	}
-	.selectionContainer:nth-of-type(3).visible .selectionBox {
+	/* .selectionContainer:nth-of-type(3).visible .selectionBox {
 		align-items: flex-start;
-	}
+	} */
 	#titleInput {
 		width: 100%;
 		aspect-ratio: 9/1;
@@ -254,7 +245,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.modeButton:nth-of-type(2) {
 		margin: 0 7%;
 	}
-	#vampireCountBox {
+	/* #vampireCountBox {
 		width: 25%;
 	}
 	#humanCountSelectionBox {
@@ -296,7 +287,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	}
 	#vsText {
 		margin: 0 12%;
-	}
+	} */
 	#completeButton {
 		bottom: 7%;
 		left: 50%;
@@ -306,7 +297,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 }
 
 @media (max-width: 1700px) and (orientation: landscape) {
-	.selectionLabel {
+	.label {
 		width: 16%;
 	}
 	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
@@ -315,21 +306,21 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 35%;
 	}
-	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+	/* .selectionContainer:nth-of-type(3).visible {
 		height: 13.5%;
-	}
-	#vampireCountBox {
+	} */
+	/* #vampireCountBox {
 		width: 14%;
 	}
 	#humanCountSelectionBox {
 		width: 28%;
-	}
+	} */
 	#completeButton {
 		width: 16%;
 	}
 }
 @media (max-width: 1500px) and (orientation: landscape) {
-	.selectionLabel {
+	.label {
 		width: 18%;
 	}
 	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
@@ -338,21 +329,21 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 32%;
 	}
-	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+	/* .selectionContainer:nth-of-type(3).visible {
 		height: 12%;
-	}
-	#vampireCountBox {
+	} */
+	/* #vampireCountBox {
 		width: 15%;
 	}
 	#humanCountSelectionBox {
 		width: 30%;
-	}
+	} */
 	#completeButton {
 		width: 17%;
 	}
 }
 @media (max-width: 1350px) and (orientation: landscape) {
-	.selectionLabel {
+	.label {
 		width: 20%;
 	}
 	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
@@ -366,7 +357,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	}
 }
 @media (max-width: 1150px) and (orientation: landscape) {
-	.selectionLabel {
+	.label {
 		width: 25%;
 	}
 	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
@@ -375,25 +366,25 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 25%;
 	}
-	#vampireCountBox {
+	/* #vampireCountBox {
 		width: 19%;
 	}
 	#humanCountSelectionBox {
 		width: 38%;
-	}
+	} */
 	#completeButton {
 		width: 19%;
 	}
 }
 
 @media (min-width: 600px) and (orientation: portrait) {
-	#roomSettingContainer {
+	#container {
 		margin-bottom: 7%;
 		width: 65%;
 	}
 }
 @media (min-width: 750px) and (orientation: portrait) {
-	#roomSettingContainer {
+	#container {
 		margin-bottom: 10%;
 		width: 55%;
 	}

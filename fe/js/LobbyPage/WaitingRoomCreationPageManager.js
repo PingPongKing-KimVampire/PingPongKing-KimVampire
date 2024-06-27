@@ -66,23 +66,31 @@ class WaitingRoomCreationPageManager {
 	_checkSelectedAll() {
 		// 모두 선택되었는지 확인하고 complete 버튼 활성화 or 비활성화
 		const isSelectedTitle = this.titleInput.value !== "";
-		const selectedModeButton = this.modeButtons.find(button => button.checked);
+		const selectedModeButton = this.modeButtons.find(
+			(button) => button.checked
+		);
 		const isSelectedMode = selectedModeButton !== undefined;
 		if (isSelectedMode) {
 			if (selectedModeButton.value === "vampireVsHuman") {
 				this.countSelection.classList.replace("invisible", "visible");
-				this.modeSelection.classList.add("selectionGroupBottomMargin");
+				this.modeSelection.classList.add("marginBottom");
 			} else {
 				this.countSelection.classList.replace("visible", "invisible");
-				this.modeSelection.classList.remove("selectionGroupBottomMargin");
+				this.modeSelection.classList.remove("marginBottom");
 			}
 		}
 		if (isSelectedTitle && isSelectedMode) {
 			this.completeButton.disabled = false;
-			this.completeButton.classList.replace("disabledButton", "activatedButton");
+			this.completeButton.classList.replace(
+				"disabledButton",
+				"activatedButton"
+			);
 		} else {
 			this.completeButton.disabled = true;
-			this.completeButton.classList.replace("activatedButton", "disabledButton");
+			this.completeButton.classList.replace(
+				"activatedButton",
+				"disabledButton"
+			);
 		}
 	}
 
@@ -223,8 +231,8 @@ class WaitingRoomCreationPageManager {
 	_getHTML() {
 		return `
 			<button class="exitButton"></button>
-			<div id="roomSettingContainer">
-				<div class="selectionContainer selectionGroupBottomMargin">
+			<div id="container">
+				<div class="selectionContainer marginBottom">
 					${this._getTitleSelectionHTML()}
 				</div>
 				<div class="selectionContainer">
@@ -240,7 +248,7 @@ class WaitingRoomCreationPageManager {
 
 	_getTitleSelectionHTML() {
 		return `
-			<label class="selectionLabel" for="titleInput">방 제목</label>
+			<label class="label" for="titleInput">방 제목</label>
 			<div class="selectionBox">
 				<input type="text" id="titleInput">
 			</div>
@@ -249,7 +257,7 @@ class WaitingRoomCreationPageManager {
 
 	_getModeSelectionHTML() {
 		return `
-			<label class="selectionLabel">모드</label>
+			<label class="label">모드</label>
 			<div class="selectionBox">
 				<input type="radio" name="mode" id="humanVsHuman" value="humanVsHuman">
 				<label for=humanVsHuman class="modeButton">인간 VS 인간</label>
@@ -263,34 +271,44 @@ class WaitingRoomCreationPageManager {
 
 	_getPlayerCountSelectionHTML() {
 		return `
-			<label class="selectionLabel">인원</label>
-			<div class="selectionBox">
-				<div class="countBox" id="vampireCountBox">
-					<div class="teamText">뱀파이어</div>
-					<button id="vampireCountButton">1명</button>
+			<label class="label" > 인원</label>
+				<div class="selectionBox">
+					<div></div>
+					<div id="vsText">VS</div>
 				</div>
-				<div id="vsText">VS</div>
-				<div id="humanCountSelectionBox">
-					<div class="countBox" id="humanCountBox">
-						<div class="teamText">인간</div>
-						<button id="humanCountButton" value="3">
-							<div>3명</div>
-							<img src="images/arrowImg.png" class="nonSelectedArrowImg">
-						</button>
-					</div>
-					<div class="countBox invisible" id="humanCountBox">
-						<div class="teamText"></div>
-						<ul id="humanCountOptionBox">
-							<li><button class="humanCountOptionButton" value="2">2명</button></li>
-							<li><button class="humanCountOptionButton" value="4">4명</button></li>
-							<li><button class="humanCountOptionButton" value="5">5명</button></li>
-							<li><button class="humanCountOptionButton" value="6">6명</button></li>
-						</ul>
-					</div>
-				</div>
-			</div>
 		`;
 	}
+
+	// _getPlayerCountSelectionHTML() {
+	//   return `
+	// 		<label class="label">인원</label>
+	// 		<div class="selectionBox">
+	// 			<div class="countBox" id="vampireCountBox">
+	// 				<div class="teamText">뱀파이어</div>
+	// 				<button id="vampireCountButton">1명</button>
+	// 			</div>
+	// 			<div id="vsText">VS</div>
+	// 			<div id="humanCountSelectionBox">
+	// 				<div class="countBox" id="humanCountBox">
+	// 					<div class="teamText">인간</div>
+	// 					<button id="humanCountButton" value="3">
+	// 						<div>3명</div>
+	// 						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
+	// 					</button>
+	// 				</div>
+	// 				<div class="countBox invisible" id="humanCountBox">
+	// 					<div class="teamText"></div>
+	// 					<ul id="humanCountOptionBox">
+	// 						<li><button class="humanCountOptionButton" value="2">2명</button></li>
+	// 						<li><button class="humanCountOptionButton" value="4">4명</button></li>
+	// 						<li><button class="humanCountOptionButton" value="5">5명</button></li>
+	// 						<li><button class="humanCountOptionButton" value="6">6명</button></li>
+	// 					</ul>
+	// 				</div>
+	// 			</div>
+	// 		</div>
+	// 	`;
+	// }
 }
 
 export default WaitingRoomCreationPageManager;
