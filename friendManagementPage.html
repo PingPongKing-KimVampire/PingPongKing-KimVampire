@@ -10,6 +10,7 @@
 </head>
 <body>
 	<div id="app">
+		<button class="exitButton"></button>
 		<div id="container">
 			<div id="tabContainer">
 				<button class="tabButton" id="searchUserButton">유저 검색</button>
@@ -17,18 +18,20 @@
 				<button class="tabButton" id="myFriendButton">내 친구 관리</button>
 				<button class="tabButton" id="blockUserButton">차단 유저 관리</button>
 			</div>
-			<div id="contentBox">
-				<div id="innerContentBox">
-					<div id="searchBox">
+			<div id="contentContainer">
+				<div id="innerContentContainer">
+					<div id="searchContainer" class="visible">
 						<input id="userSearchInput" placeholder="닉네임을 입력하세요.">
 					</div>
-					<div id="userListBox">
+					<div class="userListContainer scrollbar-scrolltrack">
 						<div class="userItem">
-							<img class="userAvatar">
-							<div class="userNickname">김뱀파이어</div>
+							<div class="avatarImgFrame">
+								<img class="avatarImg" src="FE/images/playerA.png">
+							</div>
+							<div class="nickname">김뱀파이어어어어어어어어어</div>
 							<div class="buttonGroup">
-								<div class="friendRequestButtton">친구 요청</div>
-								<div class="userBlockButtton">차단</div>
+								<div class="userManagementButton friendRequestButtton activatedButton">친구 요청</div>
+								<div class="userManagementButton userBlockButtton activatedButton">차단</div>
 							</div>
 						</div>
 					</div>

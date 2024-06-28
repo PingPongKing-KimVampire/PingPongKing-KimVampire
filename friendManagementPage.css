@@ -43,6 +43,7 @@
 	border-left-width: 0.07rem;
 }
 .tabButton:hover {
+	cursor: pointer;
 	background-color: rgb(213, 112, 255);
 	color: rgb(1, 4, 37);
 	border-color: rgb(213, 112, 255);
@@ -51,7 +52,7 @@
 	transition-duration: 0.5s;
 }
 
-#contentBox {
+#contentContainer {
 	width: 100%;
 	height: 91%;
 	background-color: rgb(1, 4, 37);
@@ -61,26 +62,25 @@
 	box-sizing: border-box;
 }
 
-#innerContentBox {
+#innerContentContainer {
 	height: 100%;
 	width: 100%;
-	/* display: flex;
+	display: flex;
 	flex-direction: column;
-	justify-content: flex-start;
-	align-items: center; */
+	align-items: center;
 }
 
-#searchBox {
-	width: 100%;
-	height: 18%;
+#searchContainer.visible {
+	width: 93%;
+	height: 16%;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
-	align-items: center;
+	align-items: flex-end;
 }
 #userSearchInput {
-	height: 50%;
-	width: 93%;
+	height: 65%;
+	width: 100%;
 	box-sizing: border-box;
 	border-radius: 3rem;
 	background-color: rgb(1, 4, 37);
@@ -94,21 +94,111 @@
 	font-size: 1.4rem;
 }
 
-#userListBox {
-	/* background-color: yellow; */
-	width: 100%;
-	height: 82%;
+.userListContainer {
+	width: 93%;
+	height: 81%;
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
+	margin-top: 3%;
+	box-sizing: border-box;
+	padding-right: 1rem;
+	overflow-y: scroll;
+}
+.userListContainer::-webkit-scrollbar {
+	width: 1rem;
+}
+.userListContainer::-webkit-scrollbar-track {
+	margin-bottom: 1rem;
+	background-color: transparent;
+}
+/* .userListContainer.scrollbar-scrolltrack::-webkit-scrollbar-track {
+	background-color: rgb(213, 112, 255);
+	border-radius: 1rem;
+}
+.userListContainer.transparent-scrolltrack::-webkit-scrollbar-track {
+	background-color: transparent;
+} */
+.userListContainer::-webkit-scrollbar-thumb {
+	background-color: rgb(213, 112, 255);
+	border-radius: 1rem;
+}
+.userListContainer::-webkit-scrollbar-button {
+	display: none;
 }
 
 .userItem {
-	height: 12%;
-	width: 93%;
+	height: 13%;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1.2%;
+	padding: 1% 3%;
+	box-sizing: border-box;
 	background-color: rgb(1, 4, 37);
-	border-radius: 1.5rem;
+	border-radius: 1.8rem;
 	border: 0.14rem solid white;
 	color: white;
+}
+
+.avatarImgFrame {
+	height: 100%; /*TODO : 이미지 가로, 세로 중 어디가 더 긴지에 따라 JS에서 설정해 주어야 할 듯*/
+	aspect-ratio: 1/1;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-end;
+	border-radius: 3rem;
+	border: 0.12rem solid white;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+.avatarImg {
+	height: 100%;
+}
+
+.nickname {
+	width: 25%;
+	font-size: 2rem;
+	font-weight: 700;
+	text-align: center;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.buttonGroup {
+	width: 30%;
+	height: 70%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.userManagementButton {
+	height: 100%;
+	width: 47%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	font-size: 1.3rem;
+}
+.userManagementButton:hover {
+	cursor: pointer;
+}
+
+#app::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 12%;
+	background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
 }
