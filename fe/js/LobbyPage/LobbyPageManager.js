@@ -59,7 +59,6 @@ class LobbyPageManager {
     this._autoSetScollTrackColor();
     this._adjustButtonSize();
 
-    console.log("여길 안 오나?");
     this._setFriendManagementButton();
   }
 

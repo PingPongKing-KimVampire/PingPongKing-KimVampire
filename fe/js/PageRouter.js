@@ -90,6 +90,7 @@ class PageRouter {
         this.clientInfo,
       )
     } else if (url === "friendManagement") {
+      this._loadCSS(['css/FriendManagementPage/friendManagementPage.css']);
       const friendManagementPageManager = new FriendManagementPageManager(
         this.app,
         this.clientInfo,
