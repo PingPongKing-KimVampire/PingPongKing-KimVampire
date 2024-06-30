@@ -11,3 +11,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['user_id'] = user.id
         token['image_uri'] = user.image_uri
         return token
+    @classmethod
+    def verify_token(cls, token):
+        try:
+            
