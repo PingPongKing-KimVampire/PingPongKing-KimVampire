@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'lobby',
     'pingpongRoom',
     'kimVampire',
+    'user',
+    'coreManage',
 ]
 
 APPEND_SLASH = False
