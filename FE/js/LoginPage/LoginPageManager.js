@@ -16,7 +16,7 @@ class LoginPageManager {
 		this.pwInput = document.querySelector('#pwInput');
 		this.idInput.addEventListener('input', this._updateLoginButton.bind(this));
 		this.pwInput.addEventListener('input', this._updateLoginButton.bind(this));
-		
+
 		this.warning = document.querySelector('.warning');
 
 		this.loginButton = document.querySelector('#loginButton');
@@ -24,7 +24,7 @@ class LoginPageManager {
 		this.loginButton.addEventListener('click', this._loginListener.bind(this));
 
 		document.querySelector('#signupButton')
-				.addEventListener('click', this.onEnterSignupPage);
+			.addEventListener('click', this.onEnterSignupPage);
 	}
 
 	_updateLoginButton() {
@@ -74,6 +74,8 @@ class LoginPageManager {
 				},
 				body: JSON.stringify(userData)
 			})
+			console.log(response);
+			console.log(response.headers.get('Authorization'));
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
@@ -99,9 +101,9 @@ class LoginPageManager {
 		socket.send(JSON.stringify(initClientMessage));
 		const userData = await new Promise((resolve) => {
 			socket.addEventListener(
-				'message', 
+				'message',
 				function listener(messageEvent) {
-					const {event, content} = JSON.parse(messageEvent.data);
+					const { event, content } = JSON.parse(messageEvent.data);
 					if (event === "initClientResponse" && content.message === "OK") {
 						socket.removeEventListener('message', listener);
 						resolve({
@@ -110,8 +112,8 @@ class LoginPageManager {
 						});
 					}
 				}.bind(this)
-				);
-			});
+			);
+		});
 		return { socket, userData };
 	}
 	_getAccessTocken() {
@@ -141,8 +143,8 @@ class LoginPageManager {
 		lobbySocket.send(JSON.stringify(enterLobbyMessage));
 		await new Promise((resolve) => {
 			lobbySocket.addEventListener(
-				'message', 
-				function(messageEvent) {
+				'message',
+				function (messageEvent) {
 					const { event, content } = JSON.parse(messageEvent.data);
 					if (event === "enterLobbyResponse" && content.message === "OK") {
 						lobbySocket.removeEventListener('message', listener);
