@@ -61,6 +61,30 @@ class FriendManagementPageManager {
 		this._autoSetScrollTrackColor();
 		this._subscribeWindow();
 		//모드에 따라 다른 notify 이벤트를 listen해 re render하는 메서드 구현
+		this._listenNotifyEvent();
+	}
+
+	_listenNotifyEvent() {
+		const listener = (messageEvent) => {
+			const { event, content } = JSON.parse(messageEvent.data);
+			if (this.selectedTab === 'friendRequestListTab') {
+				if (
+					event === 'notifyFriendRequestReceive' ||
+					event === 'notifyFriendRequestCanceled'
+				) {
+					this._renderFriendRequestList();
+				}
+			} else if (this.selectedTab === 'friendListTab') {
+				if (
+					event === 'notifyFriendDeleted' ||
+					event === 'notifyFriendRequestAccepted'
+				) {
+					this._renderFriendList();
+				}
+			}
+		};
+		//페이지 이동시 remove해야함
+		// this.clientInfo.socket.addEventListener('message', listener);
 	}
 
 	_setTabButtons() {
