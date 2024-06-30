@@ -6,7 +6,7 @@ class FriendManagementPageManager {
 
 		// TODO : 임시 하드 코딩
 		this.clientList = [
-			{ id: 3, nickname: "김뱀파이어", avatarUrl: "images/playerA.png" }, 
+			{ id: 3, nickname: "김뱀파이어어어어어어어어어어어어어", avatarUrl: "images/playerA.png" }, 
 			{ id: 3, nickname: "이뱀파이어", avatarUrl: "images/playerB.png" }, 
 			{ id: 3, nickname: "박뱀파이어", avatarUrl: "images/humanIcon.png" }, 
 			{ id: 3, nickname: "조뱀파이어", avatarUrl: "images/playerA.png" }, 

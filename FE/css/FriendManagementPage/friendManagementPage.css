@@ -95,16 +95,18 @@
 }
 
 .userListContainer {
-	width: 93%;
+	width: 96%;
 	height: 81%;
+	align-self: flex-end;
 	position: relative;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
+	margin-right: 1%;
 	margin-top: 3%;
 	box-sizing: border-box;
-	padding-right: 1rem;
+	padding-right: 1%;
 	overflow-y: scroll;
 }
 .userListContainer::-webkit-scrollbar {
@@ -142,7 +144,7 @@
 }
 
 .avatarImgFrame {
-	height: 100%; /*TODO : 이미지 가로, 세로 중 어디가 더 긴지에 따라 JS에서 설정해 주어야 할 듯*/
+	height: 100%;
 	aspect-ratio: 1/1;
 	display: flex;
 	flex-direction: row;
@@ -154,7 +156,7 @@
 	overflow: hidden;
 }
 .avatarImg {
-	height: 100%;
+	width: 100%;
 }
 
 .nickname {
@@ -188,7 +190,7 @@
 .userManagementButton:hover {
 	cursor: pointer;
 }
-
+/* 
 #app::after {
 	content: "";
 	position: absolute;
@@ -197,4 +199,184 @@
 	width: 100%;
 	height: 12%;
 	background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+} */
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
+	.tabButton {
+		font-size: 2rem;
+	}
+	#searchContainer.visible {
+		height: 14%;
+	}
+	#userSearchInput {
+		height: 68%;
+	}
+	.userListContainer {
+		height: 83%;
+	}
+	.userItem {
+		margin-bottom: 1.6%;
+		padding: 1.5% 3%;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	.tabButton {
+		font-size: 1.8rem;
+	}
+	#container {
+		width: 80%;
+	}
+	.userListContainer::-webkit-scrollbar {
+		width: 0.8rem;
+	}
+	.userItem {
+		margin-bottom: 1.8%;
+	}
+}
+
+@media (orientation: portrait) {
+	#container {
+		width: 85%;
+	}
+	#tabContainer {
+		height: 8%;
+	}
+	.tabButton {
+		font-size: 1.8rem;
+	}
+	#contentContainer {
+		height: 92%;
+	}
+	#searchContainer.visible {
+		height: 14%;
+	}
+	#userSearchInput {
+		height: 68%;
+	}
+	.userListContainer {
+		margin-top: 4%;
+		height: 82%;
+	}
+	.userListContainer::-webkit-scrollbar {
+		width: 0.7rem;
+	}
+	.userItem {
+		margin-bottom: 1.6%;
+		padding: 1.5% 3%;
+	}
+	.nickname {
+		width: 32%;
+		font-size: 1.6rem;
+	}
+	.buttonGroup {
+		height: 65%;
+		width: 40%;
+	}
+	.userManagementButton {
+		font-size: 1.15rem;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.15) {
+	.tabButton {
+		font-size: 1.6rem;
+	}
+	#searchContainer.visible {
+		height: 13%;
+	}
+	.userListContainer {
+		height: 83%;
+	}
+	.userListContainer::-webkit-scrollbar {
+		width: 0.6rem;
+	}
+	.userItem {
+		height: 5.5rem;
+		margin-bottom: 1.9%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.3) {
+	.tabButton {
+		font-size: 1.4rem;
+	}
+	.userItem {
+		padding: 2% 3%;
+	}
+	.nickname {
+		font-size: 1.4rem;
+	}
+	.userManagementButton {
+		font-size: 1rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
+	#container {
+		height: 97%;
+		width: 90%;
+	}
+	#tabContainer {
+		height: 6.5%;
+	}
+	#contentContainer {
+		height: 93.5%;
+	}
+	.tabButton {
+		font-size: 1.2rem;
+	}
+	#searchContainer.visible {
+		height: 11.5%;
+	}
+	#userSearchInput {
+		font-size: 1.4rem;
+	}
+	#userSearchInput::placeholder {
+		font-size: 1.2rem;
+	}
+	.userListContainer {
+		margin-top: 5%;
+		height: 85%;
+	}
+	.userItem {
+		height: 5rem;
+	}
+	.nickname {
+		font-size: 1.2rem;
+	}
+	.userManagementButton {
+		font-size: 1rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+	#tabContainer {
+		height: 6%;
+	}
+	#contentContainer {
+		height: 94%;
+	}
+	.tabButton {
+		font-size: 1rem;
+	}
+	#searchContainer.visible {
+		height: 10%;
+	}
+	#userSearchInput {
+		font-size: 1.2rem;
+	}
+	#userSearchInput::placeholder {
+		font-size: 1.1rem;
+	}
+	.userListContainer {
+		height: 88%;
+	}
+	.userItem {
+		height: 4.5rem;
+		margin-bottom: 2.4%;
+		padding: 2.5% 3%;
+	}
+	.nickname {
+		font-size: 1.1rem;
+	}
+	.userManagementButton {
+		font-size: 0.8rem;
+	}
 }
