@@ -78,6 +78,10 @@ class LoginPageManager {
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
+			const bearerAccessToken = response.headers.get('Authorization');
+			const accessToken = bearerAccessToken.replace('Bearer ', '');
+			if (!accessToken) throw new Error('No AccessToken');
+			this.accessToken = accessToken;
 		} catch (error) {
 			throw error;
 		}
@@ -94,7 +98,7 @@ class LoginPageManager {
 			event: 'initClient',
 			content: {
 				cliendId: id,
-				accessToken: this._getAccessTocken(),
+				accessToken: this.accessToken,
 			},
 		};
 		socket.send(JSON.stringify(initClientMessage));
@@ -244,14 +248,14 @@ class LoginPageManager {
 		});
 	}
 
-	_getAccessTocken() {
-		const cookieString = `; ${document.cookie}`;
-		const parts = cookieString.split(`; accessToken=`);
-		if (parts.length === 2) {
-			return parts.pop().split(';').shift();
-		}
-		return null;
-	}
+	// _getAccessTocken() {
+	// 	const cookieString = `; ${document.cookie}`;
+	// 	const parts = cookieString.split(`; accessToken=`);
+	// 	if (parts.length === 2) {
+	// 		return parts.pop().split(';').shift();
+	// 	}
+	// 	return null;
+	// }
 
 	async _connectLobbySocket(id) {
 		const lobbySocket = new WebSocket(
