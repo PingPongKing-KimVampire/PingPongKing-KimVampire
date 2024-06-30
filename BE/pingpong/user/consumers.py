@@ -51,6 +51,8 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if event == 'initClient':
             access_token = content['accessToken']
             await self.init_client(access_token)
+        # if event == '':
+
 
     async def init_client(self, access_token):
         from .serializers import CustomTokenObtainPairSerializer
