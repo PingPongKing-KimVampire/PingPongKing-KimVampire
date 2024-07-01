@@ -1,3 +1,6 @@
+import { SERVER_ADDRESS } from "./../PageRouter.js";
+import { SERVER_PORT } from "./../PageRouter.js";
+
 class EditProfilePageManager {
 	constructor(app, clientInfo) {
 		this.clientInfo = clientInfo;
@@ -65,24 +68,23 @@ class EditProfilePageManager {
 		return regex.test(nickname);
 	}
 	async _validateDuplicateNickname(nickName) {
-		// const query = new URLSearchParams({ nickname: nickName }).toString();
-		// const url = `http://${SERVER}:${PORT}/check-nickname?${query}`;
-		// try {
-		// 	const response = await fetch(url, {
-		// 		method: 'GET',
-		// 		headers: {
-		// 			'Content-Type': 'application/json'
-		// 		}
-		// 	});
-		// 	if (!response.ok) {
-		// 		throw new Error(`HTTP error! status: ${response.status}`);
-		// 	}
-		// 	const data = await response.json();
-		// 	return data.is_available;
-		// } catch (error) {
-		// 	console.error('Error:', error);
-		// }
-		return true;
+		const query = new URLSearchParams({ nickname: nickName }).toString();
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/check-nickname?${query}`;
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			const data = await response.json();
+			return data.is_available;
+		} catch (error) {
+			console.error('Error:', error);
+		}
 	}
 
 	_updateCompleteButton(isNicknameUpdated, isAvatarUpdated) {
@@ -117,17 +119,17 @@ class EditProfilePageManager {
 			editMessage.content.waitingRoomInfo.avatarImage = avatarImage;
 		}
 
-		// this.clientInfo.socket.send(JSON.stringify(editMessage));
-		// await new Promise((resolve) => {
-		// 	const listener = (messsageEvent) => {
-		// 		const { event, content } = JSON.parse(messsageEvent.data);
-		// 		if (event === "updateClientInfoResponse" && content.message === 'OK') {
-		// 			resolve();
-		// 		}
-		//		// TODO : 실패 시 처리하기
-		// 	}
-		// 	this.clientInfo.socket.addEventListener('message', listener);
-		// })
+		this.clientInfo.socket.send(JSON.stringify(editMessage));
+		await new Promise((resolve) => {
+			const listener = (messsageEvent) => {
+				const { event, content } = JSON.parse(messsageEvent.data);
+				if (event === "updateClientInfoResponse" && content.message === 'OK') {
+					resolve();
+				}
+				// TODO : 실패 시 처리하기
+			}
+			this.clientInfo.socket.addEventListener('message', listener);
+		})
 		// TODO : 이후 마이페이지 렌더링하기 
 	}
 
