@@ -1,4 +1,6 @@
 from lobby.models import User
+from django.db import transaction
+from asgiref.sync import sync_to_async
 
 class UserRepository:
     def authenticate(username, password):
@@ -8,6 +10,10 @@ class UserRepository:
         if user.check_password(password):
             return user
         return None
+    @staticmethod
+    @sync_to_async
+    def get_user_by_id(id):
+        return User.objects.filter(id=id).first()
 
     @staticmethod
     def get_user_by_username(username):
@@ -19,6 +25,11 @@ class UserRepository:
     
     @staticmethod
     def exists_user_by_nickname(nickname):
+        return User.objects.filter(nickname=nickname).exists()
+
+    @staticmethod
+    @sync_to_async
+    def exists_user_by_nickname_async(nickname):
         return User.objects.filter(nickname=nickname).exists()
     
     @staticmethod
@@ -34,6 +45,22 @@ class UserRepository:
     @staticmethod
     def update_user_nickname(user, new_nickname):
         user.nickname = new_nickname
+        user.save()
+        return user
+
+    
+    @staticmethod
+    @sync_to_async
+    def update_user_image_uri(user, new_image_uri):
+        user.image_uri = new_image_uri
+        user.save()
+        return user
+    
+    @staticmethod
+    @sync_to_async
+    def update_user_image_uri_and_nickname(user, new_image_uri, new_nickname):
+        user.nickname = new_nickname
+        user.image_uri = new_image_uri
         user.save()
         return user
 
