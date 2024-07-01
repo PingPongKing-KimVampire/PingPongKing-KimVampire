@@ -62,12 +62,23 @@ class FriendManagementPageManager {
 		this._subscribeWindow();
 		//모드에 따라 다른 notify 이벤트를 listen해 re render하는 메서드 구현
 		this._listenNotifyEvent();
+		this.selectedTab = 'clientSearchTab';
 	}
 
 	_listenNotifyEvent() {
 		const listener = (messageEvent) => {
 			const { event, content } = JSON.parse(messageEvent.data);
-			if (this.selectedTab === 'friendRequestListTab') {
+			if (this.selectedTab === 'clientSearchTab') {
+				if (
+					event === 'notifyFriendDeleted' ||
+					event === 'notifyFriendRequestRejected' ||
+					event === 'notifyFriendRequestAccepted' ||
+					event === 'notifyFriendRequestCanceled' ||
+					event === 'notifyFriendRequestReceive'
+				) {
+					this._renderFriendRequestList();
+				}
+			} else if (this.selectedTab === 'friendRequestListTab') {
 				if (
 					event === 'notifyFriendRequestReceive' ||
 					event === 'notifyFriendRequestCanceled'
@@ -92,16 +103,21 @@ class FriendManagementPageManager {
 		this.userListContainer = document.querySelector('.userListContainer');
 		document
 			.querySelector('#searchUserButton') // 유저 검색 탭
-			.addEventListener('click', this._setSearchContainer.bind(this, true));
+			.addEventListener('click', () => {
+				this.selectedTab = 'clientSearchTab';
+				this._setSearchContainer(true);
+			});
 		document
 			.querySelector('#friendRequestButton') // 친구 요청 목록 탭
 			.addEventListener('click', () => {
+				this.selectedTab = 'friendRequestListTab';
 				this._setSearchContainer(false);
 				this._renderFriendRequestList();
 			});
 		document
 			.querySelector('#myFriendButton') // 내 친구 관리 탭
 			.addEventListener('click', () => {
+				this.selectedTab = 'friendListTab';
 				this._setSearchContainer(false);
 				this._renderFriendList();
 			});
