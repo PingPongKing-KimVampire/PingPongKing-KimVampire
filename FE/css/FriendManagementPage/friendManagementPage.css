@@ -51,6 +51,12 @@
 	transition-property: background-color, color, height;
 	transition-duration: 0.5s;
 }
+.selectedTabButton {
+	background-color: rgb(213, 112, 255);
+	color: rgb(1, 4, 37);
+	border-color: rgb(213, 112, 255);
+	height: 100%;
+}
 
 #contentContainer {
 	width: 100%;

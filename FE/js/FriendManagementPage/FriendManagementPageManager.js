@@ -103,24 +103,27 @@ class FriendManagementPageManager {
 	}
 
 	_setTabButtons() {
-		document
-			.querySelector('#searchClientButton') // 유저 검색 탭
-			.addEventListener('click', () => {
-				this._renderSearchClientTab();
+		this.prevTabButton = document.querySelector('#searchClientButton');
+		const tabButtons = document.querySelectorAll('.tabButton');
+		tabButtons.forEach((button) => {
+			button.addEventListener('click', (event) => {
+				// 탭 버튼 스타일 변경
+				if (this.prevTabButton)
+					this.prevTabButton.classList.remove('selectedTabButton');
+				event.target.classList.add('selectedTabButton');
+				// 탭 렌더링
+				if (event.target.id === 'searchClientButton') {
+					this._renderSearchClientTab();
+				} else if (event.target.id === 'friendRequestButton') {
+					this._renderFriendRequestList();
+				} else if (event.target.id === 'myFriendButton') {
+					this._renderFriendList();
+				} else if (event.target.id === 'blockClientButton') {
+					// TODO
+				}
+				this.prevTabButton = event.target;
 			});
-		document
-			.querySelector('#friendRequestButton') // 친구 요청 목록 탭
-			.addEventListener('click', () => {
-				this._renderFriendRequestList();
-			});
-		document
-			.querySelector('#myFriendButton') // 내 친구 관리 탭
-			.addEventListener('click', () => {
-				this._renderFriendList();
-			});
-		// document
-		// 	.querySelector('#blockClientButton') // 차단 유저 관리 탭
-		// 	.addEventListener('click');
+		});
 	}
 
 	_renderSearchClientTab() { // 초기 유저 검색 탭 전체를 렌더링
@@ -128,8 +131,7 @@ class FriendManagementPageManager {
 		const innerContentContainer = document.querySelector('#innerContentContainer');
 		innerContentContainer.innerHTML = `
 			${this._getSearchContainerHTML()}
-			<div class="clientListContainer">
-			</div>
+			<div class="clientListContainer"></div>
 		`;
 		this._setSearchInput();
 		this._renderSearchedClientList();
@@ -305,8 +307,6 @@ class FriendManagementPageManager {
 		}
 	}
 
-	// TODO : 다른 탭에서도 동일하게 이 함수를 쓸 수 있지 않을까 싶음.
-	// 각 탭에서 기능이 겹치는 버튼의 클래스 이름을 통일시키면 가능할 듯. 
 	_setClientManagementButtons() { // 클라이언트 아이템의 세부 버튼에 이벤트 리스너 장착
 		const clientListContainer = document.querySelector('.clientListContainer');
 
@@ -457,7 +457,7 @@ class FriendManagementPageManager {
 	_getTabContainerHTML() {
 		return `
 			<div id="tabContainer">
-				<button class="tabButton" id="searchClientButton">유저 검색</button>
+				<button class="tabButton selectedTabButton" id="searchClientButton">유저 검색</button>
 				<button class="tabButton" id="friendRequestButton">친구 요청 목록</button>
 				<button class="tabButton" id="myFriendButton">내 친구 관리</button>
 				<button class="tabButton" id="blockClientButton">차단 유저 관리</button>
