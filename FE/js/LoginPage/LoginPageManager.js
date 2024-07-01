@@ -1,9 +1,9 @@
-import { SERVER_ADDRESS } from "../PageRouter.js";
-import { SERVER_PORT } from "../PageRouter.js";
+import { SERVER_ADDRESS } from '../PageRouter.js';
+import { SERVER_PORT } from '../PageRouter.js';
 
 class LoginPageManager {
 	constructor(app, clientInfo, onLoginSuccess, onEnterSignupPage) {
-		console.log("Login Page!");
+		console.log('Login Page!');
 
 		this.clientInfo = clientInfo;
 		this.onLoginSuccess = onLoginSuccess;
@@ -23,12 +23,13 @@ class LoginPageManager {
 		this.loginButton.disabled = true;
 		this.loginButton.addEventListener('click', this._loginListener.bind(this));
 
-		document.querySelector('#signupButton')
+		document
+			.querySelector('#signupButton')
 			.addEventListener('click', this.onEnterSignupPage);
 	}
 
 	_updateLoginButton() {
-		if (this.idInput.value !== "" && this.pwInput.value !== "") {
+		if (this.idInput.value !== '' && this.pwInput.value !== '') {
 			this.loginButton.disabled = false;
 			this.loginButton.classList.remove('disabledButton');
 			this.loginButton.classList.add('activatedButton');
@@ -43,59 +44,62 @@ class LoginPageManager {
 		event.preventDefault();
 		const id = this.idInput.value;
 		const pw = this.pwInput.value;
-
 		try {
 			await this._loginRequest(id, pw);
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			const lobbySocket = await this._connectLobbySocket(id);
+			// const lobbySocket = await this._connectLobbySocket(id);
 
 			this.clientInfo.id = id;
 			this.clientInfo.nickname = userData.nickname;
 			this.clientInfo.avatarUrl = userData.avatarUrl;
 			this.clientInfo.socket = socket;
-			this.clientInfo.lobbySocket = lobbySocket;
+			// this.clientInfo.lobbySocket = lobbySocket;
+			// this.clientInfo.getFriendInfo = await this._getFriendInfo(this.clientInfo.socket);
 			this.onLoginSuccess();
 		} catch (error) {
 			this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
 		}
+		this.onLoginSuccess();
 	}
 
 	async _loginRequest(id, pw) {
 		const userData = {
 			username: id,
-			password: pw
-		}
+			password: pw,
+		};
 		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/login`;
 		try {
 			const response = await fetch(url, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(userData)
-			})
-			console.log(response);
-			console.log(response.headers.get('Authorization'));
+				body: JSON.stringify(userData),
+			});
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
+			const bearerAccessToken = response.headers.get('Authorization');
+			const accessToken = bearerAccessToken.replace('Bearer ', '');
+			if (!accessToken) throw new Error('No AccessToken');
+			this.accessToken = accessToken;
 		} catch (error) {
 			throw error;
 		}
 	}
 
-	async _connectGlobalSocket(id, pw) {
+	async _connectGlobalSocket(id) {
 		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`);
 		await new Promise((resolve) => {
-			socket.addEventListener("open", () => {
+			socket.addEventListener('open', () => {
 				resolve();
 			});
 		});
 		const initClientMessage = {
-			event: "initClient",
+			event: 'initClient',
 			content: {
 				cliendId: id,
-				accessToken: this._getAccessTocken()
+				accessToken: this.accessToken,
 			},
 		};
 		socket.send(JSON.stringify(initClientMessage));
@@ -104,11 +108,11 @@ class LoginPageManager {
 				'message',
 				function listener(messageEvent) {
 					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === "initClientResponse" && content.message === "OK") {
+					if (event === 'initClientResponse' && content.message === 'OK') {
 						socket.removeEventListener('message', listener);
 						resolve({
 							nickname: content.clientNickname,
-							avatarUrl: content.clientAvatarUrl
+							avatarUrl: content.clientAvatarUrl,
 						});
 					}
 				}.bind(this)
@@ -116,14 +120,143 @@ class LoginPageManager {
 		});
 		return { socket, userData };
 	}
-	_getAccessTocken() {
-		const cookieString = `; ${document.cookie}`;
-		const parts = cookieString.split(`; accessToken=`);
-		if (parts.length === 2) {
-			return parts.pop().split(';').shift();
-		}
-		return null;
+
+	async _getFriendInfo(socket) {
+		const friendInfo = {};
+		//ToDo: Promise.all로 리팩토링
+		friendInfo.friendList = await this._getFriendList(socket);
+		friendInfo.clientListWhoFriendRequestedMe =
+			await this._getClientListWhoFriendRequestedMe(socket);
+		friendInfo.clientListIFriendRequested =
+			await this._getClientListIFriendRequested(socket);
+		return friendInfo;
 	}
+
+	_getFriendList(socket) {
+		const getFriendListMessage = {
+			event: 'getFriendList',
+			content: {},
+		};
+		socket.send(JSON.stringify(getFriendListMessage));
+		return new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'getFriendListResponse' && content.message === 'OK') {
+					socket.removeEventListener('message', listener);
+					resolve(content.clientInfo);
+				}
+			};
+			socket.addEventListener('message', listener);
+		});
+	}
+
+	_getClientListWhoFriendRequestedMe(socket) {
+		const getClientListWhoFriendRequestedMeMessage = {
+			event: 'getClientListWhoFriendRequestedMe',
+			content: {},
+		};
+		socket.send(JSON.stringify(getClientListWhoFriendRequestedMeMessage));
+		return new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (
+					event === 'getClientListWhoFriendRequestedMeResponse' &&
+					content.message === 'OK'
+				) {
+					socket.removeEventListener('message', listener);
+					resolve(content.clientInfo);
+				}
+			};
+			socket.addEventListener('message', listener);
+		});
+	}
+
+	_getClientListIFriendRequested(socket) {
+		const getClientListIFriendRequestedMessage = {
+			event: 'getClientListIFriendRequested',
+			content: {},
+		};
+		socket.send(JSON.stringify(getClientListIFriendRequestedMessage));
+		return new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (
+					event === 'getClientListIFriendRequestedResponse' &&
+					content.message === 'OK'
+				) {
+					socket.removeEventListener('message', listener);
+					resolve(content.clientInfo);
+				}
+			};
+			socket.addEventListener('message', listener);
+		});
+	}
+
+	_setFriendInfoNotifyListener() {
+		socket.addEventListener('message', (messageEvent) => {
+			const { event, content } = JSON.parse(messageEvent.data);
+
+			if (event === 'notifyFriendRequestReceive') {
+				//누군가 나에게 친구 요청
+				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.push(
+					content.clientInfo
+				);
+			} else if (event === 'notifyFriendRequestCanceled') {
+				//누군가 나에게 친구 요청 취소
+				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe =
+					this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(
+						(client) => client.id !== content.clientInfo.id
+					);
+			} else if (event === 'notifyFriendRequestAccepted') {
+				// 누군가 내 친구 요청을 수락
+				const acceptedClient =
+					this.clientInfo.friendInfo.clientListIFriendRequested.find(
+						(client) => client.id === content.clientInfo.id
+					);
+				if (acceptedClient) {
+					this.clientInfo.friendInfo.clientListIFriendRequested =
+						this.clientInfo.friendInfo.clientListIFriendRequested.filter(
+							(client) => client.id !== content.clientInfo.id
+						);
+
+					this.clientInfo.friendInfo.friendList.push(acceptedClient);
+				}
+			} else if (event === 'notifyFriendRequestRejected') {
+				// 누군가 내 친구 요청을 거절
+				const rejectedClient =
+					this.clientInfo.friendInfo.clientListIFriendRequested.find(
+						(client) => client.id === content.clientInfo.id
+					);
+				if (rejectedClient) {
+					this.clientInfo.friendInfo.clientListIFriendRequested =
+						this.clientInfo.friendInfo.clientListIFriendRequested.filter(
+							(client) => client.id !== content.clientInfo.id
+						);
+				}
+			} else if (event === 'notifyFriendDeleted') {
+				// 누군가 나를 친구 삭제
+				const deletedClient =
+					this.clientInfo.friendInfo.clientListIFriendRequested.find(
+						(client) => client.id === content.clientInfo.id
+					);
+				if (deletedClient) {
+					this.clientInfo.friendInfo.friendList =
+						this.clientInfo.friendInfo.friendList.filter(
+							(client) => client.id !== content.clientInfo.id
+						);
+				}
+			}
+		});
+	}
+
+	// _getAccessTocken() {
+	// 	const cookieString = `; ${document.cookie}`;
+	// 	const parts = cookieString.split(`; accessToken=`);
+	// 	if (parts.length === 2) {
+	// 		return parts.pop().split(';').shift();
+	// 	}
+	// 	return null;
+	// }
 
 	async _connectLobbySocket(id) {
 		const lobbySocket = new WebSocket(
@@ -135,7 +268,7 @@ class LoginPageManager {
 			});
 		});
 		const enterLobbyMessage = {
-			event: "enterLobby",
+			event: 'enterLobby',
 			content: {
 				cliendId: id,
 			},
@@ -146,7 +279,7 @@ class LoginPageManager {
 				'message',
 				function (messageEvent) {
 					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === "enterLobbyResponse" && content.message === "OK") {
+					if (event === 'enterLobbyResponse' && content.message === 'OK') {
 						lobbySocket.removeEventListener('message', listener);
 						resolve();
 					}
