@@ -72,7 +72,7 @@
 
 #searchContainer.visible {
 	width: 93%;
-	height: 16%;
+	height: 18%;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -96,7 +96,7 @@
 
 .clientListContainer {
 	width: 96%;
-	height: 81%;
+	height: 100%;
 	align-self: flex-end;
 	position: relative;
 	display: flex;
@@ -190,7 +190,10 @@
 .clientManagementButton:hover {
 	cursor: pointer;
 }
-/* 
+.clientManagementButton.disabledButton:hover {
+	cursor: default;
+}
+
 #app::after {
 	content: "";
 	position: absolute;
@@ -199,20 +202,17 @@
 	width: 100%;
 	height: 12%;
 	background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
-} */
+}
 
 @media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
 	.tabButton {
 		font-size: 2rem;
 	}
 	#searchContainer.visible {
-		height: 14%;
+		height: 16%;
 	}
 	#clientSearchInput {
 		height: 68%;
-	}
-	.clientListContainer {
-		height: 83%;
 	}
 	.clientItem {
 		margin-bottom: 1.6%;
@@ -248,14 +248,13 @@
 		height: 92%;
 	}
 	#searchContainer.visible {
-		height: 14%;
+		height: 15%;
 	}
 	#clientSearchInput {
 		height: 68%;
 	}
 	.clientListContainer {
 		margin-top: 4%;
-		height: 82%;
 	}
 	.clientListContainer::-webkit-scrollbar {
 		width: 0.7rem;
@@ -282,10 +281,7 @@
 		font-size: 1.6rem;
 	}
 	#searchContainer.visible {
-		height: 13%;
-	}
-	.clientListContainer {
-		height: 83%;
+		height: 14%;
 	}
 	.clientListContainer::-webkit-scrollbar {
 		width: 0.6rem;
@@ -324,7 +320,7 @@
 		font-size: 1.2rem;
 	}
 	#searchContainer.visible {
-		height: 11.5%;
+		height: 12%;
 	}
 	#clientSearchInput {
 		font-size: 1.4rem;
@@ -334,7 +330,6 @@
 	}
 	.clientListContainer {
 		margin-top: 5%;
-		height: 85%;
 	}
 	.clientItem {
 		height: 5rem;
@@ -364,9 +359,6 @@
 	}
 	#clientSearchInput::placeholder {
 		font-size: 1.1rem;
-	}
-	.clientListContainer {
-		height: 88%;
 	}
 	.clientItem {
 		height: 4.5rem;
