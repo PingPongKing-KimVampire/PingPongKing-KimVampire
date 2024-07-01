@@ -5,10 +5,6 @@ class EditProfilePageManager {
 	constructor(app, clientInfo) {
 		this.clientInfo = clientInfo;
 
-		// TODO : 임시 하드 코딩
-		this.clientInfo.avatarUrl = 'images/playerA.png';
-		this.clientInfo.nickname = '김뱀파이어';
-
 		this._setDefaultAvatars();
 		app.innerHTML = this._getHTML();
 		this._initPage();
@@ -49,6 +45,10 @@ class EditProfilePageManager {
 	}
 
 	_checkNickname = async () => {
+		if(this.nicknameInput.value === this.clientInfo.nickname){
+			this.nicknameWarning.textContent = "";
+			return false;
+		}
 		if (!this._validateNickname(this.nicknameInput.value)) {
 			const invalidNicknameMessage =
 				"1에서 20자의 영문, 숫자, 한글만 사용 가능합니다.";
