@@ -78,7 +78,7 @@
 	justify-content: center;
 	align-items: flex-end;
 }
-#userSearchInput {
+#clientSearchInput {
 	height: 65%;
 	width: 100%;
 	box-sizing: border-box;
@@ -89,12 +89,12 @@
 	color: white;
 	font-size: 1.7rem;
 }
-#userSearchInput::placeholder {
+#clientSearchInput::placeholder {
 	color: rgb(129, 119, 151);
 	font-size: 1.4rem;
 }
 
-.userListContainer {
+.clientListContainer {
 	width: 96%;
 	height: 81%;
 	align-self: flex-end;
@@ -109,25 +109,25 @@
 	padding-right: 1%;
 	overflow-y: scroll;
 }
-.userListContainer::-webkit-scrollbar {
+.clientListContainer::-webkit-scrollbar {
 	width: 1rem;
 }
-.userListContainer.scrollbar-scrolltrack::-webkit-scrollbar-track {
+.clientListContainer.scrollbar-scrolltrack::-webkit-scrollbar-track {
 	background-color: rgb(213, 112, 255);
 	border-radius: 1rem;
 }
-.userListContainer.transparent-scrolltrack::-webkit-scrollbar-track {
+.clientListContainer.transparent-scrolltrack::-webkit-scrollbar-track {
 	background-color: transparent;
 }
-.userListContainer::-webkit-scrollbar-thumb {
+.clientListContainer::-webkit-scrollbar-thumb {
 	background-color: rgb(213, 112, 255);
 	border-radius: 1rem;
 }
-.userListContainer::-webkit-scrollbar-button {
+.clientListContainer::-webkit-scrollbar-button {
 	display: none;
 }
 
-.userItem {
+.clientItem {
 	height: 6rem;
 	width: 100%;
 	display: flex;
@@ -178,7 +178,7 @@
 	align-items: center;
 }
 
-.userManagementButton {
+.clientManagementButton {
 	height: 100%;
 	width: 47%;
 	display: flex;
@@ -187,7 +187,7 @@
 	align-items: center;
 	font-size: 1.3rem;
 }
-.userManagementButton:hover {
+.clientManagementButton:hover {
 	cursor: pointer;
 }
 /* 
@@ -208,13 +208,13 @@
 	#searchContainer.visible {
 		height: 14%;
 	}
-	#userSearchInput {
+	#clientSearchInput {
 		height: 68%;
 	}
-	.userListContainer {
+	.clientListContainer {
 		height: 83%;
 	}
-	.userItem {
+	.clientItem {
 		margin-bottom: 1.6%;
 		padding: 1.5% 3%;
 	}
@@ -226,10 +226,10 @@
 	#container {
 		width: 80%;
 	}
-	.userListContainer::-webkit-scrollbar {
+	.clientListContainer::-webkit-scrollbar {
 		width: 0.8rem;
 	}
-	.userItem {
+	.clientItem {
 		margin-bottom: 1.8%;
 	}
 }
@@ -250,17 +250,17 @@
 	#searchContainer.visible {
 		height: 14%;
 	}
-	#userSearchInput {
+	#clientSearchInput {
 		height: 68%;
 	}
-	.userListContainer {
+	.clientListContainer {
 		margin-top: 4%;
 		height: 82%;
 	}
-	.userListContainer::-webkit-scrollbar {
+	.clientListContainer::-webkit-scrollbar {
 		width: 0.7rem;
 	}
-	.userItem {
+	.clientItem {
 		margin-bottom: 1.6%;
 		padding: 1.5% 3%;
 	}
@@ -272,7 +272,7 @@
 		height: 65%;
 		width: 40%;
 	}
-	.userManagementButton {
+	.clientManagementButton {
 		font-size: 1.15rem;
 	}
 }
@@ -284,13 +284,13 @@
 	#searchContainer.visible {
 		height: 13%;
 	}
-	.userListContainer {
+	.clientListContainer {
 		height: 83%;
 	}
-	.userListContainer::-webkit-scrollbar {
+	.clientListContainer::-webkit-scrollbar {
 		width: 0.6rem;
 	}
-	.userItem {
+	.clientItem {
 		height: 5.5rem;
 		margin-bottom: 1.9%;
 	}
@@ -299,13 +299,13 @@
 	.tabButton {
 		font-size: 1.4rem;
 	}
-	.userItem {
+	.clientItem {
 		padding: 2% 3%;
 	}
 	.nickname {
 		font-size: 1.4rem;
 	}
-	.userManagementButton {
+	.clientManagementButton {
 		font-size: 1rem;
 	}
 }
@@ -326,23 +326,23 @@
 	#searchContainer.visible {
 		height: 11.5%;
 	}
-	#userSearchInput {
+	#clientSearchInput {
 		font-size: 1.4rem;
 	}
-	#userSearchInput::placeholder {
+	#clientSearchInput::placeholder {
 		font-size: 1.2rem;
 	}
-	.userListContainer {
+	.clientListContainer {
 		margin-top: 5%;
 		height: 85%;
 	}
-	.userItem {
+	.clientItem {
 		height: 5rem;
 	}
 	.nickname {
 		font-size: 1.2rem;
 	}
-	.userManagementButton {
+	.clientManagementButton {
 		font-size: 1rem;
 	}
 }
@@ -359,16 +359,16 @@
 	#searchContainer.visible {
 		height: 10%;
 	}
-	#userSearchInput {
+	#clientSearchInput {
 		font-size: 1.2rem;
 	}
-	#userSearchInput::placeholder {
+	#clientSearchInput::placeholder {
 		font-size: 1.1rem;
 	}
-	.userListContainer {
+	.clientListContainer {
 		height: 88%;
 	}
-	.userItem {
+	.clientItem {
 		height: 4.5rem;
 		margin-bottom: 2.4%;
 		padding: 2.5% 3%;
@@ -376,7 +376,7 @@
 	.nickname {
 		font-size: 1.1rem;
 	}
-	.userManagementButton {
+	.clientManagementButton {
 		font-size: 0.8rem;
 	}
 }
