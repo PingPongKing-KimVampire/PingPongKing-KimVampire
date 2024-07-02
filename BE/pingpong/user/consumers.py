@@ -132,6 +132,14 @@ class GlobalConsumer(AsyncWebsocketConsumer):
 
     async def updateClientInfo(self, waiting_room_info):
         from .repositories import UserRepository
+        if 'nickname' not in waiting_room_info and 'avatarImage' not in waiting_room_info:
+            await self._send("updateClientInfoResponse", {"message": "invalidAvatarImage"})
+            return
+        if 'avatarImage' not in waiting_room_info and waiting_room_info['nickname'] is not None:
+            user = await UserRepository.get_user_by_id(self.client_id)
+            await UserRepository.update_user_nickname(user, waiting_room_info['nickname'])
+            await self._send("updateClientInfoResponse", {"message": "OK"})
+            return
         avatar_image = waiting_room_info['avatarImage']
         if 'imageUrl' not in avatar_image and avatar_image['imageData'] is not None:
             target_image_uri =  await self.upload_image(avatar_image['imageData'])
@@ -140,10 +148,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
                 return 
         elif avatar_image['imageUrl'] is not None and 'imageData' not in avatar_image:
             target_image_uri = avatar_image['imageUrl']
-        elif 'imageUrl' not in avatar_image and 'imageData' not in avatar_image and avatar_image['nickname'] is not None:
-            UserRepository.update_user_nickname(avatar_image['nickname'])
-            await self._send("updateClientInfoResponse", {"message": "OK"})
-            return
         else:
             await self._send("updateClientInfoResponse", {"message": "invalidAvatarImage"})
             return
