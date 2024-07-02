@@ -6,6 +6,7 @@ import WaitingRoomPageManager from './WaitingRoomPage/WaitingRoomPageManager.js'
 import SignupPageManager from './SignupPage/SignupPageManager.js';
 import EditProfilePageManager from './EdifProfilePage/EditProfilePageManager.js';
 import FriendManagementPageManager from './FriendManagementPage/FriendManagementPageManager.js';
+import ChattingPageManager from './ChattingPage/chattingPageManager.js';
 
 export const SERVER_ADDRESS = '127.0.0.1';
 export const SERVER_PORT = '3001';
@@ -128,7 +129,13 @@ class PageRouter {
 				this.app,
 				this.clientInfo
 			);
-		}
+		}  else if (url === 'chatting') {
+			this._loadCSS(['css/ChattingPage/chattingPage.css']);
+			const chattingPageManager = new ChattingPageManager(
+				this.app,
+				this.clientInfo
+			);
+		} 
 	}
 
 	_onLoginSuccess() {

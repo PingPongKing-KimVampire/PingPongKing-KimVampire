@@ -1,0 +1,50 @@
+.chatButton {
+    width: 5vw;
+    height: 5vw;
+	position: absolute;
+    bottom: 1.5vw;
+	left: 1.5vw;
+    background: url("../../images/chattingIcon.png") center/cover;
+}
+
+.chatButton:hover {
+	cursor: pointer;
+}
+
+/* @media (orientation: portrait) {
+	.chatButton {
+		bottom: 2%;
+		left: 3%;
+        width: 4vh;
+        height: 4vh;
+	}
+} */
+
+
+.chatContainer{
+    /* border: 0.14rem solid white; */
+    position: absolute;
+    width: 36vw;
+    height: 26vw;
+    bottom: 7vw;
+    left: 6vw;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.FriendListContainer{
+    border: 0.14rem solid white;
+    height: 100%;
+    width: 47.5%;
+    border-radius: 2rem;
+}
+
+.messageContainer{
+    border: 0.14rem solid white;
+    height: 100%;
+    width: 47.5%;
+    border-radius: 2rem;
+}
+
+/* FriendListContainer */
