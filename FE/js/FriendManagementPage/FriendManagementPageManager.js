@@ -371,18 +371,17 @@ class FriendManagementPageManager {
 		// 		}
 		// 	});
 		// });
-		// // 친구인 클라이언트 차단 -> 내 친구 목록에서 제거
-		// this.clientInfo.friendInfo.friendList.reduce((acc, friend) => {
-		// 	if (friend.id !== clientData.id)
-		// 		acc.push(friend);
-		// 	return acc;
-		// }, []);
-		// // 내가 친구 요청한 클라이언트 차단 -> 내가 친구 요청한 클라이언트 목록에서 제거
-		// this.clientInfo.friendInfo.clientListIFriendRequested.reduce((acc, client) => {
-		// 	if (client.id !== clientData.id)
-		// 		acc.push(client);
-		// 	return acc;
-		// })
+		this.clientInfo.friendInfo.friendList = // 친구인 클라이언트 차단
+			this.clientInfo.friendInfo.friendList.reduce((acc, friend) => {
+				if (friend.id !== clientData.id) acc.push(friend);
+				return acc;
+			}, []);
+		this.clientInfo.friendInfo.clientListIFriendRequested = // 내가 친구 요청한 클라이언트 차단
+			this.clientInfo.friendInfo.clientListIFriendRequested.reduce((acc, client) => {
+				if (client.id !== clientData.id) acc.push(client);
+				return acc;
+			}, []);
+		console.log(this.clientInfo.friendInfo);
 		this.clientInfo.friendInfo.clientListIBlocked.push(clientData);
 		this._renderTabByCurrentMode();
 	}
