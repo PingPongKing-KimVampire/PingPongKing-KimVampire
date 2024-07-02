@@ -25,3 +25,14 @@ async def notify_group(channel_layer, group, event, content):
             'content': content
         }
     )
+
+async def notify_client_event(channel_layer, channel_name, event, content):
+    Printer.log(f"type: {event}", "white")
+    Printer.log(f"content: {content}\n", "white")
+    await channel_layer.send(
+        channel_name,
+        {
+            'type': event,
+            'content': content
+        }
+    )

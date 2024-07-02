@@ -101,8 +101,8 @@ class FriendRepository:
     @staticmethod
     @sync_to_async
     def delete_friend(user, friend):
-        user_to_friend = Friendship.objects.select_related('friend', 'user').first(user=user, friend=friend)
-        friend_to_user = Friendship.objects.select_related('friend', 'user').first(user=friend, friend=user)
+        user_to_friend = Friendship.objects.select_related('friend', 'user').filter(user=user, friend=friend).first()
+        friend_to_user = Friendship.objects.select_related('friend', 'user').filter(user=friend, friend=user).first()
         if friend_to_user is None or user_to_friend is None:
             return False
         user_to_friend.delete()
