@@ -22,6 +22,7 @@ class FriendManagementPageManager {
 					{ id: 10, nickname: '다른사람', avatarUrl: 'images/playerA.png' },
 					{ id: 11, nickname: '이웃사람', avatarUrl: 'images/playerB.png' },
 					{ id: 12, nickname: '친구사람', avatarUrl: 'images/playerA.png' },
+					{ id: 31, nickname: '차단한 사람1', avatarUrl: 'images/playerA.png' },
 				],
 				clientListIFriendRequested: [
 					{ id: 13, nickname: '마지막사람', avatarUrl: 'images/playerA.png' },
@@ -110,12 +111,13 @@ class FriendManagementPageManager {
 			this._renderSearchedClientList();
 		});
 	}
-	_renderSearchedClientList = async () => { // 유저 검색 탭에서 clientListContainer 내부만 리렌더링
+	_renderSearchedClientList = async () => {
+		// 유저 검색 탭에서 clientListContainer 내부만 리렌더링
 		const getSearchedClientList = async () => {
 			const searchClientMessage = {
-				event: "searchClient",
-				content: { keyword: this.searchKeyword }
-			}
+				event: 'searchClient',
+				content: { keyword: this.searchKeyword },
+			};
 			// this.clientInfo.socket.send(JSON.stringify(searchClientMessage));
 			// const searchedClientList = await new Promise((resolve) => {
 			// 	this.clientInfo.socket.addEventListener('message', (messageEvent) => {
@@ -128,15 +130,21 @@ class FriendManagementPageManager {
 			// return searchedClientList;
 			return this.clientList;
 		};
-		let searchedClientList = this.searchKeyword ? await getSearchedClientList() : [];
-		searchedClientList = searchedClientList.filter((searchedClient) => { // 차단된 클라리언트 제거
-			return this.clientInfo.friendInfo.clientListIBlocked.every((blockedClient) => blockedClient.id !== searchedClient.id);
+		let searchedClientList = this.searchKeyword
+			? await getSearchedClientList()
+			: [];
+		searchedClientList = searchedClientList.filter((searchedClient) => {
+			// 차단된 클라리언트 제거
+			return this.clientInfo.friendInfo.clientListIBlocked.every(
+				(blockedClient) => blockedClient.id !== searchedClient.id
+			);
 		});
 		const clientListContainer = document.querySelector('.clientListContainer');
-		clientListContainer.innerHTML = this._getSearchedClientListHTML(searchedClientList);
+		clientListContainer.innerHTML =
+			this._getSearchedClientListHTML(searchedClientList);
 		this._setClientManagementButtons();
 		this._autoSetScrollTrackColor();
-	}
+	};
 
 	// 친구 요청 목록 탭 렌더링
 	_renderFriendRequestListTab() {
@@ -554,12 +562,15 @@ class FriendManagementPageManager {
 			`;
 		};
 		const clientRequestListHTML =
-			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.reduce(
-				(acc, current) => {
+			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe
+				.filter((client) => {
+					return this.clientInfo.friendInfo.clientListIBlocked.every(
+						(blockClient) => blockClient.id !== client.id
+					);
+				})
+				.reduce((acc, current) => {
 					return acc + getfriendRequestItemHtml(current);
-				},
-				''
-			);
+				}, '');
 		return `
 			<div class="clientListContainer">
 				${clientRequestListHTML}
