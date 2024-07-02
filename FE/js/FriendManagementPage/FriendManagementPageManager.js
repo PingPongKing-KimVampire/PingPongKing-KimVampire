@@ -32,17 +32,23 @@ class FriendManagementPageManager {
 					{ id: 18, nickname: '알고있는사람', avatarUrl: 'images/playerA.png' },
 				],
 				clientListIBlocked: [
-
+					{ id: 31, nickname: '차단한 사람1', avatarUrl: 'images/playerA.png' },
+					{ id: 32, nickname: '차단한 사람2', avatarUrl: 'images/playerA.png' },
+					{ id: 33, nickname: '차단한 사람3', avatarUrl: 'images/playerA.png' },
+					{ id: 34, nickname: '차단한 사람4', avatarUrl: 'images/playerA.png' },
+					{ id: 35, nickname: '차단한 사람5', avatarUrl: 'images/playerA.png' },
 				],
 			},
 		};
 
-		this.clientList = [ // TODO : 임시 하드코딩
+		this.clientList = [
+			// TODO : 임시 하드코딩
 			...this.clientInfo.friendInfo.friendList,
 			...this.clientInfo.friendInfo.clientListWhoFriendRequestedMe,
 			...this.clientInfo.friendInfo.clientListIFriendRequested,
-			{ id: 19, nickname: "기타1", avatarUrl: "images/humanIcon.png" }
-		]
+			...this.clientInfo.friendInfo.clientListIBlocked,
+			{ id: 19, nickname: '기타1', avatarUrl: 'images/humanIcon.png' },
+		];
 
 		app.innerHTML = this._getHTML();
 		// this.clientInfo = clientInfo;
@@ -76,7 +82,7 @@ class FriendManagementPageManager {
 				} else if (event.target.id === 'myFriendButton') {
 					this._renderFriendListTab();
 				} else if (event.target.id === 'blockClientButton') {
-					// TODO
+					this._renderBlockListManagementTab();
 				}
 				this.prevTabButton = event.target;
 			});
@@ -84,9 +90,12 @@ class FriendManagementPageManager {
 	}
 
 	// 클라이언트 검색 탭 렌더링
-	_renderSearchClientTab() { // 초기 유저 검색 탭 전체를 렌더링
+	_renderSearchClientTab() {
+		// 초기 유저 검색 탭 전체를 렌더링
 		this.selectedTab = 'searchClientTab';
-		const innerContentContainer = document.querySelector('#innerContentContainer');
+		const innerContentContainer = document.querySelector(
+			'#innerContentContainer'
+		);
 		innerContentContainer.innerHTML = `
 			${this._getSearchContainerHTML()}
 			<div class="clientListContainer"></div>
@@ -149,6 +158,17 @@ class FriendManagementPageManager {
 		this._setClientManagementButtons();
 	}
 
+	//차단 목록 관리 탭
+	_renderBlockListManagementTab() {
+		this.selectedTab = 'blockListManagementTab';
+		const innerContentContainer = document.querySelector(
+			'#innerContentContainer'
+		);
+		innerContentContainer.innerHTML =
+			this._getBlockListManagementContainerHTML();
+		this._setClientManagementButtons();
+	}
+
 	_listenNotifyEvent() {
 		const listener = (messageEvent) => {
 			const { event, content } = JSON.parse(messageEvent.data);
@@ -185,16 +205,17 @@ class FriendManagementPageManager {
 	_renderTabByCurrentMode() {
 		if (this.selectedTab === 'searchClientTab') {
 			this._renderSearchedClientList();
-		}
-		else if (this.selectedTab === 'friendRequestListTab') {
+		} else if (this.selectedTab === 'friendRequestListTab') {
 			this._renderFriendRequestListTab();
-		}
-		else if (this.selectedTab === 'friendListTab') {
+		} else if (this.selectedTab === 'friendListTab') {
 			this._renderFriendListTab();
+		} else if (this.selectedTab === 'blockListManagementTab') {
+			this._renderBlockListManagementTab();
 		}
 	}
 
-	_setClientManagementButtons() { // 클라이언트 아이템의 세부 버튼에 이벤트 리스너 장착
+	_setClientManagementButtons() {
+		// 클라이언트 아이템의 세부 버튼에 이벤트 리스너 장착
 		const clientListContainer = document.querySelector('.clientListContainer');
 
 		clientListContainer
@@ -205,9 +226,10 @@ class FriendManagementPageManager {
 					const clientData = {
 						id: parseInt(clientItem.dataset.id),
 						nickname: clientItem.querySelector('.nickname').textContent,
-						avatarUrl: clientItem.querySelector('.avatarImg').src // TODO : data-src?
+						avatarUrl: clientItem.querySelector('.avatarImg').src, // TODO : data-src?
 					};
-					if (event.target.classList.contains('requestButton')) { // 친구 요청 버튼
+					if (event.target.classList.contains('requestButton')) {
+						// 친구 요청 버튼
 						this._friendRequest(clientData);
 					} else if (event.target.classList.contains('acceptButton')) {
 						this._acceptFriendRequest(clientData.id);
@@ -219,6 +241,8 @@ class FriendManagementPageManager {
 						this._deleteFriend(clientData.id);
 					} else if (event.target.classList.contains('blockButton')) {
 						this._blockClient(clientData);
+					} else if (event.target.classList.contains('unblockButton')) {
+						this._unblockClient(clientData.id);
 					}
 				});
 			});
@@ -226,8 +250,8 @@ class FriendManagementPageManager {
 
 	async _friendRequest(clientData) {
 		const friendRequestMessage = {
-			event: "sendFriendRequest",
-			content: { clientInfo: { id: clientData.id } }
+			event: 'sendFriendRequest',
+			content: { clientInfo: { id: clientData.id } },
 		};
 		// this.clientInfo.socket.send(JSON.stringify(friendRequestMessage));
 		// await new Promise((resolve) => {
@@ -308,8 +332,8 @@ class FriendManagementPageManager {
 
 	async _cancelFriendRequest(id) {
 		const cancelRequestMessage = {
-			event: "cancelFriendRequest",
-			content: { clientInfo: { id } }
+			event: 'cancelFriendRequest',
+			content: { clientInfo: { id } },
 		};
 		// this.clientInfo.socket.send(JSON.stringify(cancelRequestMessage));
 		// await new Promise((resolve) => {
@@ -359,8 +383,8 @@ class FriendManagementPageManager {
 
 	async _blockClient(clientData) {
 		const blockClientMessage = {
-			event: "blockClient",
-			content: { clientInfo: { id: clientData.id } }
+			event: 'blockClient',
+			content: { clientInfo: { id: clientData.id } },
 		};
 		// this.clientInfo.socket.send(JSON.stringify(blockClientMessage));
 		// await new Promise((resolve) => {
@@ -386,6 +410,33 @@ class FriendManagementPageManager {
 		this._renderTabByCurrentMode();
 	}
 
+	async _unblockClient(id) {
+		// const unblockClientMessage = {
+		// 	event: 'unblockClient',
+		// 	content: { clientInfo: { id } },
+		// };
+		// this.clientInfo.socket.send(JSON.stringify(unblockClientMessage));
+		// await new Promise((resolve) => {
+		// 	const listener = (messageEvent) => {
+		// 		const { event, content } = JSON.parse(messageEvent.data);
+		// 		if (event === 'unblockClientResponse' && content.message === 'OK') {
+		// 			socket.removeEventListener('message', listener);
+		// 			resolve();
+		// 		}
+		// 	};
+		// });
+		const unblockClient = this.clientInfo.friendInfo.clientListIBlocked.find(
+			(client) => client.id === id
+		);
+		if (unblockClient) {
+			this.clientInfo.friendInfo.clientListIBlocked =
+				this.clientInfo.friendInfo.clientListIBlocked.filter(
+					(client) => client.id !== unblockClient.id
+				);
+			this._renderTabByCurrentMode();
+		}
+	}
+
 	_subscribeWindow() {
 		this._autoSetScrollTrackColorRef = this._autoSetScrollTrackColor.bind(this);
 		windowObservable.subscribeResize(this._autoSetScrollTrackColor);
@@ -397,10 +448,7 @@ class FriendManagementPageManager {
 
 	_autoSetScrollTrackColor() {
 		const clientListContainer = document.querySelector('.clientListContainer');
-		if (
-			clientListContainer.scrollHeight >
-			clientListContainer.clientHeight
-		) {
+		if (clientListContainer.scrollHeight > clientListContainer.clientHeight) {
 			clientListContainer.classList.add('transparent-scrolltrack');
 			clientListContainer.classList.remove('scrollbar-scrolltrack');
 		} else {
@@ -439,9 +487,11 @@ class FriendManagementPageManager {
 		`;
 	}
 	_getSearchedClientListHTML(clientList) {
-		const { friendList,
-				clientListWhoFriendRequestedMe,
-				clientListIFriendRequested } = this.clientInfo.friendInfo;
+		const {
+			friendList,
+			clientListWhoFriendRequestedMe,
+			clientListIFriendRequested,
+		} = this.clientInfo.friendInfo;
 
 		const getClientItemHTML = (client) => {
 			let buttonKoTitle = '친구 요청';
@@ -451,11 +501,15 @@ class FriendManagementPageManager {
 				// 이미 친구인 유저 -> 반응 X
 				buttonState = 'disabledButton';
 				buttonEnTitle = '';
-			} else if (clientListWhoFriendRequestedMe.some((friend) => friend.id === client.id)) {
+			} else if (
+				clientListWhoFriendRequestedMe.some((friend) => friend.id === client.id)
+			) {
 				// 내게 친구 요청을 보낸 유저 -> 친구 요청 수락
 				buttonKoTitle = '친구 수락';
 				buttonEnTitle = 'acceptButton';
-			} else if (clientListIFriendRequested.some((friend) => friend.id === client.id)) {
+			} else if (
+				clientListIFriendRequested.some((friend) => friend.id === client.id)
+			) {
 				// 내가 친구 요청을 보낸 유저 -> 친구 요청 취소
 				buttonKoTitle = '요청 취소';
 				buttonEnTitle = 'cancelRequestButton';
@@ -467,12 +521,14 @@ class FriendManagementPageManager {
 					</div>
 					<div class="nickname">${client.nickname}</div>
 					<div class="buttonGroup">
-						<div class="clientManagementButton ${buttonEnTitle} ${buttonState}" ${buttonState === "disabledButton" ? "disabled" : ""}>${buttonKoTitle}</div>
+						<div class="clientManagementButton ${buttonEnTitle} ${buttonState}" ${
+				buttonState === 'disabledButton' ? 'disabled' : ''
+			}>${buttonKoTitle}</div>
 						<div class="clientManagementButton blockButton activatedButton">차단</div>
 					</div>
 				</div>
 			`;
-		}
+		};
 		let clientListHTML = '';
 		if (clientList !== null) {
 			clientListHTML = clientList.reduce((acc, current) => {
@@ -527,6 +583,34 @@ class FriendManagementPageManager {
 			`;
 		};
 		const clientListHTML = this.clientInfo.friendInfo.friendList.reduce(
+			(acc, current) => {
+				return acc + getfriendItemHtml(current);
+			},
+			''
+		);
+		return `
+			<div class="clientListContainer">
+				${clientListHTML}
+			</div>
+		`;
+	}
+
+	_getBlockListManagementContainerHTML() {
+		const getfriendItemHtml = (requestClient) => {
+			return `
+			<div class="clientItem" data-id="${requestClient.id}">
+				<div class="avatarImgFrame">
+					<img class="avatarImg" src="${requestClient.avatarUrl}">
+				</div>
+				<div class="nickname">${requestClient.nickname}</div>
+				<div class="buttonGroup">
+					<div></div>
+					<div class="clientManagementButton unblockButton activatedButton">차단 해제</div>
+				</div>
+			</div>
+			`;
+		};
+		const clientListHTML = this.clientInfo.friendInfo.clientListIBlocked.reduce(
 			(acc, current) => {
 				return acc + getfriendItemHtml(current);
 			},
