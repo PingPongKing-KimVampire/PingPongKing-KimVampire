@@ -54,12 +54,11 @@ class LoginPageManager {
 			this.clientInfo.avatarUrl = userData.avatarUrl;
 			this.clientInfo.socket = socket;
 			// this.clientInfo.lobbySocket = lobbySocket;
-			// this.clientInfo.getFriendInfo = await this._getFriendInfo(this.clientInfo.socket);
+			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
 			this.onLoginSuccess();
 		} catch (error) {
 			this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
 		}
-		this.onLoginSuccess();
 	}
 
 	async _loginRequest(id, pw) {
@@ -129,8 +128,9 @@ class LoginPageManager {
 			await this._getClientListWhoFriendRequestedMe(socket);
 		friendInfo.clientListIFriendRequested =
 			await this._getClientListIFriendRequested(socket);
-		friendInfo.clientListIBlocked =
-			await this._getClientListIBlocked(socket);
+		friendInfo.clientListIBlocked = [];
+		// friendInfo.clientListIBlocked
+			// await this._getClientListIBlocked(socket);
 		return friendInfo;
 	}
 
@@ -145,7 +145,7 @@ class LoginPageManager {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === 'getFriendListResponse' && content.message === 'OK') {
 					socket.removeEventListener('message', listener);
-					resolve(content.clientInfo);
+					resolve(content.clientList);
 				}
 			};
 			socket.addEventListener('message', listener);
@@ -166,7 +166,7 @@ class LoginPageManager {
 					content.message === 'OK'
 				) {
 					socket.removeEventListener('message', listener);
-					resolve(content.clientInfo);
+					resolve(content.clientList);
 				}
 			};
 			socket.addEventListener('message', listener);
@@ -187,7 +187,7 @@ class LoginPageManager {
 					content.message === 'OK'
 				) {
 					socket.removeEventListener('message', listener);
-					resolve(content.clientInfo); // TODO : clientList 여야 하지 않을까?
+					resolve(content.clientList); // TODO : clientList 여야 하지 않을까?
 				}
 			};
 			socket.addEventListener('message', listener);

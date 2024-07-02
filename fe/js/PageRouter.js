@@ -132,7 +132,7 @@ class PageRouter {
 	}
 
 	_onLoginSuccess() {
-		this.renderPage('lobby');
+		this.renderPage('friendManagement');
 	}
 
 	_onEnterSignup() {
