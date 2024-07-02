@@ -46,11 +46,13 @@ class FriendRepository:
     @staticmethod
     @sync_to_async
     def get_friend_receive_request_list(user):
-        user_friendships = Friendship.objects.select_related('friend', 'user').all(friend=user)
+        user_friendships = Friendship.objects.select_related('friend', 'user').filter(friend=user).all()
         friend_dtos = []
+        if user_friendships.count() == 0:
+            return friend_dtos
         for friendship in user_friendships:
-            friend_friendship = Friendship.objects.select_related('first', 'user').filter(user=friendship.friend, friend=user).first()
-            if friend_friendship is None:
+            friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=friendship.friend, friend=user).first()
+            if friend_friendship is not None:
                 image_uri = friendship.user.image_uri
                 if image_uri is None:
                     image_uri = DEFAULT_IMAGE_URI
