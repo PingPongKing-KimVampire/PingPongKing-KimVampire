@@ -129,6 +129,8 @@ class LoginPageManager {
 			await this._getClientListWhoFriendRequestedMe(socket);
 		friendInfo.clientListIFriendRequested =
 			await this._getClientListIFriendRequested(socket);
+		friendInfo.clientListIBlocked =
+			await this._getClientListIBlocked(socket);
 		return friendInfo;
 	}
 
@@ -185,7 +187,25 @@ class LoginPageManager {
 					content.message === 'OK'
 				) {
 					socket.removeEventListener('message', listener);
-					resolve(content.clientInfo);
+					resolve(content.clientInfo); // TODO : clientList 여야 하지 않을까?
+				}
+			};
+			socket.addEventListener('message', listener);
+		});
+	}
+
+	_getClientListIBlocked(socket) {
+		const getClientListIBlockedMessage = {
+			event: 'getClientListIBlocked',
+			content: {},
+		}
+		socket.send(JSON.stringify(getClientListIBlockedMessage));
+		return new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'getClientListIBlockedResponse' && content.message === 'OK') {
+					socket.removeEventListener('message', listener);
+					resolve(content.clientList);
 				}
 			};
 			socket.addEventListener('message', listener);

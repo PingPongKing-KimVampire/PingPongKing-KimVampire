@@ -52,6 +52,13 @@ class PageRouter {
 						avatarUrl: null,
 					},
 				],
+				clientListIBlocked: [
+					{
+						id: null,
+						nickname: null,
+						avatarUrl: null,
+					},
+				],
 			},
 		};
 	}
