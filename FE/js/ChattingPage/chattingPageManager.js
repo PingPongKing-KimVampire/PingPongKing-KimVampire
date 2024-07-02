@@ -24,7 +24,6 @@ class ChattingPageManager{
                 recentMessage: { message: "하이하이", timeStamp: "2024-07-03T10:30:00Z" } 
             },
         ];
-
         app.innerHTML = this._getHTML();
         this._initPage();
     }
