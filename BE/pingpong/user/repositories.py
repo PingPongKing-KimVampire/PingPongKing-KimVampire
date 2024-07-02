@@ -10,7 +10,21 @@ class MessageRepository:
     @staticmethod
     @sync_to_async
     def save_message(sender, receiver, message):
-        Message.objects.create(sender=sender, receiver=receiver, message=message)
+        message_object = Message.objects.create(sender=sender, receiver=receiver, message=message)
+        return message_object
+    
+    @staticmethod
+    @sync_to_async
+    def get_total_chat_data(sender, receiver):
+        messages = Message.objects.filter(sender=sender, receiver=receiver).all()
+        message_dtos = []
+        for message in messages:
+            message_dto = {
+                "clientId": message.sender.id,
+                "message": message.message
+            }
+            message_dtos.append(message_dto)
+        return message_dtos
 
 class BlockedUserRepository:
     @staticmethod
@@ -221,8 +235,10 @@ class UserRepository:
         user.save()
         return user
     
+    @staticmethod
+    @sync_to_async
     def search_user_by_nickname(nickname):
-        users = User.objects.filter(nickname__contains=nickname).all()
+        users = User.objects.filter(nickname__startswith=nickname).all()
         user_dtos = []
         for user in users:
             user_dto = {

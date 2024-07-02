@@ -46,6 +46,15 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         if self.is_init:
             self.is_init = False
+        if hasattr(self, 'client_id') and self.client_id in channel_name_map:
+            content = {
+                "clientId": self.client_id,
+                "activeState": "false"
+            }
+            channel_name_map.pop(self.client_id)
+            discard_group(self, 'lobby')
+            await self.notify_all_group_activation("notify_friend_active_state_change", content)
+            Printer.log("notify inactivated to all friends", "red")
         Printer.log("WebSocket connection closed", "red")
         
     async def _send(self, event, content):
@@ -104,6 +113,9 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             receiver_id = content['clientId']
             message = content['message']
             await self.send_message(receiver_id, message)
+        elif event == 'getTotalChatData':
+            receiver_id = content['clientId']
+            await self.get_total_chat_data(receiver_id)            
 
     async def init_client(self, access_token):
         from .serializers import CustomTokenObtainPairSerializer
@@ -140,7 +152,11 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         }
         await add_group(self, 'lobby')
         channel_name_map[self.client_id] = self.channel_name
-        print("log -----" , channel_name_map)
+        content = {
+                "clientId": self.client_id,
+                "activeState": "false"
+        }
+        await self.notify_all_group_activation("notify_friend_active_state_change", content)
         await self._send('initClientResponse', response)
 
     async def updateClientInfo(self, waiting_room_info):
@@ -385,12 +401,54 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if receiver is None:
             await self._send("sendMessageResponse", {"message": "NotFoundReceiver"})
             return
-        await MessageRepository.send_message(sender, receiver, message)
+        message_object = await MessageRepository.save_message(sender, receiver, message)
         if receiver.id in channel_name_map:
             channel_name = channel_name_map[receiver.id]
             await notify_client_event(self.channel_layer, channel_name, "notify_message_received", 
                                       {"id": sender.id,
                                        "nickname": sender.nickname,
-                                       "message": message}
-                                       )
+                                       "message": message,
+                                       "timestamp": message_object.timestamp})
         await self._send("sendMessageResponse", {"message": "OK"})
+
+    async def notify_message_received(self, event):
+        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
+        Printer.log(f"event : {event}", "cyan")
+        content = event['content']
+        await self.send(text_data=json.dumps({
+            'event': 'notifyMessageArrive',
+            'content': content
+        }))
+    
+    async def getTotalChatData(self, receiver_id):
+        from .repositories import UserRepository
+        from .repositories import MessageRepository
+        sender = await UserRepository.get_user_by_id(self.client_id)
+        receiver = await UserRepository.get_user_by_id(receiver_id)
+        if receiver is None:
+            await self._send("getTotalChatDataResponse", {"message": "NotFoundReceiver"})
+            return
+        messages = await MessageRepository.get_total_chat_data(sender, receiver)
+        response = {
+            "message": "OK",
+            "messageList": messages
+        }
+        await self._send("getTotalChatDataResponse", response)
+
+    async def notify_all_group_activation(self, event, content):
+        from .repositories import FriendRepository
+        friends = await FriendRepository.get_friends(self.client_id)
+        for friend in friends:
+            if friend['id'] not in channel_name_map:
+                continue
+            channel_name = channel_name_map[friend['id']]
+            await notify_client_event(self.channel_layer, channel_name, event, content)
+    
+    async def notify_friend_active_state_change(self, event):
+        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
+        Printer.log(f"event : {event}", "cyan")
+        content = event['content']
+        await self.send(text_data=json.dumps({
+            'event': 'notifyFriendActiveStateChange',
+            'content': content
+        }))
