@@ -129,13 +129,16 @@ class PageRouter {
 				this.app,
 				this.clientInfo
 			);
-		}  else if (url === 'chatting') {
-			this._loadCSS(['css/ChattingPage/chattingPage.css', 'css/ChattingPage/friendList.css']);
+		} else if (url === 'chatting') {
+			this._loadCSS([
+				'css/ChattingPage/chattingPage.css',
+				'css/ChattingPage/friendList.css',
+			]);
 			const chattingPageManager = new ChattingPageManager(
 				this.app,
 				this.clientInfo
 			);
-		} 
+		}
 	}
 
 	_onLoginSuccess() {
