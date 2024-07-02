@@ -1,8 +1,34 @@
 from lobby.models import User
 from lobby.models import Friendship
+from lobby.models import BlockedRelationship
+from lobby.models import Message
 from django.db import transaction
 from asgiref.sync import sync_to_async
 DEFAULT_IMAGE_URI = "images/playerA.png"
+
+class MessageRepository:
+    @staticmethod
+    @sync_to_async
+    def save_message(sender, receiver, message):
+        Message.objects.create(sender=sender, receiver=receiver, message=message)
+
+class BlockedUserRepository:
+    @staticmethod
+    @sync_to_async
+    def block_user(blocker, blocked_user):
+        blockedRelationship = BlockedRelationship.objects.filter(blocker=blocker, blocked_user=blocked_user).first()
+        if blocked_user is not None:
+            return False
+        blockedRelationship.objects.create(blocker=blocker, blocked_user=blocked_user)
+        return True
+    
+    def unblock_user(blocker, blocked_user):
+        blockedRelationship = BlockedRelationship.objects.filter(blocker=blocker, blocked_user=blocked_user).first()
+        if blockedRelationship is None:
+            return False
+        blockedRelationship.delete()
+        return True
+
 class FriendRepository:
     @staticmethod
     @sync_to_async
@@ -110,6 +136,17 @@ class FriendRepository:
         user_to_friend.delete()
         friend_to_user.delete()
         return True
+    
+    @staticmethod
+    @sync_to_async
+    def check_friend_relation(user, friend):
+        user_to_friend = Friendship.objects.select_related('friend', 'user').filter(user=user, friend=friend).first()
+        friend_to_user = Friendship.objects.select_related('friend', 'user').filter(user=friend, friend=user).first()
+        if user_to_friend is not None and friend_to_user is not None:
+            user_to_friend.delete()
+            friend_to_user.delete()
+        elif user_to_friend is not None:
+            user_to_friend.delete()
 
 class UserRepository:
     def authenticate(username, password):
@@ -183,4 +220,16 @@ class UserRepository:
         user.nickname = new_nickname
         user.save()
         return user
+    
+    def search_user_by_nickname(nickname):
+        users = User.objects.filter(nickname__contains=nickname).all()
+        user_dtos = []
+        for user in users:
+            user_dto = {
+                "id": user.id,
+                "nickname": user.nickname,
+                "avatarUrl": user.image_uri
+            }
+            user_dtos.append(user_dto)
+        return user_dtos
     

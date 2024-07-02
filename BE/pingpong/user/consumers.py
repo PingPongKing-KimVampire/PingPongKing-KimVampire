@@ -91,6 +91,19 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         elif event == 'deleteFriend':
             friend_id = content['clientInfo']['id']
             await self.delete_friend(friend_id)
+        elif event == 'blockClient':
+            target_user_id = content['clientInfo']['id']
+            await self.block_client(target_user_id)
+        elif event == 'unblockClient':
+            target_user_id = content['clientInfo']['id']
+            await self.unblock_client(target_user_id)
+        elif event == 'searchClient':
+            keyword = content['keyword']
+            await self.search_client(keyword)
+        elif event == 'sendMessage':
+            receiver_id = content['clientId']
+            message = content['message']
+            await self.send_message(receiver_id, message)
 
     async def init_client(self, access_token):
         from .serializers import CustomTokenObtainPairSerializer
@@ -328,3 +341,56 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             'event': 'notifyFriendRequestReceive',
             'content': content
         }))
+    
+    async def block_client(self, target_user_id):
+        from .repositories import UserRepository
+        from .repositories import BlockedUserRepository
+        from .repositories import FriendRepository
+        user = await UserRepository.get_user_by_id(self.client_id)
+        target_user = await UserRepository.get_user_by_id(target_user_id)
+        FriendRepository.check_friend_relation(user, target_user)
+        if target_user is None:
+            await self._send("blockClientResponse", {"message": "NotFoundTargetUser"})
+            return
+        isExsits = await BlockedUserRepository.block_user(user, target_user)
+        if isExsits:
+            await self._send("blockClientResponse", {"message": "AlreadyBlocked"})
+            return
+        await self._send("blockClientResponse", {"message": "OK"})
+    
+    async def unblock_client(self, target_user_id):
+        from .repositories import UserRepository
+        from .repositories import BlockedUserRepository
+        user = await UserRepository.get_user_by_id(self.client_id)
+        target_user = await UserRepository.get_user_by_id(target_user_id)
+        if target_user is None:
+            await self._send("unblockClientResponse", {"message": "NotFoundTargetUser"})
+            return
+        isValid = await BlockedUserRepository.unblock_user(user, target_user)
+        if not isValid:
+            await self._send("unblockClientResponse", {"message": "NotFoundBlockedUser"})
+            return
+        await self._send("unblockClientResponse", {"message": "OK"})
+    
+    async def search_client(self, keyword):
+        from .repositories import UserRepository
+        users = await UserRepository.search_user_by_nickname(keyword)
+        await self._send("searchClientResponse", {"message": "OK", "clientList": users})
+    
+    async def send_message(self, receiver_id, message):
+        from .repositories import UserRepository
+        from .repositories import MessageRepository
+        sender = await UserRepository.get_user_by_id(self.client_id)
+        receiver = await UserRepository.get_user_by_id(receiver_id)
+        if receiver is None:
+            await self._send("sendMessageResponse", {"message": "NotFoundReceiver"})
+            return
+        await MessageRepository.send_message(sender, receiver, message)
+        if receiver.id in channel_name_map:
+            channel_name = channel_name_map[receiver.id]
+            await notify_client_event(self.channel_layer, channel_name, "notify_message_received", 
+                                      {"id": sender.id,
+                                       "nickname": sender.nickname,
+                                       "message": message}
+                                       )
+        await self._send("sendMessageResponse", {"message": "OK"})

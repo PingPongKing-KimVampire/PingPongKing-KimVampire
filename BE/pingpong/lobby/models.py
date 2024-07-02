@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
 
 class User(models.Model):
     id = models.BigAutoField(primary_key=True)  # Big integer as a primary key
@@ -43,10 +44,10 @@ class Friendship(models.Model):
     friend = models.ForeignKey(User, related_name='friend', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-# class BlockedUser(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     blocker = models.ForeignKey(User, related_name='blocking', on_delete=models.CASCADE)
-#     blocked_user = models.ForeignKey(User, related_name='blocked_by', on_delete=models.CASCADE)
+class BlockedRelationship(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    blocker = models.ForeignKey(User, related_name='blocking', on_delete=models.CASCADE)
+    blocked_user = models.ForeignKey(User, related_name='blocked_by', on_delete=models.CASCADE)
 
 # class Team(models.Model):
 #     id = models.BigAutoField(primary_key=True)
@@ -81,9 +82,9 @@ class Friendship(models.Model):
 #             models.Index(fields=['user', '-created_at']),  # 유저별 최근 경기를 빠르게 조회하기 위해 인덱스 추가
 #         ]
 
-# class Message(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
-#     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
-#     content = models.TextField(null=False)
-#     send_date = models.DateTimeField(null=False)
+class Message(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    sender = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='receiver', on_delete=models.CASCADE)
+    content = models.TextField(null=False)
+    send_date = models.DateTimeField(null=False, default = timezone.now)
