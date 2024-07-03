@@ -59,7 +59,6 @@ class WaitingRoomCreationPageManager {
 	}
 
 	_setCompleteButtonSelection() {
-		// complete 버튼 클릭 시 대기실 생성 메시지 전송
 		this.completeButton.addEventListener("click", this._createAndEnterRoom.bind(this));
 	}
 
@@ -142,7 +141,6 @@ class WaitingRoomCreationPageManager {
 			leftPlayerCount = 1;
 			rightPlayerCount = humanCount;
 		}
-
 		this._sendCreateRoomMsg(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
 		const roomId = await this._handleCreateRoomResponse(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
 		await this._enterWaitingRoom(roomId, title, leftMode, rightMode, leftPlayerCount, rightPlayerCount);
@@ -159,9 +157,7 @@ class WaitingRoomCreationPageManager {
 
 		const enterWaitingRoomMessage = {
 			event: "enterWaitingRoom",
-			content: {
-				clientId: this.clientInfo.id,
-			},
+			content: { clientId: this.clientInfo.id }
 		};
 		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 
@@ -174,7 +170,7 @@ class WaitingRoomCreationPageManager {
 						pingpongRoomSocket.removeEventListener("message", listener);
 						resolve(content);
 					}
-				}.bind(this),
+				}.bind(this)
 			);
 		});
 
@@ -271,11 +267,26 @@ class WaitingRoomCreationPageManager {
 
 	_getPlayerCountSelectionHTML() {
 		return `
-			<label class="label" > 인원</label>
-				<div class="selectionBox">
-					<div></div>
-					<div id="vsText">VS</div>
+			<label class="label">인원</label>
+			<div class="selectionBox">
+				<div class="countBox">
+					<div class="teamText">뱀파이어</div>
+					<div id="vampireCountBox">1명</div>
 				</div>
+				<div id="vsText">VS</div>
+				<div class="countBox">
+					<div class="teamText">인간</div>
+					<div id="humanCountBox" value="3"> <!-- data- 쓰자 -->
+						<div>3명</div>
+						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
+						<ul id="humanCountOptionBox" class="visible">
+							<li><button class="humanCountOptionButton" value="2">2명</button></li>
+							<li><button class="humanCountOptionButton" value="4">4명</button></li>
+							<li><button class="humanCountOptionButton" value="5">5명</button></li>
+						</ul>
+					</div>
+				</div>
+			</div>
 		`;
 	}
 
