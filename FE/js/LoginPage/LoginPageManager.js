@@ -57,6 +57,8 @@ class LoginPageManager {
 			this.clientInfo.friendInfo = await this._getFriendInfo(
 				this.clientInfo.socket
 			);
+			this._setFriendInfoNotifyListener(this.clientInfo.socket);
+
 			this.onLoginSuccess();
 		} catch (error) {
 			this.warning.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
@@ -131,9 +133,7 @@ class LoginPageManager {
 			await this._getClientListWhoFriendRequestedMe(socket);
 		friendInfo.clientListIFriendRequested =
 			await this._getClientListIFriendRequested(socket);
-		friendInfo.clientListIBlocked = [];
-		// friendInfo.clientListIBlocked
-		// await this._getClientListIBlocked(socket);
+		friendInfo.clientListIBlocked = await this._getClientListIBlocked(socket);
 		return friendInfo;
 	}
 
@@ -218,7 +218,7 @@ class LoginPageManager {
 		});
 	}
 
-	_setFriendInfoNotifyListener() {
+	_setFriendInfoNotifyListener(socket) {
 		socket.addEventListener('message', (messageEvent) => {
 			const { event, content } = JSON.parse(messageEvent.data);
 

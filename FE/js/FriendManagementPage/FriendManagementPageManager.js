@@ -207,6 +207,7 @@ class FriendManagementPageManager {
 				}
 			}
 		};
+		this.clientInfo.socket.addEventListener('message', listener);
 		//페이지 이동시 remove해야함
 		// this.clientInfo.socket.addEventListener('message', listener);
 	}
@@ -313,7 +314,6 @@ class FriendManagementPageManager {
 			content: { clientInfo: { id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(rejectFriendRequestMessage));
-		this.clientInfo.socket.send(JSON.stringify(acceptFriendRequestMessage));
 		await new Promise((resolve) => {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
