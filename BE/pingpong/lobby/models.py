@@ -51,8 +51,8 @@ class Friendship(models.Model):
 
 class BlockedRelationship(models.Model):
     id = models.BigAutoField(primary_key=True)
-    blocker = models.ForeignKey(User, related_name='blocking', on_delete=models.CASCADE)
-    blocked_user = models.ForeignKey(User, related_name='blocked_by', on_delete=models.CASCADE)
+    blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE)
+    blocked_user = models.ForeignKey(User, related_name='blocked_user', on_delete=models.CASCADE)
 
 # class Team(models.Model):
 #     id = models.BigAutoField(primary_key=True)

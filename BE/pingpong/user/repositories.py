@@ -26,6 +26,38 @@ class MessageRepository:
             }
             message_dtos.append(message_dto)
         return message_dtos
+    
+    @staticmethod
+    @sync_to_async
+    def get_recent_message_of_friends(user):
+        friends = FriendRepository.get_friends_entity(user)
+        total_friend_info = [] # 나중에 다시하기
+        # for friend in friends:
+        #     send_message = Message.objects.select_related('sender', 'receiver').filter(sender=user, receiver=friend).order_by('-send_date').frist()
+        #     receive_message = Message.objects.select_related('sender', 'receiver').filter(sender=friend, receiver=user).order_by('-send_date').first()
+        #     if send_message is None and receive_message is None:
+        #         message = None
+        #     elif send_message is not None:
+        #         messsage = receive_message
+        #     elif receive_message is None:
+        #         message = send_message
+        #     else:
+        #         if send_message.send_date > receive_message.send_date:
+        #             message = send_message
+        #         else:
+        #             message = receive_message
+        #     if message is None:
+        #         show_message = ""
+            
+        #     friend_info = {
+        #         "id": friend.id,
+        #         "nickname": friend.nickname,
+        #         "avatarUrl": friend.image_uri,
+        #         "message": last_message.message
+        #     }
+        #     total_friend_info.append(friend_info)
+        return total_friend_info
+        
 
 class BlockedUserRepository:
     @staticmethod
@@ -37,12 +69,31 @@ class BlockedUserRepository:
         blockedRelationship.objects.create(blocker=blocker, blocked_user=blocked_user)
         return True
     
+    @staticmethod
+    @sync_to_async
     def unblock_user(blocker, blocked_user):
         blockedRelationship = BlockedRelationship.objects.filter(blocker=blocker, blocked_user=blocked_user).first()
         if blockedRelationship is None:
             return False
         blockedRelationship.delete()
         return True
+
+    @staticmethod
+    @sync_to_async
+    def get_blocked_users(blocker):
+        blocked_users = BlockedRelationship.objects.select_related('blocker', 'blocked_user').filter(blocker=blocker).all()
+        blocked_user_dtos = []
+        for blocked_user in blocked_users:
+            image_uri = blocked_user.blocked_user.image_uri
+            if image_uri is None:
+                image_uri = DEFAULT_IMAGE_URI
+            blocked_user_dto = {
+                "id": blocked_user.blocked_user.id,
+                "nickname": blocked_user.blocked_user.nickname,
+                "avatarUrl": image_uri
+            }
+            blocked_user_dtos.append(blocked_user_dto)
+        return blocked_user_dtos
 
 class FriendRepository:
     @staticmethod
@@ -64,6 +115,17 @@ class FriendRepository:
                 friendDtos.append(freiendDto)
                 
         return friendDtos
+    
+    @staticmethod
+    @sync_to_async
+    def get_friends_entity(user):
+        user_friendships = Friendship.objects.select_related('friend', 'user').filter(user=user).all()
+        friends = []
+        for friendship in user_friendships:
+            friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=friendship.friend, friend=user).first()
+            if friend_friendship is not None:
+                friends.append(friendship.friend)
+        return friends
     
     @staticmethod
     @sync_to_async

@@ -21,6 +21,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from .serializers import CustomTokenObtainPairSerializer
         self.is_init = False
+        self.read_receiver_id = None
         # 주석 친 코드 : 연결 과정에서 하는 거 프론트에서 처리된 이후에 처리
         # headers = dict(self.scope['headers'])
         # bearer_access_token = headers.get(b'authorization', b'').decode('utf-8')
@@ -115,7 +116,12 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await self.send_message(receiver_id, message)
         elif event == 'getTotalChatData':
             receiver_id = content['clientId']
-            await self.get_total_chat_data(receiver_id)            
+            await self.get_total_chat_data(receiver_id)
+        elif event == 'stopReadingChat':
+            receiver_id = content['clientId']
+            await self.stop_reading_chat(receiver_id)
+        elif event == 'getClientListIBlocked':
+            await self.get_client_list_blocked_by_user()
 
     async def init_client(self, access_token):
         from .serializers import CustomTokenObtainPairSerializer
@@ -357,6 +363,13 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             'event': 'notifyFriendRequestReceive',
             'content': content
         }))
+
+    async def get_client_list_blocked_by_user(self):
+        from .repositories import UserRepository
+        from .repositories import BlockedUserRepository
+        user = await UserRepository.get_user_by_id(self.client_id)
+        blocked_users = await BlockedUserRepository.get_blocked_users(user)
+        await self._send("getClientListIBlockedResponse", {"message": "OK", "clientList": blocked_users})
     
     async def block_client(self, target_user_id):
         from .repositories import UserRepository
@@ -433,6 +446,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             "message": "OK",
             "messageList": messages
         }
+        self.read_receiver_id = receiver_id
         await self._send("getTotalChatDataResponse", response)
 
     async def notify_all_group_activation(self, event, content):
@@ -452,3 +466,9 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             'event': 'notifyFriendActiveStateChange',
             'content': content
         }))
+    
+    async def stop_reading_chat(self, receiver_id):
+        if self.read_receiver_id != receiver_id:
+            return
+        self.read_receiver_id = None
+        await self._send("stopReadingChatResponse", {"message": "OK"})
