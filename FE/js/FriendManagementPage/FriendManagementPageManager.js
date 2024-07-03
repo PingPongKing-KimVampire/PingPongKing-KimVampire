@@ -120,12 +120,14 @@ class FriendManagementPageManager {
 			};
 			this.clientInfo.socket.send(JSON.stringify(searchClientMessage));
 			const searchedClientList = await new Promise((resolve) => {
-				this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+				const listener = (messageEvent) => {
 					const { event, content } = JSON.parse(messageEvent.data);
 					if (event === 'searchClientResponse') {
+						this.clientInfo.socket.removeEventListener('message', listener);
 						resolve(content.clientList);
 					}
-				});
+				};
+				this.clientInfo.socket.addEventListener('message', listener);
 			});
 			return searchedClientList;
 		};
@@ -265,12 +267,14 @@ class FriendManagementPageManager {
 		};
 		this.clientInfo.socket.send(JSON.stringify(friendRequestMessage));
 		await new Promise((resolve) => {
-			this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === 'sendFriendRequestResponse' && content.message === 'OK') {
+					this.clientInfo.socket.removeEventListener('message', listener);
 					resolve();
 				}
-			});
+			};
+			this.clientInfo.socket.addEventListener('message', listener);
 		});
 		this.clientInfo.friendInfo.clientListIFriendRequested.push(clientData);
 		this._renderTabByCurrentMode();
@@ -348,15 +352,17 @@ class FriendManagementPageManager {
 		};
 		this.clientInfo.socket.send(JSON.stringify(cancelRequestMessage));
 		await new Promise((resolve) => {
-			this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (
 					event === 'cancelFriendRequestResponse' &&
 					content.message === 'OK'
 				) {
+					this.clientInfo.socket.removeEventListener('message', listener);
 					resolve();
 				}
-			});
+			};
+			this.clientInfo.socket.addEventListener('message', listener);
 		});
 		this.clientInfo.friendInfo.clientListIFriendRequested =
 			this.clientInfo.friendInfo.clientListIFriendRequested.filter(
@@ -400,12 +406,14 @@ class FriendManagementPageManager {
 		};
 		this.clientInfo.socket.send(JSON.stringify(blockClientMessage));
 		await new Promise((resolve) => {
-			this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === 'blockClientResponse' && content.message === 'OK') {
+					this.clientInfo.socket.removeEventListener('message', listener);
 					resolve();
 				}
-			});
+			};
+			this.clientInfo.socket.addEventListener('message', listener);
 		});
 		this.clientInfo.friendInfo.friendList = // 친구인 클라이언트 차단
 			this.clientInfo.friendInfo.friendList.reduce((acc, friend) => {
