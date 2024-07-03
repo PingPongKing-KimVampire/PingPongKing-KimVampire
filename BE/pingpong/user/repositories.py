@@ -71,7 +71,7 @@ class FriendRepository:
         user_friendships = Friendship.objects.select_related('friend', 'user').filter(user=user).all()
         friendDtos = []
         for friendship in user_friendships:
-            friend_friendship = Friendship.objects.filter(user=friendship.user, friend=user).first()
+            friend_friendship = Friendship.objects.filter(user=friendship.friend, friend=user).first()
             if friend_friendship is None:
                 image_uri = friendship.friend.image_uri
                 if image_uri is None:
