@@ -4,6 +4,7 @@ from lobby.models import BlockedRelationship
 from lobby.models import Message
 from django.db import transaction
 from asgiref.sync import sync_to_async
+from django.db import models, IntegrityError
 DEFAULT_IMAGE_URI = "images/playerA.png"
 
 class MessageRepository:
@@ -70,7 +71,7 @@ class FriendRepository:
         user_friendships = Friendship.objects.select_related('friend', 'user').filter(user=user).all()
         friendDtos = []
         for friendship in user_friendships:
-            friend_friendship = Friendship.objects.filter(user=friendship.friend, friend=user).first()
+            friend_friendship = Friendship.objects.filter(user=friendship.user, friend=user).first()
             if friend_friendship is None:
                 image_uri = friendship.friend.image_uri
                 if image_uri is None:
@@ -81,6 +82,7 @@ class FriendRepository:
                     "avatarUrl": image_uri
                 }
                 friendDtos.append(friendDto)
+        print("내가 보낸 거", friendDtos)
         return friendDtos
 
     @staticmethod
@@ -91,8 +93,8 @@ class FriendRepository:
         if user_friendships.count() == 0:
             return friend_dtos
         for friendship in user_friendships:
-            friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=friendship.friend, friend=user).first()
-            if friend_friendship is not None:
+            friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=user, friend=friendship.user).first()
+            if friend_friendship is None:
                 image_uri = friendship.user.image_uri
                 if image_uri is None:
                     image_uri = DEFAULT_IMAGE_URI
@@ -110,7 +112,10 @@ class FriendRepository:
         target_friendship = Friendship.objects.select_related('friend', 'user').filter(user=user, friend=friend).first()
         if target_friendship is not None:
             return True
-        Friendship.objects.create(user=user, friend=friend)
+        try:
+            Friendship.objects.create(user=user, friend=friend)
+        except IntegrityError:
+            return True
         return False
     
     @staticmethod
@@ -128,7 +133,10 @@ class FriendRepository:
         target_friendship = Friendship.objects.select_related('friend', 'user').filter(user=friend, friend=user).first()
         if target_friendship is None:
             return False
-        Friendship.objects.create(user=user, friend=friend)
+        try:
+            Friendship.objects.create(user=user, friend=friend)
+        except IntegrityError:
+            return False
         return True
     
     @staticmethod

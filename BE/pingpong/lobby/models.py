@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 class User(models.Model):
     id = models.BigAutoField(primary_key=True)  # Big integer as a primary key
@@ -43,6 +44,10 @@ class Friendship(models.Model):
     user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
     friend = models.ForeignKey(User, related_name='friend', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        constraints = [
+        models.UniqueConstraint(fields=['user', 'friend'], name='unique_friendship')
+    ]
 
 class BlockedRelationship(models.Model):
     id = models.BigAutoField(primary_key=True)
