@@ -241,9 +241,9 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_receive", 
-                                      {"id": friend.id,
-                                       "nickname": friend.nickname,
-                                       "avatarUrl": friend.image_uri}
+                                      {"id": user.id,
+                                       "nickname": user.nickname,
+                                       "avatarUrl": user.image_uri}
                                        )
         await self._send("sendFriendRequestResponse", {"message": "OK"})
     
@@ -262,7 +262,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
             await notify_client_event(self.channel_layer, channel_name, "notifyFriendRequestCanceled", 
-                                      {"id": friend.id})
+                                      {"id": user.id})
         await self._send("cancelFriendRequestResponse", {"message": "OK"})
     
     async def accept_friend_request(self, friend_id):
@@ -280,7 +280,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_accepted", 
-                                      {"id": friend.id})
+                                      {"id": user.id})
         await self._send("acceptFriendRequestResponse", {"message": "OK"})
     
     async def notify_friend_request_accepted(self, event):
@@ -308,7 +308,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_rejected", 
-                                      {"id": friend.id})
+                                      {"id": user.id})
         await self._send("rejectFriendRequestResponse", {"message": "OK"})
     
     async def notify_friend_request_rejected(self, event):
@@ -337,7 +337,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_deleted", 
-                                      {"id": friend.id})
+                                      {"id": user.id})
 
     async def notify_friend_deleted(self, event):
         Printer.log(f">>>>> AUTH sent >>>>>", "cyan")

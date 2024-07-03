@@ -241,10 +241,13 @@ class UserRepository:
         users = User.objects.filter(nickname__startswith=nickname).all()
         user_dtos = []
         for user in users:
+            image_uri = user.image_uri
+            if image_uri is None:
+                image_uri = DEFAULT_IMAGE_URI
             user_dto = {
                 "id": user.id,
                 "nickname": user.nickname,
-                "avatarUrl": user.image_uri
+                "avatarUrl": image_uri
             }
             user_dtos.append(user_dto)
         return user_dtos
