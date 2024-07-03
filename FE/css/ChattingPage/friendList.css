@@ -1,0 +1,98 @@
+.FriendListContainer {
+	padding: 2.5%;
+	box-sizing: border-box;
+	overflow-y: scroll;
+}
+.FriendListContainer::-webkit-scrollbar {
+	display: none;
+}
+
+.friendItem {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	width: 100%;
+	height: 23%;
+	border-radius: 1rem;
+	color: white;
+}
+.friendItem:hover {
+	background-color: rgb(213, 112, 255);
+	color: rgb(2, 4, 31);
+	transition: 0.3s;
+}
+.selectedFriendItem {
+	background-color: rgb(213, 112, 255);
+}
+
+.avatarContainer {
+	position: relative;
+	width: 23%;
+	aspect-ratio: 1/1;
+	margin: 0 8% 0 6%;
+}
+.avatarImgFrame {
+	height: 100%;
+	width: 100%;
+	border-radius: 15rem;
+	border: 0.12rem solid white;
+	/* box-sizing: border-box; */
+	background: linear-gradient(to bottom, rgb(50, 26, 81), rgb(2, 4, 31));
+	overflow: hidden;
+}
+.avatarImg {
+	width: 100%;
+}
+.activeState {
+	position: absolute;
+	bottom: 4%;
+	right: 0%;
+	width: 25%;
+	height: 25%;
+	background-color: rgb(76, 206, 25);
+	border-radius: 10rem;
+}
+
+.infoBox {
+	height: 50%;
+	width: 55%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: flex-start;
+}
+.nickname {
+	width: 100%;
+	font-size: 1.6rem;
+	font-weight: 800;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.recentMessage {
+	width: 67%;
+	font-size: 1.1rem;
+	font-weight: 400;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.inviteButton {
+	position: absolute;
+	right: 5%;
+	bottom: 15%;
+	width: 18%;
+	height: 30%;
+	background-color: white;
+	color: black;
+	border-radius: 10rem;
+	font-size: 1rem;
+	font-weight: 700;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}

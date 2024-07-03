@@ -16,10 +16,94 @@ class ChattingPageManager{
         return `
             <button class="chatButton"></button>
             <div class="chatContainer">
-                <div class="FriendListContainer"></div>
+                <div class="FriendListContainer">
+                    ${this._getFriendListHTML()}
+                </div>
                 <div class="messageContainer"></div>
             </div>
             `
+    }
+    _getFriendListHTML() {
+        return `
+            <div class="friendItem">
+                <div class="avatarContainer">
+                    <div class="avatarImgFrame">
+                        <img class="avatarImg" src="images/playerA.png">
+                    </div>
+                    <div class="activeState"></div>
+                </div>
+                <div class="infoBox">
+                    <div class="nickname">김뱀파이어</div>
+                    <div class="recentMessage">하이하이</div>
+                </div>
+                <div class="inviteButton">초대</div>
+            </div>
+            <div class="friendItem">
+                <div class="avatarContainer">
+                    <div class="avatarImgFrame">
+                        <img class="avatarImg" src="images/playerA.png">
+                    </div>
+                    <div class="activeState"></div>
+                </div>
+                <div class="infoBox">
+                    <div class="nickname">김뱀파이어</div>
+                    <div class="recentMessage">하이하이</div>
+                </div>
+                <div class="inviteButton">초대</div>
+            </div>
+            <div class="friendItem">
+                <div class="avatarContainer">
+                    <div class="avatarImgFrame">
+                        <img class="avatarImg" src="images/playerA.png">
+                    </div>
+                    <div class="activeState"></div>
+                </div>
+                <div class="infoBox">
+                    <div class="nickname">김뱀파이어</div>
+                    <div class="recentMessage">하이하이</div>
+                </div>
+                <div class="inviteButton">초대</div>
+            </div>
+            <div class="friendItem">
+                <div class="avatarContainer">
+                    <div class="avatarImgFrame">
+                        <img class="avatarImg" src="images/playerA.png">
+                    </div>
+                    <div class="activeState"></div>
+                </div>
+                <div class="infoBox">
+                    <div class="nickname">김뱀파이어</div>
+                    <div class="recentMessage">하이하이</div>
+                </div>
+                <div class="inviteButton">초대</div>
+            </div>
+            <div class="friendItem">
+                <div class="avatarContainer">
+                    <div class="avatarImgFrame">
+                        <img class="avatarImg" src="images/playerA.png">
+                    </div>
+                    <div class="activeState"></div>
+                </div>
+                <div class="infoBox">
+                    <div class="nickname">김뱀파이어</div>
+                    <div class="recentMessage">하이하이</div>
+                </div>
+                <div class="inviteButton">초대</div>
+            </div>
+            <div class="friendItem">
+                <div class="avatarContainer">
+                    <div class="avatarImgFrame">
+                        <img class="avatarImg" src="images/playerA.png">
+                    </div>
+                    <div class="activeState"></div>
+                </div>
+                <div class="infoBox">
+                    <div class="nickname">김뱀파이어</div>
+                    <div class="recentMessage">하이하이</div>
+                </div>
+                <div class="inviteButton">초대</div>
+            </div>
+        `;
     }
 }
 
