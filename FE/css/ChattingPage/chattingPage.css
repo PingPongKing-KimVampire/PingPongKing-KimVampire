@@ -1,10 +1,10 @@
 .chatButton {
-    width: 5vw;
-    height: 5vw;
+	width: 5vw;
+	height: 5vw;
 	position: absolute;
-    bottom: 1.5vw;
+	bottom: 1.5vw;
 	left: 1.5vw;
-    background: url("../../images/chattingIcon.png") center/cover;
+	background: url('../../images/chattingIcon.png') center/cover;
 }
 
 .chatButton:hover {
@@ -20,31 +20,107 @@
 	}
 } */
 
+.chatContainer {
+	position: absolute;
+	width: 36vw;
+	height: 26vw;
+	bottom: 7vw;
+	left: 6vw;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
 
-.chatContainer{
-    /* border: 0.14rem solid white; */
-    position: absolute;
-    width: 36vw;
-    height: 26vw;
-    bottom: 7vw;
-    left: 6vw;
+.FriendListContainer {
+	border: 0.14rem solid white;
+	height: 100%;
+	width: 47.5%;
+	border-radius: 2rem;
+}
+
+.messageBoxContainer {
+	border: 0.14rem solid white;
+	height: 100%;
+	width: 47.5%;
+	border-radius: 2rem;
+	background: linear-gradient(to bottom, #020626, #2c1b51 49%);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-direction: column;
+}
+
+.messageListContainer {
+	height: 80%;
+	width: 90%;
+	margin-top: 5%;
+	display: flex;
+	flex-direction: column;
+    overflow-y: auto;
+    font-weight: 650;
+}
+
+.messageListContainer::-webkit-scrollbar {
+    display: none;
+  }
+
+.messageBubble {
+	border-radius: 20px;
+	padding: 3% 6%;
+	margin: 3% 0%;
+	max-width: 70%;
+	color: black;
+    line-height: 1.4rem;
+}
+
+.messageBubble.rightSender {
+	background-color: #d570ff;
+	align-self: flex-end;
+}
+
+.messageBubble.leftSender {
+	background-color: white;
+	align-self: flex-start;
+}
+
+.messageInputContainer {
+	border: 0.14rem solid white;
+	border-radius: 2rem;
+	height: 9%;
+	width: 90%;
+	margin-bottom: 4%;
+	background-color: #020626;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.inputBox {
+	width: 100%;
+	margin-right: 5%;
+	margin-left: 5%;
+	height: 80%;
+	background-color: transparent;
+	color: white;
+	border: none;
+	outline: none;
+	font-size: 1rem;
+}
+
+.inputButton {
+	height: 55%;
+	aspect-ratio: 1;
+	margin-right: 5%;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
 }
 
-.FriendListContainer{
-    border: 0.14rem solid white;
+.sendImage {
     height: 100%;
-    width: 47.5%;
-    border-radius: 2rem;
+    width: 100%;
 }
 
-.messageContainer{
-    border: 0.14rem solid white;
-    height: 100%;
-    width: 47.5%;
-    border-radius: 2rem;
-}
 
-/* FriendListContainer */
