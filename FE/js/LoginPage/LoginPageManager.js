@@ -261,10 +261,9 @@ class LoginPageManager {
 				}
 			} else if (event === 'notifyFriendDeleted') {
 				// 누군가 나를 친구 삭제
-				const deletedClient =
-					this.clientInfo.friendInfo.clientListIFriendRequested.find(
-						(client) => client.id === content.clientInfo.id
-					);
+				const deletedClient = this.clientInfo.friendInfo.friendList.find(
+					(client) => client.id === content.clientInfo.id
+				);
 				if (deletedClient) {
 					this.clientInfo.friendInfo.friendList =
 						this.clientInfo.friendInfo.friendList.filter(

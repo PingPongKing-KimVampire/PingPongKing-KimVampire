@@ -289,10 +289,11 @@ class FriendManagementPageManager {
 					event === 'acceptFriendRequestResponse' &&
 					content.message === 'OK'
 				) {
-					socket.removeEventListener('message', listener);
+					this.clientInfo.socket.removeEventListener('message', listener);
 					resolve();
 				}
 			};
+			this.clientInfo.socket.addEventListener('message', listener);
 		});
 		const newFriendClient =
 			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(
@@ -318,13 +319,14 @@ class FriendManagementPageManager {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (
-					event === 'acceptFriendRequestResponse' &&
+					event === 'rejectFriendRequestResponse' &&
 					content.message === 'OK'
 				) {
-					socket.removeEventListener('message', listener);
+					this.clientInfo.socket.removeEventListener('message', listener);
 					resolve();
 				}
 			};
+			this.clientInfo.socket.addEventListener('message', listener);
 		});
 		const rejectedClient =
 			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(
@@ -373,10 +375,11 @@ class FriendManagementPageManager {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === 'deleteFriendResponse' && content.message === 'OK') {
-					socket.removeEventListener('message', listener);
+					this.clientInfo.socket.removeEventListener('message', listener);
 					resolve();
 				}
 			};
+			this.clientInfo.socket.addEventListener('message', listener);
 		});
 		const deletedClient = this.clientInfo.friendInfo.friendList.find(
 			(client) => client.id === id
@@ -431,10 +434,11 @@ class FriendManagementPageManager {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === 'unblockClientResponse' && content.message === 'OK') {
-					socket.removeEventListener('message', listener);
+					this.clientInfo.socket.removeEventListener('message', listener);
 					resolve();
 				}
 			};
+			this.clientInfo.socket.addEventListener('message', listener);
 		});
 		const unblockClient = this.clientInfo.friendInfo.clientListIBlocked.find(
 			(client) => client.id === id
