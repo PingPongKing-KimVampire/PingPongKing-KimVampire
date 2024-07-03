@@ -1,7 +1,30 @@
 class ChattingPageManager{
     constructor(app, clientInfo){
         console.log("Chatting Page!");
+
         this.clientInfo = clientInfo;
+        // TODO : 임시 하드코딩
+        this.clientInfo.friendInfo.friendList = [{
+                id: 1,  nickname: '조뱀파이어',  avatarUrl: 'images/playerA.png',  activeState: true, 
+                recentMessage: { message: "하이하이", timeStamp: "2024-07-03T10:30:00Z" } 
+            }, {
+                id: 2,  nickname: '박뱀파이어',  avatarUrl: 'images/humanIcon.png',  activeState: true, 
+                recentMessage: { message: "하이하이", timeStamp: "2024-07-03T07:55:00Z" }
+            }, {
+                id: 3,  nickname: '이뱀파이어',  avatarUrl: 'images/playerB.png',  activeState: false, 
+                recentMessage: { message: "하이하이", timeStamp: "2024-07-03T07:50:00Z" } 
+            }, {
+                id: 4,  nickname: '김뱀파이어',  avatarUrl: 'images/playerA.png',  activeState: true, 
+                recentMessage: { message: "하이하이", timeStamp: "2024-07-02T20:15:01Z" }
+            }, {
+                id: 5, nickname: '최뱀파이어', avatarUrl: 'images/playerA.png', activeState: true, 
+                recentMessage: { message: "하이하이", timeStamp: "2024-07-02T20:15:02Z" } 
+            }, {
+                id: 6, nickname: '정뱀파이어', avatarUrl: 'images/playerA.png', activeState: false, 
+                recentMessage: { message: "하이하이", timeStamp: "2024-07-02T14:30:00Z" } 
+            },
+        ];
+
         app.innerHTML = this._getHTML();
         this._initPage();
     }
@@ -24,86 +47,31 @@ class ChattingPageManager{
             `
     }
     _getFriendListHTML() {
-        return `
-            <div class="friendItem">
-                <div class="avatarContainer">
-                    <div class="avatarImgFrame">
-                        <img class="avatarImg" src="images/playerA.png">
+        const _getFriendItemHTML = function(friend) {
+            return  `
+                <button class="friendItem">
+                    <div class="avatarContainer">
+                        <div class="avatarImgFrame">
+                            <img class="avatarImg" src="${friend.avatarUrl}">
+                        </div>
+                        <div class="activeState ${!friend.activeState ? 'invisible' : ''}"></div>
                     </div>
-                    <div class="activeState"></div>
-                </div>
-                <div class="infoBox">
-                    <div class="nickname">김뱀파이어</div>
-                    <div class="recentMessage">하이하이</div>
-                </div>
-                <div class="inviteButton">초대</div>
-            </div>
-            <div class="friendItem">
-                <div class="avatarContainer">
-                    <div class="avatarImgFrame">
-                        <img class="avatarImg" src="images/playerA.png">
+                    <div class="infoBox">
+                        <div class="nickname">${friend.nickname}</div>
+                        <div class="recentMessage">${friend.recentMessage.message}</div>
                     </div>
-                    <div class="activeState"></div>
-                </div>
-                <div class="infoBox">
-                    <div class="nickname">김뱀파이어</div>
-                    <div class="recentMessage">하이하이</div>
-                </div>
-                <div class="inviteButton">초대</div>
-            </div>
-            <div class="friendItem">
-                <div class="avatarContainer">
-                    <div class="avatarImgFrame">
-                        <img class="avatarImg" src="images/playerA.png">
-                    </div>
-                    <div class="activeState"></div>
-                </div>
-                <div class="infoBox">
-                    <div class="nickname">김뱀파이어</div>
-                    <div class="recentMessage">하이하이</div>
-                </div>
-                <div class="inviteButton">초대</div>
-            </div>
-            <div class="friendItem">
-                <div class="avatarContainer">
-                    <div class="avatarImgFrame">
-                        <img class="avatarImg" src="images/playerA.png">
-                    </div>
-                    <div class="activeState"></div>
-                </div>
-                <div class="infoBox">
-                    <div class="nickname">김뱀파이어</div>
-                    <div class="recentMessage">하이하이</div>
-                </div>
-                <div class="inviteButton">초대</div>
-            </div>
-            <div class="friendItem">
-                <div class="avatarContainer">
-                    <div class="avatarImgFrame">
-                        <img class="avatarImg" src="images/playerA.png">
-                    </div>
-                    <div class="activeState"></div>
-                </div>
-                <div class="infoBox">
-                    <div class="nickname">김뱀파이어</div>
-                    <div class="recentMessage">하이하이</div>
-                </div>
-                <div class="inviteButton">초대</div>
-            </div>
-            <div class="friendItem">
-                <div class="avatarContainer">
-                    <div class="avatarImgFrame">
-                        <img class="avatarImg" src="images/playerA.png">
-                    </div>
-                    <div class="activeState"></div>
-                </div>
-                <div class="infoBox">
-                    <div class="nickname">김뱀파이어</div>
-                    <div class="recentMessage">하이하이</div>
-                </div>
-                <div class="inviteButton">초대</div>
-            </div>
-        `;
+                    <div class="inviteButton">초대</div>
+                </button>
+            `;
+        }
+        const sortedFriendList = this.clientInfo.friendInfo.friendList.sort((friend1, friend2) => {
+            return new Date(friend2.recentMessage.timeStamp) - new Date(friend1.recentMessage.timeStamp);;
+        });
+        console.log(sortedFriendList);
+        const friendListHTML = this.clientInfo.friendInfo.friendList.reduce((acc, currnet) => {
+            return acc + _getFriendItemHTML(currnet);
+        }, '');
+        return friendListHTML;
     }
 }
 
