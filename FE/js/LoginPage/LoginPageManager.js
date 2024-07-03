@@ -49,15 +49,17 @@ class LoginPageManager {
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
 			// const lobbySocket = await this._connectLobbySocket(id);
 
-			this.clientInfo.id = id;
+			this.clientInfo.id = userData.id;
 			this.clientInfo.nickname = userData.nickname;
 			this.clientInfo.avatarUrl = userData.avatarUrl;
 			this.clientInfo.socket = socket;
 			// this.clientInfo.lobbySocket = lobbySocket;
-			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
+			this.clientInfo.friendInfo = await this._getFriendInfo(
+				this.clientInfo.socket
+			);
 			this.onLoginSuccess();
 		} catch (error) {
-			this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+			this.warning.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
 		}
 	}
 
@@ -112,6 +114,7 @@ class LoginPageManager {
 						resolve({
 							nickname: content.clientNickname,
 							avatarUrl: content.clientAvatarUrl,
+							id: content.clientId,
 						});
 					}
 				}.bind(this)
@@ -130,7 +133,7 @@ class LoginPageManager {
 			await this._getClientListIFriendRequested(socket);
 		friendInfo.clientListIBlocked = [];
 		// friendInfo.clientListIBlocked
-			// await this._getClientListIBlocked(socket);
+		// await this._getClientListIBlocked(socket);
 		return friendInfo;
 	}
 
@@ -198,12 +201,15 @@ class LoginPageManager {
 		const getClientListIBlockedMessage = {
 			event: 'getClientListIBlocked',
 			content: {},
-		}
+		};
 		socket.send(JSON.stringify(getClientListIBlockedMessage));
 		return new Promise((resolve) => {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'getClientListIBlockedResponse' && content.message === 'OK') {
+				if (
+					event === 'getClientListIBlockedResponse' &&
+					content.message === 'OK'
+				) {
 					socket.removeEventListener('message', listener);
 					resolve(content.clientList);
 				}

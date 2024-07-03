@@ -125,19 +125,21 @@ class FriendManagementPageManager {
 					if (event === 'searchClientResponse') {
 						resolve(content.clientList);
 					}
-				})
+				});
 			});
 			return searchedClientList;
 		};
 		let searchedClientList = this.searchKeyword
 			? await getSearchedClientList()
 			: [];
-		searchedClientList = searchedClientList.filter((searchedClient) => {
-			// 차단된 클라리언트 제거
-			return this.clientInfo.friendInfo.clientListIBlocked.every(
-				(blockedClient) => blockedClient.id !== searchedClient.id
-			);
-		});
+		searchedClientList = searchedClientList
+			.filter((searchedClient) => this.clientInfo.id !== searchedClient.id) //자기자신 제거
+			.filter((searchedClient) => {
+				// 차단된 클라리언트 제거
+				return this.clientInfo.friendInfo.clientListIBlocked.every(
+					(blockedClient) => blockedClient.id !== searchedClient.id
+				);
+			});
 		const clientListContainer = document.querySelector('.clientListContainer');
 		clientListContainer.innerHTML =
 			this._getSearchedClientListHTML(searchedClientList);
@@ -346,7 +348,10 @@ class FriendManagementPageManager {
 		await new Promise((resolve) => {
 			this.clientInfo.socket.addEventListener('message', (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'cancelFriendRequestResponse' && content.message === 'OK') {
+				if (
+					event === 'cancelFriendRequestResponse' &&
+					content.message === 'OK'
+				) {
 					resolve();
 				}
 			});
@@ -367,10 +372,7 @@ class FriendManagementPageManager {
 		await new Promise((resolve) => {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (
-					event === 'deleteFriendResponse' &&
-					content.message === 'OK'
-				) {
+				if (event === 'deleteFriendResponse' && content.message === 'OK') {
 					socket.removeEventListener('message', listener);
 					resolve();
 				}
@@ -408,10 +410,13 @@ class FriendManagementPageManager {
 				return acc;
 			}, []);
 		this.clientInfo.friendInfo.clientListIFriendRequested = // 내가 친구 요청한 클라이언트 차단
-			this.clientInfo.friendInfo.clientListIFriendRequested.reduce((acc, client) => {
-				if (client.id !== clientData.id) acc.push(client);
-				return acc;
-			}, []);
+			this.clientInfo.friendInfo.clientListIFriendRequested.reduce(
+				(acc, client) => {
+					if (client.id !== clientData.id) acc.push(client);
+					return acc;
+				},
+				[]
+			);
 		this.clientInfo.friendInfo.clientListIBlocked.push(clientData);
 		this._renderTabByCurrentMode();
 	}
