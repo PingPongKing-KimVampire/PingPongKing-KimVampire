@@ -42,14 +42,14 @@ class FriendManagementPageManager {
 		// 	},
 		// };
 
-		this.clientList = [
-			// TODO : 임시 하드코딩
-			// ...this.clientInfo.friendInfo.friendList,
-			// ...this.clientInfo.friendInfo.clientListWhoFriendRequestedMe,
-			// ...this.clientInfo.friendInfo.clientListIFriendRequested,
-			// ...this.clientInfo.friendInfo.clientListIBlocked,
-			{ id: 19, nickname: '기타1', avatarUrl: 'images/humanIcon.png' },
-		];
+		// this.clientList = [
+		// 	// TODO : 임시 하드코딩
+		// 	...this.clientInfo.friendInfo.friendList,
+		// 	...this.clientInfo.friendInfo.clientListWhoFriendRequestedMe,
+		// 	...this.clientInfo.friendInfo.clientListIFriendRequested,
+		// 	...this.clientInfo.friendInfo.clientListIBlocked,
+		// 	{ id: 19, nickname: '기타1', avatarUrl: 'images/humanIcon.png' },
+		// ];
 
 		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
@@ -118,17 +118,16 @@ class FriendManagementPageManager {
 				event: 'searchClient',
 				content: { keyword: this.searchKeyword },
 			};
-			// this.clientInfo.socket.send(JSON.stringify(searchClientMessage));
-			// const searchedClientList = await new Promise((resolve) => {
-			// 	this.clientInfo.socket.addEventListener('message', (messageEvent) => {
-			// 		const { event, content } = JSON.parse(messageEvent.data);
-			// 		if (event === 'searchClientResponse') {
-			// 			resolve(content.clientList);
-			// 		}
-			// 	})
-			// });
-			// return searchedClientList;
-			return this.clientList;
+			this.clientInfo.socket.send(JSON.stringify(searchClientMessage));
+			const searchedClientList = await new Promise((resolve) => {
+				this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === 'searchClientResponse') {
+						resolve(content.clientList);
+					}
+				})
+			});
+			return searchedClientList;
 		};
 		let searchedClientList = this.searchKeyword
 			? await getSearchedClientList()
@@ -261,37 +260,37 @@ class FriendManagementPageManager {
 			event: 'sendFriendRequest',
 			content: { clientInfo: { id: clientData.id } },
 		};
-		// this.clientInfo.socket.send(JSON.stringify(friendRequestMessage));
-		// await new Promise((resolve) => {
-		// 	this.clientInfo.socket.addEventListener('message', (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (event === 'sendFriendRequestResponse' && content.message === 'OK') {
-		// 			resolve();
-		// 		}
-		// 	});
-		// });
+		this.clientInfo.socket.send(JSON.stringify(friendRequestMessage));
+		await new Promise((resolve) => {
+			this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'sendFriendRequestResponse' && content.message === 'OK') {
+					resolve();
+				}
+			});
+		});
 		this.clientInfo.friendInfo.clientListIFriendRequested.push(clientData);
 		this._renderTabByCurrentMode();
 	}
 
 	async _acceptFriendRequest(id) {
-		// const acceptFriendRequestMessage = {
-		// 	event: 'acceptFriendRequest',
-		// 	content: { clientInfo: { id } },
-		// };
-		// this.clientInfo.socket.send(JSON.stringify(acceptFriendRequestMessage));
-		// await new Promise((resolve) => {
-		// 	const listener = (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (
-		// 			event === 'acceptFriendRequestResponse' &&
-		// 			content.message === 'OK'
-		// 		) {
-		// 			socket.removeEventListener('message', listener);
-		// 			resolve();
-		// 		}
-		// 	};
-		// });
+		const acceptFriendRequestMessage = {
+			event: 'acceptFriendRequest',
+			content: { clientInfo: { id } },
+		};
+		this.clientInfo.socket.send(JSON.stringify(acceptFriendRequestMessage));
+		await new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (
+					event === 'acceptFriendRequestResponse' &&
+					content.message === 'OK'
+				) {
+					socket.removeEventListener('message', listener);
+					resolve();
+				}
+			};
+		});
 		const newFriendClient =
 			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(
 				(client) => client.id === id
@@ -307,24 +306,24 @@ class FriendManagementPageManager {
 	}
 
 	async _rejectFriendRequest(id) {
-		// const rejectFriendRequestMessage = {
-		// 	event: 'rejectFriendRequest',
-		// 	content: { clientInfo: { id } },
-		// };
-		// this.clientInfo.socket.send(JSON.stringify(rejectFriendRequestMessage));
-		// this.clientInfo.socket.send(JSON.stringify(acceptFriendRequestMessage));
-		// await new Promise((resolve) => {
-		// 	const listener = (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (
-		// 			event === 'acceptFriendRequestResponse' &&
-		// 			content.message === 'OK'
-		// 		) {
-		// 			socket.removeEventListener('message', listener);
-		// 			resolve();
-		// 		}
-		// 	};
-		// });
+		const rejectFriendRequestMessage = {
+			event: 'rejectFriendRequest',
+			content: { clientInfo: { id } },
+		};
+		this.clientInfo.socket.send(JSON.stringify(rejectFriendRequestMessage));
+		this.clientInfo.socket.send(JSON.stringify(acceptFriendRequestMessage));
+		await new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (
+					event === 'acceptFriendRequestResponse' &&
+					content.message === 'OK'
+				) {
+					socket.removeEventListener('message', listener);
+					resolve();
+				}
+			};
+		});
 		const rejectedClient =
 			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(
 				(client) => client.id === id
@@ -343,15 +342,15 @@ class FriendManagementPageManager {
 			event: 'cancelFriendRequest',
 			content: { clientInfo: { id } },
 		};
-		// this.clientInfo.socket.send(JSON.stringify(cancelRequestMessage));
-		// await new Promise((resolve) => {
-		// 	this.clientInfo.socket.addEventListener('message', (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (event === 'cancelFriendRequestResponse' && content.message === 'OK') {
-		// 			resolve();
-		// 		}
-		// 	});
-		// });
+		this.clientInfo.socket.send(JSON.stringify(cancelRequestMessage));
+		await new Promise((resolve) => {
+			this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'cancelFriendRequestResponse' && content.message === 'OK') {
+					resolve();
+				}
+			});
+		});
 		this.clientInfo.friendInfo.clientListIFriendRequested =
 			this.clientInfo.friendInfo.clientListIFriendRequested.filter(
 				(client) => client.id !== id
@@ -360,23 +359,23 @@ class FriendManagementPageManager {
 	}
 
 	async _deleteFriend(id) {
-		// const deleteFriendMessage = {
-		// 	event: 'deleteFriend',
-		// 	content: { clientInfo: { id } },
-		// };
-		// this.clientInfo.socket.send(JSON.stringify(deleteFriendMessage));
-		// await new Promise((resolve) => {
-		// 	const listener = (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (
-		// 			event === 'deleteFriendResponse' &&
-		// 			content.message === 'OK'
-		// 		) {
-		// 			socket.removeEventListener('message', listener);
-		// 			resolve();
-		// 		}
-		// 	};
-		// });
+		const deleteFriendMessage = {
+			event: 'deleteFriend',
+			content: { clientInfo: { id } },
+		};
+		this.clientInfo.socket.send(JSON.stringify(deleteFriendMessage));
+		await new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (
+					event === 'deleteFriendResponse' &&
+					content.message === 'OK'
+				) {
+					socket.removeEventListener('message', listener);
+					resolve();
+				}
+			};
+		});
 		const deletedClient = this.clientInfo.friendInfo.friendList.find(
 			(client) => client.id === id
 		);
@@ -394,15 +393,15 @@ class FriendManagementPageManager {
 			event: 'blockClient',
 			content: { clientInfo: { id: clientData.id } },
 		};
-		// this.clientInfo.socket.send(JSON.stringify(blockClientMessage));
-		// await new Promise((resolve) => {
-		// 	this.clientInfo.socket.addEventListener('message', (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (event === 'blockClientResponse' && content.message === 'OK') {
-		// 			resolve();
-		// 		}
-		// 	});
-		// });
+		this.clientInfo.socket.send(JSON.stringify(blockClientMessage));
+		await new Promise((resolve) => {
+			this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'blockClientResponse' && content.message === 'OK') {
+					resolve();
+				}
+			});
+		});
 		this.clientInfo.friendInfo.friendList = // 친구인 클라이언트 차단
 			this.clientInfo.friendInfo.friendList.reduce((acc, friend) => {
 				if (friend.id !== clientData.id) acc.push(friend);
@@ -418,20 +417,20 @@ class FriendManagementPageManager {
 	}
 
 	async _unblockClient(id) {
-		// const unblockClientMessage = {
-		// 	event: 'unblockClient',
-		// 	content: { clientInfo: { id } },
-		// };
-		// this.clientInfo.socket.send(JSON.stringify(unblockClientMessage));
-		// await new Promise((resolve) => {
-		// 	const listener = (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (event === 'unblockClientResponse' && content.message === 'OK') {
-		// 			socket.removeEventListener('message', listener);
-		// 			resolve();
-		// 		}
-		// 	};
-		// });
+		const unblockClientMessage = {
+			event: 'unblockClient',
+			content: { clientInfo: { id } },
+		};
+		this.clientInfo.socket.send(JSON.stringify(unblockClientMessage));
+		await new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'unblockClientResponse' && content.message === 'OK') {
+					socket.removeEventListener('message', listener);
+					resolve();
+				}
+			};
+		});
 		const unblockClient = this.clientInfo.friendInfo.clientListIBlocked.find(
 			(client) => client.id === id
 		);
