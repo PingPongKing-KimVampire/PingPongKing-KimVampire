@@ -65,14 +65,32 @@ class ChattingPageManager{
         this.selectedInviteButton.classList.remove('invisible');
     }
 
-    _getHTML(){
-        return `
+	_renderEntireMessage(id) {
+		//id로 조회
+		const messageList = [
+			{ senderId: 1, content: '오늘 한 판 고고?' },
+			{ senderId: 2, content: '너 개못하잖아' },
+			{ senderId: 1, content: '까부네 ㅋㅋ' },
+			{ senderId: 2, content: '드루와라' },
+		];
+        window.onload = function () {
+			const messageListContainer = document.querySelector(
+				'.messageListContainer'
+			);
+			messageListContainer.scrollTop = messageListContainer.scrollHeight;
+		};
+
+        // messageList.forEach()
+	}
+
+	_getHTML() {
+		return `
             <button class="chatButton"></button>
             <div class="chatContainer">
                 <div class="FriendListContainer">
                     ${this._getFriendListHTML()}
                 </div>
-                <div class="messageContainer"></div>
+                ${this._getMessageBoxContainerHTML()}
             </div>
             `
     }
@@ -103,6 +121,22 @@ class ChattingPageManager{
         }, '');
         return friendListHTML;
     }
+	_getMessageBoxContainerHTML() {
+		return `
+        <div class="messageBoxContainer">
+            <div class="messageListContainer">
+            <div class="messageBubble rightSender">오늘 저녁 뭐 먹을까? 치킨이 땡기는데, 네 생각은 어때? 우리 동네에 새로 생긴 치킨집이 있다던데, 거기 한번 가볼까? 맛있다는 평이 많아서 기대돼. 어떤 메뉴 먹고 싶어? 양념치킨? 후라이드치킨? 아니면 반반치킨? 나는 반반치킨이 좋아. 다양한 맛을 즐길 수 있어서 좋아. 7시에 만나서 같이 먹자. 너도 그때까지 배고프지 않게 간단한 간식 먹고 있어. 그럼 이따 보자!</div>
+            <div class="messageBubble leftSender">음... 난 치킨이 정말 좋아. 새로 생긴 치킨집 괜찮을 것 같아. 반반치킨도 좋고, 양념치킨도 좋아. 우리 사이드로 감자튀김도 시키자. 그렇게 하면 완벽한 저녁이 될 거야. 그리고 7시라니, 딱 좋은 시간인 것 같아. 그때까지 나는 간단히 샐러드라도 먹어야겠어. 이따 봐, 기대돼!</div>
+            </div>
+            <div class="messageInputContainer">
+                <input type="text", class="inputBox" spellcheck="false">
+                <div class="inputButton">
+                    <img class="sendImage" src="images/sendIcon.png"></img>
+                </div>
+            </div>
+        </div>
+        `;
+	}
 }
 
 export default ChattingPageManager;
