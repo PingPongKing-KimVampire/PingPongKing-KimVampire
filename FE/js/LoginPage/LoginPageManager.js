@@ -272,8 +272,8 @@ class LoginPageManager {
 				}
 			} else if (event === 'notifyMessageArrive') {
 				// 채팅 메시지 도착
-				const friend = this.clientInfo.friendInfo.friendList.find(
-					(friend) => friend.id === content.cliendId
+				let friend = this.clientInfo.friendInfo.friendList.find(
+					(friend) => friend.id === content.sendClientId || friend.id === content.receiveClientId
 				);
 				friend.chat.recentMessage = content.message;
 				friend.chat.recentTimestamp = content.timestamp;
