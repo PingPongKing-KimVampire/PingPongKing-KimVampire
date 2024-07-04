@@ -141,7 +141,6 @@ class PageRouter {
 				'css/ChattingPage/friendList.css',
 			]);
 			const chattingPageManager = new ChattingPageManager(
-				this.app,
 				this.clientInfo
 			);
 		}
