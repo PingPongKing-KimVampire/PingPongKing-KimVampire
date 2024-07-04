@@ -147,13 +147,10 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         # stateManager.add_user(client_id, decoded_token['nickname'])
         # await stateManager._add_client(self, client_id, decoded_token['nickname'])
         user = await UserRepository.get_user_by_id(client_id)
-        image_uri = user.image_uri
-        if image_uri is None:
-            image_uri = DEFAULT_IMAGE_URI
         response = {
             "clientId": client_id,
             "clientNickname": user.nickname,
-            "clientAvatarUrl": image_uri,
+            "clientAvatarUrl": user.get_image_uri(),
             "message": "OK"
         }
         await add_group(self, 'lobby')
@@ -249,7 +246,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_receive", 
                                       {"clientInfo": {"id": user.id,
                                        "nickname": user.nickname,
-                                       "avatarUrl": user.image_uri}}
+                                       "avatarUrl": user.get_image_uri()}}
                                        )
         await self._send("sendFriendRequestResponse", {"message": "OK"})
     
@@ -377,10 +374,10 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         from .repositories import FriendRepository
         user = await UserRepository.get_user_by_id(self.client_id)
         target_user = await UserRepository.get_user_by_id(target_user_id)
-        FriendRepository.check_friend_relation(user, target_user)
         if target_user is None:
             await self._send("blockClientResponse", {"message": "NotFoundTargetUser"})
             return
+        await FriendRepository.check_friend_relation(user, target_user)
         isExsits = await BlockedUserRepository.block_user(user, target_user)
         if isExsits:
             await self._send("blockClientResponse", {"message": "AlreadyBlocked"})
@@ -400,7 +397,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await self._send("unblockClientResponse", {"message": "NotFoundBlockedUser"})
             return
         await self._send("unblockClientResponse", {"message": "OK"})
-    
     async def search_client(self, keyword):
         from .repositories import UserRepository
         users = await UserRepository.search_user_by_nickname(keyword)

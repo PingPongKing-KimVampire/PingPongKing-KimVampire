@@ -5,7 +5,6 @@ from lobby.models import Message
 from django.db import transaction
 from asgiref.sync import sync_to_async
 from django.db import models, IntegrityError
-DEFAULT_IMAGE_URI = "images/playerA.png"
 
 class MessageRepository:
     @staticmethod
@@ -63,16 +62,19 @@ class BlockedUserRepository:
     @staticmethod
     @sync_to_async
     def block_user(blocker, blocked_user):
-        blockedRelationship = BlockedRelationship.objects.filter(blocker=blocker, blocked_user=blocked_user).first()
-        if blocked_user is not None:
-            return False
-        blockedRelationship.objects.create(blocker=blocker, blocked_user=blocked_user)
-        return True
+        blockedRelationship = BlockedRelationship.objects.select_related('blocker', 'blocked_user').filter(blocker=blocker, blocked_user=blocked_user).first()
+        if blockedRelationship is not None:
+            return True
+        try:
+            BlockedRelationship.objects.create(blocker=blocker, blocked_user=blocked_user)
+        except IntegrityError:
+            return True
+        return False
     
     @staticmethod
     @sync_to_async
     def unblock_user(blocker, blocked_user):
-        blockedRelationship = BlockedRelationship.objects.filter(blocker=blocker, blocked_user=blocked_user).first()
+        blockedRelationship = BlockedRelationship.objects.select_related('blocker', 'blocked_user').filter(blocker=blocker, blocked_user=blocked_user).first()
         if blockedRelationship is None:
             return False
         blockedRelationship.delete()
@@ -84,13 +86,10 @@ class BlockedUserRepository:
         blocked_users = BlockedRelationship.objects.select_related('blocker', 'blocked_user').filter(blocker=blocker).all()
         blocked_user_dtos = []
         for blocked_user in blocked_users:
-            image_uri = blocked_user.blocked_user.image_uri
-            if image_uri is None:
-                image_uri = DEFAULT_IMAGE_URI
             blocked_user_dto = {
                 "id": blocked_user.blocked_user.id,
                 "nickname": blocked_user.blocked_user.nickname,
-                "avatarUrl": image_uri
+                "avatarUrl": blocked_user.blocked_user.get_image_uri()
             }
             blocked_user_dtos.append(blocked_user_dto)
         return blocked_user_dtos
@@ -104,13 +103,10 @@ class FriendRepository:
         for friendship in user_friendships:
             friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=friendship.friend, friend=user).first()
             if friend_friendship is not None:
-                image_uri = friendship.friend.image_uri
-                if image_uri is None:
-                    image_uri = DEFAULT_IMAGE_URI
                 freiendDto = {
                     "id": friendship.friend.id,
                     "nickname": friendship.friend.nickname,
-                    "avatarUrl": image_uri
+                    "avatarUrl": friendship.friend.get_image_uri()
                 }
                 friendDtos.append(freiendDto)
                 
@@ -135,16 +131,12 @@ class FriendRepository:
         for friendship in user_friendships:
             friend_friendship = Friendship.objects.filter(user=friendship.friend, friend=user).first()
             if friend_friendship is None:
-                image_uri = friendship.friend.image_uri
-                if image_uri is None:
-                    image_uri = DEFAULT_IMAGE_URI
                 friendDto = {
                     "id": friendship.friend.id,
                     "nickname": friendship.friend.nickname,
-                    "avatarUrl": image_uri
+                    "avatarUrl": friendship.friend.get_image_uri()
                 }
                 friendDtos.append(friendDto)
-        print("내가 보낸 거", friendDtos)
         return friendDtos
 
     @staticmethod
@@ -157,13 +149,10 @@ class FriendRepository:
         for friendship in user_friendships:
             friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=user, friend=friendship.user).first()
             if friend_friendship is None:
-                image_uri = friendship.user.image_uri
-                if image_uri is None:
-                    image_uri = DEFAULT_IMAGE_URI
                 friend_dto = {
                     "id": friendship.user.id,
                     "nickname": friendship.user.nickname,
-                    "avatarUrl": image_uri
+                    "avatarUrl": friendship.user.get_image_uri()
                 }
                 friend_dtos.append(friend_dto)
         return friend_dtos
@@ -311,13 +300,10 @@ class UserRepository:
         users = User.objects.filter(nickname__startswith=nickname).all()
         user_dtos = []
         for user in users:
-            image_uri = user.image_uri
-            if image_uri is None:
-                image_uri = DEFAULT_IMAGE_URI
             user_dto = {
                 "id": user.id,
                 "nickname": user.nickname,
-                "avatarUrl": image_uri
+                "avatarUrl": user.get_image_uri()
             }
             user_dtos.append(user_dto)
         return user_dtos

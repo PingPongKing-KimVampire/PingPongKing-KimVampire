@@ -3,6 +3,8 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+DEFAULT_IMAGE_URI = "images/playerA.png"
+
 class User(models.Model):
     id = models.BigAutoField(primary_key=True)  # Big integer as a primary key
     username = models.CharField(max_length=20, unique=True, null=True)
@@ -15,17 +17,19 @@ class User(models.Model):
         self.password = make_password(raw_password)
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
-    @property
+    
     def get_id(self):
         return self.id
-    @property
+
     def get_nickname(self):
         return self.nickname
-    @property
+    
     def get_username(self):
         return self.username
-    @property
+
     def get_image_uri(self):
+        if self.image_uri is None:
+            return DEFAULT_IMAGE_URI
         return self.image_uri
 # class UserProfile(models.Model):
 #     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
@@ -53,6 +57,10 @@ class BlockedRelationship(models.Model):
     id = models.BigAutoField(primary_key=True)
     blocker = models.ForeignKey(User, related_name='blocker', on_delete=models.CASCADE)
     blocked_user = models.ForeignKey(User, related_name='blocked_user', on_delete=models.CASCADE)
+    class Meta:
+        constraints = [
+        models.UniqueConstraint(fields=['blocker', 'blocked_user'], name='unique_friendship')
+    ]
 
 # class Team(models.Model):
 #     id = models.BigAutoField(primary_key=True)
