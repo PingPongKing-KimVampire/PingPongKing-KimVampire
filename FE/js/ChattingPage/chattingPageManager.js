@@ -10,23 +10,23 @@ class ChattingPageManager{
 		};
         // TODO : 임시 하드코딩
         this.clientInfo.friendInfo.friendList = [{
-                id: 1,  nickname: '조뱀파이어어어어어어',  avatarUrl: 'images/playerA.png',  activeState: true, 
-                recentMessage: { message: "하이하이이이이이이이이이이이이", timeStamp: "2024-07-02T14:30:00Z" } 
+                id: 1, nickname: '조뱀파이어어어어어어',  avatarUrl: 'images/playerA.png',  activeState: "ACTIVE", 
+                chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
             }, {
-                id: 2,  nickname: '박뱀파이어',  avatarUrl: 'images/humanIcon.png',  activeState: true, 
-                recentMessage: { message: "하이하이", timeStamp: "2024-07-02T20:15:02Z" }
+                id: 2,  nickname: '박뱀파이어',  avatarUrl: 'images/humanIcon.png',  activeState: "ACTIVE", 
+                chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
             }, {
-                id: 3,  nickname: '이뱀파이어',  avatarUrl: 'images/playerB.png',  activeState: false, 
-                recentMessage: { message: "하이하이", timeStamp: "2024-07-02T20:15:01Z" } 
+                id: 3,  nickname: '이뱀파이어',  avatarUrl: 'images/playerB.png',  activeState: "INACTIVE", 
+                chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
             }, {
-                id: 4,  nickname: '김뱀파이어',  avatarUrl: 'images/playerA.png',  activeState: true, 
-                recentMessage: { message: "하이하이", timeStamp: "2024-07-03T07:50:00Z" }
+                id: 4,  nickname: '김뱀파이어',  avatarUrl: 'images/playerA.png',  activeState: "ACTIVE", 
+                chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
             }, {
-                id: 5, nickname: '최뱀파이어', avatarUrl: 'images/playerA.png', activeState: true, 
-                recentMessage: { message: "하이하이", timeStamp: "2024-07-03T07:55:00Z" } 
+                id: 5, nickname: '최뱀파이어', avatarUrl: 'images/playerA.png', activeState: "ACTIVE", 
+                chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
             }, {
-                id: 6, nickname: '정뱀파이어', avatarUrl: 'images/playerA.png', activeState: false, 
-                recentMessage: { message: "하이하이", timeStamp: "2024-07-03T10:30:00Z" } 
+                id: 6, nickname: '정뱀파이어', avatarUrl: 'images/playerA.png', activeState: "INACTIVE", 
+                chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
             },
         ];
         app.innerHTML = this._getHTML();
@@ -121,19 +121,19 @@ class ChattingPageManager{
                         <div class="avatarImgFrame">
                             <img class="avatarImg" src="${friend.avatarUrl}">
                         </div>
-                        <div class="activeState ${!friend.activeState ? 'invisible' : ''}"></div>
+                        <div class="activeState ${friend.activeState === 'ACTIVE' ? '' : 'invisible'}"></div>
                     </div>
                     <div class="infoBox">
                         <div class="nickname">${friend.nickname}</div>
-                        <div class="recentMessage">${friend.recentMessage.message}</div>
+                        <div class="recentMessage">${friend.chat.recentMessage}</div>
                     </div>
-                    <div class="inviteButton invisible ${!friend.activeState ? 'disabledInviteButton' : ''}">초대</div>
+                    <div class="inviteButton invisible ${friend.activeState === 'ACTIVE' ? '' : 'disabledInviteButton'}">초대</div>
                 </button>
             `;
         }
         // 최근에 대화한 순으로 정렬
         const sortedFriendList = this.clientInfo.friendInfo.friendList.slice().sort((friend1, friend2) => {
-            return new Date(friend2.recentMessage.timeStamp) - new Date(friend1.recentMessage.timeStamp);;
+            return new Date(friend2.chat.recentTimestamp) - new Date(friend1.chat.recentTimestamp);;
         });
         const friendListHTML = sortedFriendList.reduce((acc, currnet) => {
             return acc + _getFriendItemHTML(currnet);

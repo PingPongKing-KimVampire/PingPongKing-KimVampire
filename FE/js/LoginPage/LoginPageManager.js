@@ -270,6 +270,20 @@ class LoginPageManager {
 							(client) => client.id !== content.clientInfo.id
 						);
 				}
+			} else if (event === 'notifyMessageArrive') {
+				// 채팅 메시지 도착
+				const friend = this.clientInfo.friendInfo.friendList.find(
+					(friend) => friend.id === content.cliendId
+				);
+				friend.chat.recentMessage = content.message;
+				friend.chat.recentTimestamp = content.timestamp;
+				friend.chat.unreadMessageCount += 1; // TODO : chattingPage에서 알아서 0으로 초기화
+			} else if (event === 'notifyFriendActiveStateChange') {
+				// 친구의 활성 상태 변경
+				const friend = this.clientInfo.friendInfo.friendList.find(
+					(friend) => friend.id === content.cliendId
+				);
+				friend.activeState = content.activeState;
 			}
 		});
 	}
