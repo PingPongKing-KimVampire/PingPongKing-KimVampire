@@ -37,6 +37,12 @@ class PageRouter {
 						id: null,
 						nickname: null,
 						avatarUrl: null,
+						activeState: null,
+						chat: {
+							recentMessage: null,
+							recentTimestamp: null,
+							unreadMessageCount: null
+						}
 					},
 				],
 				clientListWhoFriendRequestedMe: [
