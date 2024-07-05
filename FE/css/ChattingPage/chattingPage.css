@@ -11,6 +11,31 @@
 	cursor: pointer;
 }
 
+.totalUnreadCount, .unreadCount {
+	position: absolute;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	border-radius: 10rem;
+	background-color: rgb(255, 37, 0);
+	color: white;
+}
+.totalUnreadCount {
+	top: 6%;
+	right: -5%;
+	height: 25%;
+	min-width: 25%;
+	padding: 0 6%;
+}
+.unreadCount {
+	top: 5%;
+	right: 3%;
+	height: 20%;
+	min-width: 10%;
+	padding: 0 2%;
+}
+
 /* @media (orientation: portrait) {
 	.chatButton {
 		bottom: 2%;
