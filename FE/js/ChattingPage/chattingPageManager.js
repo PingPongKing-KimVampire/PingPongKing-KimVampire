@@ -355,10 +355,7 @@ class ChattingPageManager {
 			return acc + messageHTML;
 		}, "");
 		this.messageListContainer.innerHTML = messageListHTML;
-		window.onload = function () {
-			const messageListContainer = document.querySelector(".messageListContainer");
-			messageListContainer.scrollTop = messageListContainer.scrollHeight;
-		};
+		this.messageListContainer.scrollTop = this.messageListContainer.scrollHeight;
 	}
 
 	_setMessageArriveListener() {
@@ -373,9 +370,10 @@ class ChattingPageManager {
 				messageElement.classList.add("messageBubble", senderSide);
 				messageElement.textContent = content.message;
 				this.messageListContainer.append(messageElement);
-				// TODO : 스크롤 내리기
 				const friend = this.clientInfo.friendInfo.friendList.find(friend => friend.id === content.sendClientId || friend.id === content.receiveClientId);
 				friend.chat.unreadMessageCount = 0;
+				//스크롤 내리기
+				this.messageListContainer.scrollTop = this.messageListContainer.scrollHeight;
 			}
 		}
 		if (event === "notifyFriendDeleted") {
