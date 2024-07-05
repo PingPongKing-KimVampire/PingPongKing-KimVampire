@@ -81,13 +81,13 @@
 	margin-top: 5%;
 	display: flex;
 	flex-direction: column;
-    overflow-y: auto;
-    font-weight: 650;
+	overflow-y: auto;
+	font-weight: 650;
 }
 
 .messageListContainer::-webkit-scrollbar {
-    display: none;
-  }
+	display: none;
+}
 
 .messageBubble {
 	border-radius: 20px;
@@ -95,7 +95,7 @@
 	margin: 3% 0%;
 	max-width: 70%;
 	color: black;
-    line-height: 1.4rem;
+	line-height: 1.4rem;
 }
 
 .messageBubble.rightSender {
@@ -142,18 +142,89 @@
 	height: 55%;
 	aspect-ratio: 1;
 	margin-right: 5%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.sendImage {
+	height: 100%;
+	width: 100%;
+}
+
+/* .noFriendContainer {
+	position: absolute;
+	width: 18vw;
+	height: 26vw;
+	bottom: 7vw;
+	left: 6vw;
+	display: flex;
+	flex-direction: column;
+	border: 0.14rem solid white;
+}
+
+.noFriendImageContainer {
+	width: 100%;
+	height: 80%;
+	background: url('../../images/noFriendVampire2.webp') center/cover;
+}
+
+.noFriendTextContainer {
+	width: 100%;
+	height: 20%;
+}
+
+*/
+
+.noFriendContainer {
+    position: absolute;
+    width: 18vw;
+    height: 26vw;
+    bottom: 7vw;
+    left: 6vw;
+	border-radius: 2rem;
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+	justify-content: center;
     align-items: center;
+    border: 0.14rem solid white;
+    background-color: #f8f8f8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 .disabledMessageInputContainer .inputButton {
 	display: none;
 }
 
-.sendImage {
-    height: 100%;
+.noFriendTitleContainer {
     width: 100%;
+    height: 12%;
+	border-radius: 2rem;
+	display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.2vw;
+    font-weight: bold;
+    /* background-color: #e0e0e0; */
 }
 
+.noFriendImageContainer {
+    width: 90%;
+    height: 70%;
+	border-radius: 2rem;
+    background: url('../../images/noFriendVampire2.webp') center/cover;
+    border-bottom: 0.14rem solid white;
+}
 
+.noFriendTextContainer {
+    width: 100%;
+    height: 18%;
+	border-radius: 2rem;
+    font-size: 1vw;
+	display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+	line-height: 1.3;
+}
