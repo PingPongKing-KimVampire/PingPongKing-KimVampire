@@ -1,8 +1,8 @@
-import windowObservable from '../../WindowObservable.js';
+import windowObservable from "../../WindowObservable.js";
 
 class FriendManagementPageManager {
 	constructor(app, clientInfo) {
-		console.log('Friend Management Page!');
+		console.log("Friend Management Page!");
 
 		// TODO : 임시 하드 코딩
 		// this.clientInfo = {
@@ -58,7 +58,7 @@ class FriendManagementPageManager {
 	}
 
 	_initPage() {
-		this.searchKeyword = '';
+		this.searchKeyword = "";
 		this._setTabButtons();
 		this._renderSearchClientTab();
 		this._listenNotifyEvent();
@@ -67,22 +67,21 @@ class FriendManagementPageManager {
 	}
 
 	_setTabButtons() {
-		this.prevTabButton = document.querySelector('#searchClientButton');
-		const tabButtons = document.querySelectorAll('.tabButton');
-		tabButtons.forEach((button) => {
-			button.addEventListener('click', (event) => {
+		this.prevTabButton = document.querySelector("#searchClientButton");
+		const tabButtons = document.querySelectorAll(".tabButton");
+		tabButtons.forEach(button => {
+			button.addEventListener("click", event => {
 				// 탭 버튼 스타일 변경
-				if (this.prevTabButton)
-					this.prevTabButton.classList.remove('selectedTabButton');
-				event.target.classList.add('selectedTabButton');
+				if (this.prevTabButton) this.prevTabButton.classList.remove("selectedTabButton");
+				event.target.classList.add("selectedTabButton");
 				// 탭 렌더링
-				if (event.target.id === 'searchClientButton') {
+				if (event.target.id === "searchClientButton") {
 					this._renderSearchClientTab();
-				} else if (event.target.id === 'friendRequestButton') {
+				} else if (event.target.id === "friendRequestButton") {
 					this._renderFriendRequestListTab();
-				} else if (event.target.id === 'myFriendButton') {
+				} else if (event.target.id === "myFriendButton") {
 					this._renderFriendListTab();
-				} else if (event.target.id === 'blockClientButton') {
+				} else if (event.target.id === "blockClientButton") {
 					this._renderBlockListManagementTab();
 				}
 				this.prevTabButton = event.target;
@@ -93,10 +92,8 @@ class FriendManagementPageManager {
 	// 클라이언트 검색 탭 렌더링
 	_renderSearchClientTab() {
 		// 초기 유저 검색 탭 전체를 렌더링
-		this.selectedTab = 'searchClientTab';
-		const innerContentContainer = document.querySelector(
-			'#innerContentContainer'
-		);
+		this.selectedTab = "searchClientTab";
+		const innerContentContainer = document.querySelector("#innerContentContainer");
 		innerContentContainer.innerHTML = `
 			${this._getSearchContainerHTML()}
 			<div class="clientListContainer"></div>
@@ -105,8 +102,8 @@ class FriendManagementPageManager {
 		this._renderSearchedClientList();
 	}
 	_setSearchInput() {
-		this.searchInput = document.querySelector('#clientSearchInput');
-		this.searchInput.addEventListener('input', async () => {
+		this.searchInput = document.querySelector("#clientSearchInput");
+		this.searchInput.addEventListener("input", async () => {
 			this.searchKeyword = this.searchInput.value;
 			this._renderSearchedClientList();
 		});
@@ -115,166 +112,140 @@ class FriendManagementPageManager {
 		// 유저 검색 탭에서 clientListContainer 내부만 리렌더링
 		const getSearchedClientList = async () => {
 			const searchClientMessage = {
-				event: 'searchClient',
+				event: "searchClient",
 				content: { keyword: this.searchKeyword },
 			};
 			this.clientInfo.socket.send(JSON.stringify(searchClientMessage));
-			const searchedClientList = await new Promise((resolve) => {
-				const listener = (messageEvent) => {
+			const searchedClientList = await new Promise(resolve => {
+				const listener = messageEvent => {
 					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === 'searchClientResponse') {
-						this.clientInfo.socket.removeEventListener('message', listener);
+					if (event === "searchClientResponse") {
+						this.clientInfo.socket.removeEventListener("message", listener);
 						resolve(content.clientList);
 					}
 				};
-				this.clientInfo.socket.addEventListener('message', listener);
+				this.clientInfo.socket.addEventListener("message", listener);
 			});
 			return searchedClientList;
 		};
-		let searchedClientList = this.searchKeyword
-			? await getSearchedClientList()
-			: [];
+		let searchedClientList = this.searchKeyword ? await getSearchedClientList() : [];
 		searchedClientList = searchedClientList
-			.filter((searchedClient) => this.clientInfo.id !== searchedClient.id) //자기자신 제거
-			.filter((searchedClient) => {
+			.filter(searchedClient => this.clientInfo.id !== searchedClient.id) //자기자신 제거
+			.filter(searchedClient => {
 				// 차단된 클라리언트 제거
-				return this.clientInfo.friendInfo.clientListIBlocked.every(
-					(blockedClient) => blockedClient.id !== searchedClient.id
-				);
+				return this.clientInfo.friendInfo.clientListIBlocked.every(blockedClient => blockedClient.id !== searchedClient.id);
 			});
-		const clientListContainer = document.querySelector('.clientListContainer');
-		clientListContainer.innerHTML =
-			this._getSearchedClientListHTML(searchedClientList);
+		const clientListContainer = document.querySelector(".clientListContainer");
+		clientListContainer.innerHTML = this._getSearchedClientListHTML(searchedClientList);
 		this._setClientManagementButtons();
 		this._autoSetScrollTrackColor();
 	};
 
 	// 친구 요청 목록 탭 렌더링
 	_renderFriendRequestListTab() {
-		this.selectedTab = 'friendRequestListTab';
-		const innerContentContainer = document.querySelector(
-			'#innerContentContainer'
-		);
+		this.selectedTab = "friendRequestListTab";
+		const innerContentContainer = document.querySelector("#innerContentContainer");
 		innerContentContainer.innerHTML = this._getFriendRequestListContainerHTML();
 		this._setClientManagementButtons();
 	}
 
 	// 내 친구 관리 탭 렌더링
 	_renderFriendListTab() {
-		this.selectedTab = 'friendListTab';
-		const innerContentContainer = document.querySelector(
-			'#innerContentContainer'
-		);
+		this.selectedTab = "friendListTab";
+		const innerContentContainer = document.querySelector("#innerContentContainer");
 		innerContentContainer.innerHTML = this._getFriendListContainerHTML();
 		this._setClientManagementButtons();
 	}
 
 	//차단 목록 관리 탭
 	_renderBlockListManagementTab() {
-		this.selectedTab = 'blockListManagementTab';
-		const innerContentContainer = document.querySelector(
-			'#innerContentContainer'
-		);
-		innerContentContainer.innerHTML =
-			this._getBlockListManagementContainerHTML();
+		this.selectedTab = "blockListManagementTab";
+		const innerContentContainer = document.querySelector("#innerContentContainer");
+		innerContentContainer.innerHTML = this._getBlockListManagementContainerHTML();
 		this._setClientManagementButtons();
 	}
 
 	_listenNotifyEvent() {
-		const listener = (messageEvent) => {
+		const listener = messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
-			if (this.selectedTab === 'searchClientTab') {
-				if (
-					event === 'notifyFriendDeleted' ||
-					event === 'notifyFriendRequestRejected' ||
-					event === 'notifyFriendRequestAccepted' ||
-					event === 'notifyFriendRequestCanceled' ||
-					event === 'notifyFriendRequestReceive'
-				) {
+			if (this.selectedTab === "searchClientTab") {
+				if (event === "notifyFriendDeleted" || event === "notifyFriendRequestRejected" || event === "notifyFriendRequestAccepted" || event === "notifyFriendRequestCanceled" || event === "notifyFriendRequestReceive") {
 					this._renderTabByCurrentMode();
 				}
-			} else if (this.selectedTab === 'friendRequestListTab') {
-				if (
-					event === 'notifyFriendRequestReceive' ||
-					event === 'notifyFriendRequestCanceled'
-				) {
+			} else if (this.selectedTab === "friendRequestListTab") {
+				if (event === "notifyFriendRequestReceive" || event === "notifyFriendRequestCanceled") {
 					this._renderTabByCurrentMode();
 				}
-			} else if (this.selectedTab === 'friendListTab') {
-				if (
-					event === 'notifyFriendDeleted' ||
-					event === 'notifyFriendRequestAccepted'
-				) {
+			} else if (this.selectedTab === "friendListTab") {
+				if (event === "notifyFriendDeleted" || event === "notifyFriendRequestAccepted") {
 					this._renderTabByCurrentMode();
 				}
 			}
 		};
-		this.clientInfo.socket.addEventListener('message', listener);
+		this.clientInfo.socket.addEventListener("message", listener);
 		//페이지 이동시 remove해야함
 		// this.clientInfo.socket.addEventListener('message', listener);
 	}
 
 	_renderTabByCurrentMode() {
-		if (this.selectedTab === 'searchClientTab') {
+		if (this.selectedTab === "searchClientTab") {
 			this._renderSearchedClientList();
-		} else if (this.selectedTab === 'friendRequestListTab') {
+		} else if (this.selectedTab === "friendRequestListTab") {
 			this._renderFriendRequestListTab();
-		} else if (this.selectedTab === 'friendListTab') {
+		} else if (this.selectedTab === "friendListTab") {
 			this._renderFriendListTab();
-		} else if (this.selectedTab === 'blockListManagementTab') {
+		} else if (this.selectedTab === "blockListManagementTab") {
 			this._renderBlockListManagementTab();
 		}
 	}
 
 	_setClientManagementButtons() {
 		// 클라이언트 아이템의 세부 버튼에 이벤트 리스너 장착
-		const clientListContainer = document.querySelector('.clientListContainer');
+		const clientListContainer = document.querySelector(".clientListContainer");
 
-		clientListContainer
-			.querySelectorAll('.clientManagementButton')
-			.forEach((button) => {
-				button.addEventListener('click', (event) => {
-					const clientItem = event.target.closest('.clientItem');
-					const clientData = {
-						id: parseInt(clientItem.dataset.id),
-						nickname: clientItem.querySelector('.nickname').textContent,
-						avatarUrl: clientItem.querySelector('.avatarImg').src, // TODO : data-src?
-					};
-					if (event.target.classList.contains('requestButton')) {
-						// 친구 요청 버튼
-						this._friendRequest(clientData);
-					} else if (event.target.classList.contains('acceptButton')) {
-						this._acceptFriendRequest(clientData.id);
-					} else if (event.target.classList.contains('rejectButton')) {
-						this._rejectFriendRequest(clientData.id);
-					} else if (event.target.classList.contains('cancelRequestButton')) {
-						this._cancelFriendRequest(clientData.id);
-					} else if (event.target.classList.contains('deleteButton')) {
-						this._deleteFriend(clientData.id);
-					} else if (event.target.classList.contains('blockButton')) {
-						this._blockClient(clientData);
-					} else if (event.target.classList.contains('unblockButton')) {
-						this._unblockClient(clientData.id);
-					}
-				});
+		clientListContainer.querySelectorAll(".clientManagementButton").forEach(button => {
+			button.addEventListener("click", event => {
+				const clientItem = event.target.closest(".clientItem");
+				const clientData = {
+					id: parseInt(clientItem.dataset.id),
+					nickname: clientItem.querySelector(".nickname").textContent,
+					avatarUrl: clientItem.querySelector(".avatarImg").src, // TODO : data-src?
+				};
+				if (event.target.classList.contains("requestButton")) {
+					// 친구 요청 버튼
+					this._friendRequest(clientData);
+				} else if (event.target.classList.contains("acceptButton")) {
+					this._acceptFriendRequest(clientData.id);
+				} else if (event.target.classList.contains("rejectButton")) {
+					this._rejectFriendRequest(clientData.id);
+				} else if (event.target.classList.contains("cancelRequestButton")) {
+					this._cancelFriendRequest(clientData.id);
+				} else if (event.target.classList.contains("deleteButton")) {
+					this._deleteFriend(clientData.id);
+				} else if (event.target.classList.contains("blockButton")) {
+					this._blockClient(clientData);
+				} else if (event.target.classList.contains("unblockButton")) {
+					this._unblockClient(clientData.id);
+				}
 			});
+		});
 	}
 
 	async _friendRequest(clientData) {
 		const friendRequestMessage = {
-			event: 'sendFriendRequest',
+			event: "sendFriendRequest",
 			content: { clientInfo: { id: clientData.id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(friendRequestMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'sendFriendRequestResponse' && content.message === 'OK') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "sendFriendRequestResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
 			};
-			this.clientInfo.socket.addEventListener('message', listener);
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
 		this.clientInfo.friendInfo.clientListIFriendRequested.push(clientData);
 		this._renderTabByCurrentMode();
@@ -282,32 +253,23 @@ class FriendManagementPageManager {
 
 	async _acceptFriendRequest(id) {
 		const acceptFriendRequestMessage = {
-			event: 'acceptFriendRequest',
+			event: "acceptFriendRequest",
 			content: { clientInfo: { id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(acceptFriendRequestMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (
-					event === 'acceptFriendRequestResponse' &&
-					content.message === 'OK'
-				) {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "acceptFriendRequestResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
 			};
-			this.clientInfo.socket.addEventListener('message', listener);
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
-		const newFriendClient =
-			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(
-				(client) => client.id === id
-			);
+		const newFriendClient = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(client => client.id === id);
 		if (newFriendClient) {
-			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe =
-				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(
-					(client) => client.id !== newFriendClient.id
-				);
+			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(client => client.id !== newFriendClient.id);
 			this.clientInfo.friendInfo.friendList.push(newFriendClient);
 			this._renderTabByCurrentMode();
 		}
@@ -315,105 +277,85 @@ class FriendManagementPageManager {
 
 	async _rejectFriendRequest(id) {
 		const rejectFriendRequestMessage = {
-			event: 'rejectFriendRequest',
+			event: "rejectFriendRequest",
 			content: { clientInfo: { id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(rejectFriendRequestMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (
-					event === 'rejectFriendRequestResponse' &&
-					content.message === 'OK'
-				) {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "rejectFriendRequestResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
 			};
-			this.clientInfo.socket.addEventListener('message', listener);
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
-		const rejectedClient =
-			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(
-				(client) => client.id === id
-			);
+		const rejectedClient = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(client => client.id === id);
 		if (rejectedClient) {
-			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe =
-				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(
-					(client) => client.id !== rejectedClient.id
-				);
+			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(client => client.id !== rejectedClient.id);
 			this._renderTabByCurrentMode();
 		}
 	}
 
 	async _cancelFriendRequest(id) {
 		const cancelRequestMessage = {
-			event: 'cancelFriendRequest',
+			event: "cancelFriendRequest",
 			content: { clientInfo: { id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(cancelRequestMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (
-					event === 'cancelFriendRequestResponse' &&
-					content.message === 'OK'
-				) {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "cancelFriendRequestResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
 			};
-			this.clientInfo.socket.addEventListener('message', listener);
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
-		this.clientInfo.friendInfo.clientListIFriendRequested =
-			this.clientInfo.friendInfo.clientListIFriendRequested.filter(
-				(client) => client.id !== id
-			);
+		this.clientInfo.friendInfo.clientListIFriendRequested = this.clientInfo.friendInfo.clientListIFriendRequested.filter(client => client.id !== id);
 		this._renderTabByCurrentMode();
 	}
 
 	async _deleteFriend(id) {
 		const deleteFriendMessage = {
-			event: 'deleteFriend',
+			event: "deleteFriend",
 			content: { clientInfo: { id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(deleteFriendMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'deleteFriendResponse' && content.message === 'OK') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "deleteFriendResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
 			};
-			this.clientInfo.socket.addEventListener('message', listener);
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
-		const deletedClient = this.clientInfo.friendInfo.friendList.find(
-			(client) => client.id === id
-		);
+		const deletedClient = this.clientInfo.friendInfo.friendList.find(client => client.id === id);
 		if (deletedClient) {
-			this.clientInfo.friendInfo.friendList =
-				this.clientInfo.friendInfo.friendList.filter(
-					(client) => client.id !== deletedClient.id
-				);
+			this.clientInfo.friendInfo.friendList = this.clientInfo.friendInfo.friendList.filter(client => client.id !== deletedClient.id);
 			this._renderTabByCurrentMode();
 		}
 	}
 
 	async _blockClient(clientData) {
 		const blockClientMessage = {
-			event: 'blockClient',
+			event: "blockClient",
 			content: { clientInfo: { id: clientData.id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(blockClientMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'blockClientResponse' && content.message === 'OK') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "blockClientResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
 			};
-			this.clientInfo.socket.addEventListener('message', listener);
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
 		this.clientInfo.friendInfo.friendList = // 친구인 클라이언트 차단
 			this.clientInfo.friendInfo.friendList.reduce((acc, friend) => {
@@ -421,41 +363,33 @@ class FriendManagementPageManager {
 				return acc;
 			}, []);
 		this.clientInfo.friendInfo.clientListIFriendRequested = // 내가 친구 요청한 클라이언트 차단
-			this.clientInfo.friendInfo.clientListIFriendRequested.reduce(
-				(acc, client) => {
-					if (client.id !== clientData.id) acc.push(client);
-					return acc;
-				},
-				[]
-			);
+			this.clientInfo.friendInfo.clientListIFriendRequested.reduce((acc, client) => {
+				if (client.id !== clientData.id) acc.push(client);
+				return acc;
+			}, []);
 		this.clientInfo.friendInfo.clientListIBlocked.push(clientData);
 		this._renderTabByCurrentMode();
 	}
 
 	async _unblockClient(id) {
 		const unblockClientMessage = {
-			event: 'unblockClient',
+			event: "unblockClient",
 			content: { clientInfo: { id } },
 		};
 		this.clientInfo.socket.send(JSON.stringify(unblockClientMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'unblockClientResponse' && content.message === 'OK') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "unblockClientResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
 			};
-			this.clientInfo.socket.addEventListener('message', listener);
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
-		const unblockClient = this.clientInfo.friendInfo.clientListIBlocked.find(
-			(client) => client.id === id
-		);
+		const unblockClient = this.clientInfo.friendInfo.clientListIBlocked.find(client => client.id === id);
 		if (unblockClient) {
-			this.clientInfo.friendInfo.clientListIBlocked =
-				this.clientInfo.friendInfo.clientListIBlocked.filter(
-					(client) => client.id !== unblockClient.id
-				);
+			this.clientInfo.friendInfo.clientListIBlocked = this.clientInfo.friendInfo.clientListIBlocked.filter(client => client.id !== unblockClient.id);
 			this._renderTabByCurrentMode();
 		}
 	}
@@ -470,13 +404,13 @@ class FriendManagementPageManager {
 	}
 
 	_autoSetScrollTrackColor() {
-		const clientListContainer = document.querySelector('.clientListContainer');
+		const clientListContainer = document.querySelector(".clientListContainer");
 		if (clientListContainer.scrollHeight > clientListContainer.clientHeight) {
-			clientListContainer.classList.add('transparent-scrolltrack');
-			clientListContainer.classList.remove('scrollbar-scrolltrack');
+			clientListContainer.classList.add("transparent-scrolltrack");
+			clientListContainer.classList.remove("scrollbar-scrolltrack");
 		} else {
-			clientListContainer.classList.remove('transparent-scrolltrack');
-			clientListContainer.classList.add('scrollbar-scrolltrack');
+			clientListContainer.classList.remove("transparent-scrolltrack");
+			clientListContainer.classList.add("scrollbar-scrolltrack");
 		}
 	}
 
@@ -510,32 +444,24 @@ class FriendManagementPageManager {
 		`;
 	}
 	_getSearchedClientListHTML(clientList) {
-		const {
-			friendList,
-			clientListWhoFriendRequestedMe,
-			clientListIFriendRequested,
-		} = this.clientInfo.friendInfo;
+		const { friendList, clientListWhoFriendRequestedMe, clientListIFriendRequested } = this.clientInfo.friendInfo;
 
-		const getClientItemHTML = (client) => {
-			let buttonKoTitle = '친구 요청';
-			let buttonEnTitle = 'requestButton';
-			let buttonState = 'activatedButton';
-			if (friendList.some((friend) => friend.id === client.id)) {
+		const getClientItemHTML = client => {
+			let buttonKoTitle = "친구 요청";
+			let buttonEnTitle = "requestButton";
+			let buttonState = "activatedButton";
+			if (friendList.some(friend => friend.id === client.id)) {
 				// 이미 친구인 유저 -> 반응 X
-				buttonState = 'disabledButton';
-				buttonEnTitle = '';
-			} else if (
-				clientListWhoFriendRequestedMe.some((friend) => friend.id === client.id)
-			) {
+				buttonState = "disabledButton";
+				buttonEnTitle = "";
+			} else if (clientListWhoFriendRequestedMe.some(friend => friend.id === client.id)) {
 				// 내게 친구 요청을 보낸 유저 -> 친구 요청 수락
-				buttonKoTitle = '친구 수락';
-				buttonEnTitle = 'acceptButton';
-			} else if (
-				clientListIFriendRequested.some((friend) => friend.id === client.id)
-			) {
+				buttonKoTitle = "친구 수락";
+				buttonEnTitle = "acceptButton";
+			} else if (clientListIFriendRequested.some(friend => friend.id === client.id)) {
 				// 내가 친구 요청을 보낸 유저 -> 친구 요청 취소
-				buttonKoTitle = '요청 취소';
-				buttonEnTitle = 'cancelRequestButton';
+				buttonKoTitle = "요청 취소";
+				buttonEnTitle = "cancelRequestButton";
 			}
 			return `
 				<div class="clientItem" data-id="${client.id}">
@@ -544,25 +470,23 @@ class FriendManagementPageManager {
 					</div>
 					<div class="nickname">${client.nickname}</div>
 					<div class="buttonGroup">
-						<div class="clientManagementButton ${buttonEnTitle} ${buttonState}" ${
-				buttonState === 'disabledButton' ? 'disabled' : ''
-			}>${buttonKoTitle}</div>
+						<div class="clientManagementButton ${buttonEnTitle} ${buttonState}" ${buttonState === "disabledButton" ? "disabled" : ""}>${buttonKoTitle}</div>
 						<div class="clientManagementButton blockButton activatedButton">차단</div>
 					</div>
 				</div>
 			`;
 		};
-		let clientListHTML = '';
+		let clientListHTML = "";
 		if (clientList !== null) {
 			clientListHTML = clientList.reduce((acc, current) => {
 				return acc + getClientItemHTML(current);
-			}, '');
+			}, "");
 		}
 		return clientListHTML;
 	}
 
 	_getFriendRequestListContainerHTML() {
-		const getfriendRequestItemHtml = (client) => {
+		const getfriendRequestItemHtml = client => {
 			return `
 			<div class="clientItem" data-id="${client.id}">
 				<div class="avatarImgFrame">
@@ -576,16 +500,13 @@ class FriendManagementPageManager {
 			</div>
 			`;
 		};
-		const clientRequestListHTML =
-			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe
-				.filter((client) => {
-					return this.clientInfo.friendInfo.clientListIBlocked.every(
-						(blockClient) => blockClient.id !== client.id
-					);
-				})
-				.reduce((acc, current) => {
-					return acc + getfriendRequestItemHtml(current);
-				}, '');
+		const clientRequestListHTML = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe
+			.filter(client => {
+				return this.clientInfo.friendInfo.clientListIBlocked.every(blockClient => blockClient.id !== client.id);
+			})
+			.reduce((acc, current) => {
+				return acc + getfriendRequestItemHtml(current);
+			}, "");
 		return `
 			<div class="clientListContainer">
 				${clientRequestListHTML}
@@ -594,7 +515,7 @@ class FriendManagementPageManager {
 	}
 
 	_getFriendListContainerHTML() {
-		const getfriendItemHtml = (requestClient) => {
+		const getfriendItemHtml = requestClient => {
 			return `
 			<div class="clientItem" data-id="${requestClient.id}">
 				<div class="avatarImgFrame">
@@ -608,12 +529,9 @@ class FriendManagementPageManager {
 			</div>
 			`;
 		};
-		const clientListHTML = this.clientInfo.friendInfo.friendList.reduce(
-			(acc, current) => {
-				return acc + getfriendItemHtml(current);
-			},
-			''
-		);
+		const clientListHTML = this.clientInfo.friendInfo.friendList.reduce((acc, current) => {
+			return acc + getfriendItemHtml(current);
+		}, "");
 		return `
 			<div class="clientListContainer">
 				${clientListHTML}
@@ -622,7 +540,7 @@ class FriendManagementPageManager {
 	}
 
 	_getBlockListManagementContainerHTML() {
-		const getfriendItemHtml = (requestClient) => {
+		const getfriendItemHtml = requestClient => {
 			return `
 			<div class="clientItem" data-id="${requestClient.id}">
 				<div class="avatarImgFrame">
@@ -636,12 +554,9 @@ class FriendManagementPageManager {
 			</div>
 			`;
 		};
-		const clientListHTML = this.clientInfo.friendInfo.clientListIBlocked.reduce(
-			(acc, current) => {
-				return acc + getfriendItemHtml(current);
-			},
-			''
-		);
+		const clientListHTML = this.clientInfo.friendInfo.clientListIBlocked.reduce((acc, current) => {
+			return acc + getfriendItemHtml(current);
+		}, "");
 		return `
 			<div class="clientListContainer">
 				${clientListHTML}
