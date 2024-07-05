@@ -81,7 +81,7 @@ class ChattingPageManager {
 			if (this.isOpened && event.target.closest('.chatContainer') === null) {
 				this._closeChatContainer();
 			}
-		})
+		});
 	}
 
 	_openChatContainer() {
@@ -90,13 +90,6 @@ class ChattingPageManager {
 		this.chatContainer.className = 'chatContainer';
 		this.chatContainer.innerHTML = this._getChatContainerHTML();
 		document.body.appendChild(this.chatContainer);
-
-		// this.selectedFriendItem = null;
-		// this.selectedInviteButton = null;
-
-		// const firstFriendItem = document.querySelector('.friendItem');
-		// this._setSelectedFriendItem(firstFriendItem);
-		// this._setFriendItems();
 
 		const firstFriendId = this._getSortedFriendList()[0].id;
 
@@ -143,6 +136,7 @@ class ChattingPageManager {
 	_setFriendItems() { // TODO : 리렌더링 시 호출
 		document.querySelectorAll('.friendItem').forEach((item) => {
 			item.addEventListener('click', async (event) => {
+				event.stopPropagation();
 				if (event.target.classList.contains('inviteButton')) {
 					console.log('초대 버튼 클릭');
 					// TODO : 초대 버튼 클릭 시 구현
@@ -221,6 +215,12 @@ class ChattingPageManager {
 		// });
 
 		this.readingFriendId = id;
+		const friend = this.clientInfo.friendInfo.friendList.find((friend) => friend.id === id);
+		if (friend) {
+			friend.chat.unreadMessageCount = 0;
+			this._renderFriendList();
+			this._renderTotalUnreadMessageCount();
+		}
 
 		const messageList = [
 			{ senderId: 1, content: '오늘 한 판 고고?' },
@@ -291,9 +291,7 @@ class ChattingPageManager {
 
 	_getChatContainerHTML() {
 		return `
-            <div class="FriendListContainer">
-                ${this._getFriendListHTML()}
-            </div>
+            <div class="FriendListContainer"></div>
             ${this._getMessageBoxContainerHTML()}
         `
 	}
