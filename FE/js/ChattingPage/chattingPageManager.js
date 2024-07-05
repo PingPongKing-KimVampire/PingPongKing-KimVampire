@@ -257,6 +257,14 @@ class ChattingPageManager {
 				friend.chat.unreadMessageCount = 0;
 			}
 		}
+		if (event === 'notifyFriendDeleted') {
+			if (this.readingFriendId === content.clientInfo.id) {
+				document.querySelector('.messageInputContainer').classList.add('disabledMessageInputContainer');
+				const inputBox = document.querySelector('.inputBox')
+				inputBox.placeholder = '더 이상 대화할 수 없습니다.';
+				inputBox.disabled = true;
+			}
+		}
 		if (event === 'acceptFriendRequestResponse'
 			|| event === 'notifyFriendRequestAccepted'
 			|| event === 'deleteFriendResponse'
