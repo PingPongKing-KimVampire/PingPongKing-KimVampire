@@ -11,22 +11,22 @@ class ChattingPageManager {
 		// TODO : 임시 하드코딩
 		this.clientInfo.friendInfo.friendList = [{
 			id: 1, nickname: '조뱀파이어어어어어어', avatarUrl: 'images/playerA.png', activeState: "ACTIVE",
-			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
+			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 1 }
 		}, {
 			id: 2, nickname: '박뱀파이어', avatarUrl: 'images/humanIcon.png', activeState: "ACTIVE",
 			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
 		}, {
 			id: 3, nickname: '이뱀파이어', avatarUrl: 'images/playerB.png', activeState: "INACTIVE",
-			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
+			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 0 }
 		}, {
 			id: 4, nickname: '김뱀파이어', avatarUrl: 'images/playerA.png', activeState: "ACTIVE",
-			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
+			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 2 }
 		}, {
 			id: 5, nickname: '최뱀파이어', avatarUrl: 'images/playerA.png', activeState: "ACTIVE",
-			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 3 }
+			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 0 }
 		}, {
 			id: 6, nickname: '정뱀파이어', avatarUrl: 'images/playerA.png', activeState: "INACTIVE",
-			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 100 }
+			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 1000 }
 		},
 		];
 
@@ -38,6 +38,11 @@ class ChattingPageManager {
 	_appendChatButton() {
 		const button = document.createElement('button');
 		button.className = 'chatButton';
+
+		this.totalUnreadCount = document.createElement('div');
+		this.totalUnreadCount.className = 'totalUnreadCount';
+		button.append(this.totalUnreadCount);
+
 		document.body.appendChild(button);
 		this._renderTotalUnreadMessageCount();
 		// this.clientInfo.socket.addEventListener('message', (messageEvent) => {
@@ -48,9 +53,15 @@ class ChattingPageManager {
 		// })
 	}
 	_renderTotalUnreadMessageCount() {
-		document.querySelector('.chatButton').textContent = this.clientInfo.friendInfo.friendList.reduce((acc, current) => {
+		const count = this.clientInfo.friendInfo.friendList.reduce((acc, current) => {
 			return acc + current.chat.unreadMessageCount;
 		}, 0);
+		if (count === 0) {
+			this.totalUnreadCount.classList.add('invisible');
+		} else {
+			this.totalUnreadCount.classList.remove('invisible');
+			this.totalUnreadCount.textContent = count > 999 ? '999+' : count;
+		}
 	}
 
 	_initPage() {
@@ -287,7 +298,7 @@ class ChattingPageManager {
         `
 	}
 	_getFriendListHTML() {
-		const _getFriendItemHTML = function (friend) {
+		const getFriendItemHTML = function (friend) {
 			return `
                 <button class="friendItem" data-id="${friend.id}">
                     <div class="avatarContainer">
@@ -301,12 +312,15 @@ class ChattingPageManager {
                         <div class="recentMessage">${friend.chat.recentMessage}</div>
                     </div>
                     <div class="inviteButton invisible ${friend.activeState === 'ACTIVE' ? '' : 'disabledInviteButton'}">초대</div>
-					<div class="unreadCount">${friend.chat.unreadMessageCount}</div>
+					<div class="unreadCount ${friend.chat.unreadMessageCount === 0 ? 'invisible' : ''}">${getUnreadCount(friend)}</div>
                 </button>
             `;
 		}
+		const getUnreadCount = function (friend) {
+			return friend.chat.unreadMessageCount > 999 ? '999+' : `${friend.chat.unreadMessageCount}`;
+		}
 		const friendListHTML = this._getSortedFriendList().reduce((acc, currnet) => {
-			return acc + _getFriendItemHTML(currnet);
+			return acc + getFriendItemHTML(currnet);
 		}, '');
 		return friendListHTML;
 	}
