@@ -1,9 +1,9 @@
-import { SERVER_ADDRESS } from '../PageRouter.js';
-import { SERVER_PORT } from '../PageRouter.js';
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
 
 class LoginPageManager {
 	constructor(app, clientInfo, onLoginSuccess, onEnterSignupPage) {
-		console.log('Login Page!');
+		console.log("Login Page!");
 
 		this.clientInfo = clientInfo;
 		this.onLoginSuccess = onLoginSuccess;
@@ -12,31 +12,29 @@ class LoginPageManager {
 	}
 
 	initPage() {
-		this.idInput = document.querySelector('#idInput');
-		this.pwInput = document.querySelector('#pwInput');
-		this.idInput.addEventListener('input', this._updateLoginButton.bind(this));
-		this.pwInput.addEventListener('input', this._updateLoginButton.bind(this));
+		this.idInput = document.querySelector("#idInput");
+		this.pwInput = document.querySelector("#pwInput");
+		this.idInput.addEventListener("input", this._updateLoginButton.bind(this));
+		this.pwInput.addEventListener("input", this._updateLoginButton.bind(this));
 
-		this.warning = document.querySelector('.warning');
+		this.warning = document.querySelector(".warning");
 
-		this.loginButton = document.querySelector('#loginButton');
+		this.loginButton = document.querySelector("#loginButton");
 		this.loginButton.disabled = true;
-		this.loginButton.addEventListener('click', this._loginListener.bind(this));
+		this.loginButton.addEventListener("click", this._loginListener.bind(this));
 
-		document
-			.querySelector('#signupButton')
-			.addEventListener('click', this.onEnterSignupPage);
+		document.querySelector("#signupButton").addEventListener("click", this.onEnterSignupPage);
 	}
 
 	_updateLoginButton() {
-		if (this.idInput.value !== '' && this.pwInput.value !== '') {
+		if (this.idInput.value !== "" && this.pwInput.value !== "") {
 			this.loginButton.disabled = false;
-			this.loginButton.classList.remove('disabledButton');
-			this.loginButton.classList.add('activatedButton');
+			this.loginButton.classList.remove("disabledButton");
+			this.loginButton.classList.add("activatedButton");
 		} else {
 			this.loginButton.disabled = true;
-			this.loginButton.classList.add('disabledButton');
-			this.loginButton.classList.remove('activatedButton');
+			this.loginButton.classList.add("disabledButton");
+			this.loginButton.classList.remove("activatedButton");
 		}
 	}
 
@@ -54,14 +52,12 @@ class LoginPageManager {
 			this.clientInfo.avatarUrl = userData.avatarUrl;
 			this.clientInfo.socket = socket;
 			// this.clientInfo.lobbySocket = lobbySocket;
-			this.clientInfo.friendInfo = await this._getFriendInfo(
-				this.clientInfo.socket
-			);
+			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
 
 			this.onLoginSuccess();
 		} catch (error) {
-			this.warning.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+			this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
 		}
 	}
 
@@ -73,18 +69,18 @@ class LoginPageManager {
 		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/login`;
 		try {
 			const response = await fetch(url, {
-				method: 'POST',
+				method: "POST",
 				headers: {
-					'Content-Type': 'application/json',
+					"Content-Type": "application/json",
 				},
 				body: JSON.stringify(userData),
 			});
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
-			const bearerAccessToken = response.headers.get('Authorization');
-			const accessToken = bearerAccessToken.replace('Bearer ', '');
-			if (!accessToken) throw new Error('No AccessToken');
+			const bearerAccessToken = response.headers.get("Authorization");
+			const accessToken = bearerAccessToken.replace("Bearer ", "");
+			if (!accessToken) throw new Error("No AccessToken");
 			this.accessToken = accessToken;
 		} catch (error) {
 			throw error;
@@ -93,33 +89,33 @@ class LoginPageManager {
 
 	async _connectGlobalSocket(id) {
 		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`);
-		await new Promise((resolve) => {
-			socket.addEventListener('open', () => {
+		await new Promise(resolve => {
+			socket.addEventListener("open", () => {
 				resolve();
 			});
 		});
 		const initClientMessage = {
-			event: 'initClient',
+			event: "initClient",
 			content: {
 				cliendId: id,
 				accessToken: this.accessToken,
 			},
 		};
 		socket.send(JSON.stringify(initClientMessage));
-		const userData = await new Promise((resolve) => {
+		const userData = await new Promise(resolve => {
 			socket.addEventListener(
-				'message',
+				"message",
 				function listener(messageEvent) {
 					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === 'initClientResponse' && content.message === 'OK') {
-						socket.removeEventListener('message', listener);
+					if (event === "initClientResponse" && content.message === "OK") {
+						socket.removeEventListener("message", listener);
 						resolve({
 							nickname: content.clientNickname,
 							avatarUrl: content.clientAvatarUrl,
 							id: content.clientId,
 						});
 					}
-				}.bind(this)
+				}.bind(this),
 			);
 		});
 		return { socket, userData };
@@ -129,160 +125,123 @@ class LoginPageManager {
 		const friendInfo = {};
 		//ToDo: Promise.all로 리팩토링
 		friendInfo.friendList = await this._getFriendList(socket);
-		friendInfo.clientListWhoFriendRequestedMe =
-			await this._getClientListWhoFriendRequestedMe(socket);
-		friendInfo.clientListIFriendRequested =
-			await this._getClientListIFriendRequested(socket);
+		friendInfo.clientListWhoFriendRequestedMe = await this._getClientListWhoFriendRequestedMe(socket);
+		friendInfo.clientListIFriendRequested = await this._getClientListIFriendRequested(socket);
 		friendInfo.clientListIBlocked = await this._getClientListIBlocked(socket);
 		return friendInfo;
 	}
 
 	_getFriendList(socket) {
 		const getFriendListMessage = {
-			event: 'getFriendList',
+			event: "getFriendList",
 			content: {},
 		};
 		socket.send(JSON.stringify(getFriendListMessage));
-		return new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		return new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'getFriendListResponse' && content.message === 'OK') {
-					socket.removeEventListener('message', listener);
+				if (event === "getFriendListResponse" && content.message === "OK") {
+					socket.removeEventListener("message", listener);
 					resolve(content.clientList);
 				}
 			};
-			socket.addEventListener('message', listener);
+			socket.addEventListener("message", listener);
 		});
 	}
 
 	_getClientListWhoFriendRequestedMe(socket) {
 		const getClientListWhoFriendRequestedMeMessage = {
-			event: 'getClientListWhoFriendRequestedMe',
+			event: "getClientListWhoFriendRequestedMe",
 			content: {},
 		};
 		socket.send(JSON.stringify(getClientListWhoFriendRequestedMeMessage));
-		return new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		return new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (
-					event === 'getClientListWhoFriendRequestedMeResponse' &&
-					content.message === 'OK'
-				) {
-					socket.removeEventListener('message', listener);
+				if (event === "getClientListWhoFriendRequestedMeResponse" && content.message === "OK") {
+					socket.removeEventListener("message", listener);
 					resolve(content.clientList);
 				}
 			};
-			socket.addEventListener('message', listener);
+			socket.addEventListener("message", listener);
 		});
 	}
 
 	_getClientListIFriendRequested(socket) {
 		const getClientListIFriendRequestedMessage = {
-			event: 'getClientListIFriendRequested',
+			event: "getClientListIFriendRequested",
 			content: {},
 		};
 		socket.send(JSON.stringify(getClientListIFriendRequestedMessage));
-		return new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		return new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (
-					event === 'getClientListIFriendRequestedResponse' &&
-					content.message === 'OK'
-				) {
-					socket.removeEventListener('message', listener);
+				if (event === "getClientListIFriendRequestedResponse" && content.message === "OK") {
+					socket.removeEventListener("message", listener);
 					resolve(content.clientList); // TODO : clientList 여야 하지 않을까?
 				}
 			};
-			socket.addEventListener('message', listener);
+			socket.addEventListener("message", listener);
 		});
 	}
 
 	_getClientListIBlocked(socket) {
 		const getClientListIBlockedMessage = {
-			event: 'getClientListIBlocked',
+			event: "getClientListIBlocked",
 			content: {},
 		};
 		socket.send(JSON.stringify(getClientListIBlockedMessage));
-		return new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		return new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (
-					event === 'getClientListIBlockedResponse' &&
-					content.message === 'OK'
-				) {
-					socket.removeEventListener('message', listener);
+				if (event === "getClientListIBlockedResponse" && content.message === "OK") {
+					socket.removeEventListener("message", listener);
 					resolve(content.clientList);
 				}
 			};
-			socket.addEventListener('message', listener);
+			socket.addEventListener("message", listener);
 		});
 	}
 
 	_setFriendInfoNotifyListener(socket) {
-		socket.addEventListener('message', (messageEvent) => {
+		socket.addEventListener("message", messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
 
-			if (event === 'notifyFriendRequestReceive') {
+			if (event === "notifyFriendRequestReceive") {
 				//누군가 나에게 친구 요청
-				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.push(
-					content.clientInfo
-				);
-			} else if (event === 'notifyFriendRequestCanceled') {
+				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.push(content.clientInfo);
+			} else if (event === "notifyFriendRequestCanceled") {
 				//누군가 나에게 친구 요청 취소
-				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe =
-					this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(
-						(client) => client.id !== content.clientInfo.id
-					);
-			} else if (event === 'notifyFriendRequestAccepted') {
+				this.clientInfo.friendInfo.clientListWhoFriendRequestedMe = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(client => client.id !== content.clientInfo.id);
+			} else if (event === "notifyFriendRequestAccepted") {
 				// 누군가 내 친구 요청을 수락
-				const acceptedClient =
-					this.clientInfo.friendInfo.clientListIFriendRequested.find(
-						(client) => client.id === content.clientInfo.id
-					);
+				const acceptedClient = this.clientInfo.friendInfo.clientListIFriendRequested.find(client => client.id === content.clientInfo.id);
 				if (acceptedClient) {
-					this.clientInfo.friendInfo.clientListIFriendRequested =
-						this.clientInfo.friendInfo.clientListIFriendRequested.filter(
-							(client) => client.id !== content.clientInfo.id
-						);
+					this.clientInfo.friendInfo.clientListIFriendRequested = this.clientInfo.friendInfo.clientListIFriendRequested.filter(client => client.id !== content.clientInfo.id);
 
 					this.clientInfo.friendInfo.friendList.push(acceptedClient);
 				}
-			} else if (event === 'notifyFriendRequestRejected') {
+			} else if (event === "notifyFriendRequestRejected") {
 				// 누군가 내 친구 요청을 거절
-				const rejectedClient =
-					this.clientInfo.friendInfo.clientListIFriendRequested.find(
-						(client) => client.id === content.clientInfo.id
-					);
+				const rejectedClient = this.clientInfo.friendInfo.clientListIFriendRequested.find(client => client.id === content.clientInfo.id);
 				if (rejectedClient) {
-					this.clientInfo.friendInfo.clientListIFriendRequested =
-						this.clientInfo.friendInfo.clientListIFriendRequested.filter(
-							(client) => client.id !== content.clientInfo.id
-						);
+					this.clientInfo.friendInfo.clientListIFriendRequested = this.clientInfo.friendInfo.clientListIFriendRequested.filter(client => client.id !== content.clientInfo.id);
 				}
-			} else if (event === 'notifyFriendDeleted') {
+			} else if (event === "notifyFriendDeleted") {
 				// 누군가 나를 친구 삭제
-				const deletedClient = this.clientInfo.friendInfo.friendList.find(
-					(client) => client.id === content.clientInfo.id
-				);
+				const deletedClient = this.clientInfo.friendInfo.friendList.find(client => client.id === content.clientInfo.id);
 				if (deletedClient) {
-					this.clientInfo.friendInfo.friendList =
-						this.clientInfo.friendInfo.friendList.filter(
-							(client) => client.id !== content.clientInfo.id
-						);
+					this.clientInfo.friendInfo.friendList = this.clientInfo.friendInfo.friendList.filter(client => client.id !== content.clientInfo.id);
 				}
-			} else if (event === 'notifyMessageArrive') {
+			} else if (event === "notifyMessageArrive") {
 				// 채팅 메시지 도착
-				let friend = this.clientInfo.friendInfo.friendList.find(
-					(friend) => friend.id === content.sendClientId || friend.id === content.receiveClientId
-				);
+				let friend = this.clientInfo.friendInfo.friendList.find(friend => friend.id === content.sendClientId || friend.id === content.receiveClientId);
 				friend.chat.recentMessage = content.message;
 				friend.chat.recentTimestamp = content.timestamp;
 				friend.chat.unreadMessageCount += 1; // TODO : chattingPage에서 알아서 0으로 초기화
-			} else if (event === 'notifyFriendActiveStateChange') {
+			} else if (event === "notifyFriendActiveStateChange") {
 				// 친구의 활성 상태 변경
-				const friend = this.clientInfo.friendInfo.friendList.find(
-					(friend) => friend.id === content.cliendId
-				);
+				const friend = this.clientInfo.friendInfo.friendList.find(friend => friend.id === content.cliendId);
 				friend.activeState = content.activeState;
 			}
 		});
@@ -298,31 +257,29 @@ class LoginPageManager {
 	// }
 
 	async _connectLobbySocket(id) {
-		const lobbySocket = new WebSocket(
-			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
-		);
-		await new Promise((resolve) => {
-			lobbySocket.addEventListener('open', () => {
+		const lobbySocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`);
+		await new Promise(resolve => {
+			lobbySocket.addEventListener("open", () => {
 				resolve();
 			});
 		});
 		const enterLobbyMessage = {
-			event: 'enterLobby',
+			event: "enterLobby",
 			content: {
 				cliendId: id,
 			},
 		};
 		lobbySocket.send(JSON.stringify(enterLobbyMessage));
-		await new Promise((resolve) => {
+		await new Promise(resolve => {
 			lobbySocket.addEventListener(
-				'message',
+				"message",
 				function (messageEvent) {
 					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === 'enterLobbyResponse' && content.message === 'OK') {
-						lobbySocket.removeEventListener('message', listener);
+					if (event === "enterLobbyResponse" && content.message === "OK") {
+						lobbySocket.removeEventListener("message", listener);
 						resolve();
 					}
-				}.bind(this)
+				}.bind(this),
 			);
 		});
 	}

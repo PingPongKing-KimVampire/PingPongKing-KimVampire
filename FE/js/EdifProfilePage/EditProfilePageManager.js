@@ -27,31 +27,30 @@ class EditProfilePageManager {
 		this.isAvatarUpdated = false;
 		this.isDefaultAvatar;
 
-		this.avatarImg = document.querySelector('#avatarImg');
+		this.avatarImg = document.querySelector("#avatarImg");
 
-		this.nicknameInput = document.querySelector('#nicknameInput');
-		this.nicknameInput.addEventListener('input', async () => {
+		this.nicknameInput = document.querySelector("#nicknameInput");
+		this.nicknameInput.addEventListener("input", async () => {
 			this.isNicknameUpdated = await this._checkNickname();
 			this._updateCompleteButton(this.isNicknameUpdated, this.isAvatarUpdated);
 		});
-		this.nicknameWarning = document.querySelector('#warning');
+		this.nicknameWarning = document.querySelector("#warning");
 
-		this.completeButton = document.querySelector('#completeButton');
+		this.completeButton = document.querySelector("#completeButton");
 		this.completeButton.disabled = true;
-		this.completeButton.addEventListener('click', this._completeEditProfile);
+		this.completeButton.addEventListener("click", this._completeEditProfile);
 
 		this._initAvatarSelectionModal();
 		this._initExitModal();
 	}
 
 	_checkNickname = async () => {
-		if(this.nicknameInput.value === this.clientInfo.nickname){
+		if (this.nicknameInput.value === this.clientInfo.nickname) {
 			this.nicknameWarning.textContent = "";
 			return false;
 		}
 		if (!this._validateNickname(this.nicknameInput.value)) {
-			const invalidNicknameMessage =
-				"1에서 20자의 영문, 숫자, 한글만 사용 가능합니다.";
+			const invalidNicknameMessage = "1에서 20자의 영문, 숫자, 한글만 사용 가능합니다.";
 			this.nicknameWarning.textContent = invalidNicknameMessage;
 			return false;
 		}
@@ -62,7 +61,7 @@ class EditProfilePageManager {
 		}
 		this.nicknameWarning.textContent = "";
 		return true;
-	}
+	};
 	_validateNickname(nickname) {
 		const regex = /^[A-Za-z가-힣0-9]{1,20}$/;
 		return regex.test(nickname);
@@ -72,10 +71,10 @@ class EditProfilePageManager {
 		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/check-nickname?${query}`;
 		try {
 			const response = await fetch(url, {
-				method: 'GET',
+				method: "GET",
 				headers: {
-					'Content-Type': 'application/json'
-				}
+					"Content-Type": "application/json",
+				},
 			});
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
@@ -83,18 +82,18 @@ class EditProfilePageManager {
 			const data = await response.json();
 			return data.is_available;
 		} catch (error) {
-			console.error('Error:', error);
+			console.error("Error:", error);
 		}
 	}
 
 	_updateCompleteButton(isNicknameUpdated, isAvatarUpdated) {
 		if (isNicknameUpdated || isAvatarUpdated) {
 			this.completeButton.disabled = false;
-			this.completeButton.classList.add('generalButton');
+			this.completeButton.classList.add("generalButton");
 			this.completeButton.classList.remove("disabledButton");
 		} else {
 			this.completeButton.disabled = true;
-			this.completeButton.classList.remove('generalButton');
+			this.completeButton.classList.remove("generalButton");
 			this.completeButton.classList.add("disabledButton");
 		}
 	}
@@ -103,9 +102,9 @@ class EditProfilePageManager {
 		const editMessage = {
 			event: "updateClientInfo",
 			content: {
-				waitingRoomInfo: {}
-			}
-		}
+				waitingRoomInfo: {},
+			},
+		};
 		if (this.isNicknameUpdated) {
 			editMessage.content.waitingRoomInfo.nickname = this.nicknameInput.value;
 		}
@@ -120,18 +119,18 @@ class EditProfilePageManager {
 		}
 
 		this.clientInfo.socket.send(JSON.stringify(editMessage));
-		await new Promise((resolve) => {
-			const listener = (messsageEvent) => {
+		await new Promise(resolve => {
+			const listener = messsageEvent => {
 				const { event, content } = JSON.parse(messsageEvent.data);
-				if (event === "updateClientInfoResponse" && content.message === 'OK') {
+				if (event === "updateClientInfoResponse" && content.message === "OK") {
 					resolve();
 				}
 				// TODO : 실패 시 처리하기
-			}
-			this.clientInfo.socket.addEventListener('message', listener);
-		})
-		// TODO : 이후 마이페이지 렌더링하기 
-	}
+			};
+			this.clientInfo.socket.addEventListener("message", listener);
+		});
+		// TODO : 이후 마이페이지 렌더링하기
+	};
 
 	_initAvatarSelectionModal() {
 		this.avatarSelectionModal = document.querySelector(".avatarSelectionModal");
@@ -141,7 +140,7 @@ class EditProfilePageManager {
 	}
 	_renderAvatarEditModal() {
 		this.avatarSelectionModal.style.display = "flex";
-		const modalClicked = (e) => {
+		const modalClicked = e => {
 			if (e.target.className.includes("selectionAvatarImage")) {
 				this.avatarImg.src = e.target.src;
 				this.isAvatarUpdated = e.target.dataset.src !== this.clientInfo.avatarUrl;
@@ -152,7 +151,7 @@ class EditProfilePageManager {
 				this._hideAvatarEditModal.call(this);
 			}
 			this.avatarSelectionModal.removeEventListener("click", modalClicked);
-		}
+		};
 		this.avatarSelectionModal.addEventListener("click", modalClicked);
 	}
 	_setUploadAvatarFrame() {
@@ -161,12 +160,12 @@ class EditProfilePageManager {
 		uploadFrame.addEventListener("click", () => {
 			fileInput.click();
 		});
-		fileInput.addEventListener("change", (event) => {
+		fileInput.addEventListener("change", event => {
 			const file = event.target.files[0];
 			if (file) {
 				//파일을 화면에 렌더링한다.
 				const reader = new FileReader();
-				reader.onload = (e) => {
+				reader.onload = e => {
 					this.avatarImg.src = e.target.result;
 					this.isAvatarUpdated = true;
 					this.isDefaultAvatar = false;
@@ -182,28 +181,27 @@ class EditProfilePageManager {
 	}
 
 	_initExitModal() {
-		this.exitModal = document.querySelector('.questionModal');
-		this.exitYesButton = document.querySelector('.questionModal button:nth-of-type(1)');
-		this.exitNoButton = document.querySelector('.questionModal button:nth-of-type(2)');
+		this.exitModal = document.querySelector(".questionModal");
+		this.exitYesButton = document.querySelector(".questionModal button:nth-of-type(1)");
+		this.exitNoButton = document.querySelector(".questionModal button:nth-of-type(2)");
 
-		document.querySelector('.exitButton')
-			.addEventListener('click', () => {
-				this._renderExitModal();
-				this.exitYesButton.addEventListener('click', this._exitEditProfilePage);
-				this.exitNoButton.addEventListener('click', this._hideExitModal);
-			});
+		document.querySelector(".exitButton").addEventListener("click", () => {
+			this._renderExitModal();
+			this.exitYesButton.addEventListener("click", this._exitEditProfilePage);
+			this.exitNoButton.addEventListener("click", this._hideExitModal);
+		});
 	}
 	_renderExitModal = () => {
-		this.exitModal.style.display = 'flex';
-	}
+		this.exitModal.style.display = "flex";
+	};
 	_exitEditProfilePage = () => {
 		// TODO : 프로필 편집 페이지에서 뒤로 가는 로직 작성하기
-	}
+	};
 	_hideExitModal = () => {
-		this.exitModal.style.display = 'none';
-		this.exitYesButton.removeEventListener('click', this._exitEditProfilePage);
-		this.exitNoButton.removeEventListener('click', this._hideExitModal);
-	}
+		this.exitModal.style.display = "none";
+		this.exitYesButton.removeEventListener("click", this._exitEditProfilePage);
+		this.exitNoButton.removeEventListener("click", this._hideExitModal);
+	};
 
 	_getHTML() {
 		return `
@@ -233,7 +231,7 @@ class EditProfilePageManager {
 				`<div class="selectionAvatarFrame">
 					<img class="selectionAvatarImage" src="${path}" data-src="${path}">
 				</div>`,
-			""
+			"",
 		);
 		return `
 		  <div class="avatarSelectionModal">
