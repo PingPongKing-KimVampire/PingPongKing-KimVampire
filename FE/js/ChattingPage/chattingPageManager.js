@@ -1,12 +1,12 @@
 class ChattingPageManager {
 	constructor(chat, clientInfo) {
-		console.log("Chatting Page!");
+		console.log('Chatting Page!');
 
 		this.clientInfo = clientInfo;
 		//추후 삭제해야함
 		this.clientInfo = {
 			id: 1,
-			friendInfo: {}
+			friendInfo: {},
 		};
 		// TODO : 임시 하드코딩
 		this.clientInfo.friendInfo.friendList = [{
@@ -29,7 +29,6 @@ class ChattingPageManager {
 			chat: { recentMessage: "하이하이하이하이하이하이하이하이", recentTimestamp: "2024-07-02T14:30:00Z", unreadMessageCount: 1000 }
 		},
 		];
-
 		this._appendChatButton();
 
 		this._initPage();
@@ -68,11 +67,21 @@ class ChattingPageManager {
 		this.isOpened = false;
 		this.readingFriendId = null;
 
-		document.querySelector(".chatButton").addEventListener("click", (event) => {
+		document.querySelector('.chatButton').addEventListener('click', (event) => {
 			event.stopPropagation();
 			if (this.isOpened) {
 				this._closeChatContainer();
 			} else {
+				//친구가 없다면
+				if (this.clientInfo.friendInfo.friendList.length === 0) {
+					if (this._noFriendContainerOpened) {
+						this._closeNoFriendChatContainer();
+					} else {
+						this._openNoFriendChatContainer();
+					}
+					return;
+				}
+				//친구가 있다면
 				this._openChatContainer();
 			}
 		});
@@ -82,6 +91,65 @@ class ChattingPageManager {
 				this._closeChatContainer();
 			}
 		});
+	}
+
+	_openNoFriendChatContainer() {
+		this._noFriendContainerOpened = true;
+		this.noFriendContainer = document.createElement('div');
+		this.noFriendContainer.className = 'noFriendContainer';
+		document.body.appendChild(this.noFriendContainer);
+
+		const noFriendTitleContainer = document.createElement('div');
+		noFriendTitleContainer.className = 'noFriendTitleContainer';
+		noFriendTitleContainer.textContent = '친구가 없어서 슬픈 뱀파이어';
+		this.noFriendContainer.appendChild(noFriendTitleContainer);
+
+		const noFriendImageContainer = document.createElement('div');
+		noFriendImageContainer.className = 'noFriendImageContainer';
+		this.noFriendContainer.appendChild(noFriendImageContainer);
+
+		const noFriendTextContainer = document.createElement('div');
+		noFriendTextContainer.className = 'noFriendTextContainer';
+		noFriendTextContainer.innerHTML =
+			`친구가 없어서 슬픈 뱀파이어다.<br>친구를 사귀고 싶다.`;
+		this.noFriendContainer.appendChild(noFriendTextContainer);
+		this.noFriendContainerWindowClickListener = (event) => {
+			event.stopPropagation();
+			if (event.target.closest('.noFriendContainer') === null) {
+				this._closeNoFriendChatContainer();
+			}
+		};
+		window.addEventListener('click', this.noFriendContainerWindowClickListener);
+
+		// 친구가 새로 생긴경우
+		// this.noFriendAndGetFriendListener = (messageEvent) => {
+		// 	const { event, content } = JSON.parse(messageEvent.data);
+		// 	if (
+		// 		(event === 'acceptFriendRequestResponse' && content.message === 'OK') ||
+		// 		event === 'notifyFriendRequestAccepted'
+		// 	) {
+		// 		this._closeNoFriendChatContainer();
+		// 		this._openChatContainer();
+		// 	}
+		// };
+		// this.clientInfo.socket.addEventListener(
+		// 	'message',
+		// 	this.noFriendAndGetFriendListener
+		// );
+	}
+
+	_closeNoFriendChatContainer() {
+		window.removeEventListener(
+			'click',
+			this.noFriendContainerWindowClickListener
+		);
+		// this.clientInfo.socket.removeEventListener(
+		// 	'message',
+		// 	this.noFriendAndGetFriendListener
+		// );
+		this._noFriendContainerOpened = false;
+		this.noFriendContainer.remove();
+		this.noFriendContainer = null;
 	}
 
 	_openChatContainer() {
@@ -110,17 +178,22 @@ class ChattingPageManager {
 		// this.clientInfo.socket.removeEventListener('message', this._messageArriveListener);
 	}
 
-	_getSortedFriendList() { // 최근에 대화한 순으로 정렬
-		return this.clientInfo.friendInfo.friendList.slice().sort((friend1, friend2) => {
-			return new Date(friend2.chat.recentTimestamp) - new Date(friend1.chat.recentTimestamp);;
-		});
+	_getSortedFriendList() {
+		// 최근에 대화한 순으로 정렬
+		return this.clientInfo.friendInfo.friendList
+			.slice()
+			.sort((friend1, friend2) => {
+				return (
+					new Date(friend2.chat.recentTimestamp) -
+					new Date(friend1.chat.recentTimestamp)
+				);
+			});
 	}
 
 	_setInputButton() {
 		this.inputBox = document.querySelector('.inputBox');
 		document.querySelector('.inputButton').addEventListener('click', () => {
-			if (this.inputBox.value === '')
-				return;
+			if (this.inputBox.value === '') return;
 			// const sendMessage= {
 			// 	event: "sendMessage",
 			// 	content: {
@@ -130,10 +203,11 @@ class ChattingPageManager {
 			// }
 			// this.clientInfo.socket.send(JSON.stringify(sendMessage));
 			this.inputBox.value = '';
-		})
+		});
 	}
 
-	_setFriendItems() { // TODO : 리렌더링 시 호출
+	_setFriendItems() {
+		// TODO : 리렌더링 시 호출
 		document.querySelectorAll('.friendItem').forEach((item) => {
 			item.addEventListener('click', async (event) => {
 				event.stopPropagation();
@@ -153,10 +227,10 @@ class ChattingPageManager {
 
 	async _sendStopReadingMessage() {
 		const stopReadingChatMessage = {
-			event: "stopReadingChat",
+			event: 'stopReadingChat',
 			content: {
-				clientId: this.readingFriendId
-			}
+				clientId: this.readingFriendId,
+			},
 		};
 		this.readingFriendId = null;
 		// this.clientInfo.socket.send(JSON.stringify(stopReadingChatMessage));
@@ -185,10 +259,11 @@ class ChattingPageManager {
 	}
 
 	_renderFriendList() {
-		document.querySelector('.FriendListContainer').innerHTML = this._getFriendListHTML();
+		document.querySelector('.FriendListContainer').innerHTML =
+			this._getFriendListHTML();
 		const friendItems = Array.from(document.querySelectorAll('.friendItem'));
 		const readingItem = friendItems.find((item) => {
-			return parseInt(item.dataset.id) === this.readingFriendId
+			return parseInt(item.dataset.id) === this.readingFriendId;
 		});
 		this._setSelectedFriendItem(readingItem);
 		this._setFriendItems();
@@ -250,20 +325,31 @@ class ChattingPageManager {
 	}
 
 	_setMessageArriveListener() {
-		this.clientInfo.socket.addEventListener('message', this._messageArriveListener)
+		this.clientInfo.socket.addEventListener(
+			'message',
+			this._messageArriveListener
+		);
 	}
 	_messageArriveListener = (messageEvent) => {
 		const { event, content } = JSON.parse(messageEvent.data);
 		if (event === 'notifyMessageArrive') {
-			if (this.readingFriendId === content.sendClientId || this.readingFriendId === content.receiveClientId) {
+			if (
+				this.readingFriendId === content.sendClientId ||
+				this.readingFriendId === content.receiveClientId
+			) {
 				const messageElement = document.createElement('div');
-				const senderSide = content.sendClientId === this.clientInfo.id ? 'rightSender' : 'leftSender';
+				const senderSide =
+					content.sendClientId === this.clientInfo.id
+						? 'rightSender'
+						: 'leftSender';
 				messageElement.classList.add('messageBubble', senderSide);
 				messageElement.textContent = content.message;
 				this.messageListContainer.append(messageElement);
 				// TODO : 스크롤 내리기
 				const friend = this.clientInfo.friendInfo.friendList.find(
-					(friend) => friend.id === content.sendClientId || friend.id === content.receiveClientId
+					(friend) =>
+						friend.id === content.sendClientId ||
+						friend.id === content.receiveClientId
 				);
 				friend.chat.unreadMessageCount = 0;
 			}
@@ -287,13 +373,13 @@ class ChattingPageManager {
 			this._renderFriendList();
 			this._renderTotalUnreadMessageCount();
 		}
-	}
+	};
 
 	_getChatContainerHTML() {
 		return `
             <div class="FriendListContainer"></div>
             ${this._getMessageBoxContainerHTML()}
-        `
+        `;
 	}
 	_getFriendListHTML() {
 		const getFriendItemHTML = function (friend) {
@@ -303,11 +389,15 @@ class ChattingPageManager {
                         <div class="avatarImgFrame">
                             <img class="avatarImg" src="${friend.avatarUrl}">
                         </div>
-                        <div class="activeState ${friend.activeState === 'ACTIVE' ? '' : 'invisible'}"></div>
+                        <div class="activeState ${
+													friend.activeState === 'ACTIVE' ? '' : 'invisible'
+												}"></div>
                     </div>
                     <div class="infoBox">
                         <div class="nickname">${friend.nickname}</div>
-                        <div class="recentMessage">${friend.chat.recentMessage}</div>
+                        <div class="recentMessage">${
+													friend.chat.recentMessage
+												}</div>
                     </div>
                     <div class="inviteButton invisible ${friend.activeState === 'ACTIVE' ? '' : 'disabledInviteButton'}">초대</div>
 					<div class="unreadCount ${friend.chat.unreadMessageCount === 0 ? 'invisible' : ''}">${getUnreadCount(friend)}</div>
