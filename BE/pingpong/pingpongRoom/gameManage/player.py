@@ -1,11 +1,11 @@
 from utils.printer import Printer
 
 class Player:
-    def __init__(self, nickname, ability, player_count=1):
+    def __init__(self, nickname, ability, team, player_count=1):
         self.nickname = nickname
         self.pos_x = 0
         self.pos_y = 0
-        self.team = None
+        self.team = team
         self.ability = ability
         self.paddle_width, self.paddle_height = self.set_paddle_size(player_count)
         if self.ability is not 'human':

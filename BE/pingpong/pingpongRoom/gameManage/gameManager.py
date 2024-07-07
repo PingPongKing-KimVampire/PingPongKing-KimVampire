@@ -97,17 +97,18 @@ class GameManager:
     
     def set_game_manager(self, room, consumer):
         self.channel_layer = consumer.channel_layer
-        self.team_left = self.set_team(room['left'])
-        self.team_right = self.set_team(room['right'])
+        self.team_left = self.set_team(room, 'left')
+        self.team_right = self.set_team(room, 'right')
         self.set_team_ability(self.team_right)
         left_mode = room['leftMode']
         right_mode = room['rightMode']
         self.clients = {**self.team_left, **self.team_right}
         self.set_game_mode(left_mode, right_mode)
 
-    def set_team(self, team):
-        player_count = len(team)
-        team = {client_id: Player(info['nickname'], info['ability'], player_count) for client_id, info in team.items()}
+    def set_team(self, room, team):
+        player_arr = room[team]
+        player_count = len(player_arr)
+        team = {client_id: Player(info['nickname'], info['ability'], team, player_count) for client_id, info in player_arr.items()}
         return team
 
     def set_team_ability(self, team):
