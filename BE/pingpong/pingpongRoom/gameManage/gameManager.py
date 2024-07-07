@@ -112,6 +112,7 @@ class GameManager:
             while not self.queue.empty():
                 client_id, content = await self.queue.get()
                 self._update_paddle_position(client_id, content)
+                content = {'xPosition': self.clients[client_id].pos_x, 'yPosition': self.clients[client_id].pos_y}
                 await self._notify_paddle_location_update(client_id, content)
             await asyncio.sleep(0.01)
 
@@ -157,7 +158,8 @@ class GameManager:
 
     def _update_paddle_position(self, client_id, content):
         player = self.clients[client_id]
-        player.update_pos(content['xPosition'], content['yPosition'])
+        player.update_target(content['xPosition'], content['yPosition'])
+        player.move()
 
     def _detect_collisions(self):
         if self.ball.get_right_x() >= self.board_width:

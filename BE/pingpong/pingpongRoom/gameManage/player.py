@@ -5,6 +5,9 @@ class Player:
         self.nickname = nickname
         self.pos_x = 0
         self.pos_y = 0
+        self.target_x = 0
+        self.target_y = 0
+        self.max_speed = 20
         self.team = team
         self.ability = ability
         self.paddle_width, self.paddle_height = self.set_paddle_size(player_count)
@@ -20,6 +23,24 @@ class Player:
             return 7, 80
         else:
             return 5, 50
+
+    def _calculate_distance(self):
+        return ((self.target_x - self.pos_x) ** 2 + (self.target_y - self.pos_y) ** 2) ** 0.5
+
+    def move(self):
+        distance = self._calculate_distance()
+        
+        if distance > self.max_speed:
+            pos_x = self.pos_x + (self.target_x - self.pos_x) * self.max_speed / distance
+            pos_y = self.pos_y + (self.target_y - self.pos_y) * self.max_speed / distance
+        else:
+            pos_x = self.target_x
+            pos_y = self.target_y
+        self.update_pos(pos_x, pos_y)
+            
+    def update_target(self, x, y):
+        self.target_x = x
+        self.target_y = y
 
     def update_pos(self, x, y):
         self.pos_x = x
