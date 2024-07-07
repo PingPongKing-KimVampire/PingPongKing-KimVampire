@@ -5,29 +5,6 @@ class WaitingRoomPageManager {
     this.app = app;
     this._onStartPingpongGame = _onStartPingpongGame;
     console.log("Waiting Room Page!");
-    this.clientInfo = {
-      socket: null,
-      id: null,
-      nickname: null,
-      lobbySocket: null,
-      gameInfo: {
-        pingpongRoomSocket: null,
-        roomId: null,
-        title: null,
-        teamLeftList: null,
-        teamRightList: null,
-        teamLeftMode: null,
-        teamRightMode: null,
-        teamLeftTotalPlayerCount: null,
-        teamRightTotalPlayerCount: null,
-      },
-    };
-
-    // const playerInfo = {
-    // 	clientId: null,
-    // 	clientNickname: null,
-    // 	readyState: null
-    // }
     this.clientInfo = clientInfo;
 
     this._initPage();
