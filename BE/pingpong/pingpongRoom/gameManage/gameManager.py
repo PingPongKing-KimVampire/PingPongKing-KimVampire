@@ -55,15 +55,15 @@ class GameManager:
         for client_id, player in self.clients.items():
             player_data.append({
                 'clientId': client_id,
-                'paddle_width': player.paddle_width,
-                'paddle_height': player.paddle_height,
+                'paddleWidth': player.paddle_width,
+                'paddleHeight': player.paddle_height,
                 'team': player.team,
                 'ability': player.ability,
             })
         return player_data
 
     async def _notify_game_ready_and_start(self):
-        board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height }
+        board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height , 'ballRadius': self.ball_radius}
         player_data = self._get_player_data()
         data = {
             "playerInfo" : player_data,
@@ -131,8 +131,9 @@ class GameManager:
             count = self.team_right.__len__()
         else:
             count = self.team_left.__len__()
+        await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
         for i in range(count - 1):
-            self.fake_ball[i] = Ball(6, self.ball_radius)
+            self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
             asyncio.create_task(self._fake_ball_loop(i))
 
     async def _fake_ball_loop(self, index):
@@ -141,7 +142,7 @@ class GameManager:
             fake_ball.move()
             ball_state = self._detect_collisions()
             if ball_state != NORMAL:
-                await self._send_ball_collision(index)
+                await self._send_fake_ball_remove(index)
                 break
             await self._send_fake_ball_update(index)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
@@ -154,8 +155,8 @@ class GameManager:
             ball_state = self._detect_collisions()
             if ball_state == SCORE:
                 await self._handle_round_end()
-            elif ball_state == PADDLE:
-                await self._send_ball_collision(0)
+            # elif ball_state == PADDLE:
+            #     await self._send_ball_collision(0)
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
@@ -167,9 +168,8 @@ class GameManager:
                 await self._notify_paddle_location_update(client_id, content)
             await asyncio.sleep(0.01)
 
-    async def _send_ball_collision(self, index=0):
-        await self._notify_game_room('notifyBallCollision', 
-            {'ballId': index, 'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
+    async def _send_fake_ball_remove(self, index=0):
+        await self._notify_game_room('notifyFakeBallRemove', {'ballId': index})
 
     async def _handle_round_end(self):
         self._add_score()
