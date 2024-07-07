@@ -46,37 +46,31 @@ class GameManager:
             })
         return player_data
 
-    def set_game_mode(self, left_mode, right_mode):
-        self.set_left_mode(left_mode)
-        self.set_right_mode(right_mode)    
-    
-    def set_left_mode(self, mode):
-        if mode == 'human':
-            pass
-        elif mode == 'jiantBlocker':
-            for player in self.team_right.values():
-                player.set_paddle_small()
-            for player in self.team_left.values():
-                player.set_paddle_big()
-                
-    def set_right_mode(self, mode):
-        if mode == 'human':
-            pass
-        elif mode == 'jiantBlocker':
-            for player in self.team_left.values():
-                player.set_paddle_small()
-            for player in self.team_right.values():
-                player.set_paddle_big()
-    
+    def check_jiant_blocker(self, left_mode, right_mode):
+        if left_mode == 'jiantBlocker':
+            self.set_team_paddle_size('left', 'big')
+            self.set_team_paddle_size('right', 'small')
+        if right_mode == 'jiantBlocker':
+            self.set_team_paddle_size('right', 'big')
+            self.set_team_paddle_size('left', 'small')
+
+    def set_team_paddle_size(self, team, size):
+        if team == 'left':
+            team = self.team_left
+        else:
+            team = self.team_right
+        for player in team.values():
+            player.modify_paddle_size(size)
+        
     def set_game_manager(self, room, consumer):
         self.channel_layer = consumer.channel_layer
         self.team_left = self.set_team(room, 'left')
         self.team_right = self.set_team(room, 'right')
-        self.set_team_ability(self.team_right)
         left_mode = room['leftMode']
         right_mode = room['rightMode']
+        right_mode = self.set_team_ability(self.team_right)
         self.clients = {**self.team_left, **self.team_right}
-        self.set_game_mode(left_mode, right_mode)
+        self.check_jiant_blocker(left_mode, right_mode)
 
     def set_team(self, room, team):
         player_arr = room[team]
@@ -86,10 +80,11 @@ class GameManager:
 
     def set_team_ability(self, team):
         for player in team.values():
-            # player.ability = 'jiantBlocker'
+            player.ability = 'jiantBlocker'
             # player.ability = 'speedTwister'
             # player.ability = 'illusionFaker'
-            player.ability = 'ghostSmasher'
+            # player.ability = 'ghostSmasher'
+        return player.ability
         
     async def trigger_game(self):
         self.is_playing = True
@@ -107,7 +102,7 @@ class GameManager:
             self.ball.move()
             ball_state = self._detect_collisions()
             if ball_state == SCORE:
-                await self._handle_round_end()
+                await self._round_end_with_score()
             # elif ball_state == PADDLE:
             #     await self._send_ball_collision(0)
             await self._send_ball_update()
@@ -210,11 +205,11 @@ class GameManager:
     
     ### Game control methods
 
-    async def _handle_round_end(self):
+    async def _round_end_with_score(self):
         self._add_score()
         await self._notify_score_update()
         if self._check_game_end():
-            await self._handle_game_end()
+            await self._end_game_loop()
         else:
             self._reset_round()
 
@@ -227,7 +222,7 @@ class GameManager:
     def _check_game_end(self):
         return self.score[LEFT] >= 5 or self.score[RIGHT] >= 5
 
-    async def _handle_game_end(self):
+    async def _end_game_loop(self):
         team = 'left' if self.score[LEFT] >= 5 else 'right'
         self._end_game()
         await self._notify_game_room('notifyGameEnd', {'winTeam': team})

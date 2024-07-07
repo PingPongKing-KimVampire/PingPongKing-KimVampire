@@ -11,19 +11,21 @@ class Player:
         if self.ability is not 'human':
             self.set_player_ability(self.ability) # todo
     
+
     def set_paddle_size(self, player_count):
+        paddle_width = 10
+        base_height = 150
+        min_height = 30
+
         if player_count == 1:
-            return 10, 150
-        board_width = 1550
-        board_height = 1000
-        base_paddle_height = 150
-        min_paddle_height = 50
-        
-        paddle_height = max(base_paddle_height / player_count, min_paddle_height)
-        paddle_width = 150
-        
+            return paddle_width, base_height
+
+        import math
+        scaling_factor = 1 / math.log(player_count + 1, 2)
+        paddle_height = max(base_height * scaling_factor, min_height)
+
         return paddle_width, paddle_height
-        
+
     def update_pos(self, x, y):
         self.pos_x = x
         self.pos_y = y
@@ -48,6 +50,12 @@ class Player:
             pass
         elif ability == 'ghostSmasher':
             pass
+
+    def modify_paddle_size(self, size):
+        if size == 'small':
+            self.set_paddle_small()
+        elif size == 'big':
+            self.set_paddle_big()
         
     def set_paddle_small(self):
         self.paddle_height = self.paddle_height / 2
@@ -55,4 +63,4 @@ class Player:
 
     def set_paddle_big(self):
         self.paddle_height = self.paddle_height * 2
-        self.paddle_width = self.paddle_width * 2
+        self.paddle_width = self.paddle_width * 4
