@@ -201,13 +201,16 @@ class GameManager:
         if self.ball.is_vanish:
             if self.ball.dx < 0:
                 room_id_team = f"{self.room_id}-right"
+                team_illusion_opponent = f"{self.room_id}-left"
             else:
                 room_id_team = f"{self.room_id}-left"
+                team_illusion_opponent = f"{self.room_id}-right"
+            await self._notify_game_room_group(team_illusion_opponent, 'notifyGhostBall', {})
         else:
             room_id_team = self.room_id
         await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
             {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
-    # 통합하면 좋을 듯?
+            
     async def _send_fake_ball_update(self, index):
         await self._notify_game_room('notifyFakeBallLocationUpdate', 
             {'ballId': index, 'xPosition': self.fake_ball[index].pos_x, 'yPosition': self.fake_ball[index].pos_y})
