@@ -58,8 +58,8 @@ class Player:
             self.set_paddle_big()
         
     def set_paddle_small(self):
-        self.paddle_height = self.paddle_height / 2
-        self.paddle_width = self.paddle_width / 2
+        self.paddle_height = self.paddle_height / 1.5
+        # self.paddle_width = self.paddle_width / 1
 
     def set_paddle_big(self):
         self.paddle_height = self.paddle_height * 2

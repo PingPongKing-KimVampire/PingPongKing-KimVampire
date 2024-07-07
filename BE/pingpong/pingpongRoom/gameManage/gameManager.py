@@ -68,7 +68,7 @@ class GameManager:
         self.team_right = self.set_team(room, 'right')
         left_mode = room['leftMode']
         right_mode = room['rightMode']
-        right_mode = self.set_team_ability(self.team_right)
+        left_mode = self.set_team_ability(self.team_left)
         self.clients = {**self.team_left, **self.team_right}
         self.check_jiant_blocker(left_mode, right_mode)
 
