@@ -2,6 +2,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from coreManage.stateManager import StateManager
 from utils.printer import Printer
+from coreManage.group import add_group, discard_group, notify_group
+
 
 stateManager = StateManager()
 
@@ -13,12 +15,14 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
         ip = self.scope['client'][0] # scope 공부해볼것
         # sessionId = self.scope['session']['session_key']
+        await add_group(self, 'lobby')
         Printer.log(f"New client connected from {ip}", "green")
 
     async def disconnect(self, close_code):
         if self.client_id:
-            stateManager._remove_client(self, self.client_id)
+            stateManager.remove_client(self, self.client_id)
             Printer.log(f"Client {self.client_id} disconnected", "red")
+            await discard_group(self, 'lobby')
 
     async def _send(self, event, content):
         Printer.log(f">>>>> LOBBY sent >>>>>", "bright_cyan")
@@ -47,28 +51,28 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         if event == 'createWaitingRoom':
             await self.create_waiting_room(content)
         elif event == 'getWaitingRoomList':
-            await self.get_waiting_room_List()
+            await self.get_waiting_room_list_response()
 
     async def enter_lobby(self, client_id):
         self.is_init = True # 인증으로 바꿔야함
-        self.nickname = stateManager._get_client_nickname(client_id)
+        self.nickname = stateManager.get_client_nickname(client_id)
         Printer.log(f"Client {client_id} entered lobby : {self.nickname}", "blue")
-        await stateManager._add_client(self, client_id, self.nickname)
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 
     async def create_waiting_room(self, content):
-        room_id = await stateManager._create_room(content['waitingRoomInfo'])
+        room_id = stateManager.create_room(content['waitingRoomInfo'])
         await self._send(event='createWaitingRoomResponse', 
             content={
                 'message': 'OK',
                 'roomId': room_id
         })
 
-    async def get_waiting_room_List(self):
-        room_list = await stateManager._get_waiting_room_list()
+    async def get_waiting_room_list_response(self):
+        room_list = stateManager.get_waiting_room_list()
         await self._send(event='getWaitingRoomResponse', 
                          content={'waitingRoomInfoList': room_list})
-        
+
+    # Notify
     async def notifyWaitingRoomCreated(self, content):
         content = content['content']
         await self._send(event='notifyWaitingRoomCreated', content=content)

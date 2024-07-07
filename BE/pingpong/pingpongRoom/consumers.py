@@ -2,7 +2,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
-import asyncio
+from coreManage.group import add_group, discard_group, notify_group
 
 stateManager = StateManager()
 
@@ -12,14 +12,18 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.state = stateManager.rooms[self.room_id]['state']
         self.game_manager = stateManager.rooms[self.room_id]['gameManager']
+        self.team = None
         await self.accept()
         # url을 수동으로 입력하면 접근이 가능한건가?
         Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
 
     async def disconnect(self, close_code):
         if self.client_id:
-            await self.game_manager._give_up_game(self)
-            await stateManager._leave_waiting_room(self, self.room_id, self.client_id)
+            await self.game_manager.give_up_game(self)
+            room_id_team = f"{self.room_id}-{self.team}"
+            await stateManager.leave_waiting_room(self, self.room_id, self.client_id)
+            await discard_group(self, self.room_id)
+            await discard_group(self, room_id_team)
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
@@ -44,9 +48,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def handle_playing_event(self, event, content):
         if event == 'updatePaddleLocation':
-            await self.game_manager._update_paddle_location(self.client_id, content)
+            await self.game_manager.update_paddle_location(self.client_id, content)
             content = {'clientId': self.client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
-            await stateManager._notify_room(self.room_id, 'notifyPaddleLocationUpdate', content)
+            await stateManager.notify_room(self.room_id, 'notifyPaddleLocationUpdate', content)
         
     async def handle_waiting_event(self, event, content):
         if event == 'changeReadyState':
@@ -57,23 +61,32 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await self.select_ability(content)
 
     async def change_ready_state(self, content):
-        await stateManager._change_ready_state(self, self.room_id, self.client_id, content['state'])
+        await stateManager.change_client_ready_state(self.room_id, self.client_id, content['state'])
             
     async def enter_waiting_room(self, content):
         self.client_id = content['clientId']
-        if not await stateManager._enter_waiting_room(self, self.room_id, self.client_id):
+        team = stateManager.enter_waiting_room(self.room_id, self.client_id)
+        if team == None:
             # 실패시 처리 추가해야 할 듯?
             await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
             Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
             return
-        team_left_list, team_right_list = await stateManager._get_waiting_room_player_list(self.room_id)
+        self.team = team
+        count = stateManager.get_room_client_count(self.room_id)
+        await stateManager.notify_room_change(self.room_id, count)
+        await stateManager.notify_room_enter(self.room_id, self.client_id, team)
+        await add_group(self, self.room_id)
+        await add_group(self, f"{self.room_id}-{team}")
+        
+        
+        team_left_list, team_right_list = stateManager.get_waiting_room_player_list(self.room_id)
         await self._send(event='enterWaitingRoomResponse',
                          content={'teamLeftList': team_left_list, 'teamRightList': team_right_list})
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
 
     async def select_ability(self, content):
         ability = content['ability']
-        await stateManager._select_ability(self.room_id, self.client_id, ability)
+        await stateManager.change_client_ability(self.room_id, self.client_id, ability)
         Printer.log(f"Client {self.client_id} selected ability {content['ability']}", "blue")
 
     """

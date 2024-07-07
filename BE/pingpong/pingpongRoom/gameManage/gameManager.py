@@ -14,8 +14,8 @@ PADDLE = 2
 NORMAL_SPEED = 10
 
 class GameManager:
-    def __init__(self, room_id, left_mode, right_mode):
-        self.channel_layer = None
+    def __init__(self, room_id, left_mode, right_mode, channel_layer):
+        self.channel_layer = channel_layer
         self.clients = {}
         self.room_id = room_id
         self.team_left = {}
@@ -62,8 +62,7 @@ class GameManager:
         for player in team.values():
             player.modify_paddle_size(size)
         
-    def set_game_manager(self, room, consumer):
-        self.channel_layer = consumer.channel_layer
+    def set_players(self, room):
         self.team_left = self.set_team(room, 'left')
         self.team_right = self.set_team(room, 'right')
         left_mode = room['leftMode']
@@ -174,7 +173,7 @@ class GameManager:
                 return PADDLE
         return NORMAL
 
-    async def _update_paddle_location(self, client_id, content):
+    async def update_paddle_location(self, client_id, content):
         await self.queue.put((client_id, content))
 
     def _detect_paddle_collision(self):
@@ -245,7 +244,7 @@ class GameManager:
         self.team_right = {}
         self._reset_round()
 
-    async def _give_up_game(self, consumer):
+    async def give_up_game(self, consumer):
         self._end_game()
         client_id = consumer.client_id
         if self.is_playing:
