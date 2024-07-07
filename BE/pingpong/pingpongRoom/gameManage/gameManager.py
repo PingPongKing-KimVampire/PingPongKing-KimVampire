@@ -11,6 +11,8 @@ NORMAL = 0
 SCORE = 1
 PADDLE = 2
 
+NORMAL_SPEED = 10
+
 class GameManager:
     def __init__(self, room_id, left_mode, right_mode):
         self.channel_layer = None
@@ -23,7 +25,7 @@ class GameManager:
         self.board_width = 1550
         self.board_height = 1000
         self.ball_radius = 25
-        self.ball = Ball(6, self.ball_radius)
+        self.ball = Ball(NORMAL_SPEED, self.ball_radius)
         self.is_playing = False
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
@@ -110,7 +112,10 @@ class GameManager:
 
     def set_team_ability(self, team):
         for player in team.values():
-            player.ability = 'speedTwister'
+            # player.ability = 'jiantBlocker'
+            # player.ability = 'speedTwister'
+            # player.ability = 'illusionFaker'
+            player.ability = 'ghostSmasher'
         
     async def trigger_game(self):
         self.is_playing = True
@@ -258,12 +263,12 @@ class GameManager:
     def _detect_paddle_collision(self):
         players_to_check = self.team_right.values() if self.ball.dx > 0 else self.team_left.values()
         team = 'right' if self.ball.dx > 0 else 'left'
-        speed = 5
+        speed = NORMAL_SPEED
         angle = 0
         for player in players_to_check:
             if self._is_ball_colliding_with_paddle(player):
                 if player.ability == 'speedTwister':
-                    speed = 10
+                    speed = self.ball.speed * 2
                     angle = 30
                 elif player.ability == 'illusionFaker':
                     asyncio.create_task(self._create_fake_ball(player, team))
@@ -275,8 +280,8 @@ class GameManager:
 
     def _is_ball_colliding_with_paddle(self, player):
         if (self.ball.pos_y >= player.pos_y - player.paddle_height / 2 and
-                self.ball.pos_y <= player.pos_y + player.paddle_height / 2):  # Assuming paddle height is 50
+                self.ball.pos_y <= player.pos_y + player.paddle_height / 2):
             if (self.ball.dx > 0 and self.ball.get_right_x() >= player.pos_x - player.paddle_width / 2) or \
-               (self.ball.dx < 0 and self.ball.get_left_x() <= player.pos_x + player.paddle_width / 2):  # Assuming paddle width is 10
+               (self.ball.dx < 0 and self.ball.get_left_x() <= player.pos_x + player.paddle_width / 2):
                 return True
         return False

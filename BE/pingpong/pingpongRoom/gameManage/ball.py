@@ -36,7 +36,7 @@ class Ball:
 
     def reversal_random(self, speed=5, angle=None):
         self.speed = speed
-        rand = random.randint(-40, 40)
+        rand = random.randint(-40 - angle, 40 + angle)
         self.angle = max(0, min(45, self.angle + rand))
         dir = self._calculate_ball_direction()
         self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
