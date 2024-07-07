@@ -105,11 +105,11 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyWaitingRoomExit', content=content['content'])
 
     async def notifyGameReady(self, content):
-        await self._send(event='notifyGameReady', content=content)
+        await self._send(event='notifyGameReady', content=content['content'])
 
     async def notifyGameStart(self, content):
         self.state = 'playing'
-        await self._send(event='notifyGameStart', content=content)
+        await self._send(event='notifyGameStart', content=content['content'])
 
     async def notifyGameGiveUp(self, content):
         self.state = 'waiting'

@@ -63,9 +63,13 @@ class GameManager:
     async def _notify_game_ready_and_start(self):
         board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height }
         player_data = self._get_player_data()
+        data = {
+            "playerInfo" : player_data,
+            "boardInfo" : board_data
+        }
         await self._notify_game_room('notifyGameReady', {})
         await asyncio.sleep(1.5)
-        await self._notify_game_room('notifyGameStart', {})
+        await self._notify_game_room('notifyGameStart', data)
 
     def set_game_mode(self, left_mode, right_mode):
         self.set_left_mode(left_mode)
