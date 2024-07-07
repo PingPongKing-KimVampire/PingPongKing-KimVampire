@@ -1,115 +1,117 @@
-import Player from "./Player.js";
-import PingpongRenderer from "./PingpongRenderer.js";
+import Player from './Player.js';
+import PingpongRenderer from './PingpongRenderer.js';
 
 class PingpongPageManager {
-  constructor(app, clientInfo, onExitPingpong) {
-    this.app = app;
-    this.clientInfo = {
-      socket: null,
-      id: null,
-      nickname: null,
-      lobbySocket: null,
-      gameInfo: {
-        pingpongRoomSocket: null,
-        roomId: null,
-        title: null,
-        teamLeftList: null,
-        teamRightList: null,
-        teamLeftMode: null,
-        teamRightMode: null,
-        sizeInfo: {
-          boardWidth: null,
-          boardHeight: null,
-          paddleWidth: null,
-          paddleHeight: null,
-          ballRadius: null,
-        },
-      },
-    };
-    this.clientInfo = clientInfo;
-    this.onExitPingpong = onExitPingpong;
-    this.playerList = [];
-  }
+	constructor(app, clientInfo, onExitPingpong) {
+		this.app = app;
+		this.clientInfo = {
+			socket: null,
+			id: null,
+			nickname: null,
+			lobbySocket: null,
+			gameInfo: {
+				pingpongRoomSocket: null,
+				roomId: null,
+				title: null,
+				teamLeftList: null,
+				teamRightList: null,
+				teamLeftMode: null,
+				teamRightMode: null,
+				sizeInfo: {
+					boardWidth: null,
+					boardHeight: null,
+					// paddleWidth: null,
+					// paddleHeight: null,
+					ballRadius: null,
+				},
+			},
+		};
+		//playerList 정보
+		// clientId;
+		// clientNickname;
+		// readyState;
+    // ability;
+		// paddleHeight;
+		// paddleWidth;
 
-  async initPage() {
-    //추후 API에 추가해야함
-    //게임 사이즈관련 정보가 API에 없다.
-    this.clientInfo.gameInfo.sizeInfo = {
-      boardWidth: 1550,
-      boardHeight: 1000,
-      paddleWidth: 15,
-      paddleHeight: 150,
-      ballRadius: 25,
-    };
-    this.app.innerHTML = this._getPingpongHTML();
+		this.clientInfo = clientInfo;
+		this.onExitPingpong = onExitPingpong;
+		this.playerList = [];
+	}
 
-    this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
-    this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
+	async initPage() {
+    //하드코딩
+    this.clientInfo.gameInfo.sizeInfo.paddleWidth = 15;
+    this.clientInfo.gameInfo.sizeInfo.paddleHeight = 150;
+		this.app.innerHTML = this._getPingpongHTML();
 
-    this._manageExitRoom(); // 탁구장 나가기 처리
-    this.exitPingpongPageRef = this._exitPingpongPage.bind(this);
-    this.clientInfo.socket.addEventListener("close", this.exitPingpongPageRef); // 탁구장 폐쇄 감지
-  }
+		this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
+		this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 
-  _manageExitRoom() {
-    const exitButton = document.querySelector(".exitButton");
-    const exitYesButton = document.querySelector(
-      ".questionModal .activatedButton:nth-of-type(1)"
-    );
-    const exitNoButton = document.querySelector(
-      ".questionModal .activatedButton:nth-of-type(2)"
-    );
-    const questionModal = document.querySelector(".questionModal");
-    exitButton.addEventListener(
-      "click",
-      this._exitButtonClicked.bind(this, questionModal)
-    );
-    exitYesButton.addEventListener(
-      "click",
-      this._exitYesButtonClicked.bind(this)
-    );
-    exitNoButton.addEventListener(
-      "click",
-      this._exitNoButtonClicked.bind(this, questionModal)
-    );
-  }
-  _exitButtonClicked(questionModal) {
-    questionModal.style.display = "flex";
-  }
-  _exitYesButtonClicked() {
-    this.clientInfo.socket.close();
-    this._exitPingpongPage();
-  }
-  _exitNoButtonClicked(questionModal) {
-    questionModal.style.display = "none";
-  }
+		this._manageExitRoom(); // 탁구장 나가기 처리
+		this.exitPingpongPageRef = this._exitPingpongPage.bind(this);
+		this.clientInfo.socket.addEventListener('close', this.exitPingpongPageRef); // 탁구장 폐쇄 감지
+	}
 
-  _exitPingpongPage() {
-    // PingpongPageManager, PingpongRenderer, Player에서 소켓과의 모든 상호작용 삭제
-    this.clientInfo.socket.removeEventListener(
-      "close",
-      this.exitPingpongPageRef
-    );
-    this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
-    this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
-    this.player.unsubscribeWindow.call(this.player);
-    this.onExitPingpong();
-    // window.getEventListeners(this.clientInfo.socket);
-    // TODO : 남아있는 리스너 확인하기
-  }
+	_manageExitRoom() {
+		const exitButton = document.querySelector('.exitButton');
+		const exitYesButton = document.querySelector(
+			'.questionModal .activatedButton:nth-of-type(1)'
+		);
+		const exitNoButton = document.querySelector(
+			'.questionModal .activatedButton:nth-of-type(2)'
+		);
+		const questionModal = document.querySelector('.questionModal');
+		exitButton.addEventListener(
+			'click',
+			this._exitButtonClicked.bind(this, questionModal)
+		);
+		exitYesButton.addEventListener(
+			'click',
+			this._exitYesButtonClicked.bind(this)
+		);
+		exitNoButton.addEventListener(
+			'click',
+			this._exitNoButtonClicked.bind(this, questionModal)
+		);
+	}
+	_exitButtonClicked(questionModal) {
+		questionModal.style.display = 'flex';
+	}
+	_exitYesButtonClicked() {
+		this.clientInfo.socket.close();
+		this._exitPingpongPage();
+	}
+	_exitNoButtonClicked(questionModal) {
+		questionModal.style.display = 'none';
+	}
 
-  _getPingpongHTML() {
-    return `
+	_exitPingpongPage() {
+		// PingpongPageManager, PingpongRenderer, Player에서 소켓과의 모든 상호작용 삭제
+		this.clientInfo.socket.removeEventListener(
+			'close',
+			this.exitPingpongPageRef
+		);
+		this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
+		this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
+		this.player.unsubscribeWindow.call(this.player);
+		this.onExitPingpong();
+		// window.getEventListeners(this.clientInfo.socket);
+		// TODO : 남아있는 리스너 확인하기
+	}
+
+	_getPingpongHTML() {
+		return `
 			<div id="gameContainer">
 				${this._getDisplayBoardHTML()}
 				${this._getPlayBoardHTML()}
 			</div>
 			${this._getquestionModalHTML()}
 		`;
-  }
+	}
 
-  _getDisplayBoardHTML() {
-    return `
+	_getDisplayBoardHTML() {
+		return `
 			<div id="displayBoard">
 				<div id="leftDisplayBoard">
 					<div class="playerInfo">
@@ -130,20 +132,20 @@ class PingpongPageManager {
 				</div>
 			</div>
 		`;
-  }
+	}
 
-  _getPlayBoardHTML() {
-    return `
+	_getPlayBoardHTML() {
+		return `
 			<div id="playBoard">
 				<div class="subPlayBoard"></div>
 				<div class="subPlayBoard"></div>
 				<div class="ball"></div>
 			</div>
 		`;
-  }
+	}
 
-  _getquestionModalHTML() {
-    return `
+	_getquestionModalHTML() {
+		return `
 			<button class="exitButton"></button>
 			<div class="questionModal">
 				<div class="questionBox">
@@ -155,7 +157,7 @@ class PingpongPageManager {
 				</div>
 			</div>
 		`;
-  }
+	}
 }
 
 export default PingpongPageManager;

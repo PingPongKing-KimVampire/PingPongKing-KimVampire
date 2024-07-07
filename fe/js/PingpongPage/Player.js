@@ -23,8 +23,6 @@ class Player {
     this.sizeInfo = {
       boardWidth: null,
       boardHeight: null,
-      paddleWidth: null,
-      paddleHeight: null,
       ballRadius: null,
     };
     this.sizeInfo = this.clientInfo.gameInfo.sizeInfo;
@@ -38,6 +36,9 @@ class Player {
     this.orientation = null;
     this.updateSubBoardRect();
     this.orientation = windowObservable.getOrientation();
+    this.me = this.clientInfo.gameInfo.teamLeftList.find((leftPlayer)=>leftPlayer.clientId===this.clientInfo.id);
+    if(!this.me)
+      this.me = this.clientInfo.gameInfo.teamRightList.find((rightPlayer)=>rightPlayer.clientId===this.clientInfo.id);
   }
 
   _subscribeWindow() {
@@ -83,12 +84,12 @@ class Player {
     }
 
     x = Math.max(
-      this.sizeInfo.boardWidth / 2 + this.sizeInfo.paddleWidth / 2,
-      Math.min(x, this.sizeInfo.boardWidth - this.sizeInfo.paddleWidth / 2)
+      this.sizeInfo.boardWidth / 2 + this.me.paddleWidth / 2,
+      Math.min(x, this.sizeInfo.boardWidth - this.me.paddleWidth / 2)
     );
     y = Math.max(
-      0 + this.sizeInfo.paddleHeight / 2,
-      Math.min(y, this.sizeInfo.boardHeight - this.sizeInfo.paddleHeight / 2)
+      0 + this.me.paddleHeight / 2,
+      Math.min(y, this.sizeInfo.boardHeight - this.me.paddleHeight / 2)
     );
 
     if (this.myTeam === "right") {

@@ -121,7 +121,6 @@ class WaitingRoomCreationPageManager {
 			leftPlayerCount = 1;
 			rightPlayerCount = 1;
 		} else if (mode === "vampireVsVampire") {
-			console.log("here");
 			leftMode = "vampire";
 			rightMode = "vampire";
 			leftPlayerCount = 1;
