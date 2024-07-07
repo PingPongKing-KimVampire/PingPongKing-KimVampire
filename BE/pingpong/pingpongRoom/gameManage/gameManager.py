@@ -32,23 +32,7 @@ class GameManager:
         self.serve_turn = LEFT
         self.queue = Queue()
 
-    async def _notify_game_room(self, event, content):
-        await self.channel_layer.group_send(
-            self.room_id,
-            {
-                'type': event,
-                'content': content
-            }
-        )
-
-    async def _notify_game_room_group(self, group, event, content):
-        await self.channel_layer.group_send(
-            group,
-            {
-                'type': event,
-                'content': content
-            }
-        )
+    # Game Setting
 
     def _get_player_data(self):
         player_data = []
@@ -61,17 +45,6 @@ class GameManager:
                 'ability': player.ability,
             })
         return player_data
-
-    async def _notify_game_ready_and_start(self):
-        board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height , 'ballRadius': self.ball_radius}
-        player_data = self._get_player_data()
-        data = {
-            "playerInfo" : player_data,
-            "boardInfo" : board_data
-        }
-        await self._notify_game_room('notifyGameReady', {})
-        await asyncio.sleep(1.5)
-        await self._notify_game_room('notifyGameStart', data)
 
     def set_game_mode(self, left_mode, right_mode):
         self.set_left_mode(left_mode)
@@ -126,27 +99,7 @@ class GameManager:
         asyncio.create_task(self._game_loop())
         asyncio.create_task(self._input_loop())
 
-    async def _create_fake_ball(self, team_illusion):
-        if team_illusion == 'left':
-            count = self.team_right.__len__()
-        else:
-            count = self.team_left.__len__()
-        await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
-        for i in range(count - 1):
-            self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
-            asyncio.create_task(self._fake_ball_loop(i))
-
-    async def _fake_ball_loop(self, index):
-        fake_ball = self.fake_ball[index]
-        while self.is_playing and not self.is_end:
-            fake_ball.move()
-            ball_state = self._detect_collisions()
-            if ball_state != NORMAL:
-                await self._send_fake_ball_remove(index)
-                break
-            await self._send_fake_ball_update(index)
-            await asyncio.sleep(1 / FRAME_PER_SECOND)
-        del self.fake_ball[index]
+    # Game Loop
 
     async def _game_loop(self):
         await asyncio.sleep(1.5)
@@ -168,84 +121,49 @@ class GameManager:
                 await self._notify_paddle_location_update(client_id, content)
             await asyncio.sleep(0.01)
 
-    async def _send_fake_ball_remove(self, index=0):
-        await self._notify_game_room('notifyFakeBallRemove', {'ballId': index})
+    # Fake Ball - IllusionFaker
 
-    async def _handle_round_end(self):
-        self._add_score()
-        await self._notify_score_update()
-        if self._check_game_end():
-            await self._handle_game_end()
+    async def _fake_ball_loop(self, index):
+        fake_ball = self.fake_ball[index]
+        while self.is_playing and not self.is_end:
+            fake_ball.move()
+            ball_state = self._detect_collisions()
+            if ball_state != NORMAL:
+                await self._notify_game_room('notifyFakeBallRemove', {'ballId': index})
+                break
+            await self._send_fake_ball_update(index)
+            await asyncio.sleep(1 / FRAME_PER_SECOND)
+        del self.fake_ball[index]
+
+    async def _create_fake_ball(self, team_illusion):
+        if team_illusion == 'left':
+            count = self.team_right.__len__()
         else:
-            self._reset_round()
+            count = self.team_left.__len__()
+        await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
+        for i in range(count - 1):
+            self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
+            asyncio.create_task(self._fake_ball_loop(i))
 
-    def _add_score(self):
-        if self.ball.dx > 0:
-            self.score[LEFT] += 1
-        else:
-            self.score[RIGHT] += 1
-    
-    async def _notify_score_update(self):
-        win_team = 'left' if self.ball.dx > 0 else 'right'
-        await self._notify_game_room('notifyScoreUpdate', {'team': win_team, 'score': self.score[win_team]})
-        
-    def _check_game_end(self):
-        return self.score[LEFT] >= 5 or self.score[RIGHT] >= 5
-
-    async def _handle_game_end(self):
-        team = 'left' if self.score[LEFT] >= 5 else 'right'
-        self._end_game()
-        await self._notify_game_room('notifyGameEnd', {'winTeam': team})
+    # Playing Methods
         
     async def _send_ball_update(self):
         if self.ball.is_vanish:
             if self.ball.dx < 0:
                 room_id_team = f"{self.room_id}-right"
+                team_illusion_opponent = f"{self.room_id}-left"
             else:
                 room_id_team = f"{self.room_id}-left"
+                team_illusion_opponent = f"{self.room_id}-right"
+            await self._notify_game_room_group(team_illusion_opponent, 'notifyGhostBall', {})
         else:
             room_id_team = self.room_id
         await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
             {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
-    # 통합하면 좋을 듯?
-    async def _send_fake_ball_update(self, index):
-        await self._notify_game_room('notifyFakeBallLocationUpdate', 
-            {'ballId': index, 'xPosition': self.fake_ball[index].pos_x, 'yPosition': self.fake_ball[index].pos_y})
-
-    async def _give_up_game(self, consumer):
-        self._end_game()
-        client_id = consumer.client_id
-        if self.is_playing:
-            await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
-
-    async def _update_paddle_location(self, client_id, content):
-        await self.queue.put((client_id, content))
 
     def _update_paddle_position(self, client_id, content):
         player = self.clients[client_id]
         player.update_pos(content['xPosition'], content['yPosition'])
-
-    async def _notify_paddle_location_update(self, client_id, content):
-        content = {'clientId': client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
-        await self._notify_game_room('notifyPaddleLocationUpdate', content)
-
-    def _reset_round(self):
-        serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
-        self.ball.reset_ball(serve_position, self.board_height / 2, 0)
-
-    def _end_game(self):
-        self.is_playing = False
-        self.is_end = True
-        self._reset_game()
-        
-    def _reset_game(self):
-        self.score = {LEFT: 0, RIGHT: 0}
-        self.serve_turn = LEFT
-        self.is_playing = False
-        self.is_end = False
-        self.team_left = {}
-        self.team_right = {}
-        self._reset_round()
 
     def _detect_collisions(self):
         if self.ball.get_right_x() >= self.board_width:
@@ -260,6 +178,9 @@ class GameManager:
             if self._detect_paddle_collision():
                 return PADDLE
         return NORMAL
+
+    async def _update_paddle_location(self, client_id, content):
+        await self.queue.put((client_id, content))
 
     def _detect_paddle_collision(self):
         players_to_check = self.team_right.values() if self.ball.dx > 0 else self.team_left.values()
@@ -286,3 +207,94 @@ class GameManager:
                (self.ball.dx < 0 and self.ball.get_left_x() <= player.pos_x + player.paddle_width / 2):
                 return True
         return False
+    
+    ### Game control methods
+
+    async def _handle_round_end(self):
+        self._add_score()
+        await self._notify_score_update()
+        if self._check_game_end():
+            await self._handle_game_end()
+        else:
+            self._reset_round()
+
+    def _add_score(self):
+        if self.ball.dx > 0:
+            self.score[LEFT] += 1
+        else:
+            self.score[RIGHT] += 1
+        
+    def _check_game_end(self):
+        return self.score[LEFT] >= 5 or self.score[RIGHT] >= 5
+
+    async def _handle_game_end(self):
+        team = 'left' if self.score[LEFT] >= 5 else 'right'
+        self._end_game()
+        await self._notify_game_room('notifyGameEnd', {'winTeam': team})
+
+    def _reset_round(self):
+        serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
+        self.ball.reset_ball(serve_position, self.board_height / 2, 0)
+
+    def _end_game(self):
+        self.is_playing = False
+        self.is_end = True
+        self._reset_game()
+        
+    def _reset_game(self):
+        self.score = {LEFT: 0, RIGHT: 0}
+        self.serve_turn = LEFT
+        self.is_playing = False
+        self.is_end = False
+        self.team_left = {}
+        self.team_right = {}
+        self._reset_round()
+
+    async def _give_up_game(self, consumer):
+        self._end_game()
+        client_id = consumer.client_id
+        if self.is_playing:
+            await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
+    
+    ### Notify methods
+
+    async def _notify_game_room(self, event, content):
+        await self.channel_layer.group_send(
+            self.room_id,
+            {
+                'type': event,
+                'content': content
+            }
+        )
+
+    async def _notify_game_room_group(self, group, event, content):
+        await self.channel_layer.group_send(
+            group,
+            {
+                'type': event,
+                'content': content
+            }
+        )
+
+    async def _notify_game_ready_and_start(self):
+        board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height , 'ballRadius': self.ball_radius}
+        player_data = self._get_player_data()
+        data = {
+            "playerInfo" : player_data,
+            "boardInfo" : board_data
+        }
+        await self._notify_game_room('notifyGameReady', {})
+        await asyncio.sleep(1.5)
+        await self._notify_game_room('notifyGameStart', data)
+
+    async def _notify_paddle_location_update(self, client_id, content):
+        content = {'clientId': client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
+        await self._notify_game_room('notifyPaddleLocationUpdate', content)
+
+    async def _send_fake_ball_update(self, index):
+        await self._notify_game_room('notifyFakeBallLocationUpdate', 
+            {'ballId': index, 'xPosition': self.fake_ball[index].pos_x, 'yPosition': self.fake_ball[index].pos_y})
+    
+    async def _notify_score_update(self):
+        win_team = 'left' if self.ball.dx > 0 else 'right'
+        await self._notify_game_room('notifyScoreUpdate', {'team': win_team, 'score': self.score[win_team]})
