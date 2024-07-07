@@ -276,6 +276,7 @@ class GameManager:
         player_data = self._get_player_data()
         data = {
             "playerInfo" : player_data,
+            "teamInfo" : { "leftTeamAbilitfy " : self.left_mode, "rightTeamAbility" : self.right_mode},
             "boardInfo" : board_data
         }
         await self._notify_game_room('notifyGameReady', {})
