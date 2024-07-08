@@ -7,9 +7,12 @@ FRAME_PER_SECOND = 60
 LEFT = 'left'
 RIGHT = 'right'
 
-NORMAL = 0
+NOHIT = 0
 SCORE = 1
 PADDLE = 2
+GHOST = 3
+SPEEDTWIST = 4
+FAKE = 5
 
 NORMAL_SPEED = 10
 
@@ -104,6 +107,9 @@ class GameManager:
             ball_state = self._detect_collisions()
             if ball_state == SCORE:
                 await self._round_end_with_score()
+            if ball_state == GHOST:
+                await self._notify_game_room('notifyGhostBall', {})
+            # elif 
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
@@ -123,7 +129,7 @@ class GameManager:
         while self.is_playing and not self.is_end:
             fake_ball.move()
             ball_state = self._detect_collisions()
-            if ball_state != NORMAL:
+            if ball_state != NOHIT:
                 await self._notify_game_room('notifyFakeBallRemove', {'ballId': index})
                 break
             await self._send_fake_ball_update(index)
@@ -148,11 +154,8 @@ class GameManager:
         if self.ball.is_vanish:
             if self.ball.dx < 0:
                 room_id_team = f"{self.room_id}-right"
-                team_illusion_opponent = f"{self.room_id}-left"
             else:
                 room_id_team = f"{self.room_id}-left"
-                team_illusion_opponent = f"{self.room_id}-right"
-            await self._notify_game_room_group(team_illusion_opponent, 'notifyGhostBall', {})
         else:
             room_id_team = self.room_id
         await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
@@ -173,9 +176,10 @@ class GameManager:
         elif self.ball.get_top_y() <= 0 or self.ball.get_bottom_y() >= self.board_height:
             self.ball.dy = -self.ball.dy
         else:
-            if self._detect_paddle_collision():
-                return PADDLE
-        return NORMAL
+            state = self._detect_paddle_collision()
+            if state != NOHIT:
+                return state
+        return NOHIT
 
     async def update_paddle_location(self, client_id, content):
         await self.queue.put((client_id, content))
@@ -187,16 +191,20 @@ class GameManager:
         angle = 0
         for player in players_to_check:
             if self._is_ball_colliding_with_paddle(player):
+                state = PADDLE
                 if player.ability == 'speedTwister':
                     speed = self.ball.speed * 2
                     angle = 30
+                    state = SPEEDTWIST
                 elif player.ability == 'illusionFaker':
                     asyncio.create_task(self._create_fake_ball(team))
+                    state = FAKE
                 elif player.ability == 'ghostSmasher':
                     self.ball.is_vanish = True
+                    state = GHOST
                 self.ball.reversal_random(speed, angle)
-                return True
-        return False
+                return state
+        return NOHIT
 
     def _is_ball_colliding_with_paddle(self, player):
         if (self.ball.pos_y >= player.pos_y - player.paddle_height / 2 and
