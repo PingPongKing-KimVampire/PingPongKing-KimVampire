@@ -79,10 +79,10 @@ class GameManager:
 
     def set_team_ability(self, team):
         for player in team.values():
-            player.ability = 'jiantBlocker'
+            # player.ability = 'jiantBlocker'
             # player.ability = 'speedTwister'
             # player.ability = 'illusionFaker'
-            # player.ability = 'ghostSmasher'
+            player.ability = 'ghostSmasher'
         return player.ability
         
     async def trigger_game(self):
@@ -98,12 +98,12 @@ class GameManager:
     async def _game_loop(self):
         await asyncio.sleep(1.5)
         while self.is_playing and not self.is_end:
-            self.ball.move()
+            is_ghost = self.ball.move()
+            if is_ghost == False:
+                await self._notify_game_room('notifyUnghostBall', {})
             ball_state = self._detect_collisions()
             if ball_state == SCORE:
                 await self._round_end_with_score()
-            # elif ball_state == PADDLE:
-            #     await self._send_ball_collision(0)
             await self._send_ball_update()
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
@@ -135,6 +135,8 @@ class GameManager:
             count = self.team_right.__len__()
         else:
             count = self.team_left.__len__()
+        from utils.printer import Printer
+        Printer.log(f"Create {count} fake balls", "green")
         await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
         for i in range(count - 1):
             self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
@@ -189,7 +191,7 @@ class GameManager:
                     speed = self.ball.speed * 2
                     angle = 30
                 elif player.ability == 'illusionFaker':
-                    asyncio.create_task(self._create_fake_ball(player, team))
+                    asyncio.create_task(self._create_fake_ball(team))
                 elif player.ability == 'ghostSmasher':
                     self.ball.is_vanish = True
                 self.ball.reversal_random(speed, angle)

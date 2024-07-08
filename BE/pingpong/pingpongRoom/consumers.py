@@ -27,9 +27,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
-        Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
-        Printer.log(f"event : {event}", "white")
-        Printer.log(f"conetnt : {content}\n", "white")
+        # Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
+        # Printer.log(f"event : {event}", "white")
+        # Printer.log(f"conetnt : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
 
@@ -38,9 +38,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
         event = message.get('event')
         content = message.get('content')
-        Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
-        Printer.log(f"event : {event}", "white")
-        Printer.log(f"content : {content}\n", "white")
+        # Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
+        # Printer.log(f"event : {event}", "white")
+        # Printer.log(f"content : {content}\n", "white")
         if self.state == 'playing':
             await self.handle_playing_event(event, content)
         else:
@@ -132,5 +132,16 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.state = 'waiting'
         await self._send(event='notifyGameEnd', content=content['content'])
 
-    async def notifyBallCollision(self, content):
-        await self._send(event='notifyBallCollision', content=content['content'])
+    async def notifyGhostBall(self, content):
+        Printer.log(f"Ghost ball", "green")
+        await self._send(event='notifyGhostBall', content=content['content'])
+
+    async def notifyFakeBallCreate(self, content):
+        await self._send(event='notifyFakeBallCreate', content=content['content'])
+
+    async def notifyFakeBallRemove(self, content):
+        await self._send(event='notifyFakeBallRemove', content=content['content'])
+
+    async def notifyUnghostBall(self, content):
+        Printer.log(f"Unghost ball", "green")
+        await self._send(event='notifyUnghostBall', content=content['content'])
