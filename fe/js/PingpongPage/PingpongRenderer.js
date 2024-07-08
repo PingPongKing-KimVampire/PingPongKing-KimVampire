@@ -129,6 +129,8 @@ class PingpongRenderer {
 		} else if (event === 'notifyGameGiveUp') {
 			// 누군가의 기권 선언
 			this._removePlayer(content);
+		} else {
+			console.log(event);
 		}
 	};
 	removeListener() {

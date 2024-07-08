@@ -145,3 +145,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def notifyUnghostBall(self, content):
         Printer.log(f"Unghost ball", "green")
         await self._send(event='notifyUnghostBall', content=content['content'])
+
+    async def notifyFakeBallLocationUpdate(self, content):
+        await self._send(event='notifyFakeBallLocationUpdate', content=content['content'])
+
+    async def notifySpeedTwistBall(self, content):
+        await self._send(event='notifySpeedTwistBall', content=content['content'])

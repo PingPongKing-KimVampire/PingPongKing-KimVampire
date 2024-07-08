@@ -33,6 +33,7 @@ class GameManager:
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
         self.serve_turn = LEFT
+        self.fake_ball = {}
         self.queue = Queue()
 
     # Game Setting
@@ -84,8 +85,8 @@ class GameManager:
         for player in team.values():
             # player.ability = 'jiantBlocker'
             # player.ability = 'speedTwister'
-            # player.ability = 'illusionFaker'
-            player.ability = 'ghostSmasher'
+            player.ability = 'illusionFaker'
+            # player.ability = 'ghostSmasher'
         return player.ability
         
     async def trigger_game(self):
@@ -104,13 +105,8 @@ class GameManager:
             is_ghost = self.ball.move()
             if is_ghost == False:
                 await self._notify_game_room('notifyUnghostBall', {})
-            ball_state = self._detect_collisions()
-            if ball_state == SCORE:
-                await self._round_end_with_score()
-            if ball_state == GHOST:
-                await self._notify_game_room('notifyGhostBall', {})
-            # elif 
-            await self._send_ball_update()
+            ball_state = self._detect_collisions(self.ball)
+            await self._send_ball_update(ball_state)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
     async def _input_loop(self):
@@ -125,16 +121,19 @@ class GameManager:
     # Fake Ball - IllusionFaker
 
     async def _fake_ball_loop(self, index):
+        from utils.printer import Printer
+        Printer.log(f"Fake ball {index} created", "yellow")
         fake_ball = self.fake_ball[index]
         while self.is_playing and not self.is_end:
             fake_ball.move()
-            ball_state = self._detect_collisions()
+            ball_state = self._detect_collisions(fake_ball)
             if ball_state != NOHIT:
+                Printer.log("hit reason: " + str(ball_state), "yellow")
                 await self._notify_game_room('notifyFakeBallRemove', {'ballId': index})
                 break
             await self._send_fake_ball_update(index)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-        del self.fake_ball[index]
+        self.fake_ball[index] = None
 
     async def _create_fake_ball(self, team_illusion):
         if team_illusion == 'left':
@@ -142,15 +141,22 @@ class GameManager:
         else:
             count = self.team_left.__len__()
         from utils.printer import Printer
-        Printer.log(f"Create {count} fake balls", "green")
         await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
-        for i in range(count - 1):
+        for i in range(count):
+        # for i in range(count - 1):
             self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
+            self.fake_ball[i].reset_ball(self.ball.pos_x, self.ball.pos_y, self.ball.angle)
             asyncio.create_task(self._fake_ball_loop(i))
 
     # Playing Methods
         
-    async def _send_ball_update(self):
+    async def _send_ball_update(self, ball_state):
+        if ball_state == SCORE:
+            await self._round_end_with_score()
+        elif ball_state == GHOST:
+            await self._notify_game_room('notifyGhostBall', {})
+        elif ball_state == SPEEDTWIST:
+            await self._notify_game_room('notifySpeedTwistBall', {})
         if self.ball.is_vanish:
             if self.ball.dx < 0:
                 room_id_team = f"{self.room_id}-right"
@@ -166,15 +172,19 @@ class GameManager:
         player.update_target(content['xPosition'], content['yPosition'])
         player.move()
 
-    def _detect_collisions(self):
-        if self.ball.get_right_x() >= self.board_width:
+    def _detect_collisions(self, ball):
+        if ball.get_right_x() >= self.board_width:
+            print("right_x: ", ball.get_right_x())
+            print("board_width: ", self.board_width)
             self.serve_turn = LEFT
             return SCORE
-        elif self.ball.get_left_x() <= 0:
+        elif ball.get_left_x() <= 0:
+            print("left_x: ", ball.get_left_x())
+            print("board_width: ", self.board_width)
             self.serve_turn = RIGHT
             return SCORE
-        elif self.ball.get_top_y() <= 0 or self.ball.get_bottom_y() >= self.board_height:
-            self.ball.dy = -self.ball.dy
+        elif ball.get_top_y() <= 0 or ball.get_bottom_y() >= self.board_height:
+            ball.dy = -ball.dy
         else:
             state = self._detect_paddle_collision()
             if state != NOHIT:
