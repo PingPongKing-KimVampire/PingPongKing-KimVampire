@@ -48,7 +48,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def handle_playing_event(self, event, content):
         if event == 'updatePaddleLocation':
-            await self.game_manager.update_paddle_location(self.client_id, content)
+            await self.update_paddle_location(content)
+            # await self.game_manager.update_paddle_location(self.client_id, content)
             content = {'clientId': self.client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
             await stateManager.notify_room(self.room_id, 'notifyPaddleLocationUpdate', content)
         
@@ -59,6 +60,11 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await self.enter_waiting_room(content)
         elif event == 'selectAbility':
             await self.select_ability(content)
+    
+    async def update_paddle_location(self, content):
+        x = content['xPosition']
+        y = content['yPosition']
+        self.game_manager.update_target(self.client_id, x, y)
 
     async def change_ready_state(self, content):
         await stateManager.change_client_ready_state(self.room_id, self.client_id, content['state'])

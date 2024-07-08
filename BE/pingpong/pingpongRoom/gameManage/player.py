@@ -5,9 +5,11 @@ class Player:
         self.nickname = nickname
         self.pos_x = 0
         self.pos_y = 0
+        self.dx = 0
+        self.dy = 0
         self.target_x = 0
         self.target_y = 0
-        self.max_speed = 20
+        self.max_speed = 15
         self.team = team
         self.ability = ability
         self.paddle_width, self.paddle_height = self.set_paddle_size(player_count)
@@ -24,28 +26,41 @@ class Player:
         else:
             return 5, 50
 
+    def reset_pos(self):
+        if self.team == 'left':
+            x = 1550 / 4
+        else:
+            x = 1550 / 4 * 3
+        y = 1000 / 2
+        self.pos_x = x
+        self.pos_y = y
+        self.target_x = x
+        self.target_y = y
+
     def _calculate_distance(self):
         return ((self.target_x - self.pos_x) ** 2 + (self.target_y - self.pos_y) ** 2) ** 0.5
 
     def move(self):
+        self.pos_x += self.dx
+        self.pos_y += self.dy
+        return self.pos_x, self.pos_y
+
+    def needs_update(self):
         distance = self._calculate_distance()
-        
-        if distance > self.max_speed:
-            pos_x = self.pos_x + (self.target_x - self.pos_x) * self.max_speed / distance
-            pos_y = self.pos_y + (self.target_y - self.pos_y) * self.max_speed / distance
-        else:
-            pos_x = self.target_x
-            pos_y = self.target_y
-        self.update_pos(pos_x, pos_y)
+        if distance < 1:
+            return False
+        speed = min(self.max_speed, distance)
+        self.dx = (self.target_x - self.pos_x) / distance * speed
+        self.dy = (self.target_y - self.pos_y) / distance * speed
+        # if ( self.dx ** 2 + self.dy ** 2 ) ** 0.5 > self.max_speed:
+        #     Printer.log(f"Player {self.nickname} speed is too fast", "yellow")
+        #     return False
+        return True
             
     def update_target(self, x, y):
         self.target_x = x
         self.target_y = y
 
-    def update_pos(self, x, y):
-        self.pos_x = x
-        self.pos_y = y
-        
     def get_pos(self):
         return self.pos_x, self.pos_y
     
