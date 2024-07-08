@@ -23,10 +23,10 @@ class Ball:
     def move(self):
         self.pos_x += self.dx
         self.pos_y += self.dy
-        if self.is_vanish and self.dx < 0 and self.pos_x < 517:
+        if self.is_vanish and self.dx < 0 and self.pos_x < 517 or self.is_vanish and self.dx > 0 and self.pos_x > 1033:
             self.is_vanish = False
-        elif self.is_vanish and self.dx > 0 and self.pos_x > 1033:
-            self.is_vanish = False
+            return False
+        return True
             
     def _calculate_ball_direction(self):
         angle_radians = (self.angle * math.pi) / 180
