@@ -193,6 +193,6 @@ class StateManager:
             await notify_group(self.channel_layer, 'lobby', event, content)
 
     async def notify_room(self, room_id: str, event: str, content: Dict[str, Any]) -> None:
-        Printer.log(f"!!!!! notify ROOM {room_id} !!!!!", "cyan")
+        # Printer.log(f"!!!!! notify ROOM {room_id} !!!!!", "cyan")
         if self.channel_layer:
             await notify_group(self.channel_layer, room_id, event, content)
