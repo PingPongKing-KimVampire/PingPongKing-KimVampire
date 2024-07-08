@@ -83,9 +83,9 @@ class GameManager:
 
     def set_team_ability(self, team):
         for player in team.values():
-            # player.ability = 'jiantBlocker'
+            player.ability = 'jiantBlocker'
             # player.ability = 'speedTwister'
-            player.ability = 'illusionFaker'
+            # player.ability = 'illusionFaker'
             # player.ability = 'ghostSmasher'
         return player.ability
         
@@ -95,12 +95,14 @@ class GameManager:
         self._reset_round()
         asyncio.create_task(self._notify_game_ready_and_start())
         asyncio.create_task(self._game_loop())
-        asyncio.create_task(self._input_loop())
+        # asyncio.create_task(self._input_loop())
+        asyncio.create_task(self._paddle_update_loop())
 
     # Game Loop
 
     async def _game_loop(self):
         await asyncio.sleep(1.5)
+        await self._notify_all_paddle_positions()
         while self.is_playing and not self.is_end:
             is_ghost = self.ball.move()
             if is_ghost == False:
@@ -109,14 +111,29 @@ class GameManager:
             await self._send_ball_update(ball_state)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
-    async def _input_loop(self):
+    # async def _input_loop(self):
+    #     while self.is_playing and not self.is_end:
+    #         while not self.queue.empty():
+    #             client_id, content = await self.queue.get()
+    #             self._update_paddle_position(client_id, content)
+    #         await asyncio.sleep(0.01)
+
+    def update_target(self, client_id, x, y):
+        self.clients[client_id].update_target(x, y)
+
+    async def _paddle_update_loop(self):
+        debug_x, debug_y = 0, 0
         while self.is_playing and not self.is_end:
-            while not self.queue.empty():
-                client_id, content = await self.queue.get()
-                self._update_paddle_position(client_id, content)
-                content = {'xPosition': self.clients[client_id].pos_x, 'yPosition': self.clients[client_id].pos_y}
-                await self._notify_paddle_location_update(client_id, content)
-            await asyncio.sleep(0.01)
+            for client_id, player in self.clients.items():
+                if player.needs_update():
+                    pos_x, pos_y = player.move()
+                    # print("player pos: ", pos_x, pos_y)
+                    # if debug_x - pos_x > 15 or debug_y - pos_y > 15:
+                    #     print("debug pos: ", debug_x, debug_y)
+                    content = {'xPosition': pos_x, 'yPosition': pos_y}
+                    await self._notify_paddle_location_update(client_id, content)
+                    debug_x, debug_y = player.pos_x, player.pos_y
+            await asyncio.sleep(1 / FRAME_PER_SECOND)
 
     # Fake Ball - IllusionFaker
 
@@ -167,10 +184,9 @@ class GameManager:
         await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
             {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
-    def _update_paddle_position(self, client_id, content):
-        player = self.clients[client_id]
-        player.update_target(content['xPosition'], content['yPosition'])
-        player.move()
+    # def _update_paddle_position(self, client_id, content):
+    #     player = self.clients[client_id]
+    #     player.update_target(content['xPosition'], content['yPosition'])
 
     def _detect_collisions(self, ball):
         if ball.get_right_x() >= self.board_width:
@@ -251,6 +267,9 @@ class GameManager:
     def _reset_round(self):
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
         self.ball.reset_ball(serve_position, self.board_height / 2, 0)
+        for player in self.clients.values():
+            player.reset_pos()
+        asyncio.create_task(self._notify_all_paddle_positions())
 
     def _end_game(self):
         self.is_playing = False
@@ -307,6 +326,11 @@ class GameManager:
     async def _notify_paddle_location_update(self, client_id, content):
         content = {'clientId': client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
         await self._notify_game_room('notifyPaddleLocationUpdate', content)
+        
+    async def _notify_all_paddle_positions(self):
+        for client_id, player in self.clients.items():
+            content = {'clientId': client_id, 'xPosition': player.pos_x, 'yPosition': player.pos_y}
+            await self._notify_paddle_location_update(client_id, content)
 
     async def _send_fake_ball_update(self, index):
         await self._notify_game_room('notifyFakeBallLocationUpdate', 

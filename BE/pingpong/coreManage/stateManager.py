@@ -156,7 +156,7 @@ class StateManager:
             }
             await self.notify_lobby('notifyWaitingRoomCreated', room_data)
         else:
-            await self.notify_lobby('notifyCurrentPlayerCountChange', {'currentPlayerCount': count + 1, 'roomId': room_id})
+            await self.notify_lobby('notifyCurrentPlayerCountChange', {'currentPlayerCount': count, 'roomId': room_id})
 
     async def change_client_ready_state(self, room_id: str, client_id: str, is_ready: str) -> None:
         room = self.rooms.get(room_id, {})
@@ -196,3 +196,17 @@ class StateManager:
         # Printer.log(f"!!!!! notify ROOM {room_id} !!!!!", "cyan")
         if self.channel_layer:
             await notify_group(self.channel_layer, room_id, event, content)
+
+    def create_test_room(self) -> None:
+        self.rooms['human_human'] = {
+            'title': '인간 vs 인간',
+            'leftMode': 'human',
+            'rightMode': 'human',
+            'leftMaxPlayerCount': 1,
+            'rightMaxPlayerCount': 1,
+            'left': {},
+            'right': {},
+            'gameManager': GameManager('testRoom', 'human', 'human', None),
+            'state': 'waiting'
+        }
+        Printer.log(f"Test Room created", "blue")
