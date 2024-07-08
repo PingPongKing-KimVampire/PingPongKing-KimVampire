@@ -20,6 +20,8 @@ class PingpongRenderer {
 					boardHeight: null,
 					ballRadius: null,
 				},
+				teamLeftAbility: null,
+				teamRightAbility: null,
 			},
 		};
 		// const playerInfo = {
@@ -28,6 +30,9 @@ class PingpongRenderer {
 		// 	readyState: null
 		// }
 		this.clientInfo = clientInfo;
+
+		//하드코딩
+		// this.clientInfo.gameInfo.teamLeftAbility = 'ghostSmasher';
 
 		this._initPingpongRenderer();
 		this._setDisplayBoard(
@@ -129,10 +134,40 @@ class PingpongRenderer {
 		} else if (event === 'notifyGameGiveUp') {
 			// 누군가의 기권 선언
 			this._removePlayer(content);
-		} else {
-			console.log(event);
+		} else if (event === 'notifyUnghostBall') {
+			if (this._isVampire(this.me)) {
+				this._makeBallTranslucent();
+			} else {
+				this._makeBallTransparent();
+			}
+		} else if (event === 'notifyUnghostBall') {
+			this._makeBallOpaque();
 		}
 	};
+
+	//반투명
+	_makeBallTranslucent() {
+		this.ball.element.style.opcacity = '0.5';
+	}
+
+	//불투명
+	_makeBallOpaque() {
+		this.ball.element.style.opcacity = '1';
+	}
+
+	//투명
+	_makeBallTransparent() {
+		this.ball.element.style.opcacity = '0';
+	}
+
+	_isVampire(player) {
+		const team = player.team;
+		if (team === 'left')
+			return this.clientInfo.gameInfo.teamLeftMode === 'vampire';
+		else if (team === 'right')
+			return this.clientInfo.gameInfo.teamRightMode === 'vampire';
+	}
+
 	removeListener() {
 		this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
 			'message',
@@ -185,6 +220,8 @@ class PingpongRenderer {
 			};
 			this.players.push(player);
 			if (clientId === this.clientInfo.id) this.me = player;
+			console.log(this.me);
+			console.log(this.clientInfo.gameInfo);
 		}
 		for (const {
 			clientId,
