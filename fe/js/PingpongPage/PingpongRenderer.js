@@ -134,7 +134,7 @@ class PingpongRenderer {
 		} else if (event === 'notifyGameGiveUp') {
 			// 누군가의 기권 선언
 			this._removePlayer(content);
-		} else if (event === 'notifyUnghostBall') {
+		} else if (event === 'notifyGhostBall') {
 			if (this._isVampire(this.me)) {
 				this._makeBallTranslucent();
 			} else {
@@ -147,17 +147,17 @@ class PingpongRenderer {
 
 	//반투명
 	_makeBallTranslucent() {
-		this.ball.element.style.opcacity = '0.5';
+		this.ball.element.style.opacity = '0.5';
 	}
 
 	//불투명
 	_makeBallOpaque() {
-		this.ball.element.style.opcacity = '1';
+		this.ball.element.style.opacity = '1';
 	}
 
 	//투명
 	_makeBallTransparent() {
-		this.ball.element.style.opcacity = '0';
+		this.ball.element.style.opacity = '0';
 	}
 
 	_isVampire(player) {
@@ -220,8 +220,6 @@ class PingpongRenderer {
 			};
 			this.players.push(player);
 			if (clientId === this.clientInfo.id) this.me = player;
-			console.log(this.me);
-			console.log(this.clientInfo.gameInfo);
 		}
 		for (const {
 			clientId,
