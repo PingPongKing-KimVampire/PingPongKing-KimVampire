@@ -188,7 +188,7 @@ class StateManager:
             await game_manager.trigger_game()
 
     async def notify_lobby(self, event: str, content: Dict[str, Any]) -> None:
-        Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
+        # Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
         if self.channel_layer:
             await notify_group(self.channel_layer, 'lobby', event, content)
 
