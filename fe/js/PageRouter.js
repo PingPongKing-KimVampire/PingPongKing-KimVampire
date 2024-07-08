@@ -83,44 +83,44 @@ class PageRouter {
 			},
 		};
 	}
-
-	async renderPage(url) {
-		if (url === 'login') {
-			const loginPageManager = new LoginPageManager(
-				this.app,
-				this.clientInfo,
-				this._onLoginSuccess.bind(this)
-			);
-			await loginPageManager.initPage();
-		} else if (url === 'lobby') {
-			const lobbyPageManager = new NewLobbyPageManager(
-				this.app,
-				this.clientInfo,
-				this._onClickWatingRoomCreationButton.bind(this),
-				this._onEnterWaitingRoom.bind(this)
-			);
-			await lobbyPageManager.initPage();
-		} else if (url === 'waitingRoomCreation') {
-			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(
-				this.app,
-				this.clientInfo,
-				this._onEnterWaitingRoom.bind(this)
-			);
-		} else if (url === 'pingpong') {
-			const pingpongPageManager = new PingpongPageManager(
-				this.app,
-				this.clientInfo,
-				this._onExitPingpongGame.bind(this)
-			);
-			await pingpongPageManager.initPage();
-		} else if (url === 'waitingRoom') {
-			const waitingRoomPageManager = new WaitingRoomPageManager(
-				this.app,
-				this.clientInfo,
-				this._onStartPingpongGame.bind(this)
-			);
-		}
-	}
+  async renderPage(url) {
+    if (url === "login") {
+      const loginPageManager = new LoginPageManager(
+        this.app,
+        this.clientInfo,
+        this._onLoginSuccess.bind(this)
+      );
+      await loginPageManager.initPage();
+    } else if (url === "lobby") {
+      const lobbyPageManager = new NewLobbyPageManager(
+        this.app,
+        this.clientInfo,
+        this._onClickWatingRoomCreationButton.bind(this),
+        this._onEnterWaitingRoom.bind(this)
+      );
+      await lobbyPageManager.initPage();
+    } else if (url === "waitingRoomCreation") {
+      const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(
+        this.app,
+        this.clientInfo,
+        this._onEnterWaitingRoom.bind(this)
+      );
+    } else if (url === "pingpong") {
+      const pingpongPageManager = new PingpongPageManager(
+        this.app,
+        this.clientInfo,
+        this._onExitPingpongGame.bind(this)
+      );
+      await pingpongPageManager.initPage();
+    } else if (url === "waitingRoom") {
+      const waitingRoomPageManager = new WaitingRoomPageManager(
+        this.app,
+        this.clientInfo,
+        this._onStartPingpongGame.bind(this),
+        this._onExitPingpongGame.bind(this)
+      );
+    }
+  }
 
 	_onLoginSuccess() {
 		this.renderPage('lobby');

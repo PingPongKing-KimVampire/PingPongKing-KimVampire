@@ -260,8 +260,8 @@ class WaitingRoomCreationPageManager {
 		`;
 	}
 
-	_getPlayerCountSelectionHTML() {
-		return `
+  _getPlayerCountSelectionHTML() {
+    return `
 			<label class="selectionLabel">인원</label>
 			<div class="selectionBox">
 				<div class="countBox" id="vampireCountBox">
@@ -289,7 +289,7 @@ class WaitingRoomCreationPageManager {
 				</div>
 			</div>
 		`;
-	}
+  }
 }
 
 export default WaitingRoomCreationPageManager;
