@@ -327,6 +327,13 @@ class WaitingRoomPageManager {
 		} else {
 			readyButtonStyle = 'disabledButton';
 		}
+		let abilityModalHTML = '';
+		if (this.clientInfo.gameInfo.teamLeftMode === 'vampire' && this.clientInfo.gameInfo.teamRightMode === 'vampire') {
+			abilityModalHTML = `${this._getVamVamAbilityModalHTML()}`;
+		} else {
+			abilityModalHTML = `${this._getVamHuAbilityModalHTML()}`;
+		}
+
 		return `
 			<div id="container">
 				<div id="header">
@@ -352,7 +359,7 @@ class WaitingRoomPageManager {
 					Ready
 				</button>
 			</div>
-			${this._getAbilityModalHTML()}
+			${abilityModalHTML}
 			${this._getQuestionModalHTML()}
 		`;
 	}
@@ -476,36 +483,58 @@ class WaitingRoomPageManager {
 		`;
 	}
 
-	_getAbilityModalHTML() {
+	_getVamVamAbilityModalHTML() {
 		return `
 			<div class="abilitySelectionModal">
-			<div class="abilityContainer">
-				<div class="abilitySubContainer">
-					${this._getAbilityItemHTML(
-						'자이언트 블로커',
-						'jiantBlocker',
-						'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
-					)}
-					${this._getAbilityItemHTML(
-						'스피드 트위스터',
-						'speedTwister',
-						'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
-					)}
-				</div>
-				<div class="abilitySubContainer">
-					${this._getAbilityItemHTML(
-						'일루젼 페이커',
-						'illusionFaker',
-						'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
-					)}
-					${this._getAbilityItemHTML(
-						'고스트 스매셔',
-						'ghostSmasher',
-						'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
-					)}
+				<div class="abilityContainer" id="vamVamAbilityContainer">
+					<div class="abilitySubContainer">
+						${this._getAbilityItemHTML(
+							'스피드 트위스터',
+							'speedTwister',
+							'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
+						)}
+					</div>
+					<div class="abilitySubContainer">
+						${this._getAbilityItemHTML(
+							'고스트 스매셔',
+							'ghostSmasher',
+							'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
+						)}
+					</div>
 				</div>
 			</div>
-		</div>
+		`;
+	}
+	_getVamHuAbilityModalHTML() {
+		return `
+			<div class="abilitySelectionModal">
+				<div class="abilityContainer">
+					<div class="abilitySubContainer">
+						${this._getAbilityItemHTML(
+							'자이언트 블로커',
+							'jiantBlocker',
+							'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
+						)}
+						${this._getAbilityItemHTML(
+							'스피드 트위스터',
+							'speedTwister',
+							'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
+						)}
+					</div>
+					<div class="abilitySubContainer">
+						${this._getAbilityItemHTML(
+							'일루젼 페이커',
+							'illusionFaker',
+							'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
+						)}
+						${this._getAbilityItemHTML(
+							'고스트 스매셔',
+							'ghostSmasher',
+							'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
+						)}
+					</div>
+				</div>
+			</div>
 		`;
 	}
 	_getAbilityItemHTML(koName, enName, description) {
