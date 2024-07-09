@@ -145,7 +145,7 @@ class PingpongRenderer {
 		} else if (event === 'notifyFakeBallCreate') {
 			this._createFakeBall(content.count);
 			this.fakeBallList.forEach((fakeBall) => {
-				_renderBall(
+				this._renderBall(
 					{ xPosition: fakeBall.xPos, yPosition: fakeBall.yPos },
 					fakeBall.element
 				);
@@ -155,16 +155,15 @@ class PingpongRenderer {
 			const targetFakeBall = this.fakeBallList.find(
 				(fakeBall) => fakeBall.id === ballId
 			);
-			this._renderBall({ content }, targetFakeBall.element);
+			this._renderBall(content, targetFakeBall.element);
 		} else if (event === 'notifyFakeBallRemove') {
-			this.fakeBallList.forEach((fakeBall) => {
-				fakeBall.element.remove();
-			});
-			this.fakeBallList = null;
-		} else if(event === "notifySpeedTwistBall") {
+			this._removeFakeBall(content.ballId);
+		} else if (event === 'notifySpeedTwistBall') {
 			this.ball.element.style.backgroundColor = 'blue';
-		} else if(event === "notifyUnspeedTwistBall") {
+		} else if (event === 'notifyUnspeedTwistBall') {
 			this.ball.element.style.backgroundColor = 'white';
+		} else {
+			console.log('예상하지 못한 이벤트: ', event);
 		}
 	};
 
@@ -189,14 +188,33 @@ class PingpongRenderer {
 		for (let i = 0; i < count; i++) {
 			const element = document.createElement('div');
 			element.className = 'ball';
+			//임시
+			element.style.backgroundColor = 'pink';
+			// if (this._isVampire(this.me)) element.style.opacity = 0.5;
 			playBoardDiv.append(element);
 			this.fakeBallList.push({
-				id,
+				id: i,
 				element,
 				xPos: this.ball.xPos,
 				yPos: this.ball.yPos,
 			});
 		}
+	}
+
+	_removeFakeBall(ballId) {
+		const targetFakeBall = this.fakeBallList.find(
+			(fakeBall) => fakeBall.id === ballId
+		);
+		// console.log(targetFakeBall);
+		// targetFakeBall.element.classList.add("pop");
+		// targetFakeBall.element.addEventListener("transitionend", ()=>{
+		// 	console.log("here");
+		// targetFakeBall.element.remove();
+		// })
+		targetFakeBall.element.remove();
+		this.fakeBallList = this.fakeBallList.filter((fakeBall) => {
+			fakeBall.id !== ballId;
+		});
 	}
 
 	_isVampire(player) {
