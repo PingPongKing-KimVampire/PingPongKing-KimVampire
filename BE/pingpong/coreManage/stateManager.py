@@ -18,6 +18,23 @@ class StateManager:
         self.channel_layer = None
         self.clients: Dict[str, str] = {}
         self.rooms: Dict[str, Dict[str, Any]] = {}
+        self.match_queue = []
+        self.tournament_data = {}
+
+    # Matchmaking Management
+    def add_to_match_queue(self, client_id: str) -> None:
+        self.match_queue.append(client_id)
+        Printer.log(f"Client {client_id} added to match queue", "blue")
+        
+    def remove_from_match_queue(self, client_id: str) -> None:
+        self.match_queue.remove(client_id)
+        Printer.log(f"Client {client_id} removed from match queue", "blue")
+
+    def is_match_queue_full(self) -> bool:
+        return len(self.match_queue) >= 4
+    
+    def match_complete(self) -> None:
+        pass
 
     # Client Management
     def add_client(self, consumer: Any, client_id: str, nickname: str) -> None:

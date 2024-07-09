@@ -38,12 +38,12 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
         event = message.get('event')
         content = message.get('content')
-        # Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
-        # Printer.log(f"event : {event}", "white")
-        # Printer.log(f"content : {content}\n", "white")
         if self.state == 'playing':
             await self.handle_playing_event(event, content)
         else:
+            Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
+            Printer.log(f"event : {event}", "white")
+            Printer.log(f"content : {content}\n", "white")
             await self.handle_waiting_event(event, content)
 
     async def handle_playing_event(self, event, content):

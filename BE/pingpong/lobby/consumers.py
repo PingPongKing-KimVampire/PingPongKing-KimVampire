@@ -52,6 +52,10 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             await self.create_waiting_room(content)
         elif event == 'getWaitingRoomList':
             await self.get_waiting_room_list_response()
+        elif event == 'matchMakingStart':
+            await self.match_making_start()
+        elif event == 'matchMakingCancel':
+            await self.match_making_cancel()
 
     async def enter_lobby(self, client_id):
         self.is_init = True # 인증으로 바꿔야함
@@ -72,6 +76,16 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         await self._send(event='getWaitingRoomResponse', 
                          content={'waitingRoomInfoList': room_list})
 
+    # Match Making
+    
+    async def match_making_start(self):
+        await discard_group(self, 'lobby')
+        await stateManager.add_to_match_queue(self.client_id)
+
+    async def match_making_cancel(self):
+        await stateManager.remove_from_match_queue(self.client_id)
+        await add_group(self, 'lobby')
+
     # Notify
     async def notifyWaitingRoomCreated(self, content):
         content = content['content']
@@ -84,3 +98,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
     async def notifyWaitingRoomClosed(self, content):
         content = content['content']
         await self._send(event='notifyWaitingRoomClosed', content=content)
+    
+    async def notifyMatchMakingComplete(self, content):
+        content = content['content']
+        await self._send(event='notifyMatchMakingComplete', content=content)
