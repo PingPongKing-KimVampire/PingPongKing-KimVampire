@@ -241,7 +241,7 @@ class LobbyPageManager {
 		};
 		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 
-		const { teamLeftList, teamRightList } = await new Promise(resolve => {
+		const { teamLeftList, teamRightList, teamLeftAbility, teamRightAbility } = await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener(
 				"message",
 				function listener(messageEvent) {
@@ -264,6 +264,8 @@ class LobbyPageManager {
 			teamRightMode,
 			teamLeftTotalPlayerCount,
 			teamRightTotalPlayerCount,
+			teamLeftAbility,
+			teamRightAbility,
 		};
 		this._unsubscribeWindow();
 		this.clientInfo.lobbySocket.close();
