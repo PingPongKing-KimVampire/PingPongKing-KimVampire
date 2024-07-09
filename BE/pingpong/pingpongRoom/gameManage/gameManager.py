@@ -13,6 +13,7 @@ PADDLE = 2
 GHOST = 3
 SPEEDTWIST = 4
 FAKE = 5
+NORMALIZE = 6
 
 NORMAL_SPEED = 10
 
@@ -78,13 +79,14 @@ class GameManager:
     def set_team(self, room, team):
         player_arr = room[team]
         player_count = len(player_arr)
-        team = {client_id: Player(info['nickname'], info['ability'], team, player_count) for client_id, info in player_arr.items()}
+        ability = room[team + 'Ability']
+        team = {client_id: Player(info['nickname'], ability, team, player_count) for client_id, info in player_arr.items()}
         return team
 
     def set_team_ability(self, team):
         for player in team.values():
-            player.ability = 'jiantBlocker'
-            # player.ability = 'speedTwister'
+            # player.ability = 'jiantBlocker'
+            player.ability = 'speedTwister'
             # player.ability = 'illusionFaker'
             # player.ability = 'ghostSmasher'
         return player.ability
@@ -174,6 +176,8 @@ class GameManager:
             await self._notify_game_room('notifyGhostBall', {})
         elif ball_state == SPEEDTWIST:
             await self._notify_game_room('notifySpeedTwistBall', {})
+        elif ball_state == NORMALIZE:
+            await self._notify_game_room('notifyUnspeedTwistBall', {})
         if self.ball.is_vanish:
             if self.ball.dx < 0:
                 room_id_team = f"{self.room_id}-right"
@@ -228,6 +232,8 @@ class GameManager:
                 elif player.ability == 'ghostSmasher':
                     self.ball.is_vanish = True
                     state = GHOST
+                elif player.ability == None and self.ball.speed != speed:
+                    state = NORMALIZE
                 self.ball.reversal_random(speed, angle)
                 return state
         return NOHIT
