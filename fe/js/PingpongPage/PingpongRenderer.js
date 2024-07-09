@@ -124,7 +124,7 @@ class PingpongRenderer {
 		} else if (event === 'notifyBallLocationUpdate') {
 			// 공 위치 변경
 			this._updateBall(content);
-			this._renderBall(content);
+			this._renderBall(content, this.ball.element);
 		} else if (event === 'notifyScoreUpdate') {
 			// 점수 변경
 			this._updateScore(content);
@@ -142,6 +142,25 @@ class PingpongRenderer {
 			}
 		} else if (event === 'notifyUnghostBall') {
 			this._makeBallOpaque();
+		} else if (event === 'notifyFakeBallCreate') {
+			this._createFakeBall(content.count);
+			this.fakeBallList.forEach((fakeBall) => {
+				_renderBall(
+					{ xPosition: fakeBall.xPos, yPosition: fakeBall.yPos },
+					fakeBall.element
+				);
+			});
+		} else if (event === 'notifyFakeBallLocationUpdate') {
+			const ballId = content.ballId;
+			const targetFakeBall = this.fakeBallList.find(
+				(fakeBall) => fakeBall.id === ballId
+			);
+			this._renderBall({ content }, targetFakeBall.element);
+		} else if (event === 'notifyFakeBallRemove') {
+			this.fakeBallList.forEach((fakeBall) => {
+				fakeBall.element.remove();
+			});
+			this.fakeBallList = null;
 		}
 	};
 
@@ -158,6 +177,22 @@ class PingpongRenderer {
 	//투명
 	_makeBallTransparent() {
 		this.ball.element.style.opacity = '0';
+	}
+
+	_createFakeBall(count) {
+		if (!this.fakeBallList) this.fakeBallList = [];
+		const playBoardDiv = document.querySelector('#playBoard');
+		for (let i = 0; i < count; i++) {
+			const element = document.createElement('div');
+			element.className = 'ball';
+			playBoardDiv.append(element);
+			this.fakeBallList.push({
+				id,
+				element,
+				xPos: this.ball.xPos,
+				yPos: this.ball.yPos,
+			});
+		}
 	}
 
 	_isVampire(player) {
@@ -264,7 +299,10 @@ class PingpongRenderer {
 	_updateOrientation(orientation) {
 		this.orientation = orientation;
 		this._updateGameContainer();
-		this._renderBall({ xPosition: this.ball.xPos, yPosition: this.ball.yPos });
+		this._renderBall(
+			{ xPosition: this.ball.xPos, yPosition: this.ball.yPos },
+			this.ball.element
+		);
 		this.players.forEach((player) =>
 			this._renderPaddle({
 				clientId: player.id,
@@ -287,28 +325,28 @@ class PingpongRenderer {
 		this.ball.yPos = yPosition;
 	}
 
-	_renderBall({ xPosition, yPosition }) {
+	_renderBall({ xPosition, yPosition }, ballElement) {
 		if (this.orientation === 'portrait') {
-			this.ball.element.style.height = `${this.ballSizePercent}%`;
-			this.ball.element.style.width = 'auto';
+			ballElement.style.height = `${this.ballSizePercent}%`;
+			ballElement.style.width = 'auto';
 		} else if (this.orientation === 'landscape') {
-			this.ball.element.style.width = `${this.ballSizePercent}%`;
-			this.ball.element.style.height = 'auto';
+			ballElement.style.width = `${this.ballSizePercent}%`;
+			ballElement.style.height = 'auto';
 		}
-		this.ball.element.style.aspectRatio = '1/1';
+		ballElement.style.aspectRatio = '1/1';
 
 		const yPercent = (yPosition / this.boardHeight) * 100;
 		const xPercent = (xPosition / this.boardWidth) * 100;
 		if (this.orientation === 'portrait') {
-			this.ball.element.style.top =
+			ballElement.style.top =
 				this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
-			this.ball.element.style.left = `${100 - yPercent}%`;
+			ballElement.style.left = `${100 - yPercent}%`;
 		} else if (this.orientation === 'landscape') {
-			this.ball.element.style.top = `${yPercent}%`;
-			this.ball.element.style.left =
+			ballElement.style.top = `${yPercent}%`;
+			ballElement.style.left =
 				this.me.team === 'right' ? `${xPercent}%` : `${100 - xPercent}%`;
 		}
-		this.ball.element.style.transform = `translate(-50%, -50%)`;
+		ballElement.style.transform = `translate(-50%, -50%)`;
 	}
 
 	_renderPaddle({ clientId, xPosition, yPosition }) {
