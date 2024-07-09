@@ -24,6 +24,8 @@ class WaitingRoomPageManager {
 				teamRightMode: null,
 				teamLeftTotalPlayerCount: null,
 				teamRightTotalPlayerCount: null,
+				teamLeftAbility: null,
+				teamRightAbility: null,
 			},
 		};
 
@@ -34,24 +36,31 @@ class WaitingRoomPageManager {
 		// }
 		this.clientInfo = clientInfo;
 
+		this._setMeInfo();
 		this._initPage();
 		this._listenWaitingRoomEvent();
 	}
 
+	_setMeInfo() {
+		// 자신의 팀, 모드, 준비 상태 알아오기
+		this.me = {
+			team: null,
+			mode: null,
+			readyState: null,
+			selectAbility: false
+		}
+		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find((player) => player.clientId === this.clientInfo.id);
+		if (myPlayer) {
+			this.me.readyState = myPlayer.readyState;
+			this.me.team = 'left';
+		} else {
+			myPlayer = this.clientInfo.gameInfo.teamRightList.find((player) => player.clientId === this.clientInfo.id);
+			this.me.readyState = myPlayer.readyState;
+			this.me.team = 'right';
+		}
+		this.me.mode = this.me.team === 'left' ? this.clientInfo.gameInfo.teamLeftMode : this.clientInfo.gameInfo.teamRightMode;
+	}
 	_initPage() {
-		const playerList = [...this.clientInfo.gameInfo.teamLeftList, ...this.clientInfo.gameInfo.teamRightList];
-		const me = playerList.find((player) => player.clientId === this.clientInfo.id);
-		this.ImReady = me.readyState;
-
-		// TODO : 버튼 표시 상태 파악하기
-		// 인간 팀이라면
-			// 준비되지 않은 경우 : generalButton
-			// 준비된 경우 : + clickedReadyButton
-		// 뱀파이어라면
-			// 능력 안 고른 경우 : disabledButton
-			// 능력 고른 경우 : generalButton
-			// 준비된 경우 : + clickedReadyButton
-
 		this.app.innerHTML = this._getHTML();
 
 		this.leftReadyText = document.querySelector(
@@ -67,18 +76,13 @@ class WaitingRoomPageManager {
 		document
 			.querySelector("#readyButton")
 			.addEventListener("click", (event) => {
-				event.target.classList.toggle('clickedReadyButton');
 				this._sendMyReadyStateChangeMessage.call(this);
 			})
 		document
 			.querySelector(".exitButton")
 			.addEventListener("click", this._exitWaitingRoom.bind(this));
-		
-		// TODO : 두 개의 ability 버튼 고려하기, 나의 ability 버튼에만 이벤트 등록
-		this.abilityButton = document.querySelector('.abilityButton');
-		this.abilityModal = document.querySelector('.abilitySelectionModal');
-		if (this.abilityButton)
-			this.abilityButton.addEventListener('click', this._abilityButtonClicked.bind(this));
+
+		this._setAbilityButtons();
 	}
 
 	async _exitWaitingRoom() {
@@ -126,6 +130,22 @@ class WaitingRoomPageManager {
 		return lobbySocket;
 	}
 
+	_setAbilityButtons() {
+		this.abilityModal = document.querySelector('.abilitySelectionModal');
+		const leftAbilityButton = document.querySelector('.teamPanel:first-of-type .abilityButton');
+		const rightAbilityButton = document.querySelector('.teamPanel:last-of-type .abilityButton');
+		if (this.me.team === 'left') {
+			this.myAbilityButton = leftAbilityButton;
+			this.opponentAbilityButton = rightAbilityButton;
+		} else {
+			this.myAbilityButton = rightAbilityButton;
+			this.opponentAbilityButton = leftAbilityButton;
+		}
+		if (this.myAbilityButton) {
+			this.myAbilityButton.addEventListener('click', this._displayAbilityModal.bind(this));
+		}
+	}
+
 	_listenWaitingRoomEvent() {
 		const listener = (messageEvent) => {
 			const message = JSON.parse(messageEvent.data);
@@ -141,25 +161,35 @@ class WaitingRoomPageManager {
 			} else if (event === "notifyReadyStateChange") {
 				const { clientId, state } = content;
 				this._updateReadyState(clientId, state);
+				if (clientId === this.clientInfo.id) this.me.readyState = state;
 				this._initPage();
 			} else if (event === "notifyGameReady") {
 				//3, 2, 1 추후 구현
 			} else if (event === "notifyGameStart") {
-				content.playerInfo.forEach((player)=>{
-					let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find((leftPlayer)=>leftPlayer.clientId === player.clientId);
-					if(!targetPlayer)
-					  targetPlayer = this.clientInfo.gameInfo.teamRightList.find((rightPlayer)=>rightPlayer.clientId === player.clientId);
+				content.playerInfo.forEach((player) => {
+					let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find((leftPlayer) => leftPlayer.clientId === player.clientId);
+					if (!targetPlayer)
+						targetPlayer = this.clientInfo.gameInfo.teamRightList.find((rightPlayer) => rightPlayer.clientId === player.clientId);
 					targetPlayer.ability = player.ability;
 					targetPlayer.paddleHeight = player.paddleHeight;
 					targetPlayer.paddleWidth = player.paddleWidth;
-				  })
-				  this.clientInfo.gameInfo.sizeInfo = content.boardInfo;
-		  
-						  this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
-							  'message',
-							  listener
-						  );
-						  this._onStartPingpongGame();
+				})
+				this.clientInfo.gameInfo.sizeInfo = content.boardInfo;
+				this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
+					'message',
+					listener
+				);
+				this._onStartPingpongGame();
+			} else if (event === "notifySelectAbility") {
+				if (content.team === 'left') {
+					this.clientInfo.gameInfo.teamLeftAbility = content.ability;
+				} else {
+					this.clientInfo.gameInfo.teamRightAbility = content.ability;
+				}
+				if (content.team === this.me.team && this.myAbilityButton) {
+					this.me.selectAbility = true;
+				}
+				this._initPage();
 			}
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener(
@@ -254,7 +284,7 @@ class WaitingRoomPageManager {
 		}
 	}
 
-	_abilityButtonClicked() {
+	_displayAbilityModal() {
 		this.abilityModal.style.display = 'flex';
 		this.abilityModal.addEventListener('click', this._modalClicked);
 	}
@@ -262,17 +292,26 @@ class WaitingRoomPageManager {
 		const selectedItem = event.target.closest('.abilityItem');
 		if (selectedItem === null)
 			return;
-		const selectedAbility = selectedItem.value;
-		this.abilityButton.innerHTML = `
-			<div class="abilityImgFrame">
-				<img class="abilityImg" src="images/ability/${selectedAbility}.png">
-			</div>
-		`;
+		const selectAbilityMessage = {
+			event: "selectAbility",
+			content: { ability: selectedItem.value }
+		}
+		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(selectAbilityMessage));
 		this.abilityModal.style.display = 'none';
 		this.abilityModal.removeEventListener('click', this._modalClicked);
 	}
 
 	_getHTML() {
+		let readyButtonStyle = '';
+		if (this.me.readyState === 'READY') {
+			readyButtonStyle = 'activatedButton';
+		} else if (this.me.mode === 'human') {
+			readyButtonStyle = 'generalButton';
+		} else if (this.me.mode === 'vampire' && this.me.selectAbility) {
+			readyButtonStyle = 'generalButton';
+		} else {
+			readyButtonStyle = 'disabledButton';
+		}
 		return `
 			<button class="exitButton"></button>
 			<div id="container">
@@ -282,18 +321,22 @@ class WaitingRoomPageManager {
 				</div>
 				<div id="panel">
 					${this._getTeamPanelHTML(
-			this.clientInfo.gameInfo.teamLeftMode,
-			this.clientInfo.gameInfo.teamLeftList,
-			this.clientInfo.gameInfo.teamLeftTotalPlayerCount
-		)}
+						this.clientInfo.gameInfo.teamLeftMode,
+						this.clientInfo.gameInfo.teamLeftList,
+						this.clientInfo.gameInfo.teamLeftTotalPlayerCount,
+						this.clientInfo.gameInfo.teamLeftAbility
+					)}
 					<div id="vsText">VS</div>
 					${this._getTeamPanelHTML(
-			this.clientInfo.gameInfo.teamRightMode,
-			this.clientInfo.gameInfo.teamRightList,
-			this.clientInfo.gameInfo.teamRightTotalPlayerCount
-		)}
+						this.clientInfo.gameInfo.teamRightMode,
+						this.clientInfo.gameInfo.teamRightList,
+						this.clientInfo.gameInfo.teamRightTotalPlayerCount,
+						this.clientInfo.gameInfo.teamRightAbility
+					)}
 				</div>
-				<button class="disabledButton ${this.ImReady === 'READY' ? 'clickedReadyButton' : ''}" id="readyButton">Ready</button>
+				<button class="${readyButtonStyle}" id="readyButton" ${readyButtonStyle === 'disabledButton' ? 'disabled' : ''}>
+					Ready
+				</button>
 			</div>
 			${this._getAbilityModalHTML()}
 		`;
@@ -301,22 +344,20 @@ class WaitingRoomPageManager {
 	_getMode() {
 		const left =
 			this.clientInfo.gameInfo.teamLeftMode === "vampire" ? "뱀파이어" : "인간";
-		const right =
-			this.clientInfo.gameInfo.teamRightMode === "vampire"
-				? "뱀파이어"
-				: "인간";
+		const right = 
+			this.clientInfo.gameInfo.teamRightMode === "vampire" ? "뱀파이어" : "인간";
 		return `${left} VS ${right} 모드`;
 	}
 
-	_getTeamPanelHTML(mode, teamList, totalPlayerCount) {
+	_getTeamPanelHTML(mode, teamList, totalPlayerCount, selectAbility) {
 		let infoHTML;
 		if (totalPlayerCount === 1) {
 			if (teamList.length === 0) infoHTML = this._getPlayerEmptyInfoHTML(mode);
-			else infoHTML = this._getPlayerInfoHTML(mode, teamList[0]);
+			else infoHTML = this._getPlayerInfoHTML(mode, teamList[0], selectAbility);
 		} else {
 			infoHTML = this._getPlayerInfoListHTML(teamList, totalPlayerCount);
 		}
-		const readyAll = teamList.every((player) => player.readyState === 'READY');
+		const readyAll = teamList.length === totalPlayerCount && teamList.every((player) => player.readyState === 'READY');
 		return `
 			<div class="teamPanel">
 				<div class="status">
@@ -333,7 +374,7 @@ class WaitingRoomPageManager {
 
 	_getPlayerEmptyInfoHTML(mode) {
 		const abilityBtnHTML =
-			'<button class="abilityButton generalButton">능력<br>선택</button>';
+			'<button class="abilityButton generalButton">?</button>';
 		return `
 			<div class="nameContainer">
 				<div class="name">?</div>
@@ -347,9 +388,23 @@ class WaitingRoomPageManager {
 		`;
 	}
 
-	_getPlayerInfoHTML(mode, player) {
-		const abilityBtnHTML =
-			'<button class="abilityButton generalButton">능력<br>선택</button>';
+	_getPlayerInfoHTML(mode, player, selectAbility) {
+		let abilityBtnInnerHTML;
+		const isMine = player.clientId === this.clientInfo.id;
+		if (selectAbility) {
+			abilityBtnInnerHTML = `
+				<div class="abilityImgFrame">
+					<img class="abilityImg" src="images/ability/${selectAbility}.png">
+				</div>`;
+		} else {
+			abilityBtnInnerHTML = `${isMine ? '능력<br>선택' : '?'}`;
+		}
+		let abilityBtnHTML = `
+			<button class="abilityButton generalButton ${isMine ? 'myAbilityButton' : ''}">
+				${abilityBtnInnerHTML}
+			</button>
+		`;
+
 		return `
 			<div class="nameContainer">
 				<div class="name">${player.clientNickname}</div>
@@ -357,9 +412,8 @@ class WaitingRoomPageManager {
 			<div class="avatar">
 				${mode === 'vampire' ? abilityBtnHTML : ''}
 				<div class="avatarImgFrame">
-					<img class="avatarImg ${
-						player.readyState === 'READY' ? 'on' : ''
-					}" src="images/playerA.png">
+					<img class="avatarImg ${player.readyState === 'READY' ? 'on' : ''}" 
+						src="images/playerA.png">
 				</div>
 			</div>
 		`;
@@ -414,7 +468,7 @@ class WaitingRoomPageManager {
 				<div class="abilitySubContainer">
 					${this._getAbilityItemHTML(
 						'자이언트 블로커',
-						'giantBlocker',
+						'jiantBlocker',
 						'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
 					)}
 					${this._getAbilityItemHTML(
