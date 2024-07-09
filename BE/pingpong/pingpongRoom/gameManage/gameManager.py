@@ -165,7 +165,7 @@ class GameManager:
         # for i in range(count - 1):
             self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
             self.fake_ball[i].reset_ball(self.ball.pos_x, self.ball.pos_y, self.ball.angle)
-            self.fake_ball[i].reversal_random()
+            self.fake_ball[i].reversal_random(self.fake_ball[i].speed, self.fake_ball[i].angle)
             asyncio.create_task(self._fake_ball_loop(i))
 
     # Playing Methods
