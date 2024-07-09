@@ -8,9 +8,11 @@ stateManager = StateManager()
 
 class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.client_id = None
         self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
+        self.client_id = None
+        self.nickname = None
         self.tournament_state = "semi-final"
+        self.tournament_info = stateManager.get_tournament_room(self.tournament_id)
         await self.accept()
         Printer.log(f"Client connected to tournament room {self.room_id}", "green")
 
@@ -24,9 +26,9 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
-        # Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
-        # Printer.log(f"event : {event}", "white")
-        # Printer.log(f"conetnt : {content}\n", "white")
+        Printer.log(f">>>>> Tournamnet {self.room_id} sent >>>>>", "bright_cyan")
+        Printer.log(f"event : {event}", "white")
+        Printer.log(f"conetnt : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
 
@@ -36,6 +38,23 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         event = message.get('event')
         content = message.get('content')
         if event == "enterTournamentRoom":
-            pass
-        elif event == "getTournamentRoom":
-            pass
+            await self.enter_tournament_room(content)
+        elif event == "getTournamentGameInfo":
+            pass         
+
+    async def enter_tournament_room(self, content):
+        self.client_id = content['clientId']
+        self.nickname = stateManager.get_client_nickname(self.client_id)
+        await add_group(self, self.tournament_id)
+        client_list = stateManager.get_tournament_client_list(self.tournament_id)
+        client_list_data = []
+        for client_id, nickname in client_list.items():
+            content = {
+                "clientId" : client_id,
+                "nickname" : nickname,
+                "clientAvartarUrl" : "/테스트중_수정할것.png"
+                # "clientAvartarUrl" : stateManager.get_client_avatar_url(client_id)
+            }
+            client_list_data.append(content)
+        await self._send("enterTournamentRoomResponse", 
+                         { "tournamentClientList": client_list_data })

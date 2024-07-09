@@ -1,7 +1,8 @@
 from typing import Dict, Any, Optional, List, Tuple
 import uuid
-from asyncio import sleep
-from .group import notify_group
+from asyncio import sleep, create_task
+import asyncio
+from .group import notify_group, add_group
 from pingpongRoom.gameManage.gameManager import GameManager
 from utils.printer import Printer
 
@@ -18,23 +19,78 @@ class StateManager:
         self.channel_layer = None
         self.clients: Dict[str, str] = {}
         self.rooms: Dict[str, Dict[str, Any]] = {}
+        self.match_making_loop_task = None
         self.match_queue = []
-        self.tournament_data = {}
+        self.tournaments = {str, Dict[str, Any]}
+        self.is_match_task_running = False
 
     # Matchmaking Management
-    def add_to_match_queue(self, client_id: str) -> None:
-        self.match_queue.append(client_id)
-        Printer.log(f"Client {client_id} added to match queue", "blue")
-        
-    def remove_from_match_queue(self, client_id: str) -> None:
-        self.match_queue.remove(client_id)
-        Printer.log(f"Client {client_id} removed from match queue", "blue")
+    def add_to_match_queue(self, consumer) -> None:
+        if self.match_making_loop_task is None or self.match_making_loop_task.done():
+            self.is_match_task_running = True
+            self.match_making_loop_task = create_task(self.match_making_loop())
+        self.match_queue.append(consumer)
+        Printer.log(f"Client {consumer.client_id} added to match queue", "blue")
+
+    def remove_from_match_queue(self, consumer) -> None:
+        self.match_queue.remove(consumer)
+        Printer.log(f"Client {consumer.client_id} removed from match queue", "blue")
 
     def is_match_queue_full(self) -> bool:
         return len(self.match_queue) >= 4
+
+    async def group_match_clients(self, match_clients, tournament_id) -> None:
+        for consumer in match_clients:
+            await asyncio.gather(*[add_group(consumer, tournament_id)]) # gather : 병렬적으로 실행하지만, 순서는 보장됨
+            await notify_group(self.channel_layer, tournament_id, 
+                               'notifyMatchMakingComplete', {'tournamentId': tournament_id})
+
+    async def match_making_loop(self) -> None:
+        while self.is_match_task_running:
+            if self.is_match_queue_full():
+                match_clients = self.match_queue[:4]
+                self.match_queue = self.match_queue[4:]
+                client_list = {consumer.client_id: consumer.nickname for consumer in match_clients}
+                tournament_id = self.create_tournament(client_list)
+                await self.group_match_clients(match_clients, tournament_id)
+            if not self.match_queue:
+                self.is_match_task_running = False
+            await sleep(1)
+        self.match_making_loop_task = None
+
+    def create_tournament(self, client_list) -> str:
+        tournament_id = str(uuid.uuid4())
+        self.tournaments[tournament_id] = {
+            'clients': client_list,
+            'state': 'semi-final',
+            'gameData' : Dict[str, Any] # row : [gameinfo, gameinfo]
+        }
+        return tournament_id
+
+    async def stop_matchmaking(self):
+        self.is_match_task_running = False
+        if self.match_making_loop_task:
+            await self.match_making_loop_task
+            
+    def set_tournament_room_state(self, tournament_id: str, state: str) -> None:
+        self.tournaments[tournament_id]['state'] = state
+        
+    def get_tournament_room_state(self, tournament_id: str) -> str:
+        return self.tournaments.get(tournament_id, {}).get('state', '')
+
+    def get_tournament_game_data(self, tournament_id: str) -> Dict[str, Any]:
+        return self.tournaments.get(tournament_id, {}).get('gameData', {})
+
+    def append_tournament_game_data(self, tournament_id: str, data: Dict[str, Any]) -> None:
+        self.tournaments[tournament_id]['gameData'].append(data)
+
+    # Tournament Management
+
+    def get_tournament_room(self, tournament_id: str) -> Dict[str, Any]:
+        return self.tournaments.get(tournament_id, {})
     
-    def match_complete(self) -> None:
-        pass
+    def get_tournament_client_list(self, tournament_id: str) -> List[Dict[str, str]]:
+        return self.tournaments.get(tournament_id, {}).get('clients', {})
 
     # Client Management
     def add_client(self, consumer: Any, client_id: str, nickname: str) -> None:
