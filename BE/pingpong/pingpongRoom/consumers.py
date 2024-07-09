@@ -162,3 +162,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def notifySpeedTwistBall(self, content):
         await self._send(event='notifySpeedTwistBall', content=content['content'])
+
+    async def notifyUnspeedTwistBall(self, content):
+        await self._send(event='notifyUnspeedTwistBall', content=content['content'])
