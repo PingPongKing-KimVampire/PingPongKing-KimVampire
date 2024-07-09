@@ -2,6 +2,8 @@ import asyncio
 from .ball import Ball
 from .player import Player
 from asyncio import Queue
+import uuid
+import random
 
 FRAME_PER_SECOND = 60
 LEFT = 'left'
@@ -110,7 +112,7 @@ class GameManager:
             if is_ghost == False:
                 await self._notify_game_room('notifyUnghostBall', {})
             ball_state = self._detect_collisions(self.ball)
-            await self._send_ball_update(ball_state)
+            await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
     # async def _input_loop(self):
@@ -143,6 +145,7 @@ class GameManager:
         from utils.printer import Printer
         Printer.log(f"Fake ball {index} created", "yellow")
         fake_ball = self.fake_ball[index]
+        Printer.log(f"Fake ball {index} angle:" + str(fake_ball.angle), "yellow")
         while self.is_playing and not self.is_end:
             fake_ball.move()
             ball_state = self._detect_collisions(fake_ball)
@@ -163,14 +166,16 @@ class GameManager:
         await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
         for i in range(count):
         # for i in range(count - 1):
-            self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
-            self.fake_ball[i].reset_ball(self.ball.pos_x, self.ball.pos_y, self.ball.angle)
-            self.fake_ball[i].reversal_random(self.fake_ball[i].speed, self.fake_ball[i].angle)
-            asyncio.create_task(self._fake_ball_loop(i))
+            id = str(uuid.uuid4())
+            self.fake_ball[id] = Ball(NORMAL_SPEED, self.ball_radius)
+            rand = random.randint(-15, 15)
+            self.fake_ball[id].reset_ball(self.ball.pos_x, self.ball.pos_y, self.ball.angle + rand)
+            asyncio.create_task(self._fake_ball_loop(id))
 
     # Playing Methods
         
-    async def _send_ball_update(self, ball_state):
+    async def _send_ball_update(self, ball_state, ball):
+        team = 'left' if ball.dx > 0 else 'right'
         if ball_state == SCORE:
             await self._round_end_with_score()
         elif ball_state == GHOST:
@@ -179,6 +184,8 @@ class GameManager:
             await self._notify_game_room('notifySpeedTwistBall', {})
         elif ball_state == NORMALIZE:
             await self._notify_game_room('notifyUnspeedTwistBall', {})
+        elif ball_state == FAKE:
+            asyncio.create_task(self._create_fake_ball(team))
         if self.ball.is_vanish:
             if self.ball.dx < 0:
                 room_id_team = f"{self.room_id}-right"
@@ -194,6 +201,7 @@ class GameManager:
     #     player.update_target(content['xPosition'], content['yPosition'])
 
     def _detect_collisions(self, ball):
+        state = NOHIT
         if ball.get_right_x() >= self.board_width:
             # print("right_x: ", ball.get_right_x())
             # print("board_width: ", self.board_width)
@@ -208,16 +216,13 @@ class GameManager:
             ball.dy = -ball.dy
         else:
             state = self._detect_paddle_collision(ball)
-            if state != NOHIT:
-                return state
-        return NOHIT
+        return state
 
     async def update_paddle_location(self, client_id, content):
         await self.queue.put((client_id, content))
 
     def _detect_paddle_collision(self, ball):
         players_to_check = self.team_right.values() if ball.dx > 0 else self.team_left.values()
-        team = 'right' if ball.dx > 0 else 'left'
         speed = NORMAL_SPEED
         angle = 0
         for player in players_to_check:
@@ -228,7 +233,6 @@ class GameManager:
                     angle = 30
                     state = SPEEDTWIST
                 elif player.ability == 'illusionFaker':
-                    asyncio.create_task(self._create_fake_ball(team))
                     state = FAKE
                 elif player.ability == 'ghostSmasher':
                     ball.is_vanish = True

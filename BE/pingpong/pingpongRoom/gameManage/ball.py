@@ -11,6 +11,7 @@ class Ball:
         self.dx = 0
         self.dy = 0
         self.is_vanish = False
+        self.state = 0 
 
     def reset_ball(self, x, y, angle):
         self.pos_x = x
