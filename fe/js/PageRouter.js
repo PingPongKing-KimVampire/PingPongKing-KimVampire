@@ -44,6 +44,8 @@ class PageRouter {
 				teamRightMode: null,
 				teamLeftTotalPlayerCount: null,
 				teamRightTotalPlayerCount: null,
+				teamLeftAbility: null,
+				teamRightAbility: null,
 			},
 			friendInfo: {
 				friendList: [
