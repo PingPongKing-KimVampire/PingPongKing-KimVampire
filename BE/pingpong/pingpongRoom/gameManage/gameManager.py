@@ -86,8 +86,8 @@ class GameManager:
     def set_team_ability(self, team):
         for player in team.values():
             # player.ability = 'jiantBlocker'
-            player.ability = 'speedTwister'
-            # player.ability = 'illusionFaker'
+            # player.ability = 'speedTwister'
+            player.ability = 'illusionFaker'
             # player.ability = 'ghostSmasher'
         return player.ability
         
@@ -165,6 +165,7 @@ class GameManager:
         # for i in range(count - 1):
             self.fake_ball[i] = Ball(NORMAL_SPEED, self.ball_radius)
             self.fake_ball[i].reset_ball(self.ball.pos_x, self.ball.pos_y, self.ball.angle)
+            self.fake_ball[i].reversal_random()
             asyncio.create_task(self._fake_ball_loop(i))
 
     # Playing Methods
@@ -194,19 +195,19 @@ class GameManager:
 
     def _detect_collisions(self, ball):
         if ball.get_right_x() >= self.board_width:
-            print("right_x: ", ball.get_right_x())
-            print("board_width: ", self.board_width)
+            # print("right_x: ", ball.get_right_x())
+            # print("board_width: ", self.board_width)
             self.serve_turn = LEFT
             return SCORE
         elif ball.get_left_x() <= 0:
-            print("left_x: ", ball.get_left_x())
-            print("board_width: ", self.board_width)
+            # print("left_x: ", ball.get_left_x())
+            # print("board_width: ", self.board_width)
             self.serve_turn = RIGHT
             return SCORE
         elif ball.get_top_y() <= 0 or ball.get_bottom_y() >= self.board_height:
             ball.dy = -ball.dy
         else:
-            state = self._detect_paddle_collision()
+            state = self._detect_paddle_collision(ball)
             if state != NOHIT:
                 return state
         return NOHIT
@@ -214,27 +215,27 @@ class GameManager:
     async def update_paddle_location(self, client_id, content):
         await self.queue.put((client_id, content))
 
-    def _detect_paddle_collision(self):
-        players_to_check = self.team_right.values() if self.ball.dx > 0 else self.team_left.values()
-        team = 'right' if self.ball.dx > 0 else 'left'
+    def _detect_paddle_collision(self, ball):
+        players_to_check = self.team_right.values() if ball.dx > 0 else self.team_left.values()
+        team = 'right' if ball.dx > 0 else 'left'
         speed = NORMAL_SPEED
         angle = 0
         for player in players_to_check:
             if self._is_ball_colliding_with_paddle(player):
                 state = PADDLE
                 if player.ability == 'speedTwister':
-                    speed = self.ball.speed * 2
+                    speed = ball.speed * 2
                     angle = 30
                     state = SPEEDTWIST
                 elif player.ability == 'illusionFaker':
                     asyncio.create_task(self._create_fake_ball(team))
                     state = FAKE
                 elif player.ability == 'ghostSmasher':
-                    self.ball.is_vanish = True
+                    ball.is_vanish = True
                     state = GHOST
-                elif player.ability == None and self.ball.speed != speed:
+                elif player.ability == None and ball.speed != speed:
                     state = NORMALIZE
-                self.ball.reversal_random(speed, angle)
+                ball.reversal_random(speed, angle)
                 return state
         return NOHIT
 
