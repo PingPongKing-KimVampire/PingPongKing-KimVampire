@@ -161,6 +161,10 @@ class PingpongRenderer {
 				fakeBall.element.remove();
 			});
 			this.fakeBallList = null;
+		} else if(event === "notifySpeedTwistBall") {
+			this.ball.element.style.backgroundColor = 'blue';
+		} else if(event === "notifyUnspeedTwistBall") {
+			this.ball.element.style.backgroundColor = 'white';
 		}
 	};
 
