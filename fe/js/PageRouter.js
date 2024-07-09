@@ -4,6 +4,8 @@ import WaitingRoomCreationPageManager from './LobbyPage/WaitingRoomCreationPageM
 import NewLobbyPageManager from './LobbyPage/LobbyPageManager.js';
 import WaitingRoomPageManager from './WaitingRoomPage/WaitingRoomPageManager.js';
 
+import TournamentPageManager from './TournamentPage/TournamentPageManager.js';
+
 export const SERVER_ADDRESS = '127.0.0.1';
 export const SERVER_PORT = '3001';
 
@@ -121,7 +123,9 @@ class PageRouter {
         this._onStartPingpongGame.bind(this),
         this._onExitPingpongGame.bind(this)
       );
-    }
+    } else if (url === "tournament") {
+		const tournamentPageManager = new TournamentPageManager(this.app, this.clientInfo);
+	}
   }
 
 	_onLoginSuccess() {
