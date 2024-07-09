@@ -77,21 +77,9 @@ class WaitingRoomPageManager {
 			.querySelector("#readyButton")
 			.addEventListener("click", (event) => {
 				this._sendMyReadyStateChangeMessage.call(this);
-			})
-		document
-			.querySelector(".exitButton")
-			.addEventListener("click", this._exitWaitingRoom.bind(this));
-
+			});
+		this._manageExitRoom();
 		this._setAbilityButtons();
-	}
-
-	async _exitWaitingRoom() {
-		this.clientInfo.gameInfo.pingpongRoomSocket.close();
-		this.clientInfo.gameInfo = null;
-		this.clientInfo.lobbySocket = await this._connectLobbySocket(
-			this.clientInfo.id
-		);
-		this._onExitWaitingRoom();
 	}
 
 	//login 페이지와 중복되는 로직임. 어떻게 공유할 것인지 생각해야함.
@@ -301,6 +289,33 @@ class WaitingRoomPageManager {
 		this.abilityModal.removeEventListener('click', this._modalClicked);
 	}
 
+	_manageExitRoom() {
+		const exitButton = document.querySelector('.exitButton');
+		const exitYesButton = document.querySelector(
+			'.questionModal .activatedButton:nth-of-type(1)');
+		const exitNoButton = document.querySelector(
+			'.questionModal .activatedButton:nth-of-type(2)');
+		const questionModal = document.querySelector('.questionModal');
+
+		exitButton.addEventListener('click', () => {
+			questionModal.style.display = 'flex';
+		});
+		exitYesButton.addEventListener('click', () => {
+			this._exitWaitingRoom();
+		});
+		exitNoButton.addEventListener('click', () => {
+			questionModal.style.display = 'none';
+		})
+	}
+	async _exitWaitingRoom() {
+		this.clientInfo.gameInfo.pingpongRoomSocket.close();
+		this.clientInfo.gameInfo = null;
+		this.clientInfo.lobbySocket = await this._connectLobbySocket(
+			this.clientInfo.id
+		);
+		this._onExitWaitingRoom();
+	}
+
 	_getHTML() {
 		let readyButtonStyle = '';
 		if (this.me.readyState === 'READY') {
@@ -313,7 +328,6 @@ class WaitingRoomPageManager {
 			readyButtonStyle = 'disabledButton';
 		}
 		return `
-			<button class="exitButton"></button>
 			<div id="container">
 				<div id="header">
 					<div id="title">${this.clientInfo.gameInfo.title}</div>
@@ -339,6 +353,7 @@ class WaitingRoomPageManager {
 				</button>
 			</div>
 			${this._getAbilityModalHTML()}
+			${this._getQuestionModalHTML()}
 		`;
 	}
 	_getMode() {
@@ -502,6 +517,21 @@ class WaitingRoomPageManager {
 				</div>
 				<div class="abilityDescription">${description}</div>
 			</button>
+		`;
+	}
+
+	_getQuestionModalHTML() {
+		return `
+			<button class="exitButton"></button>
+			<div class="questionModal">
+				<div class="questionBox">
+					<div class="question">대결에 참전하지 않으시겠습니까?</div>
+					<div class="buttonGroup">
+						<button class="activatedButton">네</button>
+						<button class="activatedButton">아니오</button>
+					</div>
+				</div>
+			</div>
 		`;
 	}
 }
