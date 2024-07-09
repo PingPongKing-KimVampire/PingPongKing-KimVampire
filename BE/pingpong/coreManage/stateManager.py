@@ -41,6 +41,8 @@ class StateManager:
             'title': content['title'],
             'leftMode': content['leftMode'],
             'rightMode': content['rightMode'],
+            'leftAbility': None,
+            'rightAbility': None,
             'leftMaxPlayerCount': content['leftPlayerCount'],
             'rightMaxPlayerCount': content['rightPlayerCount'],
             'left': {},
@@ -57,6 +59,11 @@ class StateManager:
     def get_room_client_count(self, room_id: str) -> int:
         room = self.rooms.get(room_id, {})
         return len(room.get('left', {})) + len(room.get('right', {}))
+
+    def get_room_ability(self, room_id: str) -> Dict[str, str]:
+        left_ability = self.rooms[room_id].get('leftAbility', None)
+        right_ability = self.rooms[room_id].get('rightAbility', None)
+        return left_ability, right_ability
 
     def enter_waiting_room(self, room_id: str, client_id: str) -> Optional[str]:
         room = self.rooms.get(room_id)
@@ -79,7 +86,6 @@ class StateManager:
         room[team][client_id] = {
             'nickname': client_nickname,
             'state': 'NOTREADY',
-            'ability': 'human'
         }
 
     def remove_client_from_room(self, room_id: str, client_id: str) -> None:
@@ -174,7 +180,7 @@ class StateManager:
         room = self.rooms.get(room_id, {})
         for team in ['left', 'right']:
             if client_id in room.get(team, {}):
-                room[team][client_id]['ability'] = ability
+                room[f"{team}Ability"] = ability
                 await self.notify_room(room_id, event='notifySelectAbility', content={'team': team, 'ability': ability})
                 Printer.log(f"Client {client_id} selected ability {ability}", "blue")
                 break

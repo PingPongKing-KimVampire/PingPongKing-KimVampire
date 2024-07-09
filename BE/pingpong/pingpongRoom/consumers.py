@@ -86,8 +86,13 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
         
         team_left_list, team_right_list = stateManager.get_waiting_room_player_list(self.room_id)
+        team_left_ability, team_right_ability = stateManager.get_room_ability(self.room_id)
         await self._send(event='enterWaitingRoomResponse',
-                         content={'teamLeftList': team_left_list, 'teamRightList': team_right_list})
+                         content={'teamLeftList': team_left_list, 
+                                  'teamRightList': team_right_list,
+                                  'teamLeftAbility': team_left_ability,
+                                  'teamRightAbility': team_right_ability
+                                  })
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
 
     async def select_ability(self, content):
