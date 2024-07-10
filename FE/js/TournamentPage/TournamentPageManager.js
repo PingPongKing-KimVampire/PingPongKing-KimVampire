@@ -8,12 +8,12 @@ class TournamentPageManager {
 		this.playerList = [
 			{
 				clientId: "1",
-				clientNickname: "김뱀파이어",
+				clientNickname: "김뱀파이어어어어어어어어엉어어어어어",
 				avartarUrl: "images/playerA.png"
 			},
 			{
 				clientId: "2",
-				clientNickname: "김뱀파이",
+				clientNickname: "김뱀파이어",
 				avartarUrl: "images/playerA.png"
 			},
 			{
@@ -39,7 +39,7 @@ class TournamentPageManager {
 				clientIdList: ["3", "4"],
 				score: [10, 0],
 				roomId: "1234",
-				state: "finished"
+				state: "isPlaying"
 			}
 		];
 		this.final = [
@@ -47,7 +47,7 @@ class TournamentPageManager {
 				clientIdList: ["1", "3"],
 				score: [0, 10],
 				roomId: "123456",
-				state: "isPlaying"
+				state: "notStarted"
 			}
 		]
 
@@ -253,7 +253,9 @@ class TournamentPageManager {
 					<div class="avatarImgFrame">?</div>
 					${isWinner ? '<img class="crownImg" src="images/tournamentCrown.png">' : ''}
 				</div>
-				<div class="nickname">???</div>
+				<div class="nickname">
+					<div class="nicknameText">???</div>
+				</div>
 			</div>
 		`;
 	}
@@ -266,7 +268,9 @@ class TournamentPageManager {
 					</div>
 					${isWinner ? '<img class="crownImg" src="images/tournamentCrown.png">' : ''}
 				</div>
-				<div class="nickname">${player.clientNickname}</div>
+				<div class="nickname">
+					<div class="nicknameText">${player.clientNickname}</div>
+				</div>
 			</div>
 		`;
 	}

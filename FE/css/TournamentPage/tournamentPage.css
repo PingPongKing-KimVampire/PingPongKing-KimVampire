@@ -9,7 +9,10 @@
 
 #root {
 	height: 25%;
-	width: auto;
+	width: 50%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
 }
 
 #subTrees {
@@ -31,20 +34,27 @@
 .final, .semiFinal {
 	height: 40%;
 	width: 100%;
+}
+.final {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 }
-
 .semiFinal {
 	display: flex;
 	flex-direction: row;
+	justify-content: center;
 }
 
 .player {
 	height: 100%;
+	width: 50%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+.final .player, .semiFinal .player {
+	width: 50%;
 }
 
 .avatar {
@@ -94,14 +104,21 @@
 
 .nickname {
 	height: 25%;
+	width: 80%;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
+}
+
+.nicknameText {
 	font-size: 1.5rem;
 	font-weight: 200;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
-.emptyPlayer .nickname {
+.emptyPlayer .nicknameText {
 	color: rgba(255, 255, 255, 0.3);
 }
 
@@ -141,9 +158,90 @@
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	width: 3%;
+	width: 4%;
 }
 .scoreBox .score {
 	font-size: 1.7rem;
 	font-weight: 200;
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
+	#container {
+		width: 65%;
+	}
+	.scoreBox {
+		width: 4.5%;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
+	#container {
+		width: 80%;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	#container {
+		width: 85%;
+		height: 72%;
+	}
+	.scoreBox {
+		width: 6%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1) {
+	#container {
+		height: 65%;
+		width: 90%;
+	}
+	.nicknameText {
+		font-size: 1.3rem;
+	}
+	.scoreBox {
+		width: 8%;
+	}
+	.scoreBox .score {
+		font-size: 1.5rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+	#container {
+		height: 57%;
+		width: 90%;
+	}
+	.observeButton {
+		font-size: 1rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+	#container {
+		height: 50%;
+		width: 90%;
+	}
+	.nicknameText {
+		font-size: 1rem;
+	}
+	.scoreBox .score {
+		font-size: 1.2rem;
+	}
+	.observeButton {
+		font-size: 0.8rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+	#container {
+		height: 37%;
+		width: 90%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+	#container {
+		height: 30%;
+		width: 90%;
+	}
+	.nicknameText {
+		font-size: 0.7rem;
+	}
+	.scoreBox .score {
+		font-size: 0.9rem;
+	}
 }
