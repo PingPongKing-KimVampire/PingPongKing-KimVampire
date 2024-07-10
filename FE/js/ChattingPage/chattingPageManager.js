@@ -214,7 +214,7 @@ class ChattingPageManager {
 
 		this._renderFriendList(); // TODO : FriendListContainer div 비워주기, 정렬된 데이터를 가지고 렌더링
 
-		// this._setMessageArriveListener();
+		this._setMessageArriveListener();
 	}
 	async _closeChatContainer() {
 		this.isOpened = false;
@@ -222,7 +222,7 @@ class ChattingPageManager {
 		if (this.readingFriendId) {
 			await this._sendStopReadingMessage();
 		}
-		// this.clientInfo.socket.removeEventListener('message', this._messageArriveListener);
+		this.clientInfo.socket.removeEventListener('message', this._messageArriveListener);
 	}
 
 	_getSortedFriendList() {
@@ -236,14 +236,14 @@ class ChattingPageManager {
 		this.inputBox = document.querySelector(".inputBox");
 		document.querySelector(".inputButton").addEventListener("click", () => {
 			if (this.inputBox.value === "") return;
-			// const sendMessage= {
-			// 	event: "sendMessage",
-			// 	content: {
-			// 		clientId: this.readingFriendId,
-			// 		message: this.inputBox.value
-			// 	}
-			// }
-			// this.clientInfo.socket.send(JSON.stringify(sendMessage));
+			const sendMessage = {
+				event: "sendMessage",
+				content: {
+					clientId: this.readingFriendId,
+					message: this.inputBox.value
+				}
+			}
+			this.clientInfo.socket.send(JSON.stringify(sendMessage));
 			this.inputBox.value = "";
 		});
 	}
@@ -275,17 +275,17 @@ class ChattingPageManager {
 			},
 		};
 		this.readingFriendId = null;
-		// this.clientInfo.socket.send(JSON.stringify(stopReadingChatMessage));
-		// await new Promise((resolve) => {
-		// 	const listener = (messageEvent) => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (event === 'stopReadingChatResponse' && content.message === 'OK') {
-		// 			this.clientInfo.socket.removeEventListener('message', listener);
-		// 			resolve();
-		// 		}
-		// 	}
-		// 	this.clientInfo.socket.addEventListener('message', listener);
-		// });
+		this.clientInfo.socket.send(JSON.stringify(stopReadingChatMessage));
+		await new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'stopReadingChatResponse' && content.message === 'OK') {
+					this.clientInfo.socket.removeEventListener('message', listener);
+					resolve();
+				}
+			}
+			this.clientInfo.socket.addEventListener('message', listener);
+		});
 	}
 
 	// TODO : 대기실 페이지일 때만 초대 버튼 표시하기
@@ -312,23 +312,23 @@ class ChattingPageManager {
 
 	async _renderEntireMessage(id) {
 		//id로 조회
-		// const getTotalChatDataMessage = {
-		// 	event: "getTotalChatData",
-		// 	content: {
-		// 		clientId: 3
-		// 	}
-		// }
-		// this.clientInfo.socket.send(JSON.stringify(getTotalChatDataMessage));
-		// const messageList = await new Promise((resolve) => {
-		// const listener = (messageEvent) => {
-		// 	const { event, content } = JSON.parse(messageEvent.data);
-		// 	if (event === 'getTotalChatDataResponse') {
-		// 		this.clientInfo.socket.removeEventListener('message', listener);
-		// 		resolve(content.messageList);
-		// 	}
-		// }
-		// 	this.clientInfo.socket.addEventListener('message', listener);
-		// });
+		const getTotalChatDataMessage = {
+			event: "getTotalChatData",
+			content: {
+				clientId: id
+			}
+		}
+		this.clientInfo.socket.send(JSON.stringify(getTotalChatDataMessage));
+		const messageList = await new Promise((resolve) => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'getTotalChatDataResponse') {
+					this.clientInfo.socket.removeEventListener('message', listener);
+					resolve(content.messageList);
+				}
+			}
+			this.clientInfo.socket.addEventListener('message', listener);
+		});
 
 		this.readingFriendId = id;
 		const friend = this.clientInfo.friendInfo.friendList.find(friend => friend.id === id);
@@ -338,17 +338,17 @@ class ChattingPageManager {
 			this._renderTotalUnreadMessageCount();
 		}
 
-		const messageList = [
-			{ senderId: 1, content: "오늘 한 판 고고?" },
-			{ senderId: 2, content: "너 개못하잖아" },
-			{ senderId: 1, content: "까부네 ㅋㅋ" },
-			{ senderId: 2, content: "드루와라" },
-			{
-				senderId: 2,
-				content:
-					"늘 저녁 뭐 먹을까? 치킨이 땡기는데, 네 생각은 어때? 우리 동네에 새로 생긴 치킨집이 있다던데, 거기 한번 가볼까? 맛있다는 평이 많아서 기대돼. 어떤 메뉴 먹고 싶어? 양념치킨? 후라이드치킨? 아니면 반반치킨? 나는 반반치킨이 좋아. 다양한 맛을 즐길 수 있어서 좋아. 7시에 만나서 같이 먹자. 너도 그때까지 배고프지 않게 간단한 간식 먹고 있어. 그럼 이따 보자!",
-			},
-		];
+		// const messageList = [
+		// 	{ senderId: 1, content: "오늘 한 판 고고?" },
+		// 	{ senderId: 2, content: "너 개못하잖아" },
+		// 	{ senderId: 1, content: "까부네 ㅋㅋ" },
+		// 	{ senderId: 2, content: "드루와라" },
+		// 	{
+		// 		senderId: 2,
+		// 		content:
+		// 			"늘 저녁 뭐 먹을까? 치킨이 땡기는데, 네 생각은 어때? 우리 동네에 새로 생긴 치킨집이 있다던데, 거기 한번 가볼까? 맛있다는 평이 많아서 기대돼. 어떤 메뉴 먹고 싶어? 양념치킨? 후라이드치킨? 아니면 반반치킨? 나는 반반치킨이 좋아. 다양한 맛을 즐길 수 있어서 좋아. 7시에 만나서 같이 먹자. 너도 그때까지 배고프지 않게 간단한 간식 먹고 있어. 그럼 이따 보자!",
+		// 	},
+		// ];
 
 		const messageListHTML = messageList.reduce((acc, message) => {
 			const senderSide = message.senderId === this.clientInfo.id ? "rightSender" : "leftSender";
