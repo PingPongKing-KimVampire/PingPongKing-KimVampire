@@ -9,7 +9,8 @@ class TournamentPageManager {
 		this._onStartPingpongGame = _onStartPingpongGame;
 		this.clientInfo = clientInfo;
 
-		this.playerList = [ // TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
+		this.playerList = [
+			// TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
 
 			{
 				clientId: "1",
@@ -39,26 +40,27 @@ class TournamentPageManager {
 					clientIdList: ["1", "2"],
 					score: [0, 10],
 					roomId: "123456",
-					state: "finished"
+					state: "finished",
 				},
 				{
 					clientIdList: ["3", "4"],
 					score: [10, 0],
 					roomId: "1234",
-					state: "isPlaying"
-				}
+					state: "isPlaying",
+				},
 			],
 			final: [
 				{
 					clientIdList: ["1", "3"],
 					score: [0, 10],
 					roomId: "123456",
-					state: "notStarted"
-				}
-			]
+					state: "notStarted",
+				},
+			],
 		};
 
 		// this._getTournamentInfo();
+		setTimeout(this._renderTournamentAnimation.bind(this, "final"));
 		this._initPage();
 	}
 
@@ -72,18 +74,18 @@ class TournamentPageManager {
 	async _getTournamentInfo() {
 		const getTournamentInfoMessage = {
 			event: "getTournamentGameInfo",
-			content: {}
-		}
+			content: {},
+		};
 		this.clientInfo.tournamentInfo.tournamentSocket.send(JSON.stringify(getTournamentInfoMessage));
 		const { semiFinal, final } = await new Promise(resolve => {
-			const listener = (messageEvent) => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'getTournamentGameInfoResponse') {
-					this.clientInfo.tournamentInfo.tournamentSocket.removeEventListener('message', listener);
+				if (event === "getTournamentGameInfoResponse") {
+					this.clientInfo.tournamentInfo.tournamentSocket.removeEventListener("message", listener);
 					resolve(content);
 				}
-			}
-			this.clientInfo.tournamentInfo.tournamentSocket.addEventListener('message', listener);
+			};
+			this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
 		});
 		this.tournamentInfo.semiFinal = semiFinal;
 		this.tournamentInfo.final = final;
@@ -100,15 +102,44 @@ class TournamentPageManager {
 	}
 
 	_listenTournamentEvent() {
-		const listener = async (messageEvent) => {
+		const listener = async messageEvent => {
 			const message = JSON.parse(messageEvent);
 			const { event, content } = message;
 			if (event === "notifyYourGameRoomReady") {
 				await this._enterWaitingRoom(content.tournamentID); // TODO : tournamentID가 roomId 맞나?
 				this._enterPingpongRoom();
+			} else if (event === "notifyAllTeamFinish") {
+				this._renderTournamentAnimation(content.stage);
 			}
+		};
+		this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
+	}
+
+	async _renderTournamentAnimation(stage) {
+		async function _renderTournamentWarning() {
+			return new Promise(resolve => {
+				let count = 1;
+				const tournamentWarning = document.createElement("div");
+				tournamentWarning.className = "tournamentWarning";
+				tournamentWarning.textContent = `${count}초 후 토너먼트로 돌아갑니다`;
+				this.app.append(tournamentWarning);
+				const intervalId = setInterval(() => {
+					count--;
+					if (count == -1) {
+						clearInterval(intervalId);
+						tournamentWarning.remove();
+						resolve();
+					}
+					tournamentWarning.textContent = `${count}초 후 토너먼트로 돌아갑니다`;
+				}, 1000);
+			});
 		}
-		this.clientInfo.tournamentInfo.tournamentSocket.addEventListener('message', listener);
+		await _renderTournamentWarning.call(this);
+
+		//5초 후 토너먼트 화면으로 이동하고 애니메이션을 렌더링함
+		if (stage === "semi-final") {
+		} else if (stage === "final") {
+		}
 	}
 
 	async _enterWaitingRoom(roomId) {
@@ -122,29 +153,33 @@ class TournamentPageManager {
 		// 대기실 입장 요청 보내기
 		const enterWaitingRoomMessage = {
 			event: "enterWaitingRoom",
-			content: { clientId: this.clientInfo.id }
+			content: { clientId: this.clientInfo.id },
 		};
 		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 		// 대기실 입장 응답 받기
 		await new Promise(resolve => {
-			const listener = (messageEvent) => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === "enterWaitingRoomResponse") {
 					pingpongRoomSocket.removeEventListener("message", listener);
 					resolve();
 				}
-			}
+			};
 			pingpongRoomSocket.addEventListener("message", listener);
 		});
 		this.clientInfo.gameInfo = {
 			pingpongRoomSocket,
 			roomId,
 			title: null,
-			teamLeftList: [], teamRightList: [],
-			teamLeftMode: 'human', teamRightMode: 'human',
-			teamLeftTotalPlayerCount: 1, teamRightTotalPlayerCount: 1,
-			teamLeftAbility: null, teamRightAbility: null
-		}
+			teamLeftList: [],
+			teamRightList: [],
+			teamLeftMode: "human",
+			teamRightMode: "human",
+			teamLeftTotalPlayerCount: 1,
+			teamRightTotalPlayerCount: 1,
+			teamLeftAbility: null,
+			teamRightAbility: null,
+		};
 		this.clientInfo.lobbySocket.close();
 		this.clientInfo.lobbySocket = null;
 	}
@@ -153,32 +188,32 @@ class TournamentPageManager {
 		// 바로 준비 완료 메시지 보내기
 		const changeReadyStateMessage = {
 			event: "changeReadyState",
-			content: { readyState: "READY" }
-		}
+			content: { readyState: "READY" },
+		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(changeReadyStateMessage));
 		// 3초 후 notifyGameStart 메시지 받기
 		const { boardInfo, playerInfo } = await new Promise(resolve => {
-			const listener = (messageEvent) => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'notifyGameStart') {
-					this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener('message', listener);
+				if (event === "notifyGameStart") {
+					this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", listener);
 					resolve(content);
 				}
-			}
-			this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener('message', listener);
+			};
+			this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", listener);
 		});
 		// teamLeftList, teamRightList 세팅 후 핑퐁룸 입장
-		playerInfo.forEach((player) => {
+		playerInfo.forEach(player => {
 			let teamList;
-			if (player.team === 'left') {
+			if (player.team === "left") {
 				teamList = this.clientInfo.gameInfo.teamLeftList;
-			} else if (player.team === 'right') {
+			} else if (player.team === "right") {
 				teamList = this.clientInfo.gameInfo.teamRightList;
 			}
 			teamList.push({
 				clinetId: player.clientId,
-				clientNickname: this.playerList.find((p) => p.clientId === player.clientId).clientNickname,
-				readyState: 'READY',
+				clientNickname: this.playerList.find(p => p.clientId === player.clientId).clientNickname,
+				readyState: "READY",
 				ability: null,
 				paddleWidth: player.paddleWidth,
 				paddleHeight: player.paddleHeight,
@@ -363,11 +398,11 @@ class TournamentPageManager {
 				elementCanvas.append(scoreBox);
 			}
 			const stages = [...this.tournamentInfo.final, ...this.tournamentInfo.semiFinal];
-			const types = ['final', 'leftSemiFinal', 'rightSemiFinal'];
+			const types = ["final", "leftSemiFinal", "rightSemiFinal"];
 			stages.forEach((stage, index) => {
 				if (stage.state === "isPlaying") {
 					createObserveButton(types[index]);
-				} else if (stage.state == 'finished') {
+				} else if (stage.state == "finished") {
 					createScoreBox(types[index], ...stage.score);
 				}
 			});
@@ -380,8 +415,8 @@ class TournamentPageManager {
 	// TODO : playerList의 clientId와 final의 clientIdList 타입을 맞춰야 할 듯
 	_getHTML() {
 		let winner = null;
-		const [ final ] = this.tournamentInfo.final;
-		if (final.state === 'finished') {
+		const [final] = this.tournamentInfo.final;
+		if (final.state === "finished") {
 			winner = this._getWinningPlayer(final.score, final.clientIdList);
 		}
 		return `
@@ -403,8 +438,8 @@ class TournamentPageManager {
 	_getSubTreesHTML() {
 		let leftFinalist = null;
 		let rightFinalist = null;
-		const [ leftSemiFinal, rightSemiFinal ] = this.tournamentInfo.semiFinal;
-		if (leftSemiFinal.state === 'finished') {
+		const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
+		if (leftSemiFinal.state === "finished") {
 			leftFinalist = this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList);
 		}
 		if (rightSemiFinal.state === "finished") {
