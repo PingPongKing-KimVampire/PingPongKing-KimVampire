@@ -135,7 +135,8 @@ class PageRouter {
 		} else if (url === 'tournament') {
 			const tournamentPageManager = new TournamentPageManager(
 				this.app,
-				this.clientInfo
+				this.clientInfo,
+				this._onStartPingpongGame.bind(this)
 			);
 		}
 	}

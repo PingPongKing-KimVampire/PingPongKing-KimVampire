@@ -1,8 +1,12 @@
 import windowObservable from "../../WindowObservable.js";
 
+import { SERVER_ADDRESS } from "./../PageRouter.js";
+import { SERVER_PORT } from "./../PageRouter.js";
+
 class TournamentPageManager {
-	constructor(app, clientInfo) {
+	constructor(app, clientInfo, _onStartPingpongGame) {
 		this.app = app;
+		this._onStartPingpongGame = _onStartPingpongGame;
 		this.clientInfo = clientInfo;
 
 		this.playerList = [
@@ -57,10 +61,9 @@ class TournamentPageManager {
 	_initPage() {
 		this.app.innerHTML = this._getHTML();
 		requestAnimationFrame(this._renderBracket.bind(this)); // TODO : 가끔 안 먹을 때 있음!ㅠㅠ
-
 		this._subscribeWindow();
+		// this._listenTournamentEvent(); TODO : 현재 테스트 불가능함
 	}
-
 
 	_subscribeWindow() {
 		this._renderBracketRef = this._renderBracket.bind(this);
@@ -68,6 +71,96 @@ class TournamentPageManager {
 	}
 	_unsubscribeWindow() { // TODO : 페이지 나갈 시 호출
 		windowObservable.unsubscribeResize(this._renderBracketRef);
+	}
+
+	_listenTournamentEvent() {
+		const listener = async (messageEvent) => {
+			const message = JSON.parse(messageEvent);
+			const { event, content } = message;
+			if (event === "notifyYourGameRoomReady") {
+				await this._enterWaitingRoom(content.tournamentID); // TODO : tournamentID가 roomId 맞나?
+				this._enterPingpongRoom();
+			}
+		}
+		this.clientInfo.tournamentInfo.tournamentSocket.addEventListener('message', listener);
+	}
+
+	async _enterWaitingRoom(roomId) {
+		// 핑퐁룸 소켓에 연결
+		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`);
+		await new Promise(resolve => {
+			pingpongRoomSocket.addEventListener("open", () => {
+				resolve();
+			});
+		});
+		// 대기실 입장 요청 보내기
+		const enterWaitingRoomMessage = {
+			event: "enterWaitingRoom",
+			content: { clientId: this.clientInfo.id }
+		};
+		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
+		// 대기실 입장 응답 받기
+		await new Promise(resolve => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === "enterWaitingRoomResponse") {
+					pingpongRoomSocket.removeEventListener("message", listener);
+					resolve();
+				}
+			}
+			pingpongRoomSocket.addEventListener("message", listener);
+		});
+		this.clientInfo.gameInfo = {
+			pingpongRoomSocket,
+			roomId,
+			title: null,
+			teamLeftList: [], teamRightList: [],
+			teamLeftMode: 'human', teamRightMode: 'human',
+			teamLeftTotalPlayerCount: 1, teamRightTotalPlayerCount: 1,
+			teamLeftAbility: null, teamRightAbility: null
+		}
+		this.clientInfo.lobbySocket.close();
+		this.clientInfo.lobbySocket = null;
+	}
+	
+	async _enterPingpongRoom() {
+		// 바로 준비 완료 메시지 보내기
+		const changeReadyStateMessage = {
+			event: "changeReadyState",
+			content: { readyState: "READY" }
+		}
+		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(changeReadyStateMessage));
+		// 3초 후 notifyGameStart 메시지 받기
+		const { boardInfo, playerInfo } = await new Promise(resolve => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'notifyGameStart') {
+					this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener('message', listener);
+					resolve(content);
+				}
+			}
+			this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener('message', listener);
+		});
+		// teamLeftList, teamRightList 세팅 후 핑퐁룸 입장
+		playerInfo.forEach((player) => {
+			let teamList;
+			if (player.team === 'left') {
+				teamList = this.clientInfo.gameInfo.teamLeftList;
+			} else if (player.team === 'right') {
+				teamList = this.clientInfo.gameInfo.teamRightList;
+			}
+			teamList.push({
+				clinetId: player.clientId,
+				clientNickname: this.playerList.find((p) => p.clientId === player.clientId).clientNickname,
+				readyState: 'READY',
+				ability: null,
+				paddleWidth: player.paddleWidth,
+				paddleHeight: player.paddleHeight,
+			});
+		});
+		this.clientInfo.gameInfo.sizeInfo = boardInfo;
+		this._unsubscribeWindow();
+		this._onStartPingpongGame();
 	}
 
 	_renderBracket() {
