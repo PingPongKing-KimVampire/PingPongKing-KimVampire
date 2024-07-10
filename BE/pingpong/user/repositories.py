@@ -2,61 +2,67 @@ from lobby.models import User
 from lobby.models import Friendship
 from lobby.models import BlockedRelationship
 from lobby.models import Message
+from lobby.models import Chat
+from lobby.models import ChatUser
 from django.db import transaction
 from asgiref.sync import sync_to_async
 from django.db import models, IntegrityError
 
+
 class MessageRepository:
     @staticmethod
+    def get_recent_message(sender, receiver):
+        chat = ChatRepository.get_common_chat(sender, receiver)
+        if chat is None:
+            return None, 0
+        message = Message.objects.select_related('chat', 'sender').filter(chat=chat).order_by('-send_date').first()
+        count = Message.objects.select_related('chat', 'sender').filter(chat=chat, is_read=False, sender=receiver).count()
+        return message, count
+
+    @staticmethod
     @sync_to_async
-    def save_message(sender, receiver, message):
-        message_object = Message.objects.create(sender=sender, receiver=receiver, message=message)
-        return message_object
+    def save_message(sender, receiver, content):
+        chat = ChatRepository.get_common_chat(sender, receiver)
+        if chat is None:
+            chat = ChatRepository.save_chat(sender, receiver)
+        message = Message.objects.create(chat=chat, sender=sender, content=content)
+        return message
     
     @staticmethod
     @sync_to_async
     def get_total_chat_data(sender, receiver):
-        messages = Message.objects.filter(sender=sender, receiver=receiver).all()
+        chat = ChatRepository.get_common_chat(sender, receiver)
+        if chat is None:
+            return []
+        messages = Message.objects.select_related('chat', 'sender').filter(chat=chat).order_by('-send_date').all()
         message_dtos = []
         for message in messages:
             message_dto = {
-                "clientId": message.sender.id,
-                "message": message.message
+                "senderId": message.sender.id,
+                "content": message.content,
             }
+            if message.is_read is False and message.sender is not sender:
+                message.is_read = True
+                message.save()
             message_dtos.append(message_dto)
         return message_dtos
-    
-    @staticmethod
-    @sync_to_async
-    def get_recent_message_of_friends(user):
-        friends = FriendRepository.get_friends_entity(user)
-        total_friend_info = [] # 나중에 다시하기
-        # for friend in friends:
-        #     send_message = Message.objects.select_related('sender', 'receiver').filter(sender=user, receiver=friend).order_by('-send_date').frist()
-        #     receive_message = Message.objects.select_related('sender', 'receiver').filter(sender=friend, receiver=user).order_by('-send_date').first()
-        #     if send_message is None and receive_message is None:
-        #         message = None
-        #     elif send_message is not None:
-        #         messsage = receive_message
-        #     elif receive_message is None:
-        #         message = send_message
-        #     else:
-        #         if send_message.send_date > receive_message.send_date:
-        #             message = send_message
-        #         else:
-        #             message = receive_message
-        #     if message is None:
-        #         show_message = ""
-            
-        #     friend_info = {
-        #         "id": friend.id,
-        #         "nickname": friend.nickname,
-        #         "avatarUrl": friend.image_uri,
-        #         "message": last_message.message
-        #     }
-        #     total_friend_info.append(friend_info)
-        return total_friend_info
         
+class ChatRepository:
+    @staticmethod
+    def get_common_chat(user1, user2):
+        chat_user_list_by_user1 = ChatUser.objects.select_related('chat', 'user').filter(user=user1).all()
+        for chat_user in chat_user_list_by_user1:
+            chat_user_another = ChatUser.objects.select_related('chat', 'user').filter(chat=chat_user.chat, user=user2).first()
+            if chat_user_another is not None:
+                return chat_user.chat
+        return None
+
+    @staticmethod
+    def save_chat(user1, user2):
+        chat = Chat.objects.create()
+        ChatUser.objects.create(user=user1, chat=chat)
+        ChatUser.objects.create(user=user2, chat=chat)
+        return chat
 
 class BlockedUserRepository:
     @staticmethod
@@ -103,10 +109,16 @@ class FriendRepository:
         for friendship in user_friendships:
             friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=friendship.friend, friend=user).first()
             if friend_friendship is not None:
+                message, count = MessageRepository.get_recent_message(user, friendship.friend)
                 freiendDto = {
                     "id": friendship.friend.id,
                     "nickname": friendship.friend.nickname,
-                    "avatarUrl": friendship.friend.get_image_uri()
+                    "avatarUrl": friendship.friend.get_image_uri(),
+                    "chat": {
+                        "recentMessage": message.content if message is not None else "",
+                        "recentTimestamp": message.send_date.isoformat() if message is not None else "",
+                        "unreadMessageCount": count,
+                    }
                 }
                 friendDtos.append(freiendDto)
                 

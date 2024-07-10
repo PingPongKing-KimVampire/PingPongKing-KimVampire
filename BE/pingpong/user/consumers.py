@@ -50,7 +50,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if hasattr(self, 'client_id') and self.client_id in channel_name_map:
             content = {
                 "clientId": self.client_id,
-                "activeState": "false"
+                "activeState": "INACTIVE"
             }
             channel_name_map.pop(self.client_id)
             discard_group(self, 'lobby')
@@ -157,7 +157,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         channel_name_map[self.client_id] = self.channel_name
         content = {
                 "clientId": self.client_id,
-                "activeState": "false"
+                "activeState": "ACTIVE"
         }
         await self.notify_all_group_activation("notify_friend_active_state_change", content)
         await self._send('initClientResponse', response)
@@ -411,13 +411,14 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await self._send("sendMessageResponse", {"message": "NotFoundReceiver"})
             return
         message_object = await MessageRepository.save_message(sender, receiver, message)
+        response = {"sendClientId": sender.id,
+                "receiveClientId": receiver.id,
+                "message": message,
+                "timestamp": message_object.send_date.isoformat()}
+        await notify_client_event(self.channel_layer, self.channel_name, "notify_message_received", response)
         if receiver.id in channel_name_map:
             channel_name = channel_name_map[receiver.id]
-            await notify_client_event(self.channel_layer, channel_name, "notify_message_received", 
-                                      {"id": sender.id,
-                                       "nickname": sender.nickname,
-                                       "message": message,
-                                       "timestamp": message_object.timestamp})
+            await notify_client_event(self.channel_layer, channel_name, "notify_message_received", response)
         await self._send("sendMessageResponse", {"message": "OK"})
 
     async def notify_message_received(self, event):
@@ -429,7 +430,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             'content': content
         }))
     
-    async def getTotalChatData(self, receiver_id):
+    async def get_total_chat_data(self, receiver_id):
         from .repositories import UserRepository
         from .repositories import MessageRepository
         sender = await UserRepository.get_user_by_id(self.client_id)
@@ -437,6 +438,10 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if receiver is None:
             await self._send("getTotalChatDataResponse", {"message": "NotFoundReceiver"})
             return
+        if self.read_receiver_id is not None and self.read_receiver_id == receiver_id:
+            await self._send("getTotalChatDataResponse", {"message": "AlreadyReadingChatData"})
+            return
+        self.read_receiver_id = receiver_id
         messages = await MessageRepository.get_total_chat_data(sender, receiver)
         response = {
             "message": "OK",
@@ -465,6 +470,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     
     async def stop_reading_chat(self, receiver_id):
         if self.read_receiver_id != receiver_id:
+            await self._send("stopReadingChatResponse", {"message": "OK"})
             return
         self.read_receiver_id = None
         await self._send("stopReadingChatResponse", {"message": "OK"})

@@ -59,7 +59,7 @@ class BlockedRelationship(models.Model):
     blocked_user = models.ForeignKey(User, related_name='blocked_user', on_delete=models.CASCADE)
     class Meta:
         constraints = [
-        models.UniqueConstraint(fields=['blocker', 'blocked_user'], name='unique_friendship')
+        models.UniqueConstraint(fields=['blocker', 'blocked_user'], name='unique_block_realtionship')
     ]
 
 # class Team(models.Model):
@@ -95,9 +95,23 @@ class BlockedRelationship(models.Model):
 #             models.Index(fields=['user', '-created_at']),  # 유저별 최근 경기를 빠르게 조회하기 위해 인덱스 추가
 #         ]
 
+class Chat(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class ChatUser(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    chat = models.ForeignKey(Chat, related_name='chat_chat', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='chat_user', on_delete=models.CASCADE)
+    class Meta:
+        constraints = [
+        models.UniqueConstraint(fields=['chat', 'user'], name='unique_chat_user')
+    ]
+
 class Message(models.Model):
     id = models.BigAutoField(primary_key=True)
+    chat = models.ForeignKey(Chat, related_name='messages', on_delete=models.CASCADE, default=1)
     sender = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, related_name='receiver', on_delete=models.CASCADE)
     content = models.TextField(null=False)
     send_date = models.DateTimeField(null=False, default = timezone.now)
+    is_read = models.BooleanField(default=False)
