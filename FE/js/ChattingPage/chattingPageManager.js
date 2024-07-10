@@ -290,14 +290,14 @@ class ChattingPageManager {
 
 	// TODO : 대기실 페이지일 때만 초대 버튼 표시하기
 	_setSelectedFriendItem(friendItem) {
-		if (this.selectedFriendItem) {
-			this.selectedFriendItem.classList.remove("selectedFriendItem");
-			this.selectedInviteButton.classList.add("invisible");
-		}
-		this.selectedFriendItem = friendItem;
-		this.selectedInviteButton = friendItem.querySelector(".inviteButton");
-		this.selectedFriendItem.classList.add("selectedFriendItem");
-		this.selectedInviteButton.classList.remove("invisible");
+		// if (this.selectedFriendItem) {
+		// 	this.selectedFriendItem.classList.remove("selectedFriendItem");
+		// 	this.selectedInviteButton.classList.add("invisible");
+		// }
+		// this.selectedFriendItem = friendItem;
+		// this.selectedInviteButton = friendItem.querySelector(".inviteButton");
+		// this.selectedFriendItem.classList.add("selectedFriendItem");
+		// this.selectedInviteButton.classList.remove("invisible");
 	}
 
 	_renderFriendList() {
