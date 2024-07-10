@@ -110,6 +110,7 @@ class LobbyPageManager {
 
 	_subscribeWindow() {
 		this._adjustButtonSizeRef = this._adjustButtonSize.bind(this);
+		// TODO : _adjustButtonSizeRef에 this가 안 붙음. 잘 안 되고 있을 듯?
 		windowObservable.subscribeResize(_adjustButtonSizeRef);
 		this._autoSetScollTrackColorRef = this._autoSetScollTrackColor.bind(this);
 		windowObservable.subscribeResize(_autoSetScollTrackColorRef);

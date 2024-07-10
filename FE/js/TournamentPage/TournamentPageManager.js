@@ -1,3 +1,5 @@
+import windowObservable from "../../WindowObservable.js";
+
 class TournamentPageManager {
 	constructor(app, clientInfo) {
 		this.app = app;
@@ -5,161 +7,275 @@ class TournamentPageManager {
 
 		this.playerList = [
 			{
-				clientId : 1,
-				clientNickname : "김뱀파이어",
-				avartarUrl : "images/playerA.png"
+				clientId: "1",
+				clientNickname: "김뱀파이어",
+				avartarUrl: "images/playerA.png"
 			},
-			{ 
-				clientId : 2,
-				clientNickname : "김뱀파이",
-				avartarUrl : "images/playerA.png"
+			{
+				clientId: "2",
+				clientNickname: "김뱀파이",
+				avartarUrl: "images/playerA.png"
 			},
-			{ 
-				clientId : 3,
-				clientNickname : "김뱀파",
-				avartarUrl : "images/playerA.png"
+			{
+				clientId: "3",
+				clientNickname: "김뱀파",
+				avartarUrl: "images/playerA.png"
 			},
-			{ 
-				clientId : 4,
-				clientNickname : "김뱀",
-				avartarUrl : "images/playerA.png"
+			{
+				clientId: "4",
+				clientNickname: "김뱀",
+				avartarUrl: "images/playerA.png"
 			}
 		];
+
+		this.semiFinal = [
+			{
+				clientIdList: ["1", "2"],
+				score: [0, 10],
+				roomId: "123456",
+				state: "finished"
+			},
+			{
+				clientIdList: ["3", "4"],
+				score: [10, 0],
+				roomId: "1234",
+				state: "finished"
+			}
+		];
+		this.final = [
+			{
+				clientIdList: ["1", "3"],
+				score: [0, 10],
+				roomId: "123456",
+				state: "isPlaying"
+			}
+		]
 
 		this._initPage();
 	}
 
 	_initPage() {
 		this.app.innerHTML = this._getHTML();
-		requestAnimationFrame(this._renderLines);
+		requestAnimationFrame(this._renderBracket.bind(this)); // TODO : 가끔 안 먹을 때 있음!ㅠㅠ
+
+		this._subscribeWindow();
 	}
 
-	_renderLines() {
-		const svgCanvas = document.querySelector('#svgCanvas');
-		svgCanvas.innerHTML = '';
-		function drawLine(pos1, pos2) {
-			const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-			line.setAttribute('x1', pos1.x);
-			line.setAttribute('y1', pos1.y);
-			line.setAttribute('x2', pos2.x);
-			line.setAttribute('y2', pos2.y);
-			line.setAttribute('stroke', 'white');
-			line.setAttribute('stroke-width', 2);
-			svgCanvas.append(line);
-		}
-		function getTopCenterPos(rect, bool) {
+
+	_subscribeWindow() {
+		this._renderBracketRef = this._renderBracket.bind(this);
+		windowObservable.subscribeResize(this._renderBracketRef);
+	}
+	_unsubscribeWindow() { // TODO : 페이지 나갈 시 호출
+		windowObservable.unsubscribeResize(this._renderBracketRef);
+	}
+
+	_renderBracket() {
+		const elementCanvas = document.querySelector('#elementCanvas');
+		elementCanvas.innerHTML = '';
+		const lineCanvas = document.querySelector('#lineCanvas');
+		lineCanvas.innerHTML = '';
+
+		let pointBelowWinner;
+		let pointBelowFinal1;
+		let pointBelowFinal2;
+
+		const getTopCenterPos = (rect) => {
 			return { x: rect.left + (rect.width / 2), y: rect.top };
 		}
-		function getBottomCenterPos(rect) {
+		const getBottomCenterPos = (rect) => {
 			return { x: rect.left + (rect.width / 2), y: rect.bottom };
 		}
+		const renderLines = () => {
+			function createLine(pos1, pos2) {
+				const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+				line.setAttribute('x1', pos1.x);
+				line.setAttribute('y1', pos1.y);
+				line.setAttribute('x2', pos2.x);
+				line.setAttribute('y2', pos2.y);
+				line.setAttribute('stroke', 'rgba(255, 255, 255, 0.3)');
+				line.setAttribute('stroke-width', '0.1rem');
+				lineCanvas.append(line);
+			}
+			const winner = document.querySelector('#root').getBoundingClientRect();
+			const final1 = document.querySelector('.subTree:first-of-type .final').getBoundingClientRect();
+			const final2 = document.querySelector('.subTree:last-of-type .final').getBoundingClientRect();
 
-		const f = document.querySelector('#root').getBoundingClientRect();
-		const sf1 = document.querySelector('.subTree:first-of-type .semiFinal').getBoundingClientRect();
-		const sf2 = document.querySelector('.subTree:last-of-type .semiFinal').getBoundingClientRect();
-	
-		const sf1TopCenter = getTopCenterPos(sf1);
-		const sf2TopCenter = getTopCenterPos(sf2);
-		const fBottomCenter = getBottomCenterPos(f);
-	
-		const pointAboveSf1 = { x: sf1TopCenter.x, y: (sf1TopCenter.y + fBottomCenter.y) / 2 }
-		const pointAboveSf2 = { x: sf2TopCenter.x, y: (sf2TopCenter.y + fBottomCenter.y) / 2 }
-		const pointBelowWinner = { x: fBottomCenter.x, y: pointAboveSf1.y }
-	
-		drawLine(sf1TopCenter, pointAboveSf1);
-		drawLine(sf2TopCenter, pointAboveSf2);
-		drawLine(pointAboveSf1, pointBelowWinner);
-		drawLine(pointAboveSf2, pointBelowWinner);
-		drawLine(fBottomCenter, pointBelowWinner);
-	
-		const p1 = document.querySelector('.subTree:first-of-type .participants .player:first-of-type').getBoundingClientRect();
-		const p2 = document.querySelector('.subTree:first-of-type .participants .player:last-of-type').getBoundingClientRect();
-		const p3 = document.querySelector('.subTree:last-of-type .participants .player:first-of-type').getBoundingClientRect();
-		const p4 = document.querySelector('.subTree:last-of-type .participants .player:last-of-type').getBoundingClientRect();
+			const final1TopCenter = getTopCenterPos(final1);
+			const final2TopCenter = getTopCenterPos(final2);
+			const winnerBottomCenter = getBottomCenterPos(winner);
 
-		const p1TopCenter = getTopCenterPos(p1, true);
-		const p2TopCenter = getTopCenterPos(p2, true);
-		const p3TopCenter = getTopCenterPos(p3, true);
-		const p4TopCenter = getTopCenterPos(p4, true);
-		const sf1BottomCenter = getBottomCenterPos(sf1);
-		const sf2BottomCenter = getBottomCenterPos(sf2);
-	
-		const pointAboveP1 = { x: p1TopCenter.x, y: (p1TopCenter.y + sf1BottomCenter.y) / 2 };
-		const pointAboveP2 = { x: p2TopCenter.x, y: (p2TopCenter.y + sf1BottomCenter.y) / 2 };
-		const pointAboveP3 = { x: p3TopCenter.x, y: (p3TopCenter.y + sf2BottomCenter.y) / 2 };
-		const pointAboveP4 = { x: p4TopCenter.x, y: (p4TopCenter.y + sf2BottomCenter.y) / 2 };
+			const pointAboveFinal1 = { x: final1TopCenter.x, y: (final1TopCenter.y + winnerBottomCenter.y) / 2 };
+			const pointAboveFinal2 = { x: final2TopCenter.x, y: (final2TopCenter.y + winnerBottomCenter.y) / 2 };
+			pointBelowWinner = { x: winnerBottomCenter.x, y: pointAboveFinal1.y };
 
-		const pointBelowSf1 = { x: sf1BottomCenter.x, y: pointAboveP1.y };
-		const pointBelowSf2 = { x: sf2BottomCenter.x, y: pointAboveP3.y };
-	
-		drawLine(p1TopCenter, pointAboveP1);
-		drawLine(p2TopCenter, pointAboveP2);
-		drawLine(p3TopCenter, pointAboveP3);
-		drawLine(p4TopCenter, pointAboveP4);
-	
-		drawLine(pointAboveP1, pointBelowSf1);
-		drawLine(pointAboveP2, pointBelowSf1);
-		drawLine(pointAboveP3, pointBelowSf2);
-		drawLine(pointAboveP4, pointBelowSf2);
-	
-		drawLine(sf1BottomCenter, pointBelowSf1);
-		drawLine(sf2BottomCenter, pointBelowSf2);
+			createLine(final1TopCenter, pointAboveFinal1);
+			createLine(final2TopCenter, pointAboveFinal2);
+			createLine(pointAboveFinal1, pointBelowWinner);
+			createLine(pointAboveFinal2, pointBelowWinner);
+			createLine(winnerBottomCenter, pointBelowWinner);
+
+			const semiFinal1 = document.querySelector('.subTree:first-of-type .semiFinal .player:first-of-type').getBoundingClientRect();
+			const semiFinal2 = document.querySelector('.subTree:first-of-type .semiFinal .player:last-of-type').getBoundingClientRect();
+			const semiFinal3 = document.querySelector('.subTree:last-of-type .semiFinal .player:first-of-type').getBoundingClientRect();
+			const semiFinal4 = document.querySelector('.subTree:last-of-type .semiFinal .player:last-of-type').getBoundingClientRect();
+
+			const semiFinal1TopCenter = getTopCenterPos(semiFinal1);
+			const semiFinal2TopCenter = getTopCenterPos(semiFinal2);
+			const semiFinal3TopCenter = getTopCenterPos(semiFinal3);
+			const semiFinal4TopCenter = getTopCenterPos(semiFinal4);
+			const final1BottomCenter = getBottomCenterPos(final1);
+			const final2BottomCenter = getBottomCenterPos(final2);
+
+			const pointAboveSemiFinal1 = { x: semiFinal1TopCenter.x, y: (semiFinal1TopCenter.y + final1BottomCenter.y) / 2 };
+			const pointAboveSemiFinal2 = { x: semiFinal2TopCenter.x, y: (semiFinal2TopCenter.y + final1BottomCenter.y) / 2 };
+			const pointAboveSemiFinal3 = { x: semiFinal3TopCenter.x, y: (semiFinal3TopCenter.y + final2BottomCenter.y) / 2 };
+			const pointAboveSemiFinal4 = { x: semiFinal4TopCenter.x, y: (semiFinal4TopCenter.y + final2BottomCenter.y) / 2 };
+
+			pointBelowFinal1 = { x: final1BottomCenter.x, y: pointAboveSemiFinal1.y };
+			pointBelowFinal2 = { x: final2BottomCenter.x, y: pointAboveSemiFinal3.y };
+
+			createLine(semiFinal1TopCenter, pointAboveSemiFinal1);
+			createLine(semiFinal2TopCenter, pointAboveSemiFinal2);
+			createLine(semiFinal3TopCenter, pointAboveSemiFinal3);
+			createLine(semiFinal4TopCenter, pointAboveSemiFinal4);
+
+			createLine(pointAboveSemiFinal1, pointBelowFinal1);
+			createLine(pointAboveSemiFinal2, pointBelowFinal1);
+			createLine(pointAboveSemiFinal3, pointBelowFinal2);
+			createLine(pointAboveSemiFinal4, pointBelowFinal2);
+
+			createLine(final1BottomCenter, pointBelowFinal1);
+			createLine(final2BottomCenter, pointBelowFinal2);
+		}
+		const renderElements = () => {
+			function setElementPos(type, element) {
+				if (type === 'final') {
+					element.style.top = `${pointBelowWinner.y * 1.04}px`;
+					element.style.left = `${pointBelowWinner.x}px`;
+				} else if (type === 'leftSemiFinal') {
+					element.style.top = `${pointBelowFinal1.y * 1.02}px`;
+					element.style.left = `${pointBelowFinal1.x}px`;
+				} else if (type === 'rightSemiFinal') {
+					element.style.top = `${pointBelowFinal2.y * 1.02}px`;
+					element.style.left = `${pointBelowFinal2.x}px`;
+				}
+			}
+			function createObserveButton(type) {
+				const observeButton = document.createElement('button');
+				observeButton.classList.add('generalButton', 'observeButton');
+				observeButton.textContent = '관전하기';
+				setElementPos(type, observeButton);
+				elementCanvas.append(observeButton);
+			}
+			function createScoreBox(type, leftScore, rightScore) {
+				const scoreBox = document.createElement('div');
+				scoreBox.classList.add('scoreBox');
+				scoreBox.innerHTML = `
+					<div class="score">${leftScore}</div>
+					<div class="score">${rightScore}</div>
+				`;
+				setElementPos(type, scoreBox);
+				elementCanvas.append(scoreBox);
+			}
+			const stages = [...this.final, ...this.semiFinal];
+			const types = ['final', 'leftSemiFinal', 'rightSemiFinal'];
+			stages.forEach((stage, index) => {
+				if (stage.state === 'isPlaying') {
+					createObserveButton(types[index]);
+				} else if (stage.state== 'finished') {
+					createScoreBox(types[index], ...stage.score);
+				}
+			});
+		}
+
+		renderLines();
+		renderElements();
 	}
 
+	// TODO : playerList의 clientId와 final의 clientIdList 타입을 맞춰야 할 듯
 	_getHTML() {
+		let winner = null;
+		const [ final ] = this.final;
+		if (final.state === 'finished') {
+			winner = this._getWinningPlayer(final.score, final.clientIdList);
+		}
 		return `
 			<div id="container">
-				${this._getRootHTML(null)}
-				${this._getSubTreesHTML(this.playerList)}
+				${this._getRootHTML(winner)}
+				${this._getSubTreesHTML()}
 			</div>
-			<svg id="svgCanvas"></svg>
+			<svg id="lineCanvas"></svg>
+			<div id="elementCanvas"></div>
 		`;
 	}
 	_getRootHTML(finalist) {
 		return `
 			<div id="root">
-				${finalist ? this._getPlayerHTML(finalist) : this._getEmptyPlayerHTML()}
+				${finalist ? this._getPlayerHTML(finalist, true) : this._getEmptyPlayerHTML(true)}
 			</div>
 		`;
 	}
-	_getSubTreesHTML(playerList) {
+	_getSubTreesHTML() {
+		let leftFinalist = null;
+		let rightFinalist = null;
+		const [ leftSemiFinal, rightSemiFinal ] = this.semiFinal;
+		if (leftSemiFinal.state === 'finished') {
+			leftFinalist = this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList);
+		}
+		if (rightSemiFinal.state === 'finished') {
+			rightFinalist = this._getWinningPlayer(rightSemiFinal.score, rightSemiFinal.clientIdList);
+		}
 		return `
 			<div id="subTrees">
-				${this._getSubTreeHTML(null, playerList.slice(0, 2))}
-				${this._getSubTreeHTML(null, playerList.slice(2))}
+				${this._getSubTreeHTML(leftFinalist, this.playerList.slice(0, 2))}
+				${this._getSubTreeHTML(rightFinalist, this.playerList.slice(2))}
 			</div>
 		`;
 	}
-	_getSubTreeHTML(semiFinalist, participants) {
+	_getSubTreeHTML(finalist, semiFinalist) {
 		return `
 			<div class="subTree">
+				<div class="final">
+					${finalist ? this._getPlayerHTML(finalist) : this._getEmptyPlayerHTML()}
+				</div>
 				<div class="semiFinal">
-					${semiFinalist ? this._getPlayerHTML(semiFinalist) : this._getEmptyPlayerHTML()}
-				</div>
-				<div class="participants">
-					${this._getPlayerHTML(participants[0])}
-					${this._getPlayerHTML(participants[1])}
+					${this._getPlayerHTML(semiFinalist[0])}
+					${this._getPlayerHTML(semiFinalist[1])}
 				</div>
 			</div>
 		`;
 	}
-	_getEmptyPlayerHTML() {
+	_getEmptyPlayerHTML(isWinner = false) {
 		return `
-			<div class="avatarImgFrame emptyFrame">
-				<div class="avatarQuestionMark">?</div>
+			<div class="player emptyPlayer">
+				<div class="avatar">
+					<div class="avatarImgFrame">?</div>
+					${isWinner ? '<img class="crownImg" src="images/tournamentCrown.png">' : ''}
+				</div>
+				<div class="nickname">???</div>
 			</div>
-			<div class="nickname">?</div>
 		`;
 	}
-	_getPlayerHTML(player) {
+	_getPlayerHTML(player, isWinner = false) {
 		return `
 			<div class="player">
-				<div class="avatarImgFrame">
-					<img class="avatarImg" src="${player.avartarUrl}">
+				<div class="avatar">
+					<div class="avatarImgFrame">
+						<img class="avatarImg" src="${player.avartarUrl}">
+					</div>
+					${isWinner ? '<img class="crownImg" src="images/tournamentCrown.png">' : ''}
 				</div>
 				<div class="nickname">${player.clientNickname}</div>
 			</div>
 		`;
+	}
+
+	_getWinningPlayer(score, clientIdList) {
+		const [score1, score2] = score;
+		const [clientId1, clientId2] = clientIdList;
+		const winnerId = score1 > score2 ? clientId1 : clientId2;
+		return this.playerList.find(player => player.clientId === winnerId);
 	}
 }
 

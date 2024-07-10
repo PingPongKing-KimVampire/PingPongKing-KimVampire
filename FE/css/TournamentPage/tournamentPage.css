@@ -9,10 +9,7 @@
 
 #root {
 	height: 25%;
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+	width: auto;
 }
 
 #subTrees {
@@ -31,15 +28,14 @@
 	align-items: center;
 }
 
-.semiFinal, .participants {
+.final, .semiFinal {
 	height: 40%;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 }
 
-.participants {
+.semiFinal {
 	display: flex;
 	flex-direction: row;
 }
@@ -51,9 +47,15 @@
 	align-items: center;
 }
 
-.avatarImgFrame {
+.avatar {
+	position: relative;
 	height: 75%;
 	aspect-ratio: 1/1;
+}
+
+.avatarImgFrame {
+	height: 100%;
+	width: 100%;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -64,19 +66,30 @@
 	background: linear-gradient(to bottom, rgb(50, 26, 81), rgb(2, 4, 31));
 	filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5));
 	overflow: hidden;
+	position: relative;
+	z-index: 2;
 }
-.avatarImgFrame.emptyFrame {
+.emptyPlayer .avatarImgFrame {
 	align-items: center;
+	background: none;
+	background-color: rgb(1, 4, 37);
+	filter: none;
+	border: 0.1rem solid rgba(255, 255, 255, 0.3);
+	font-size: 1.8rem;
+	font-weight: 200;
+	color: rgba(255, 255, 255, 0.3);
 }
-
 .avatarImg {
 	width: 100%;
 }
 
-.avatarQuestionMark {
-	font-size: 1.8rem;
-	font-weight: 500;
-	color: rgb(213, 112, 255);
+.crownImg {
+	position: absolute;
+	bottom: 90%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 50%;
+	z-index: 1;
 }
 
 .nickname {
@@ -88,11 +101,49 @@
 	font-size: 1.5rem;
 	font-weight: 200;
 }
+.emptyPlayer .nickname {
+	color: rgba(255, 255, 255, 0.3);
+}
 
-#svgCanvas {
+#lineCanvas {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
+}
+
+#elementCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.observeButton {
+	position: absolute;
+	transform: translateX(-50%);
+	font-size: 1.2rem;
+	font-weight: 500;
+	padding: 0.3% 0.9%;
+}
+.observeButton:hover {
+	background-color: rgb(213, 112, 255);
+	border-color: rgb(213, 112, 255);
+	color: rgb(1, 4, 37);
+	font-weight: 700;
+}
+
+.scoreBox {
+	position: absolute;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 3%;
+}
+.scoreBox .score {
+	font-size: 1.7rem;
+	font-weight: 200;
 }
