@@ -1,82 +1,82 @@
 class ChattingPageManager {
-	constructor(chat, clientInfo) {
+	constructor(clientInfo) {
 		console.log("Chatting Page!");
 
 		this.clientInfo = clientInfo;
 		//추후 삭제해야함
-		this.clientInfo = {
-			id: 1,
-			friendInfo: {},
-		};
+		// this.clientInfo = {
+		// 	id: 1,
+		// 	friendInfo: {},
+		// };
 		// TODO : 임시 하드코딩
-		this.clientInfo.friendInfo.friendList = [
-			{
-				id: 1,
-				nickname: "조뱀파이어어어어어어",
-				avatarUrl: "images/playerA.png",
-				activeState: "ACTIVE",
-				chat: {
-					recentMessage: "하이하이하이하이하이하이하이하이",
-					recentTimestamp: "2024-07-02T14:30:00Z",
-					unreadMessageCount: 1,
-				},
-			},
-			{
-				id: 2,
-				nickname: "박뱀파이어",
-				avatarUrl: "images/humanIcon.png",
-				activeState: "ACTIVE",
-				chat: {
-					recentMessage: "하이하이하이하이하이하이하이하이",
-					recentTimestamp: "2024-07-02T14:30:00Z",
-					unreadMessageCount: 3,
-				},
-			},
-			{
-				id: 3,
-				nickname: "이뱀파이어",
-				avatarUrl: "images/playerB.png",
-				activeState: "INACTIVE",
-				chat: {
-					recentMessage: "하이하이하이하이하이하이하이하이",
-					recentTimestamp: "2024-07-02T14:30:00Z",
-					unreadMessageCount: 0,
-				},
-			},
-			{
-				id: 4,
-				nickname: "김뱀파이어",
-				avatarUrl: "images/playerA.png",
-				activeState: "ACTIVE",
-				chat: {
-					recentMessage: "하이하이하이하이하이하이하이하이",
-					recentTimestamp: "2024-07-02T14:30:00Z",
-					unreadMessageCount: 2,
-				},
-			},
-			{
-				id: 5,
-				nickname: "최뱀파이어",
-				avatarUrl: "images/playerA.png",
-				activeState: "ACTIVE",
-				chat: {
-					recentMessage: "하이하이하이하이하이하이하이하이",
-					recentTimestamp: "2024-07-02T14:30:00Z",
-					unreadMessageCount: 0,
-				},
-			},
-			{
-				id: 6,
-				nickname: "정뱀파이어",
-				avatarUrl: "images/playerA.png",
-				activeState: "INACTIVE",
-				chat: {
-					recentMessage: "하이하이하이하이하이하이하이하이",
-					recentTimestamp: "2024-07-02T14:30:00Z",
-					unreadMessageCount: 1000,
-				},
-			},
-		];
+		// this.clientInfo.friendInfo.friendList = [
+		// 	{
+		// 		id: 1,
+		// 		nickname: "조뱀파이어어어어어어",
+		// 		avatarUrl: "images/playerA.png",
+		// 		activeState: "ACTIVE",
+		// 		chat: {
+		// 			recentMessage: "하이하이하이하이하이하이하이하이",
+		// 			recentTimestamp: "2024-07-02T14:30:00Z",
+		// 			unreadMessageCount: 1,
+		// 		},
+		// 	},
+		// 	{
+		// 		id: 2,
+		// 		nickname: "박뱀파이어",
+		// 		avatarUrl: "images/humanIcon.png",
+		// 		activeState: "ACTIVE",
+		// 		chat: {
+		// 			recentMessage: "하이하이하이하이하이하이하이하이",
+		// 			recentTimestamp: "2024-07-02T14:30:00Z",
+		// 			unreadMessageCount: 3,
+		// 		},
+		// 	},
+		// 	{
+		// 		id: 3,
+		// 		nickname: "이뱀파이어",
+		// 		avatarUrl: "images/playerB.png",
+		// 		activeState: "INACTIVE",
+		// 		chat: {
+		// 			recentMessage: "하이하이하이하이하이하이하이하이",
+		// 			recentTimestamp: "2024-07-02T14:30:00Z",
+		// 			unreadMessageCount: 0,
+		// 		},
+		// 	},
+		// 	{
+		// 		id: 4,
+		// 		nickname: "김뱀파이어",
+		// 		avatarUrl: "images/playerA.png",
+		// 		activeState: "ACTIVE",
+		// 		chat: {
+		// 			recentMessage: "하이하이하이하이하이하이하이하이",
+		// 			recentTimestamp: "2024-07-02T14:30:00Z",
+		// 			unreadMessageCount: 2,
+		// 		},
+		// 	},
+		// 	{
+		// 		id: 5,
+		// 		nickname: "최뱀파이어",
+		// 		avatarUrl: "images/playerA.png",
+		// 		activeState: "ACTIVE",
+		// 		chat: {
+		// 			recentMessage: "하이하이하이하이하이하이하이하이",
+		// 			recentTimestamp: "2024-07-02T14:30:00Z",
+		// 			unreadMessageCount: 0,
+		// 		},
+		// 	},
+		// 	{
+		// 		id: 6,
+		// 		nickname: "정뱀파이어",
+		// 		avatarUrl: "images/playerA.png",
+		// 		activeState: "INACTIVE",
+		// 		chat: {
+		// 			recentMessage: "하이하이하이하이하이하이하이하이",
+		// 			recentTimestamp: "2024-07-02T14:30:00Z",
+		// 			unreadMessageCount: 1000,
+		// 		},
+		// 	},
+		// ];
 		//친구 없는 경우
 		// this.clientInfo.friendInfo.friendList = []
 		this._appendChatButton();
@@ -102,6 +102,7 @@ class ChattingPageManager {
 		// })
 	}
 	_renderTotalUnreadMessageCount() {
+		console.log(this.clientInfo);
 		const count = this.clientInfo.friendInfo.friendList.reduce((acc, current) => {
 			return acc + current.chat.unreadMessageCount;
 		}, 0);
