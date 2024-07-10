@@ -141,7 +141,8 @@ class PageRouter {
 			const tournamentPageManager = new TournamentPageManager(
 				this.app,
 				this.clientInfo,
-				this._onStartPingpongGame.bind(this)
+				this._onStartPingpongGame.bind(this),
+				this._joinLobbyPage.bind(this)
 			);
 		}
 	}

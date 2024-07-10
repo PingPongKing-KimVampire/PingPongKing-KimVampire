@@ -165,6 +165,29 @@
 	font-weight: 200;
 }
 
+#tournamentExitButton {
+	position: absolute;
+	height: 6%;
+	top: 3%;
+	left: 2%;
+	padding: 0 1.5% 0 3%;
+	font-size: 1.5rem;
+	z-index: 1;
+}
+#tournamentExitButton img {
+	position: absolute;
+	top: 50%;
+	left: 5%;
+	transform: translateY(-55%);
+	height: 50%;
+}
+#tournamentExitButton:hover {
+	background-color: rgb(213, 112, 255);
+	border-color: rgb(1, 4, 37);
+	color: rgb(1, 4, 37);
+	font-weight: 900;
+}
+
 @media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
 	#container {
 		width: 65%;
@@ -172,10 +195,17 @@
 	.scoreBox {
 		width: 4.5%;
 	}
+	#tournamentExitButton {
+		padding: 0 2% 0 4%;
+	}
 }
 @media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
 	#container {
 		width: 80%;
+	}
+	#tournamentExitButton {
+		height: 5.5%;
+		font-size: 1.45rem;
 	}
 }
 @media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
@@ -185,6 +215,11 @@
 	}
 	.scoreBox {
 		width: 6%;
+	}
+	#tournamentExitButton {
+		height: 5%;
+		font-size: 1.4rem;
+		padding: 0 2.3% 0 4.6%;
 	}
 }
 
@@ -201,6 +236,13 @@
 	}
 	.scoreBox .score {
 		font-size: 1.5rem;
+	}
+	#tournamentExitButton {
+		top: 2%;
+		left: 3%;
+		height: 5%;
+		font-size: 1.4rem;
+		padding: 0 3% 0 6%;
 	}
 }
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
@@ -226,6 +268,11 @@
 	.observeButton {
 		font-size: 0.8rem;
 	}
+	#tournamentExitButton {
+		height: 4.5%;
+		font-size: 1.3rem;
+		padding: 0 3.5% 0 7%;
+	}
 }
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
 	#container {
@@ -243,5 +290,10 @@
 	}
 	.scoreBox .score {
 		font-size: 0.9rem;
+	}
+	#tournamentExitButton {
+		height: 4%;
+		font-size: 1.2rem;
+		padding: 0 3.5% 0 7%;
 	}
 }
