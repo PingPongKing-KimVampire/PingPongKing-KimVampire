@@ -46,7 +46,8 @@ class PingpongPageManager {
 		this.app.innerHTML = this._getPingpongHTML();
 
 		this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
-		this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
+		if(this.clientInfo.gameInfo.role !== "observer")
+			this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 
 		this._manageExitRoom(); // 탁구장 나가기 처리
 
@@ -136,7 +137,7 @@ class PingpongPageManager {
 				<div id="leftDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamLeftScore?0:this.clientInfo.gameInfo.teamLeftScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>
@@ -146,7 +147,7 @@ class PingpongPageManager {
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamRightScore?0:this.clientInfo.gameInfo.teamRightScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>
