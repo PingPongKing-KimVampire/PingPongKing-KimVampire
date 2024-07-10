@@ -50,6 +50,7 @@ class PageRouter {
 				teamLeftAbility: null,
 				teamRightAbility: null,
 			},
+			tournamentInfo: null, // TODO : 토너먼트에서 나왔을 때 다시 null로 세팅
 			friendInfo: {
 				friendList: [
 					{
@@ -112,10 +113,14 @@ class PageRouter {
 				this._onEnterWaitingRoom.bind(this)
 			);
 		} else if (url === 'pingpong') {
+			let onExitPingpongGame = this._onExitPingpongGame.bind(this);
+			if (this.clientInfo.tournamentInfo === null) {
+				onExitPingpongGame = this._joinTournamentPage.bind(this);
+			}
 			const pingpongPageManager = new PingpongPageManager(
 				this.app,
 				this.clientInfo,
-				this._onExitPingpongGame.bind(this)
+				onExitPingpongGame
 			);
 			await pingpongPageManager.initPage();
 		} else if (url === 'waitingRoom') {
