@@ -126,14 +126,17 @@ class PageRouter {
 				this._onExitPingpongGame.bind(this)
 			);
 		} else if (url === 'waitingTournament') {
-			const waitingTournamentPageManager =
-				new WaitingTournamentPageManager(
-					this.app,
-					this.clientInfo,
-					this._joinLobbyPage.bind(this)
-				);
-		} else if (url === "tournament") {
-			const tournamentPageManager = new TournamentPageManager(this.app, this.clientInfo);
+			const waitingTournamentPageManager = new WaitingTournamentPageManager(
+				this.app,
+				this.clientInfo,
+				this._joinLobbyPage.bind(this),
+				this._joinTournamentPage.bind(this)
+			);
+		} else if (url === 'tournament') {
+			const tournamentPageManager = new TournamentPageManager(
+				this.app,
+				this.clientInfo
+			);
 		}
 	}
 
@@ -161,8 +164,12 @@ class PageRouter {
 		this.renderPage('waitingTournament');
 	}
 
-	_joinLobbyPage(){
+	_joinLobbyPage() {
 		this.renderPage('lobby');
+	}
+
+	_joinTournamentPage() {
+		this.renderPage('tournament');
 	}
 }
 

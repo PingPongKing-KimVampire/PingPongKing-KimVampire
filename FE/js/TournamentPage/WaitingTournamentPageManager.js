@@ -3,12 +3,19 @@ import { SERVER_ADDRESS } from './../PageRouter.js';
 import { SERVER_PORT } from './../PageRouter.js';
 
 class WaitingTournamentPageManager {
-	constructor(app, clientInfo, joinLobbyPage) {
+	constructor(app, clientInfo, joinLobbyPage, joinTournamentPage) {
 		console.log('WaitingTournament Page!');
 		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
 		this.joinLobbyPage = joinLobbyPage;
+		this.joinTournamentPage = joinTournamentPage;
 		this.initPage();
+
+		//3초뒤 tournamentPage로 이동하도록 하드코딩
+		setTimeout(() => {
+			this.clientInfo.lobbySocket.close();
+			this.joinTournamentPage();
+		}, 3000);
 	}
 
 	async initPage() {
@@ -67,8 +74,8 @@ class WaitingTournamentPageManager {
 					tournamentSocket,
 					tournamentClientList,
 				};
-				//페이지 이동
-				console.log("토너먼트 페이지로 이동")
+				this.clientInfo.lobbySocket.close();
+				this.joinTournamentPage();
 			}
 		};
 		lobbySocket.addEventListener(
