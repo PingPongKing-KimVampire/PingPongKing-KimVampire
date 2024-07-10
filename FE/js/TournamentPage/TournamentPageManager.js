@@ -9,7 +9,7 @@ class TournamentPageManager {
 		this._onStartPingpongGame = _onStartPingpongGame;
 		this.clientInfo = clientInfo;
 
-		this.playerList = [
+		this.playerList = [ // TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
 			{
 				clientId: "1",
 				clientNickname: "김뱀파이어어어어어어어어엉어어어어어",
@@ -32,29 +32,32 @@ class TournamentPageManager {
 			}
 		];
 
-		this.semiFinal = [
-			{
-				clientIdList: ["1", "2"],
-				score: [0, 10],
-				roomId: "123456",
-				state: "finished"
-			},
-			{
-				clientIdList: ["3", "4"],
-				score: [10, 0],
-				roomId: "1234",
-				state: "isPlaying"
-			}
-		];
-		this.final = [
-			{
-				clientIdList: ["1", "3"],
-				score: [0, 10],
-				roomId: "123456",
-				state: "notStarted"
-			}
-		]
+		this.tournamentInfo = {
+			semiFinal: [
+				{
+					clientIdList: ["1", "2"],
+					score: [0, 10],
+					roomId: "123456",
+					state: "finished"
+				},
+				{
+					clientIdList: ["3", "4"],
+					score: [10, 0],
+					roomId: "1234",
+					state: "isPlaying"
+				}
+			],
+			final: [
+				{
+					clientIdList: ["1", "3"],
+					score: [0, 10],
+					roomId: "123456",
+					state: "notStarted"
+				}
+			]
+		};
 
+		// this._getTournamentInfo();
 		this._initPage();
 	}
 
@@ -63,6 +66,27 @@ class TournamentPageManager {
 		requestAnimationFrame(this._renderBracket.bind(this)); // TODO : 가끔 안 먹을 때 있음!ㅠㅠ
 		this._subscribeWindow();
 		// this._listenTournamentEvent(); TODO : 현재 테스트 불가능함
+	}
+
+	async _getTournamentInfo() {
+		const getTournamentInfoMessage = {
+			event: "getTournamentGameInfo",
+			content: {}
+		}
+		this.clientInfo.tournamentInfo.tournamentSocket.send(JSON.stringify(getTournamentInfoMessage));
+		const { semiFinal, final } = await new Promise(resolve => {
+			const listener = (messageEvent) => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === 'getTournamentGameInfoResponse') {
+					this.clientInfo.tournamentInfo.tournamentSocket.removeEventListener('message', listener);
+					resolve(content);
+				}
+			}
+			this.clientInfo.tournamentInfo.tournamentSocket.addEventListener('message', listener);
+		});
+		this.tournamentInfo.semiFinal = semiFinal;
+		this.tournamentInfo.final = final;
+		this._initPage();
 	}
 
 	_subscribeWindow() {
@@ -122,7 +146,7 @@ class TournamentPageManager {
 		this.clientInfo.lobbySocket.close();
 		this.clientInfo.lobbySocket = null;
 	}
-	
+
 	async _enterPingpongRoom() {
 		// 바로 준비 완료 메시지 보내기
 		const changeReadyStateMessage = {
@@ -271,12 +295,12 @@ class TournamentPageManager {
 				setElementPos(type, scoreBox);
 				elementCanvas.append(scoreBox);
 			}
-			const stages = [...this.final, ...this.semiFinal];
+			const stages = [...this.tournamentInfo.final, ...this.tournamentInfo.semiFinal];
 			const types = ['final', 'leftSemiFinal', 'rightSemiFinal'];
 			stages.forEach((stage, index) => {
 				if (stage.state === 'isPlaying') {
 					createObserveButton(types[index]);
-				} else if (stage.state== 'finished') {
+				} else if (stage.state == 'finished') {
 					createScoreBox(types[index], ...stage.score);
 				}
 			});
@@ -289,7 +313,7 @@ class TournamentPageManager {
 	// TODO : playerList의 clientId와 final의 clientIdList 타입을 맞춰야 할 듯
 	_getHTML() {
 		let winner = null;
-		const [ final ] = this.final;
+		const [ final ] = this.tournamentInfo.final;
 		if (final.state === 'finished') {
 			winner = this._getWinningPlayer(final.score, final.clientIdList);
 		}
@@ -312,7 +336,7 @@ class TournamentPageManager {
 	_getSubTreesHTML() {
 		let leftFinalist = null;
 		let rightFinalist = null;
-		const [ leftSemiFinal, rightSemiFinal ] = this.semiFinal;
+		const [ leftSemiFinal, rightSemiFinal ] = this.tournamentInfo.semiFinal;
 		if (leftSemiFinal.state === 'finished') {
 			leftFinalist = this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList);
 		}
