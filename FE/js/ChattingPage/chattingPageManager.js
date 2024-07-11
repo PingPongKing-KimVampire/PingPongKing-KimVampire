@@ -18,12 +18,12 @@ class ChattingPageManager {
 
 		document.body.appendChild(button);
 		this._renderTotalUnreadMessageCount();
-		this.clientInfo.socket.addEventListener('message', (messageEvent) => {
+		this.clientInfo.socket.addEventListener("message", messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
-			if (event === 'notifyMessageArrive') {
+			if (event === "notifyMessageArrive") {
 				this._renderTotalUnreadMessageCount();
 			}
-		})
+		});
 	}
 	_renderTotalUnreadMessageCount() {
 		const count = this.clientInfo.friendInfo.friendList.reduce((acc, current) => {
@@ -95,28 +95,19 @@ class ChattingPageManager {
 		window.addEventListener("click", this.noFriendContainerWindowClickListener);
 
 		// 친구가 새로 생긴경우
-		this.noFriendAndGetFriendListener = (messageEvent) => {
+		this.noFriendAndGetFriendListener = messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
-			if (
-				(event === 'acceptFriendRequestResponse' && content.message === 'OK') ||
-				event === 'notifyFriendRequestAccepted'
-			) {
+			if ((event === "acceptFriendRequestResponse" && content.message === "OK") || event === "notifyFriendRequestAccepted") {
 				this._closeNoFriendChatContainer();
 				this._openChatContainer();
 			}
 		};
-		this.clientInfo.socket.addEventListener(
-			'message',
-			this.noFriendAndGetFriendListener
-		);
+		this.clientInfo.socket.addEventListener("message", this.noFriendAndGetFriendListener);
 	}
 
 	_closeNoFriendChatContainer() {
 		window.removeEventListener("click", this.noFriendContainerWindowClickListener);
-		this.clientInfo.socket.removeEventListener(
-			'message',
-			this.noFriendAndGetFriendListener
-		);
+		this.clientInfo.socket.removeEventListener("message", this.noFriendAndGetFriendListener);
 		this._noFriendContainerOpened = false;
 		this.noFriendContainer.remove();
 		this.noFriendContainer = null;
@@ -246,7 +237,17 @@ class ChattingPageManager {
 	// }
 
 	_renderFriendList() {
-		document.querySelector(".FriendListContainer").innerHTML = this._getFriendListHTML();
+		const friendListContainer = document.querySelector(".FriendListContainer");
+		friendListContainer.innerHTML = this._getFriendListHTML();
+		friendListContainer.querySelectorAll(".friendItem").forEach((friendItem)=>{
+			const id = friendItem.dataset.id;
+			console.log(id);
+			console.log(friendItem.querySelector(".avatarImg"));
+			friendItem.querySelector(".avatarImg").addEventListener("click", (e)=>{
+				e.stopPropagation();
+				alert(`ID는 ${id}다`);
+			})
+		})
 		const friendItems = Array.from(document.querySelectorAll(".friendItem"));
 		const readingItem = friendItems.find(item => {
 			return parseInt(item.dataset.id) === this.readingFriendId;
@@ -340,7 +341,6 @@ class ChattingPageManager {
 	}
 	_getFriendListHTML() {
 		const getFriendItemHTML = function (friend) {
-			console.log(friend);
 			return `
                 <button class="friendItem" data-id="${friend.id}">
                     <div class="avatarContainer">
@@ -351,7 +351,7 @@ class ChattingPageManager {
                     </div>
                     <div class="infoBox">
                         <div class="nickname">${friend.nickname}</div>
-                        <div class="recentMessage">${friend.chat?.recentMessage?friend.chat.recentMessage:"아직 대화를 나누지 않은 친구입니다."}</div>
+                        <div class="recentMessage">${friend.chat?.recentMessage ? friend.chat.recentMessage : "아직 대화를 나누지 않은 친구입니다."}</div>
                     </div>
                     <div class="inviteButton invisible ${friend.activeState === "ACTIVE" ? "" : "disabledInviteButton"}">초대</div>
 					<div class="unreadCount ${!friend.chat?.unreadMessageCount ? "invisible" : ""}">${getUnreadCount(friend)}</div>
