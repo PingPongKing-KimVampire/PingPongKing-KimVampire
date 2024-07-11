@@ -82,6 +82,9 @@ form {
 	font-size: 1.4rem;
 	font-weight: 300;
 }
+#signupButton:hover {
+	color: rgba(255, 255, 255, 0.7);
+}
 
 @media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
 	#container {
