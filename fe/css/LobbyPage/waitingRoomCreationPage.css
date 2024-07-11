@@ -147,6 +147,7 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	border-radius: 1rem;
 	transition-duration: 0.5s;
 	z-index: 1;
+	box-sizing: border-box;
 }
 #humanCountOptionBox.visible li {
 	width: 97%;
