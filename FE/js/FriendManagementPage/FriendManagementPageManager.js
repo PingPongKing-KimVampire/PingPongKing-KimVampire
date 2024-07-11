@@ -270,6 +270,10 @@ class FriendManagementPageManager {
 		const newFriendClient = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(client => client.id === id);
 		if (newFriendClient) {
 			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(client => client.id !== newFriendClient.id);
+			newFriendClient.chat = {
+				recentTimestamp: null,
+				unreadMessageCount: 0
+			}
 			this.clientInfo.friendInfo.friendList.push(newFriendClient);
 			this._renderTabByCurrentMode();
 		}
