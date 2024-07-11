@@ -26,6 +26,7 @@ class SignupPageManager {
 		this.pwInput = document.querySelector("#pwInput");
 		this.pwInput.addEventListener("input", () => {
 			this._checkPw();
+			this._checkRePw();
 			this._updateSignupButton();
 		});
 		this.rePwInput = document.querySelector("#rePwInput");
@@ -50,22 +51,40 @@ class SignupPageManager {
 	}
 
 	_checkId = async () => {
+		if (this.idInput.value === '') {
+			this.idWarning.textContent = '';
+			this.idValidState = false;
+			return;
+		}
 		if (!this._validateId(this.idInput.value)) {
 			const invalidIdMessage = "1에서 20자의 영문, 숫자만 사용 가능합니다.";
 			this.idWarning.textContent = invalidIdMessage;
 			this.idValidState = false;
 			return;
 		}
-		if (!(await this._validateDuplicateId(this.idInput.value))) {
-			const duplicateIdMessage = "이미 존재하는 아이디입니다.";
-			this.idWarning.textContent = duplicateIdMessage;
-			this.idValidState = false;
+		try {
+			if (!(await this._validateDuplicateId(this.idInput.value))) {
+				const duplicateIdMessage = "이미 존재하는 아이디입니다.";
+				this.idWarning.textContent = duplicateIdMessage;
+				this.idValidState = false;
+				return;
+			}
+		} catch (error) {
+			if (error instanceof Error)
+				this.idWarning.textContent = error.message;
+			if (error instanceof TypeError && error.message === 'Failed to fetch')
+				this.idWarning.textContent = "서버의 응답이 없습니다.";
 			return;
 		}
 		this.idValidState = true;
 		this.idWarning.textContent = "";
 	};
 	_checkPw = () => {
+		if (this.pwInput.value === '') {
+			this.pwWarning.textContent = '';
+			this.pwValidState = false;
+			return;
+		}
 		if (!this._validatePw(this.pwInput.value)) {
 			const invalidPwMessage = "8에서 20자로 영문, 숫자, 특수문자를 모두 포함해야 합니다.";
 			this.pwWarning.textContent = invalidPwMessage;
@@ -76,6 +95,11 @@ class SignupPageManager {
 		this.pwWarning.textContent = "";
 	};
 	_checkRePw = () => {
+		if (this.rePwInput.value === '') {
+			this.rePwWarning.textContent = '';
+			this.rePwValidState = false;
+			return;
+		}
 		if (!this._validateRePw(this.pwInput.value, this.rePwInput.value)) {
 			const invalidRePwMessage = "비밀번호와 일치하지 않습니다.";
 			this.rePwWarning.textContent = invalidRePwMessage;
@@ -86,16 +110,29 @@ class SignupPageManager {
 		this.rePwWarning.textContent = "";
 	};
 	_checkNickName = async () => {
+		if (this.nickNameInput.value === '') {
+			this.nickNameWarning.textContent = '';
+			this.nickNameValidState = false;
+			return;
+		}
 		if (!this._validateNickName(this.nickNameInput.value)) {
 			const invalidNickNameMessage = "1에서 20자의 영문, 숫자, 한글만 사용 가능합니다.";
 			this.nickNameWarning.textContent = invalidNickNameMessage;
 			this.nickNameValidState = false;
 			return;
 		}
-		if (!(await this._validateDuplicateNickName(this.nickNameInput.value))) {
-			const duplicateNickNameMessage = "이미 존재하는 닉네임입니다.";
-			this.nickNameWarning.textContent = duplicateNickNameMessage;
-			this.nickNameValidState = false;
+		try {
+			if (!(await this._validateDuplicateNickName(this.nickNameInput.value))) {
+				const duplicateNickNameMessage = "이미 존재하는 닉네임입니다.";
+				this.nickNameWarning.textContent = duplicateNickNameMessage;
+				this.nickNameValidState = false;
+				return;
+			}
+		} catch (error) {
+			if (error instanceof Error)
+				this.nickNameWarning.textContent = error.message;
+			if (error instanceof TypeError && error.message === 'Failed to fetch')
+				this.nickNameWarning.textContent = "서버의 응답이 없습니다.";
 			return;
 		}
 		this.nickNameValidState = true;
@@ -105,41 +142,33 @@ class SignupPageManager {
 	async _validateDuplicateId(id) {
 		const query = new URLSearchParams({ username: id }).toString();
 		const url = `http://${SERVER}:${PORT}/check-username?${query}`;
-		try {
-			const response = await fetch(url, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-			const data = await response.json();
-			return data.is_available;
-		} catch (error) {
-			console.error("Error:", error);
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		if (!response.ok) {
+			throw new Error('서버와의 연결이 불안정합니다.');
 		}
+		const data = await response.json();
+		return data.is_available;
 	}
 
 	async _validateDuplicateNickName(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
 		const url = `http://${SERVER}:${PORT}/check-nickname?${query}`;
-		try {
-			const response = await fetch(url, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-			const data = await response.json();
-			return data.is_available;
-		} catch (error) {
-			console.error("Error:", error);
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		if (!response.ok) {
+			throw new Error('서버와의 연결이 불안정합니다.');
 		}
+		const data = await response.json();
+		return data.is_available;
 	}
 
 	_validateId(id) {
@@ -184,18 +213,47 @@ class SignupPageManager {
 			});
 
 			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
+				let information = '';
+				if (response.status === 409) {
+					const responseData = await response.json(); 
+					if (responseData.duplicated_item === 'id') {
+						information = '이미 존재하는 아이디입니다.';
+					} else if (responseData.duplicated_item === 'nickname') {
+						information = '이미 존재하는 닉네임입니다.';
+					}
+				} else if (response.status >= 400 && response.status < 500) {
+					information = '입력 내용이 유효하지 않습니다.';
+				} else if (response.status >= 500) {
+					information = '서버와의 연결이 불안정합니다.';
+				}
+				throw new Error(information);
 			}
 
-			// const data = await response.json();
-			// console.log('회원가입 성공:', data);
-			// 회원가입 성공 후 추가 작업 (예: 리디렉션)
-			this.onSignupSuccess();
 		} catch (error) {
-			console.error("회원가입 실패:", error);
+			if (error instanceof Error)
+				this._displaySignupFailureNotiWindow(error.message);
+			if (error instanceof TypeError && error.message === 'Failed to fetch')
+				this._displaySignupFailureNotiWindow("서버의 응답이 없습니다.");
 		}
+
+
+		// const data = await response.json();
+		// console.log('회원가입 성공:', data);
+		// 회원가입 성공 후 추가 작업 (예: 리디렉션)
 		this.onSignupSuccess();
 	};
+	_displaySignupFailureNotiWindow(infomation) {
+		const notiWindow = document.querySelector('.notiWindow');
+		notiWindow.querySelector('.infomation').textContent = infomation;
+		notiWindow.style.display = 'flex';
+
+		const confirmButton = notiWindow.querySelector('.confirmButton');
+		const listener = () => {
+			confirmButton.removeEventListener('click', listener);
+			notiWindow.style.display = 'none';
+		}
+		confirmButton.addEventListener('click', listener);
+	}
 
 	_updateSignupButton = () => {
 		if (this.idValidState && this.pwValidState && this.rePwValidState && this.nickNameValidState) {
@@ -226,6 +284,7 @@ class SignupPageManager {
 				</div>
 			</div>
 			<button id="signupButton" class="disabledButton">회원가입</button>
+			${this._getSignupFailureNotiWindowHTML()}
 		`;
 	}
 	_getIdContainerHTML() {
@@ -255,6 +314,15 @@ class SignupPageManager {
 			<label class="label" for="nickNameInput">닉네임</label>
 			<input class="input" type="text" id="nickNameInput">
 			<div class="warning" id="nickNameWarning"></div>
+		`;
+	}
+
+	_getSignupFailureNotiWindowHTML() {
+		return `
+			<div class="notiWindow">
+				<div class="infomation">이미 존재하는 아이디입니다.</div>
+				<button class="confirmButton">확인</button>
+			</div>
 		`;
 	}
 }
