@@ -222,7 +222,7 @@ class ChattingPageManager {
 		if (this.readingFriendId) {
 			await this._sendStopReadingMessage();
 		}
-		this.clientInfo.socket.removeEventListener('message', this._messageArriveListener);
+		this.clientInfo.socket.removeEventListener("message", this._messageArriveListener);
 	}
 
 	_getSortedFriendList() {
@@ -233,18 +233,25 @@ class ChattingPageManager {
 	}
 
 	_setInputButton() {
-		this.inputBox = document.querySelector(".inputBox");
-		document.querySelector(".inputButton").addEventListener("click", () => {
+		const sendMessage = () => {
 			if (this.inputBox.value === "") return;
 			const sendMessage = {
 				event: "sendMessage",
 				content: {
 					clientId: this.readingFriendId,
-					message: this.inputBox.value
-				}
-			}
+					message: this.inputBox.value,
+				},
+			};
 			this.clientInfo.socket.send(JSON.stringify(sendMessage));
 			this.inputBox.value = "";
+		};
+		this.inputBox = document.querySelector(".inputBox");
+		document.querySelector(".inputButton").addEventListener("click", sendMessage);
+		this.inputBox.addEventListener("keydown", e => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				sendMessage();
+			}
 		});
 	}
 
@@ -276,15 +283,15 @@ class ChattingPageManager {
 		};
 		this.readingFriendId = null;
 		this.clientInfo.socket.send(JSON.stringify(stopReadingChatMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'stopReadingChatResponse' && content.message === 'OK') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "stopReadingChatResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
-			}
-			this.clientInfo.socket.addEventListener('message', listener);
+			};
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
 	}
 
@@ -315,19 +322,19 @@ class ChattingPageManager {
 		const getTotalChatDataMessage = {
 			event: "getTotalChatData",
 			content: {
-				clientId: id
-			}
-		}
+				clientId: id,
+			},
+		};
 		this.clientInfo.socket.send(JSON.stringify(getTotalChatDataMessage));
-		const messageList = await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		const messageList = await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'getTotalChatDataResponse') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "getTotalChatDataResponse") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve(content.messageList);
 				}
-			}
-			this.clientInfo.socket.addEventListener('message', listener);
+			};
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
 
 		this.readingFriendId = id;
