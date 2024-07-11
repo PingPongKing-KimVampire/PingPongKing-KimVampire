@@ -218,7 +218,10 @@ class LoginPageManager {
 				const acceptedClient = this.clientInfo.friendInfo.clientListIFriendRequested.find(client => client.id === content.clientInfo.id);
 				if (acceptedClient) {
 					this.clientInfo.friendInfo.clientListIFriendRequested = this.clientInfo.friendInfo.clientListIFriendRequested.filter(client => client.id !== content.clientInfo.id);
-
+					acceptedClient.chat = {
+						recentTimestamp: null,
+						unreadMessageCount: 0
+					}
 					this.clientInfo.friendInfo.friendList.push(acceptedClient);
 				}
 			} else if (event === "notifyFriendRequestRejected") {
