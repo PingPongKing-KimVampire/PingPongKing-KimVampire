@@ -20,8 +20,10 @@ class ChattingPageManager {
 		this._renderTotalUnreadMessageCount();
 		this.clientInfo.socket.addEventListener("message", messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
-			if (event === "notifyMessageArrive") {
-				this._renderTotalUnreadMessageCount();
+			if (event === "notifyMessageArrive" || event === "notifyFriendDeleted" || event === "deleteFriendResponse") {
+				setTimeout(() => {
+					this._renderTotalUnreadMessageCount();
+				}, 0);
 			}
 		});
 	}
@@ -239,15 +241,15 @@ class ChattingPageManager {
 	_renderFriendList() {
 		const friendListContainer = document.querySelector(".FriendListContainer");
 		friendListContainer.innerHTML = this._getFriendListHTML();
-		friendListContainer.querySelectorAll(".friendItem").forEach((friendItem)=>{
+		friendListContainer.querySelectorAll(".friendItem").forEach(friendItem => {
 			const id = friendItem.dataset.id;
 			console.log(id);
 			console.log(friendItem.querySelector(".avatarImg"));
-			friendItem.querySelector(".avatarImg").addEventListener("click", (e)=>{
+			friendItem.querySelector(".avatarImg").addEventListener("click", e => {
 				e.stopPropagation();
 				alert(`ID는 ${id}다`);
-			})
-		})
+			});
+		});
 		const friendItems = Array.from(document.querySelectorAll(".friendItem"));
 		const readingItem = friendItems.find(item => {
 			return parseInt(item.dataset.id) === this.readingFriendId;
@@ -329,7 +331,6 @@ class ChattingPageManager {
 			event === "notifyFriendActiveStateChange"
 		) {
 			this._renderFriendList();
-			this._renderTotalUnreadMessageCount();
 		}
 	};
 
