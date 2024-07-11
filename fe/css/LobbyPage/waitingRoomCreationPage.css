@@ -29,7 +29,7 @@
 }
 
 .label {
-	width: 15%;
+	width: 20%;
 	font-size: 3rem;
 	font-weight: 800;
 }
@@ -82,12 +82,10 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 }
 
 .countBox {
-	background-color: red;
 	height: 100%;
 	width: 15%;
 	display: flex;
 	flex-direction: column;
-	/* justify-content: center; */
 	align-items: center;
 }
 
@@ -100,6 +98,10 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 #vampireCountBox, #humanCountBox {
 	height: 60%;
 	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
 	border-radius: 1rem;
 	font-size: 2rem;
 	font-weight: 600;
@@ -109,10 +111,6 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	color: white;
 }
 #humanCountBox {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
 	position: relative;
 	background-color: rgb(213, 112, 255);
 	border: 0.1rem solid rgb(213, 112, 255);
@@ -143,11 +141,12 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	align-items: center;
 	width: 100%;
 	height: 240%;
-	padding: 0.3%;
+	padding: 1% 2%;
 	background-color: rgb(1, 4, 37);
 	border: 0.1rem solid white;
 	border-radius: 1rem;
 	transition-duration: 0.5s;
+	z-index: 1;
 }
 #humanCountOptionBox.visible li {
 	width: 97%;
@@ -174,120 +173,6 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	margin: 0 8%;
 }
 
-
-/* #humanCountSelectionBox {
-	height: 100%;
-	display: flex;
-	flex-direction: row;
-}
-.countBox {
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: center;
-}
-.countBox:last-of-type {
-	height: 200%;
-	align-items: flex-start;
-}
-.countBox .teamText {
-	font-size: 1.5rem;
-	font-weight: 300;
-	height: 40%;
-}
-.countBox:last-of-type .teamText {
-	height: 20%;
-}
-#vampireCountBox {
-	width: 13%;
-}
-#humanCountSelectionBox {
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
-	width: 26%;
-}
-#humanCountBox {
-	width: 50%;
-}
-#vampireCountButton, #humanCountButton {
-	height: 60%;
-	width: 100%;
-	border: 0.1rem solid white;
-	color: white;
-	background-color: rgb(1, 4, 37);
-	border-radius: 15px;
-	font-size: 2rem;
-	font-weight: 600;
-}
-#humanCountButton {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-	position: relative;
-	background-color: rgb(213, 112, 255);
-	border: 0.1rem solid rgb(213, 112, 255);
-	box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.5);
-}
-#humanCountButton img {
-	height: 50%;
-	aspect-ratio: 2/3;
-	position: absolute;
-	right: 8%;
-	transition: transform 0.5s;
-}
-.nonSelectedArrowImg {
-	transform: rotate(0deg);
-}
-.selectedArrowImg {
-	transform: rotate(180deg);
-}
-#humanCountButton:hover {
-	cursor: pointer;
-} */
-
-/* #humanCountBox.visible #humanCountOptionBox {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	width: 70%;
-	height: 80%;
-	margin-left: 5%;
-	padding: 0.3%;
-	background-color: rgb(1, 4, 37);
-	border: 0.1rem solid white;
-	border-radius: 15px;
-	transition-duration: 0.5s;
-}
-
-#humanCountBox.visible #humanCountOptionBox li {
-	width: 100%;
-	height: 24%;
-}
-
-#humanCountBox.visible #humanCountOptionBox .humanCountOptionButton {
-	width: 100%;
-	height: 100%;
-	background-color: rgb(1, 4, 37);
-	color: white;
-	border-radius: 10px;
-	font-size: 1.25rem;
-	font-weight: 300;
-}
-#humanCountBox.visible #humanCountOptionBox .humanCountOptionButton:hover {
-	background-color: rgb(234, 183, 255);
-	color: rgb(1, 4, 37);
-	transition: background-color 0.1s;
-}
-
-#vsText {
-	font-size: 3rem;
-	font-weight: 800;
-	margin: 0 8%;
-} */
-
 #completeButton {
 	width: 15%;
 	position: absolute;
@@ -300,6 +185,8 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 @media (orientation: portrait) {
 	#container {
 		height: auto;
+		width: 60%;
+		margin-bottom: 13%;
 	}
 	.selectionContainer {
 		flex-direction: column;
@@ -318,19 +205,18 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	}
 	.label {
 		width: auto;
-		margin-bottom: 5%;
+		margin-bottom: 3%;
+		font-size: 2.5rem;
 	}
 	.selectionBox {
 		height: auto;
 		justify-content: center;
 	}
-	/* .selectionContainer:nth-of-type(3).visible .selectionBox {
-		align-items: flex-start;
-	} */
 	#titleInput {
 		width: 100%;
-		aspect-ratio: 9/1;
+		aspect-ratio: 8/1;
 		padding: 0 6%;
+		text-align: center;
 	}
 	.modeButton {
 		width: 28%;
@@ -339,39 +225,18 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.modeButton:nth-of-type(2) {
 		margin: 0 7%;
 	}
-	/* #vampireCountBox {
+	#vsText {
+		font-size: 2.5rem;
+		font-weight: 700;
+	}
+	.countBox {
 		width: 25%;
-	}
-	#humanCountSelectionBox {
-		position: relative;
-		flex-direction: column;
-		width: 25%;
-	}
-	#humanCountBox {
-		height: 50%;
-		width: 100%;
-	}
-	#humanCountBox:last-of-type {
-		position: absolute;
-		height: 200%;
-		z-index: 1;
-		top: 100%;
-	}
-	#humanCountBox:last-of-type .teamText {
-		margin-bottom: 5%;
-		height: 0;
-	}
-	#humanCountBox.visible #humanCountOptionBox {
-		width: 100%;
-		height: 100%;
-		margin-left: 0;
 	}
 	.countBox .teamText {
-		margin-bottom: 10%;
+		padding: 0 0 7% 0;
 	}
-	#vampireCountButton, #humanCountButton {
-		width: 100%;
-		aspect-ratio: 2.2/1;
+	#humanCountBox, #vampireCountBox {
+		aspect-ratio: 2.5/1;
 	}
 	.nonSelectedArrowImg {
 		transform: rotate(90deg);
@@ -379,18 +244,23 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectedArrowImg {
 		transform: rotate(270deg);
 	}
-	#vsText {
-		margin: 0 12%;
-	} */
+	#humanCountOptionBox.visible {
+		top: 120%;
+		left: 0%;
+	}
 	#completeButton {
 		bottom: 7%;
 		left: 50%;
 		transform: translateX(-50%);
-		width: 30%;
+		width: 25%;
+		font-size: 1.8rem;
 	}
 }
 
-@media (max-width: 1700px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-aspect-ratio: 1.85/1) {
+	.marginBottom {
+		margin-bottom: 7%;
+	}
 	.label {
 		width: 16%;
 	}
@@ -400,86 +270,145 @@ input[type="radio"]:checked + .modeButton, input[type="radio"]:checked + .countB
 	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
 		height: 35%;
 	}
-	/* .selectionContainer:nth-of-type(3).visible {
-		height: 13.5%;
-	} */
-	/* #vampireCountBox {
-		width: 14%;
-	}
-	#humanCountSelectionBox {
-		width: 28%;
-	} */
 	#completeButton {
 		width: 16%;
 	}
 }
-@media (max-width: 1500px) and (orientation: landscape) {
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.63/1) {
+	.marginBottom {
+		margin-bottom: 10%;
+	}
 	.label {
 		width: 18%;
-	}
-	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
-		height: 13.5%;
-	}
-	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
-		height: 32%;
-	}
-	/* .selectionContainer:nth-of-type(3).visible {
-		height: 12%;
-	} */
-	/* #vampireCountBox {
-		width: 15%;
-	}
-	#humanCountSelectionBox {
-		width: 30%;
-	} */
-	#completeButton {
-		width: 17%;
-	}
-}
-@media (max-width: 1350px) and (orientation: landscape) {
-	.label {
-		width: 20%;
+		font-size: 2.8rem;
 	}
 	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
 		height: 13%;
 	}
 	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
+		height: 33%;
+	}
+	.countBox {
+		width: 17%;
+	}
+	#completeButton {
+		width: 17%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
+	.marginBottom {
+		margin-bottom: 11.5%;
+	}
+	.label {
+		width: 20%;
+	}
+	.selectionContainer:nth-of-type(2) {
 		height: 28%;
+	}
+	.countBox {
+		width: 19%;
 	}
 	#completeButton {
 		width: 18%;
 	}
 }
-@media (max-width: 1150px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	.marginBottom {
+		margin-bottom: 11%;
+	}
 	.label {
 		width: 25%;
 	}
-	.selectionContainer:nth-of-type(1) { /* 제목 선택 그룹 */
+	.selectionContainer:nth-of-type(1) {
 		height: 12%;
 	}
-	.selectionContainer:nth-of-type(2) { /* 모드 선택 그룹 */
-		height: 25%;
+	.selectionContainer:nth-of-type(2) {
+		height: 24%;
 	}
-	/* #vampireCountBox {
-		width: 19%;
+	.selectionContainer:nth-of-type(3).visible { /* 인원 선택 그룹 */
+		height: 13%;
 	}
-	#humanCountSelectionBox {
-		width: 38%;
-	} */
+	.countBox {
+		width: 21%;
+	}
 	#completeButton {
 		width: 19%;
 	}
 }
 
-@media (min-width: 600px) and (orientation: portrait) {
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
 	#container {
-		margin-bottom: 7%;
-		width: 65%;
+		width: 70%;
+	}
+	.marginBottom {
+		margin-bottom: 13%;
+	}
+	#completeButton {
+		width: 30%;
 	}
 }
-@media (min-width: 750px) and (orientation: portrait) {
-	#container {
-		margin-bottom: 10%;
-		width: 55%;
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+	.marginBottom {
+		margin-bottom: 15%;
+	}
+	.label {
+		font-size: 2.3rem;
+	}
+	#vsText {
+		font-size: 2rem;
+	}
+	.countBox {
+		width: 28%;
+	}
+	.countBox .teamText {
+		font-size: 1.3rem;
+	}
+	#vampireCountBox, #humanCountBox {
+		font-size: 1.7rem;
+	}
+	#humanCountOptionBox.visible .humanCountOptionButton {
+		font-size: 1.2rem;
+	}
+	#completeButton {
+		width: 33%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+	.marginBottom {
+		margin-bottom: 15%;
+	}
+	.countBox {
+		width: 30%;
+	}
+	#vampireCountBox, #humanCountBox {
+		aspect-ratio: 2.7/1;
+		font-size: 1.5rem;
+	}
+	#humanCountOptionBox.visible .humanCountOptionButton {
+		font-size: 1.1rem;
+	}
+	#completeButton {
+		width: 40%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+	.marginBottom {
+		margin-bottom: 16%;
+	}
+	.countBox {
+		width: 32%;
+	}
+	#vampireCountBox, #humanCountBox {
+		aspect-ratio: 2.7/1;
+		font-size: 1.4rem;
+		border-radius: 0.7rem;
+	}
+	#humanCountOptionBox.visible .humanCountOptionButton {
+		font-size: 1rem;
+	}
+	#completeButton {
+		width: 40%;
 	}
 }

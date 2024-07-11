@@ -28,12 +28,16 @@ class WaitingRoomCreationPageManager {
 		this.titleInput = document.querySelector("#titleInput");
 		this.modeSelection = document.querySelector(".selectionContainer:nth-of-type(2)");
 		this.modeButtons = [...document.getElementsByName("mode")];
-		this.countSelection = document.querySelector(".selectionContainer:last-of-type");
-		this.humanCountButton = document.querySelector("#humanCountButton");
-		this.humanCountButtonText = document.querySelector("#humanCountButton div");
-		this.humanCountArrowImg = document.querySelector("#humanCountButton img");
-		this.humanCountOptionBox = document.querySelector("#humanCountBox:last-of-type");
-		this.humanCountOptionButtons = [...document.getElementsByClassName("humanCountOptionButton")];
+		this.countSelection = document.querySelector(
+			".selectionContainer:last-of-type"
+		);
+		this.humanCountBox = document.querySelector("#humanCountBox");
+		this.humanCountBoxText = document.querySelector("#humanCountBox div");
+		this.humanCountArrowImg = document.querySelector("#humanCountBox img");
+		this.humanCountOptionBox = document.querySelector("#humanCountOptionBox");
+		this.humanCountOptionButtons = [
+			...document.getElementsByClassName("humanCountOptionButton"),
+		];
 		this.completeButton = document.querySelector("#completeButton");
 		this.completeButton.disabled = true;
 
@@ -51,10 +55,13 @@ class WaitingRoomCreationPageManager {
 	}
 
 	_setHumanCountSelection() {
-		// humanCount 버튼 or humanCountOption 버튼 클릭 시 반응
-		this.humanCountButton.addEventListener("click", this._humanCountButtonClicked.bind(this));
-		this.humanCountOptionButtons.forEach(button => {
-			button.addEventListener("click", this._humanCountOptionButtonClicked.bind(this));
+		this.humanCountBox.addEventListener("click", () => {
+			this._toggleHumanCountOptionBox();
+		});
+		this.humanCountOptionButtons.forEach((button) => {
+			button.addEventListener("click", (event) => {
+				this._selectHumanCount(event);
+			});
 		});
 	}
 
@@ -93,18 +100,17 @@ class WaitingRoomCreationPageManager {
 		}
 	}
 
-	_humanCountButtonClicked() {
+	_toggleHumanCountOptionBox() {
 		this.humanCountArrowImg.classList.toggle("nonSelectedArrowImg");
 		this.humanCountArrowImg.classList.toggle("selectedArrowImg");
 		this.humanCountOptionBox.classList.toggle("visible");
 		this.humanCountOptionBox.classList.toggle("invisible");
 	}
 
-	_humanCountOptionButtonClicked(event) {
-		this._humanCountButtonClicked();
+	_selectHumanCount(event) {
 		const clickedValue = event.target.value;
-		this.humanCountButton.value = clickedValue;
-		this.humanCountButtonText.innerText = `${clickedValue}명`;
+		this.humanCountBox.dataset.count = clickedValue;
+		this.humanCountBoxText.innerText = `${clickedValue}명`;
 		let count = 2;
 		for (const button of this.humanCountOptionButtons) {
 			if (count === parseInt(clickedValue)) count++;
@@ -134,7 +140,7 @@ class WaitingRoomCreationPageManager {
 			leftPlayerCount = 1;
 			rightPlayerCount = 1;
 		} else if (mode === "vampireVsHuman") {
-			const humanCount = parseInt(this.humanCountButton.value);
+			const humanCount = parseInt(this.humanCountBox.dataset.count);
 			if (isNaN(humanCount)) return;
 			leftMode = "vampire";
 			rightMode = "human";
@@ -276,10 +282,10 @@ class WaitingRoomCreationPageManager {
 				<div id="vsText">VS</div>
 				<div class="countBox">
 					<div class="teamText">인간</div>
-					<div id="humanCountBox" value="3"> <!-- data- 쓰자 -->
+					<div id="humanCountBox" data-count="3">
 						<div>3명</div>
 						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
-						<ul id="humanCountOptionBox" class="visible">
+						<ul id="humanCountOptionBox" class="invisible">
 							<li><button class="humanCountOptionButton" value="2">2명</button></li>
 							<li><button class="humanCountOptionButton" value="4">4명</button></li>
 							<li><button class="humanCountOptionButton" value="5">5명</button></li>
@@ -289,37 +295,6 @@ class WaitingRoomCreationPageManager {
 			</div>
 		`;
 	}
-
-	// _getPlayerCountSelectionHTML() {
-	//   return `
-	// 		<label class="label">인원</label>
-	// 		<div class="selectionBox">
-	// 			<div class="countBox" id="vampireCountBox">
-	// 				<div class="teamText">뱀파이어</div>
-	// 				<button id="vampireCountButton">1명</button>
-	// 			</div>
-	// 			<div id="vsText">VS</div>
-	// 			<div id="humanCountSelectionBox">
-	// 				<div class="countBox" id="humanCountBox">
-	// 					<div class="teamText">인간</div>
-	// 					<button id="humanCountButton" value="3">
-	// 						<div>3명</div>
-	// 						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
-	// 					</button>
-	// 				</div>
-	// 				<div class="countBox invisible" id="humanCountBox">
-	// 					<div class="teamText"></div>
-	// 					<ul id="humanCountOptionBox">
-	// 						<li><button class="humanCountOptionButton" value="2">2명</button></li>
-	// 						<li><button class="humanCountOptionButton" value="4">4명</button></li>
-	// 						<li><button class="humanCountOptionButton" value="5">5명</button></li>
-	// 						<li><button class="humanCountOptionButton" value="6">6명</button></li>
-	// 					</ul>
-	// 				</div>
-	// 			</div>
-	// 		</div>
-	// 	`;
-	// }
 }
 
 export default WaitingRoomCreationPageManager;
