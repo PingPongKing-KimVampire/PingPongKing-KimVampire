@@ -351,7 +351,7 @@ class ChattingPageManager {
                     </div>
                     <div class="infoBox">
                         <div class="nickname">${friend.nickname}</div>
-                        <div class="recentMessage">${friend.chat?.recentMessage ? friend.chat.recentMessage : "아직 대화를 나누지 않은 친구입니다."}</div>
+                        <div class="recentMessage">${friend.chat?.recentMessage ? friend.chat.recentMessage : ""}</div>
                     </div>
                     <div class="inviteButton invisible ${friend.activeState === "ACTIVE" ? "" : "disabledInviteButton"}">초대</div>
 					<div class="unreadCount ${!friend.chat?.unreadMessageCount ? "invisible" : ""}">${getUnreadCount(friend)}</div>
