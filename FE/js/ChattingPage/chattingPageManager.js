@@ -234,21 +234,36 @@ class ChattingPageManager {
 
 	_setInputButton() {
 		const sendMessage = () => {
-			if (this.inputBox.value === "") return;
-			const sendMessage = {
+			const messageContent = this.inputBox.value.trim();
+			if (messageContent === "") return;
+			const sendMessageObj = {
 				event: "sendMessage",
 				content: {
 					clientId: this.readingFriendId,
-					message: this.inputBox.value,
+					message: messageContent,
 				},
 			};
-			this.clientInfo.socket.send(JSON.stringify(sendMessage));
+			this.clientInfo.socket.send(JSON.stringify(sendMessageObj));
 			this.inputBox.value = "";
 		};
+
 		this.inputBox = document.querySelector(".inputBox");
-		document.querySelector(".inputButton").addEventListener("click", sendMessage);
+		const inputButton = document.querySelector(".inputButton");
+
+		inputButton.addEventListener("click", sendMessage);
+
+		let isComposing = false;
+
+		this.inputBox.addEventListener("compositionstart", () => {
+			isComposing = true;
+		});
+
+		this.inputBox.addEventListener("compositionend", () => {
+			isComposing = false;
+		});
+
 		this.inputBox.addEventListener("keydown", e => {
-			if (e.key === "Enter") {
+			if (e.key === "Enter" && !isComposing) {
 				e.preventDefault();
 				sendMessage();
 			}
