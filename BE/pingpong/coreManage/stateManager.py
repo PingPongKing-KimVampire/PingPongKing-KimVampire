@@ -166,7 +166,7 @@ class StateManager:
     async def notify_room_created(self, room_id: str) -> None:
         room = self.rooms.get(room_id, None)
         room_data = room.get_room_data()
-        # await self.notify_lobby('notifyWaitingRoomCreated', room_data)
+        await self.notify_lobby('notifyWaitingRoomCreated', {'waitingRoomInfo' : room_data})
 
     async def notify_ready_state_change(self, room_id: str, client_id: str, is_ready: str) -> None:
         await self.notify_room(room_id, event='notifyReadyStateChange', content={'clientId': client_id, 'state': is_ready})
@@ -181,9 +181,8 @@ class StateManager:
 
     async def start_game(self, room_id: str) -> None:
         room = self.rooms.get(room_id, None)
-        game_manager = room.get('gameManager')
+        game_manager = room
         if game_manager:
-            game_manager.set_players(room)
             await self.notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo': {'roomId': room_id}})
             await game_manager.trigger_game()
 

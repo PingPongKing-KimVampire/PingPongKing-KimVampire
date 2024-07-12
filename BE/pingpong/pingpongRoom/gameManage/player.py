@@ -12,6 +12,8 @@ class Player:
         self.target_x = 0
         self.target_y = 0
         self.max_speed = 15
+        self.paddle_width = 10
+        self.paddle_height = 150
         self.ability = ability
 
     def set_state(self, state):

@@ -23,15 +23,15 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             room_id_team = f"{self.room_id}-{self.team}"
             stateManager.remove_client_from_room(self.room_id, self.client_id)
             await stateManager.notify_room_change(self.room_id)
-            await stateManager.notify_leave_waiting_room(self, self.room_id, self.client_id)
+            await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
             await discard_group(self, self.room_id)
             await discard_group(self, room_id_team)
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
-        # Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
-        # Printer.log(f"event : {event}", "white")
-        # Printer.log(f"conetnt : {content}\n", "white")
+        Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
+        Printer.log(f"event : {event}", "white")
+        Printer.log(f"conetnt : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
 
@@ -88,7 +88,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await stateManager.notify_room_change(self.room_id)
         await add_group(self, self.room_id)
         await add_group(self, f"{self.room_id}-{team}")
-        
         
         team_left_list, team_right_list = stateManager.get_waiting_room_player_list(self.room_id)
         team_left_ability, team_right_ability = stateManager.get_room_ability(self.room_id)

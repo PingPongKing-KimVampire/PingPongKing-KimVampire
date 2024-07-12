@@ -61,11 +61,14 @@ class GameRoomManager:
         team = None
         if len(self.team_left) < self.left_max_count:
             player =  Player(nickname, ability=None, team='left')
+            self.team_left[client_id] = player
             team = 'left'
         elif len(self.team_right) < self.right_max_count:
             player = Player(nickname, ability=None, team='right')
+            self.team_right[client_id] = player
             team = 'right'
         self.clients[client_id] = player
+        print()
         return team
 
     def remove_client(self, client_id):
@@ -78,26 +81,23 @@ class GameRoomManager:
 
     def get_room_data(self):
         return {
-            'roomId' : self.room_id,
-            'title' : self.title,
-            'leftMode' : self.left_mode,
-            'rightMode' : self.right_mode,
-            'currentPlayerCount' : self.get_room_client_count(),
-            'maxPlayerCount' : self.left_max_count + self.right_max_count
+            'roomId': self.room_id,
+            'title': self.title,
+            'leftMode': self.left_mode,
+            'rightMode': self.right_mode,
+            'currentPlayerCount': self.get_room_client_count(),
+            'maxPlayerCount': self.left_max_count + self.right_max_count
         }
 
     def get_team_list(self, team):
-        team_list = None
-        if team == 'left':
-            team_list = self.team_left
-        else:
-            team_list = self.team_right
+        team_list = self.team_left if team == 'left' else self.team_right
         data = []
         for client_id, player in team_list.items():
+            print("player: ", player.nickname, player.ready_state)
             data.append({
                 'clientId': client_id,
-                'nickname': player.nickname,
-                'readyState' : player.ready_state
+                'clientNickname': player.nickname,
+                'readyState': player.ready_state
             })
         return data
 
@@ -169,20 +169,8 @@ class GameRoomManager:
             player.modify_paddle_size(size)
         
     def set_players(self, room):
-        self.team_left = self.set_team(room, 'left')
-        self.team_right = self.set_team(room, 'right')
-        left_mode = room['leftMode']
-        right_mode = room['rightMode']
-        left_mode = self.set_team_ability(self.team_left)
-        self.clients = {**self.team_left, **self.team_right}
-        self.check_jiant_blocker(left_mode, right_mode)
-
-    def set_team(self, room, team):
-        player_arr = room[team]
-        player_count = len(player_arr)
-        ability = room[team + 'Ability']
-        team = {client_id: Player(info['nickname'], ability, team) for client_id, info in player_arr.items()}
-        return team
+        # left_mode = self.set_team_ability(self.team_left)
+        self.check_jiant_blocker(self.left_mode, self.right_mode)
 
     def set_team_ability(self, team):
         for player in team.values():
