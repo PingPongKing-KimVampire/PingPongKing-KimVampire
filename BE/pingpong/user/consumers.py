@@ -284,7 +284,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             channel_name = channel_name_map[friend.id]
             active_state = "ACTIVE"
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_accepted", 
-                                     {"clientInfo": {"id": user.id}})
+                                     {"clientInfo": {"id": user.id, "activeState": "ACTIVE"}})
         else:
             active_state = "INACTIVE"
         await self._send("acceptFriendRequestResponse", {"message": "OK",
