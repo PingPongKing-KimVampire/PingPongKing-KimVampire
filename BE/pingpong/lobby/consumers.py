@@ -21,7 +21,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.client_id:
-            stateManager.remove_client(self, self.client_id)
+            stateManager.remove_client(self.client_id)
             Printer.log(f"Client {self.client_id} disconnected", "red")
             await discard_group(self, 'lobby')
 
@@ -72,6 +72,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
                 'message': 'OK',
                 'roomId': room_id
         })
+        await stateManager.notify_lobby('notifyWaitingRoomCreated', {'content': {'roomId': room_id}})
 
     async def get_waiting_room_list_response(self):
         room_list = stateManager.get_waiting_room_list()

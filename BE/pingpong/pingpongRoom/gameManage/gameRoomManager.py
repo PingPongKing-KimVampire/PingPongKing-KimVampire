@@ -19,15 +19,25 @@ NORMALIZE = 6
 
 NORMAL_SPEED = 10
 
-class GameManager:
-    def __init__(self, room_id, left_mode, right_mode, channel_layer):
+
+class GameRoomManager:
+    def __init__(self, channel_layer, room_id, title, left_mode, right_mode, left_max_count, right_max_count):
         self.channel_layer = channel_layer
-        self.clients = {}
+
+        #common game room info
         self.room_id = room_id
+        self.title = title
+        self.clients = {}
         self.team_left = {}
         self.team_right = {}
+        self.left_max_count = left_max_count
+        self.right_max_count = right_max_count
         self.left_mode = left_mode
         self.right_mode = right_mode
+        self.left_ability = None
+        self.right_ability = None
+
+        # game playing info
         self.board_width = 1550
         self.board_height = 1000
         self.ball_radius = 25
@@ -39,8 +49,97 @@ class GameManager:
         self.fake_ball = {}
         self.queue = Queue()
 
-    # Game Setting
+    # getter
+    
+    def get_room_client_count(self):
+        return len(self.clients)
 
+    def get_room_ability(self):
+        return self.left_ability, self.right_ability
+
+    def enter_room(self, client_id, nickname):
+        team = None
+        if len(self.team_left) < self.left_max_count:
+            player =  Player(nickname, ability=None, team='left')
+            team = 'left'
+        elif len(self.team_right) < self.right_max_count:
+            player = Player(nickname, ability=None, team='right')
+            team = 'right'
+        self.clients[client_id] = player
+        return team
+
+    def remove_client(self, client_id):
+        if client_id in self.clients:
+            del self.clients[client_id]
+        if client_id in self.team_left:
+            del self.team_left[client_id]
+        elif client_id in self.team_right:
+            del self.team_right[client_id]
+
+    def get_room_data(self):
+        return {
+            'roomId' : self.room_id,
+            'title' : self.title,
+            'leftMode' : self.left_mode,
+            'rightMode' : self.right_mode,
+            'currentPlayerCount' : self.get_room_client_count(),
+            'maxPlayerCount' : self.left_max_count + self.right_max_count
+        }
+
+    def get_team_list(self, team):
+        team_list = None
+        if team == 'left':
+            team_list = self.team_left
+        else:
+            team_list = self.team_right
+        data = []
+        for client_id, player in team_list.items():
+            data.append({
+                'clientId': client_id,
+                'nickname': player.nickname,
+                'readyState' : player.ready_state
+            })
+        return data
+
+    def set_client_ready_state(self, client_id, state):
+        player = self.clients[client_id]
+        player.set_state(state)
+        
+    def check_game_ready(self):
+        if not self.is_room_full():
+            return False
+        return all(player.ready_state == 'READY' for player in self.clients.values())
+
+    def set_client_ability(self, client_id, ability):
+        player = None
+        if client_id in self.team_left:
+            player = self.team_left[client_id]
+            player.ability = ability
+            self.left_ability = ability
+        elif client_id in self.team_right:
+            player = self.team_right[client_id]
+            player.ability = ability
+            self.right_ability = ability
+
+    def get_client_ability(self, client_id):
+        team = None
+        ability = None
+        if client_id in self.team_left:
+            team = 'left'
+            ability = self.left_ability
+        elif client_id in self.team_right:
+            team = 'right'
+            ability = self.right_ability
+        return team, ability
+
+    def is_room_full(self):
+        return len(self.clients) == self.left_max_count + self.right_max_count
+
+    def is_room_empty(self):
+        return len(self.clients) == 0
+
+    # Game Setting
+    
     def _get_player_data(self):
         player_data = []
         for client_id, player in self.clients.items():
@@ -82,7 +181,7 @@ class GameManager:
         player_arr = room[team]
         player_count = len(player_arr)
         ability = room[team + 'Ability']
-        team = {client_id: Player(info['nickname'], ability, team, player_count) for client_id, info in player_arr.items()}
+        team = {client_id: Player(info['nickname'], ability, team) for client_id, info in player_arr.items()}
         return team
 
     def set_team_ability(self, team):

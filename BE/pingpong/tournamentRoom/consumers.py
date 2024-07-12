@@ -9,6 +9,7 @@ stateManager = StateManager()
 class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
+        self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
         self.client_id = None
         self.nickname = None
         self.tournament_state = "semi-final"
@@ -40,11 +41,12 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         if event == "enterTournamentRoom":
             await self.enter_tournament_room(content)
         elif event == "getTournamentGameInfo":
-            pass         
+            pass
 
     async def enter_tournament_room(self, content):
         self.client_id = content['clientId']
         self.nickname = stateManager.get_client_nickname(self.client_id)
+        # 인증 해야함
         await add_group(self, self.tournament_id)
         client_list = stateManager.get_tournament_client_list(self.tournament_id)
         client_list_data = []
