@@ -282,9 +282,15 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             return
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
+            active_state = "ACTIVE"
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_accepted", 
                                      {"clientInfo": {"id": user.id}})
-        await self._send("acceptFriendRequestResponse", {"message": "OK"})
+        else:
+            active_state = "INACTIVE"
+        await self._send("acceptFriendRequestResponse", {"message": "OK",
+            "clientInfo": {
+                "activeState": active_state
+            }                                             })
     
     async def notify_friend_request_canceled(self, event):
         Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
