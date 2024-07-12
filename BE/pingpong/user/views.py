@@ -52,7 +52,9 @@ def signup(request):
     if not nickname_is_valid(nickname):
         return JsonResponse({"error_code": "USER_03", "error_message": "nickname is invalid"}, status=400)
     if UserRepository.exists_user_by_username(username):
-        return JsonResponse({"error_code": "USER_06", "error_message": "username already exists"}, status=400)
+        return JsonResponse({"duplicated_item": "id"}, status=409)
+    elif UserRepository.exists_user_by_nickname(nickname):
+        return JsonResponse({"duplicated_item": "nickname"}, status=409)
     user = UserRepository.create_user(username, password, nickname)
     response_data = {
         'userId': user.id

@@ -432,6 +432,9 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         from .repositories import MessageRepository
         sender = await UserRepository.get_user_by_id(self.client_id)
         receiver = await UserRepository.get_user_by_id(receiver_id)
+        if len(message) > 1000:
+            await self._send("sendMessageResponse", {"message": "longMessageLength"})
+            return
         if receiver is None:
             await self._send("sendMessageResponse", {"message": "NotFoundReceiver"})
             return

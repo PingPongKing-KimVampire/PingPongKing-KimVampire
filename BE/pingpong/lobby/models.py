@@ -112,6 +112,6 @@ class Message(models.Model):
     id = models.BigAutoField(primary_key=True)
     chat = models.ForeignKey(Chat, related_name='messages', on_delete=models.CASCADE, default=1)
     sender = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
-    content = models.TextField(null=False)
+    content = models.TextField(max_length=1000, null=False)
     send_date = models.DateTimeField(null=False, default = timezone.now)
     is_read = models.BooleanField(default=False)
