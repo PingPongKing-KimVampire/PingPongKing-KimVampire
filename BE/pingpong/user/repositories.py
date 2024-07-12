@@ -103,17 +103,22 @@ class BlockedUserRepository:
 class FriendRepository:
     @staticmethod
     @sync_to_async
-    def get_friends(user):
+    def get_friends(user, channel_name_map):
         user_friendships = Friendship.objects.select_related('friend', 'user').filter(user=user).all()
         friendDtos = []
         for friendship in user_friendships:
             friend_friendship = Friendship.objects.select_related('friend', 'user').filter(user=friendship.friend, friend=user).first()
             if friend_friendship is not None:
                 message, count = MessageRepository.get_recent_message(user, friendship.friend)
+                if friendship.friend.id in channel_name_map:
+                    active_state = "ACTIVE"
+                else:
+                    active_state = "INACTIVE"
                 freiendDto = {
                     "id": friendship.friend.id,
                     "nickname": friendship.friend.nickname,
                     "avatarUrl": friendship.friend.get_image_uri(),
+                    "activeState": active_state,
                     "chat": {
                         "recentMessage": message.content if message is not None else "",
                         "recentTimestamp": message.send_date.isoformat() if message is not None else "",
@@ -230,8 +235,11 @@ class FriendRepository:
         if user_to_friend is not None and friend_to_user is not None:
             user_to_friend.delete()
             friend_to_user.delete()
+            return "FRIEND"
         elif user_to_friend is not None:
             user_to_friend.delete()
+            return "FRIEND_REQUEST"
+        return None
 
 class UserRepository:
     def authenticate(username, password):
