@@ -1,5 +1,4 @@
 from django.urls import path
-from authentication.consumers import AuthConsumer
 from lobby.consumers import LobbyConsumer
 from pingpongRoom.consumers import PingpongRoomConsumer
 from user.consumers import GlobalConsumer
