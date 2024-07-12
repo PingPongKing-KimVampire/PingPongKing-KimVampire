@@ -1,8 +1,10 @@
 from utils.printer import Printer
 
 class Player:
-    def __init__(self, nickname, ability, team, player_count=1):
+    def __init__(self, nickname, ability, team):
         self.nickname = nickname
+        self.team = team
+        self.ready_state = 'NOTREADY'
         self.pos_x = 0
         self.pos_y = 0
         self.dx = 0
@@ -10,10 +12,16 @@ class Player:
         self.target_x = 0
         self.target_y = 0
         self.max_speed = 15
-        self.team = team
+        self.paddle_width = 10
+        self.paddle_height = 150
         self.ability = ability
-        self.paddle_width, self.paddle_height = self.set_paddle_size(player_count)
 
+    def set_state(self, state):
+        self.ready_state = state
+        
+    def get_state(self):
+        return self.ready_state
+        
     def set_paddle_size(self, player_count):
         if player_count == 1:
             return 10, 150

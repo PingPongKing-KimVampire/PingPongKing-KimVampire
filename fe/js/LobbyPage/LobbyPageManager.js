@@ -63,11 +63,11 @@ class LobbyPageManager {
 		lobbySocket.addEventListener("message", messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
 			if (event === "notifyWaitingRoomCreated") {
-				const { roomId, title, leftMode, rightMode, currentPlayerCount, totalPlayerCount } = content.waitingRoomInfo;
-				const newWaitingRoomElement = this._getWaitingRoomElement(roomId, leftMode, rightMode, title, currentPlayerCount, totalPlayerCount);
+				const { roomId, title, leftMode, rightMode, currentPlayerCount, maxPlayerCount } = content.waitingRoomInfo;
+				const newWaitingRoomElement = this._getWaitingRoomElement(roomId, leftMode, rightMode, title, currentPlayerCount, maxPlayerCount);
 				this.allWaitingRoomElement[roomId] = {
 					element: newWaitingRoomElement,
-					totalPlayerCount,
+					maxPlayerCount,
 				};
 				this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
 			} else if (event === "notifyWaitingRoomClosed") {
@@ -80,9 +80,9 @@ class LobbyPageManager {
 				const { roomId, currentPlayerCount } = content;
 				if (this.allWaitingRoomElement[roomId]) {
 					const waitingRoomElement = this.allWaitingRoomElement[roomId].element;
-					const totalPlayerCount = this.allWaitingRoomElement[roomId].totalPlayerCount;
+					const maxPlayerCount = this.allWaitingRoomElement[roomId].maxPlayerCount;
 					for (const children of waitingRoomElement.children) {
-						if (children.className === "matchPlayerCount") children.textContent = `${currentPlayerCount} / ${totalPlayerCount}`;
+						if (children.className === "matchPlayerCount") children.textContent = `${currentPlayerCount} / ${maxPlayerCount}`;
 					}
 				}
 			}
@@ -134,7 +134,7 @@ class LobbyPageManager {
 			const newWaitingRoomElement = this._getWaitingRoomElement(roomId, leftMode, rightMode, title, currentPlayerCount, maxPlayerCount);
 			this.allWaitingRoomElement[roomId] = {
 				element: newWaitingRoomElement,
-				totalPlayerCount: maxPlayerCount,
+				maxPlayerCount: maxPlayerCount,
 			};
 			this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
 			this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
@@ -166,7 +166,7 @@ class LobbyPageManager {
 		}
 	}
 
-	_getWaitingRoomElement(roomId, leftMode, rightMode, title, currendPlayerCount, totalPlayerCount) {
+	_getWaitingRoomElement(roomId, leftMode, rightMode, title, currendPlayerCount, maxPlayerCount) {
 		const waitingRoomContainer = document.createElement("div");
 		waitingRoomContainer.className = "waitingRoomContainer";
 
@@ -201,7 +201,7 @@ class LobbyPageManager {
 
 		const matchPlayerCount = document.createElement("div");
 		matchPlayerCount.className = "matchPlayerCount";
-		matchPlayerCount.textContent = `${currendPlayerCount} / ${totalPlayerCount}`;
+		matchPlayerCount.textContent = `${currendPlayerCount} / ${maxPlayerCount}`;
 
 		waitingRoomContainer.appendChild(gameTypeContainer);
 		waitingRoomContainer.appendChild(matchName);
@@ -211,7 +211,7 @@ class LobbyPageManager {
 		waitingRoomContainer.addEventListener("click", async () => {
 			this.enterModalTitle.innerText = `"${title}"`;
 			this.enterRoomModal.style.display = "flex";
-			const enterRoomListenerRef = this._enterWaitingRoom.bind(this, roomId, title, leftMode, rightMode, 1, totalPlayerCount - 1);
+			const enterRoomListenerRef = this._enterWaitingRoom.bind(this, roomId, title, leftMode, rightMode, 1, maxPlayerCount - 1);
 			const hideModalLisenerRef = () => {
 				this.enterRoomModal.style.display = "none";
 				this.enterYesButton.removeEventListener("click", enterRoomListenerRef);

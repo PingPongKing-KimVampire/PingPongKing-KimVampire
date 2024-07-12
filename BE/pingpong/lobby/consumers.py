@@ -11,6 +11,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.is_init = False
         self.client_id = None
+        self.nickname = None
         await self.accept()
 
         ip = self.scope['client'][0] # scope 공부해볼것
@@ -20,7 +21,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.client_id:
-            stateManager.remove_client(self, self.client_id)
+            stateManager.remove_client(self.client_id)
             Printer.log(f"Client {self.client_id} disconnected", "red")
             await discard_group(self, 'lobby')
 
@@ -52,14 +53,15 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             await self.create_waiting_room(content)
         elif event == 'getWaitingRoomList':
             await self.get_waiting_room_list_response()
-        elif event == 'matchMakingStart':
-            await self.match_making_start()
-        elif event == 'matchMakingCancel':
-            await self.match_making_cancel()
+        elif event == 'startMatchMaking':
+            await self.match_making_start(self)
+        elif event == 'cancelMatchMaking':
+            await self.match_making_cancel(self)
 
     async def enter_lobby(self, client_id):
         self.is_init = True # 인증으로 바꿔야함
         self.nickname = stateManager.get_client_nickname(client_id)
+        self.client_id = client_id
         Printer.log(f"Client {client_id} entered lobby : {self.nickname}", "blue")
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 
@@ -70,6 +72,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
                 'message': 'OK',
                 'roomId': room_id
         })
+        # await stateManager.notify_lobby('notifyWaitingRoomCreated', {'content': {'roomId': room_id}})
 
     async def get_waiting_room_list_response(self):
         room_list = stateManager.get_waiting_room_list()
@@ -78,13 +81,15 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
     # Match Making
     
-    async def match_making_start(self):
+    async def match_making_start(self, consumer):
         await discard_group(self, 'lobby')
-        await stateManager.add_to_match_queue(self.client_id)
+        stateManager.add_to_match_queue(consumer)
+        await self._send(event='startMatchMakingResponse', content={'message': 'OK'})
 
-    async def match_making_cancel(self):
-        await stateManager.remove_from_match_queue(self.client_id)
+    async def match_making_cancel(self, consumer):
+        stateManager.remove_from_match_queue(consumer)
         await add_group(self, 'lobby')
+        await self._send(event='cancelMatchMakingResponse', content={'message': 'OK'})
 
     # Notify
     async def notifyWaitingRoomCreated(self, content):
