@@ -24,6 +24,28 @@ class WaitingRoomCreationPageManager {
 		};
 		this.clientInfo = clientInfo;
 		this.onEnterWaitingRoom = onEnterWaitingRoom;
+	constructor(app, clientInfo, onEnterWaitingRoom) {
+		console.log("Create Waiting Room Page!");
+		app.innerHTML = this._getHTML();
+		this.clientInfo = {
+			socket: null,
+			id: null,
+			nickname: null,
+			lobbySocket: null,
+			gameInfo: {
+				pingpongRoomSocket: null,
+				roomId: null,
+				title: null,
+				teamLeftList: null,
+				teamRightList: null,
+				teamLeftMode: null,
+				teamRightMode: null,
+				teamLeftTotalPlayerCount: null,
+				teamRightTotalPlayerCount: null,
+			},
+		};
+		this.clientInfo = clientInfo;
+		this.onEnterWaitingRoom = onEnterWaitingRoom;
 
 		this.titleInput = document.querySelector("#titleInput");
 		this.modeSelection = document.querySelector(".selectionContainer:nth-of-type(2)");
@@ -37,6 +59,10 @@ class WaitingRoomCreationPageManager {
 		this.completeButton = document.querySelector("#completeButton");
 		this.completeButton.disabled = true;
 
+		this._setTitleModeSelection();
+		this._setHumanCountSelection();
+		this._setCompleteButtonSelection();
+	}
 		this._setTitleModeSelection();
 		this._setHumanCountSelection();
 		this._setCompleteButtonSelection();
@@ -70,7 +96,33 @@ class WaitingRoomCreationPageManager {
 		// complete 버튼 클릭 시 대기실 생성 메시지 전송
 		this.completeButton.addEventListener("click", this._createAndEnterRoom.bind(this));
 	}
+	_setCompleteButtonSelection() {
+		// complete 버튼 클릭 시 대기실 생성 메시지 전송
+		this.completeButton.addEventListener("click", this._createAndEnterRoom.bind(this));
+	}
 
+	_checkSelectedAll() {
+		// 모두 선택되었는지 확인하고 complete 버튼 활성화 or 비활성화
+		const isSelectedTitle = this.titleInput.value !== "";
+		const selectedModeButton = this.modeButtons.find(button => button.checked);
+		const isSelectedMode = selectedModeButton !== undefined;
+		if (isSelectedMode) {
+			if (selectedModeButton.value === "vampireVsHuman") {
+				this.countSelection.classList.replace("invisible", "visible");
+				this.modeSelection.classList.add("selectionGroupBottomMargin");
+			} else {
+				this.countSelection.classList.replace("visible", "invisible");
+				this.modeSelection.classList.remove("selectionGroupBottomMargin");
+			}
+		}
+		if (isSelectedTitle && isSelectedMode) {
+			this.completeButton.disabled = false;
+			this.completeButton.classList.replace("disabledButton", "activatedButton");
+		} else {
+			this.completeButton.disabled = true;
+			this.completeButton.classList.replace("activatedButton", "disabledButton");
+		}
+	}
 	_checkSelectedAll() {
 		// 모두 선택되었는지 확인하고 complete 버튼 활성화 or 비활성화
 		const isSelectedTitle = this.titleInput.value !== "";
@@ -129,7 +181,32 @@ class WaitingRoomCreationPageManager {
 		let leftPlayerCount;
 		let rightMode;
 		let rightPlayerCount;
+	async _createAndEnterRoom() {
+		const title = this.titleInput.value;
+		const mode = this.modeButtons.find(button => button.checked).value;
+		let leftMode;
+		let leftPlayerCount;
+		let rightMode;
+		let rightPlayerCount;
 
+		if (mode === "humanVsHuman") {
+			leftMode = "human";
+			rightMode = "human";
+			leftPlayerCount = 1;
+			rightPlayerCount = 1;
+		} else if (mode === "vampireVsVampire") {
+			leftMode = "vampire";
+			rightMode = "vampire";
+			leftPlayerCount = 1;
+			rightPlayerCount = 1;
+		} else if (mode === "vampireVsHuman") {
+			const humanCount = parseInt(this.humanCountButton.value);
+			if (isNaN(humanCount)) return;
+			leftMode = "vampire";
+			rightMode = "human";
+			leftPlayerCount = 1;
+			rightPlayerCount = humanCount;
+		}
 		if (mode === "humanVsHuman") {
 			leftMode = "human";
 			rightMode = "human";
@@ -153,10 +230,21 @@ class WaitingRoomCreationPageManager {
 		const roomId = await this._handleCreateRoomResponse(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
 		await this._enterWaitingRoom(roomId, title, leftMode, rightMode, leftPlayerCount, rightPlayerCount);
 	}
+		this._sendCreateRoomMsg(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
+		const roomId = await this._handleCreateRoomResponse(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
+		await this._enterWaitingRoom(roomId, title, leftMode, rightMode, leftPlayerCount, rightPlayerCount);
+	}
 
 	async _enterWaitingRoom(roomId, gameTitle, teamLeftMode, teamRightMode, teamLeftTotalPlayerCount, teamRightTotalPlayerCount) {
 		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`);
+	async _enterWaitingRoom(roomId, gameTitle, teamLeftMode, teamRightMode, teamLeftTotalPlayerCount, teamRightTotalPlayerCount) {
+		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`);
 
+		await new Promise(resolve => {
+			pingpongRoomSocket.addEventListener("open", () => {
+				resolve();
+			});
+		});
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {
 				resolve();
@@ -170,7 +258,26 @@ class WaitingRoomCreationPageManager {
 			},
 		};
 		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
+		const enterWaitingRoomMessage = {
+			event: "enterWaitingRoom",
+			content: {
+				clientId: this.clientInfo.id,
+			},
+		};
+		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 
+		const { teamLeftList, teamRightList } = await new Promise(resolve => {
+			pingpongRoomSocket.addEventListener(
+				"message",
+				function listener(messageEvent) {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === "enterWaitingRoomResponse") {
+						pingpongRoomSocket.removeEventListener("message", listener);
+						resolve(content);
+					}
+				}.bind(this),
+			);
+		});
 		const { teamLeftList, teamRightList } = await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener(
 				"message",
@@ -198,10 +305,46 @@ class WaitingRoomCreationPageManager {
 		this.clientInfo.gameInfo = gameInfo;
 		this.clientInfo.lobbySocket.close();
 		this.clientInfo.lobbySocket = null;
+		const gameInfo = {
+			pingpongRoomSocket,
+			roomId,
+			title: gameTitle,
+			teamLeftList,
+			teamRightList,
+			teamLeftMode,
+			teamRightMode,
+			teamLeftTotalPlayerCount,
+			teamRightTotalPlayerCount,
+		};
+		this.clientInfo.gameInfo = gameInfo;
+		this.clientInfo.lobbySocket.close();
+		this.clientInfo.lobbySocket = null;
 
 		this.onEnterWaitingRoom();
 	}
+		this.onEnterWaitingRoom();
+	}
 
+	_sendCreateRoomMsg(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount) {
+		const createRoomMessage = {
+			event: "createWaitingRoom",
+			content: {
+				waitingRoomInfo: {
+					title,
+					leftMode,
+					leftPlayerCount,
+					rightMode,
+					rightPlayerCount,
+				},
+			},
+		};
+		this.clientInfo.lobbySocket.send(JSON.stringify(createRoomMessage));
+	}
+	_handleCreateRoomResponse() {
+		return new Promise(resolve => {
+			const listener = messageEvent => {
+				const message = JSON.parse(messageEvent.data);
+				const { event, content } = message;
 	_sendCreateRoomMsg(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount) {
 		const createRoomMessage = {
 			event: "createWaitingRoom",
@@ -233,7 +376,19 @@ class WaitingRoomCreationPageManager {
 			this.clientInfo.lobbySocket.addEventListener("message", listener);
 		});
 	}
+				if (event === "createWaitingRoomResponse") {
+					if (content.message === "OK") {
+						this.clientInfo.socket.removeEventListener("message", listener);
+						resolve(content.roomId);
+					}
+				}
+			};
+			this.clientInfo.lobbySocket.addEventListener("message", listener);
+		});
+	}
 
+	_getHTML() {
+		return `
 	_getHTML() {
 		return `
 			<button class="exitButton"></button>
