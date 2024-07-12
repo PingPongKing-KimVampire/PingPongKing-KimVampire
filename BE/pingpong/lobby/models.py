@@ -62,38 +62,37 @@ class BlockedRelationship(models.Model):
         models.UniqueConstraint(fields=['blocker', 'blocked_user'], name='unique_block_realtionship')
     ]
 
-# class Team(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     name = models.CharField(max_length=255, null=False)
-#     game = models.ForeignKey('Game', related_name='teams', on_delete=models.CASCADE)
+class Team(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    game = models.ForeignKey('Game', related_name='teams', on_delete=models.CASCADE)
 
-# class TeamUser(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     team = models.ForeignKey(Team, related_name='members', on_delete=models.CASCADE)
-#     user = models.ForeignKey(User, related_name='teams', on_delete=models.CASCADE)
+class TeamUser(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    team = models.ForeignKey(Team, related_name='members', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='teams', on_delete=models.CASCADE)
 
-# class Game(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     start_at = models.DateTimeField(null=False)
-#     end_at = models.DateTimeField(blank=True, null=True)
+class Game(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    start_at = models.DateTimeField(default=timezone.now, null=False)
+    end_at = models.DateTimeField(blank=True, null=True)
 
-# class Round(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     game = models.ForeignKey(Game, related_name='rounds', on_delete=models.CASCADE)
-#     win_team = models.ForeignKey(Team, related_name='wins', on_delete=models.CASCADE)
+    def finish(self):
+        self.end_at = timezone.now()
 
-# class Match(models.Model):
-#     id = models.BigAutoField(primary_key=True)
-#     game = models.ForeignKey(Game, related_name='matches', on_delete=models.CASCADE)
-#     user = models.ForeignKey(User, related_name='matches', on_delete=models.CASCADE)
-#     team = models.ForeignKey(Team, related_name='team_matches', on_delete=models.CASCADE)
-#     is_win = models.BooleanField(default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
+class Round(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    game = models.ForeignKey(Game, related_name='rounds', on_delete=models.CASCADE)
+    win_team = models.ForeignKey(Team, related_name='wins', on_delete=models.CASCADE)
 
-#     class Meta:
-#         indexes = [
-#             models.Index(fields=['user', '-created_at']),  # 유저별 최근 경기를 빠르게 조회하기 위해 인덱스 추가
-#         ]
+class BallHit(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    round = models.ForeignKey(Round, related_name='hits_round', on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, related_name='hits_team', on_delete=models.CASCADE)
+    x_coordinate = models.DecimalField(max_digits=10, decimal_places=6)
+    y_coordinate = models.DecimalField(max_digits=10, decimal_places=6)
+
+    def __str__(self):
+        return f"Point({self.x_coordinate}, {self.y_coordinate})"
 
 class Chat(models.Model):
     id = models.BigAutoField(primary_key=True)

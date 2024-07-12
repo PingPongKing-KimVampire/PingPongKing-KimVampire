@@ -59,10 +59,16 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             await self.match_making_cancel(self)
 
     async def enter_lobby(self, client_id):
-        self.is_init = True # 인증으로 바꿔야함
-        self.nickname = stateManager.get_client_nickname(client_id)
+        # 프론트랑 인증 얘기해보기
+        from user.repositories import UserRepository
+        user =  await UserRepository.get_user_by_id(client_id)
+        if user is None:
+            await self.close()
+            return
+        self.is_init = True
+        self.nickname = user.nickname
         self.client_id = client_id
-        Printer.log(f"Client {client_id} entered lobby : {self.nickname}", "blue")
+        Printer.log(f"Client {client_id} entered lobby : {self.nickname} (id : {self.client_id})", "blue")
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 
     async def create_waiting_room(self, content):

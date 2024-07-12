@@ -9,6 +9,7 @@ stateManager = StateManager()
 class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.client_id = None
+        self.nickname = None
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.game_manager = stateManager.rooms[self.room_id]
         self.game_state = 'waiting'
@@ -74,14 +75,21 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             
     async def enter_waiting_room(self, content):
         self.client_id = content['clientId']
-        team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id)
+        # 프론트랑 인증 얘기해보기
+        from user.repositories import UserRepository
+        user =  await UserRepository.get_user_by_id(self.client_id)
+        if user is None:
+            await self.close()
+            return
+        self.nickname = user.nickname
+        team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname)
         if team == None:
             # 실패시 처리 추가해야 할 듯?
             await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
             Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
             return
         self.team = team
-        await stateManager.notify_room_enter(self.room_id, self.client_id, team)
+        await stateManager.notify_room_enter(self.room_id, self.client_id, self.nickname, team)
         if is_you_create:
             await stateManager.notify_room_created(self.room_id)
         else:

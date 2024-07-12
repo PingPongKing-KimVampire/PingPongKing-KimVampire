@@ -110,12 +110,11 @@ class StateManager:
         room = self.rooms.get(room_id, )
         return room.get_room_ability()
 
-    def enter_waiting_room(self, room_id: str, client_id: str) -> Optional[str]:
+    def enter_waiting_room(self, room_id: str, client_id: str, nickname: str) -> Optional[str]:
         is_you_create = False
         room = self.rooms.get(room_id)
         if not room:
             return None
-        nickname = self.get_client_nickname(client_id)
         if room.is_room_empty():
             is_you_create = True
         team = room.enter_room(client_id, nickname)
@@ -148,9 +147,8 @@ class StateManager:
         return room.check_game_ready()
 
     # Asynchronous Methods
-    async def notify_room_enter(self, room_id: str, client_id: str, team: str) -> None:
-        client_nickname = self.get_client_nickname(client_id)
-        enter_data = {'clientId': client_id, 'clientNickname': client_nickname, 'team': team}
+    async def notify_room_enter(self, room_id: str, client_id: str, nickname: str, team: str) -> None:
+        enter_data = {'clientId': client_id, 'clientNickname': nickname, 'team': team}
         await self.notify_room(room_id, event='notifyWaitingRoomEnter', content=enter_data)
 
     async def notify_leave_waiting_room(self, room_id: str, client_id: str) -> None:
