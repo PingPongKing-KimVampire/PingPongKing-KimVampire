@@ -212,7 +212,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         from .repositories import FriendRepository
         from .repositories import UserRepository
         user = await UserRepository.get_user_by_id(self.client_id)
-        friends = await FriendRepository.get_friends(user)
+        friends = await FriendRepository.get_friends(user, channel_name_map)
         await self._send("getFriendListResponse", {"message": "OK", "clientList": friends})
     
     async def get_friend_receive_request_list(self):
@@ -264,7 +264,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             return
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
-            await notify_client_event(self.channel_layer, channel_name, "notifyFriendRequestCanceled", 
+            await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_canceled", 
                                       {"clientInfo": {"id": user.id}})
         await self._send("cancelFriendRequestResponse", {"message": "OK"})
     
@@ -282,9 +282,24 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             return
         if friend.id in channel_name_map:
             channel_name = channel_name_map[friend.id]
+            active_state = "ACTIVE"
             await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_accepted", 
-                                     {"clientInfo": {"id": user.id}})
-        await self._send("acceptFriendRequestResponse", {"message": "OK"})
+                                     {"clientInfo": {"id": user.id, "activeState": "ACTIVE"}})
+        else:
+            active_state = "INACTIVE"
+        await self._send("acceptFriendRequestResponse", {"message": "OK",
+            "clientInfo": {
+                "activeState": active_state
+            }                                             })
+    
+    async def notify_friend_request_canceled(self, event):
+        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
+        Printer.log(f"event : {event}", "cyan")
+        content = event['content']
+        await self.send(text_data=json.dumps({
+            'event': 'notifyFriendRequestCanceled',
+            'content': content
+        }))
     
     async def notify_friend_request_accepted(self, event):
         Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
@@ -377,7 +392,17 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if target_user is None:
             await self._send("blockClientResponse", {"message": "NotFoundTargetUser"})
             return
-        await FriendRepository.check_friend_relation(user, target_user)
+        friendIndex = await FriendRepository.check_friend_relation(user, target_user)
+        if friendIndex == "FRIEND":
+            if target_user.id in channel_name_map:
+                channel_name = channel_name_map[target_user.id]
+                await notify_client_event(self.channel_layer, channel_name, "notify_friend_deleted", 
+                                        {"clientInfo": {"id": user.id}})
+        elif friendIndex == "FRIEND_REQUEST":
+            if target_user.id in channel_name_map:
+                channel_name = channel_name_map[target_user.id]
+                await notify_client_event(self.channel_layer, channel_name, "notify_friend_request_canceled", 
+                                        {"clientInfo": {"id": user.id}})
         isExsits = await BlockedUserRepository.block_user(user, target_user)
         if isExsits:
             await self._send("blockClientResponse", {"message": "AlreadyBlocked"})
@@ -452,7 +477,9 @@ class GlobalConsumer(AsyncWebsocketConsumer):
 
     async def notify_all_group_activation(self, event, content):
         from .repositories import FriendRepository
-        friends = await FriendRepository.get_friends(self.client_id)
+        from .repositories import UserRepository
+        user = await UserRepository.get_user_by_id(self.client_id)
+        friends = await FriendRepository.get_friends(user, channel_name_map)
         for friend in friends:
             if friend['id'] not in channel_name_map:
                 continue
