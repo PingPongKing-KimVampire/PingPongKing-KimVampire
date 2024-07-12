@@ -13,7 +13,7 @@ class EditProfilePageManager {
 	_setDefaultAvatars() {
 		this._addDefaultAvatar("images/playerA.png");
 		this._addDefaultAvatar("images/vampireIcon.png");
-		this._addDefaultAvatar("images/playerA.png");
+		this._addDefaultAvatar("images/playerC.svg");
 		this._addDefaultAvatar("images/humanIcon.png");
 		this._addDefaultAvatar("images/playerB.png");
 	}
@@ -45,7 +45,7 @@ class EditProfilePageManager {
 	}
 
 	_checkNickname = async () => {
-		if (this.nicknameInput.value === this.clientInfo.nickname) {
+		if (this.nicknameInput.value === '' || this.nicknameInput.value === this.clientInfo.nickname) {
 			this.nicknameWarning.textContent = "";
 			return false;
 		}
@@ -54,10 +54,18 @@ class EditProfilePageManager {
 			this.nicknameWarning.textContent = invalidNicknameMessage;
 			return false;
 		}
-		if (!(await this._validateDuplicateNickname(this.nicknameInput.value))) {
-			const duplicateNicknameMessage = "이미 존재하는 닉네임입니다.";
-			this.nicknameWarning.textContent = duplicateNicknameMessage;
-			return false;
+		try {
+			if (!(await this._validateDuplicateNickname(this.nicknameInput.value))) {
+				const duplicateNicknameMessage = "이미 존재하는 닉네임입니다.";
+				this.nicknameWarning.textContent = duplicateNicknameMessage;
+				return false;
+			}
+		} catch (error) {
+			if (error instanceof Error)
+				this.nicknameWarning.textContent = error.message;
+			if (error instanceof TypeError && error.message === `Failed to fetch`)
+				this.nicknameWarning.textContent = "서버의 응답이 없습니다.";
+			return;
 		}
 		this.nicknameWarning.textContent = "";
 		return true;
@@ -69,21 +77,17 @@ class EditProfilePageManager {
 	async _validateDuplicateNickname(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
 		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/check-nickname?${query}`;
-		try {
-			const response = await fetch(url, {
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-			const data = await response.json();
-			return data.is_available;
-		} catch (error) {
-			console.error("Error:", error);
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		if (!response.ok) {
+			throw new Error('서버와의 연결이 불안정합니다.');
 		}
+		const data = await response.json();
+		return data.is_available;
 	}
 
 	_updateCompleteButton(isNicknameUpdated, isAvatarUpdated) {
