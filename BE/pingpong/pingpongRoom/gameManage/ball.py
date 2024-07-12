@@ -10,6 +10,8 @@ class Ball:
         self.angle = 0
         self.dx = 0
         self.dy = 0
+        self.is_vanish = False
+        self.state = 0 
 
     def reset_ball(self, x, y, angle):
         self.pos_x = x
@@ -22,19 +24,24 @@ class Ball:
     def move(self):
         self.pos_x += self.dx
         self.pos_y += self.dy
-
+        if self.is_vanish and self.dx < 0 and self.pos_x < 517 or self.is_vanish and self.dx > 0 and self.pos_x > 1033:
+            self.is_vanish = False
+            return False
+        return True
+            
     def _calculate_ball_direction(self):
         angle_radians = (self.angle * math.pi) / 180
         dx = math.cos(angle_radians) * self.speed
         dy = math.sin(angle_radians) * self.speed
         return {'dx': dx, 'dy': dy}
 
-    def reversal_random_dx(self):
-        rand = random.randint(-40, 40)  # -40 ~ +40도 사이에서 이동 방향 변화
-        self.angle = max(0, min(45, self.angle + rand))  # 최소 각도 0, 최대 각도 45
+    def reversal_random(self, speed=5, angle=None):
+        self.speed = speed
+        rand = random.randint(-40 - angle, 40 + angle)
+        self.angle = max(0, min(45, self.angle + rand))
         dir = self._calculate_ball_direction()
-        self.dx = dir['dx'] if self.dx < 0 else -dir['dx']  # dx는 부호 반전
-        self.dy = -dir['dy'] if self.dy < 0 else dir['dy']  # dy는 부호 유지
+        self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
+        self.dy = -dir['dy'] if self.dy < 0 else dir['dy']
 
     def change_direction(self, angle):
         self.angle = angle

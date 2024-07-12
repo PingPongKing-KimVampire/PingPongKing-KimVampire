@@ -8,8 +8,8 @@ import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js"
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 
-export const SERVER_ADDRESS = "127.0.0.1";
-export const SERVER_PORT = "3001";
+export const SERVER_ADDRESS = '127.0.0.1';
+export const SERVER_PORT = '3001';
 
 class PageRouter {
 	constructor() {
@@ -105,8 +105,7 @@ class PageRouter {
 	}
 
 	_onLoginSuccess() {
-		this.renderPage("chatting");
-		this.renderPage("friendManagement");
+		this.renderPage("lobby");
 	}
 
 	_onEnterSignup() {

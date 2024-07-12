@@ -28,16 +28,12 @@ class WaitingRoomCreationPageManager {
 		this.titleInput = document.querySelector("#titleInput");
 		this.modeSelection = document.querySelector(".selectionContainer:nth-of-type(2)");
 		this.modeButtons = [...document.getElementsByName("mode")];
-		this.countSelection = document.querySelector(
-			".selectionContainer:last-of-type"
-		);
-		this.humanCountBox = document.querySelector("#humanCountBox");
-		this.humanCountBoxText = document.querySelector("#humanCountBox div");
-		this.humanCountArrowImg = document.querySelector("#humanCountBox img");
-		this.humanCountOptionBox = document.querySelector("#humanCountOptionBox");
-		this.humanCountOptionButtons = [
-			...document.getElementsByClassName("humanCountOptionButton"),
-		];
+		this.countSelection = document.querySelector(".selectionContainer:last-of-type");
+		this.humanCountButton = document.querySelector("#humanCountBox");
+		this.humanCountButtonText = this.humanCountButton ? this.humanCountButton.querySelector("div") : null;
+		this.humanCountArrowImg = this.humanCountButton ? this.humanCountButton.querySelector("img") : null;
+		this.humanCountOptionBox = document.querySelector("#humanCountBox:last-of-type");
+		this.humanCountOptionButtons = [...document.getElementsByClassName("humanCountOptionButton")];
 		this.completeButton = document.querySelector("#completeButton");
 		this.completeButton.disabled = true;
 
@@ -48,70 +44,76 @@ class WaitingRoomCreationPageManager {
 
 	_setTitleModeSelection() {
 		// 방 제목 or 모드 입력이 변경될 때마다 _checkSelectedAll 호출
-		this.titleInput.addEventListener("input", this._checkSelectedAll.bind(this));
-		this.modeButtons.forEach(button => {
-			button.addEventListener("change", this._checkSelectedAll.bind(this));
-		});
+		if (this.titleInput) {
+			this.titleInput.addEventListener("input", this._checkSelectedAll.bind(this));
+		}
+		if (this.modeButtons.length > 0) {
+			this.modeButtons.forEach(button => {
+				button.addEventListener("change", this._checkSelectedAll.bind(this));
+			});
+		}
 	}
 
 	_setHumanCountSelection() {
-		this.humanCountBox.addEventListener("click", () => {
-			this._toggleHumanCountOptionBox();
-		});
-		this.humanCountOptionButtons.forEach((button) => {
-			button.addEventListener("click", (event) => {
-				this._selectHumanCount(event);
+		// humanCount 버튼 or humanCountOption 버튼 클릭 시 반응
+		if (this.humanCountButton) {
+			this.humanCountButton.addEventListener("click", this._humanCountButtonClicked.bind(this));
+		}
+		if (this.humanCountOptionButtons.length > 0) {
+			this.humanCountOptionButtons.forEach(button => {
+				button.addEventListener("click", this._humanCountOptionButtonClicked.bind(this));
 			});
-		});
+		}
 	}
 
 	_setCompleteButtonSelection() {
+		// complete 버튼 클릭 시 대기실 생성 메시지 전송
 		this.completeButton.addEventListener("click", this._createAndEnterRoom.bind(this));
 	}
 
 	_checkSelectedAll() {
 		// 모두 선택되었는지 확인하고 complete 버튼 활성화 or 비활성화
 		const isSelectedTitle = this.titleInput.value !== "";
-		const selectedModeButton = this.modeButtons.find(
-			(button) => button.checked
-		);
+		const selectedModeButton = this.modeButtons.find(button => button.checked);
 		const isSelectedMode = selectedModeButton !== undefined;
 		if (isSelectedMode) {
 			if (selectedModeButton.value === "vampireVsHuman") {
 				this.countSelection.classList.replace("invisible", "visible");
-				this.modeSelection.classList.add("marginBottom");
+				this.modeSelection.classList.add("selectionGroupBottomMargin");
 			} else {
 				this.countSelection.classList.replace("visible", "invisible");
-				this.modeSelection.classList.remove("marginBottom");
+				this.modeSelection.classList.remove("selectionGroupBottomMargin");
 			}
 		}
 		if (isSelectedTitle && isSelectedMode) {
 			this.completeButton.disabled = false;
-			this.completeButton.classList.replace(
-				"disabledButton",
-				"activatedButton"
-			);
+			this.completeButton.classList.replace("disabledButton", "activatedButton");
 		} else {
 			this.completeButton.disabled = true;
-			this.completeButton.classList.replace(
-				"activatedButton",
-				"disabledButton"
-			);
+			this.completeButton.classList.replace("activatedButton", "disabledButton");
 		}
 	}
 
-	_toggleHumanCountOptionBox() {
-		this.humanCountArrowImg.classList.toggle("nonSelectedArrowImg");
-		this.humanCountArrowImg.classList.toggle("selectedArrowImg");
-		this.humanCountOptionBox.classList.toggle("visible");
-		this.humanCountOptionBox.classList.toggle("invisible");
+	_humanCountButtonClicked() {
+		if (this.humanCountArrowImg && this.humanCountOptionBox) {
+			this.humanCountArrowImg.classList.toggle("nonSelectedArrowImg");
+			this.humanCountArrowImg.classList.toggle("selectedArrowImg");
+			this.humanCountOptionBox.classList.toggle("visible");
+			this.humanCountOptionBox.classList.toggle("invisible");
+		}
 	}
 
-	_selectHumanCount(event) {
+	_humanCountOptionButtonClicked(event) {
+		this._humanCountButtonClicked();
 		const clickedValue = event.target.value;
-		this.humanCountBox.dataset.count = clickedValue;
-		this.humanCountBoxText.innerText = `${clickedValue}명`;
-		let count = 2;
+		if (this.humanCountButton && this.humanCountButtonText) {
+			this.humanCountButton.value = clickedValue;
+			this.humanCountButtonText.innerText = `${clickedValue}명`;
+		}
+		// const clickedValue = event.target.value;
+		// this.humanCountButton.value = clickedValue;
+		// this.humanCountButtonText.innerText = `${clickedValue}명`;
+		// let count = 2;
 		for (const button of this.humanCountOptionButtons) {
 			if (count === parseInt(clickedValue)) count++;
 			button.innerText = `${count}명`;
@@ -134,19 +136,19 @@ class WaitingRoomCreationPageManager {
 			leftPlayerCount = 1;
 			rightPlayerCount = 1;
 		} else if (mode === "vampireVsVampire") {
-			console.log("here");
 			leftMode = "vampire";
 			rightMode = "vampire";
 			leftPlayerCount = 1;
 			rightPlayerCount = 1;
 		} else if (mode === "vampireVsHuman") {
-			const humanCount = parseInt(this.humanCountBox.dataset.count);
+			const humanCount = parseInt(this.humanCountButton.value);
 			if (isNaN(humanCount)) return;
 			leftMode = "vampire";
 			rightMode = "human";
 			leftPlayerCount = 1;
 			rightPlayerCount = humanCount;
 		}
+
 		this._sendCreateRoomMsg(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
 		const roomId = await this._handleCreateRoomResponse(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
 		await this._enterWaitingRoom(roomId, title, leftMode, rightMode, leftPlayerCount, rightPlayerCount);
@@ -163,7 +165,9 @@ class WaitingRoomCreationPageManager {
 
 		const enterWaitingRoomMessage = {
 			event: "enterWaitingRoom",
-			content: { clientId: this.clientInfo.id }
+			content: {
+				clientId: this.clientInfo.id,
+			},
 		};
 		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 
@@ -176,7 +180,7 @@ class WaitingRoomCreationPageManager {
 						pingpongRoomSocket.removeEventListener("message", listener);
 						resolve(content);
 					}
-				}.bind(this)
+				}.bind(this),
 			);
 		});
 
@@ -250,7 +254,7 @@ class WaitingRoomCreationPageManager {
 
 	_getTitleSelectionHTML() {
 		return `
-			<label class="label" for="titleInput">방 제목</label>
+			<label class="selectionLabel" for="titleInput">방 제목</label>
 			<div class="selectionBox">
 				<input type="text" id="titleInput">
 			</div>
@@ -259,7 +263,7 @@ class WaitingRoomCreationPageManager {
 
 	_getModeSelectionHTML() {
 		return `
-			<label class="label">모드</label>
+			<label class="selectionLabel">모드</label>
 			<div class="selectionBox">
 				<input type="radio" name="mode" id="humanVsHuman" value="humanVsHuman">
 				<label for=humanVsHuman class="modeButton">인간 VS 인간</label>

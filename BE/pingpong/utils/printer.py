@@ -21,6 +21,9 @@ class Printer:
     
     @staticmethod
     def log(message, color="magenta"):
+        state = "debug"
+        if state != "debug":
+            return
         colorCode = Printer.COLORS.get(color, Printer.COLORS["magenta"])
         resetCode = Printer.COLORS["reset"]
         

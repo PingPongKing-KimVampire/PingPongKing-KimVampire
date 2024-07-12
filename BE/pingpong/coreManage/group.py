@@ -16,8 +16,8 @@ async def discard_group(consumer, group):
     return group
 
 async def notify_group(channel_layer, group, event, content):
-    Printer.log(f"type: {event}", "white")
-    Printer.log(f"content: {content}\n", "white")
+    # Printer.log(f"type: {event}", "white")
+    # Printer.log(f"content: {content}\n", "white")
     await channel_layer.group_send(
         group,
         {

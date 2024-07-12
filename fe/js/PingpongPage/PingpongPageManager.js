@@ -1,5 +1,5 @@
-import Player from "./Player.js";
-import PingpongRenderer from "./PingpongRenderer.js";
+import Player from './Player.js';
+import PingpongRenderer from './PingpongRenderer.js';
 
 class PingpongPageManager {
 	constructor(app, clientInfo, onExitPingpong) {
@@ -20,27 +20,29 @@ class PingpongPageManager {
 				sizeInfo: {
 					boardWidth: null,
 					boardHeight: null,
-					paddleWidth: null,
-					paddleHeight: null,
+					// paddleWidth: null,
+					// paddleHeight: null,
 					ballRadius: null,
 				},
 			},
 		};
+		//playerList 정보
+		// clientId;
+		// clientNickname;
+		// readyState;
+    // ability;
+		// paddleHeight;
+		// paddleWidth;
+
 		this.clientInfo = clientInfo;
 		this.onExitPingpong = onExitPingpong;
 		this.playerList = [];
 	}
 
 	async initPage() {
-		//추후 API에 추가해야함
-		//게임 사이즈관련 정보가 API에 없다.
-		this.clientInfo.gameInfo.sizeInfo = {
-			boardWidth: 1550,
-			boardHeight: 1000,
-			paddleWidth: 15,
-			paddleHeight: 150,
-			ballRadius: 25,
-		};
+    //하드코딩
+    this.clientInfo.gameInfo.sizeInfo.paddleWidth = 15;
+    this.clientInfo.gameInfo.sizeInfo.paddleHeight = 150;
 		this.app.innerHTML = this._getPingpongHTML();
 
 		this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
@@ -48,32 +50,48 @@ class PingpongPageManager {
 
 		this._manageExitRoom(); // 탁구장 나가기 처리
 		this.exitPingpongPageRef = this._exitPingpongPage.bind(this);
-		this.clientInfo.socket.addEventListener("close", this.exitPingpongPageRef); // 탁구장 폐쇄 감지
+		this.clientInfo.socket.addEventListener('close', this.exitPingpongPageRef); // 탁구장 폐쇄 감지
 	}
 
 	_manageExitRoom() {
-		const exitButton = document.querySelector(".exitButton");
-		const exitYesButton = document.querySelector(".questionModal .activatedButton:nth-of-type(1)");
-		const exitNoButton = document.querySelector(".questionModal .activatedButton:nth-of-type(2)");
-		const questionModal = document.querySelector(".questionModal");
-		exitButton.addEventListener("click", this._exitButtonClicked.bind(this, questionModal));
-		exitYesButton.addEventListener("click", this._exitYesButtonClicked.bind(this));
-		exitNoButton.addEventListener("click", this._exitNoButtonClicked.bind(this, questionModal));
+		const exitButton = document.querySelector('.exitButton');
+		const exitYesButton = document.querySelector(
+			'.questionModal .activatedButton:nth-of-type(1)'
+		);
+		const exitNoButton = document.querySelector(
+			'.questionModal .activatedButton:nth-of-type(2)'
+		);
+		const questionModal = document.querySelector('.questionModal');
+		exitButton.addEventListener(
+			'click',
+			this._exitButtonClicked.bind(this, questionModal)
+		);
+		exitYesButton.addEventListener(
+			'click',
+			this._exitYesButtonClicked.bind(this)
+		);
+		exitNoButton.addEventListener(
+			'click',
+			this._exitNoButtonClicked.bind(this, questionModal)
+		);
 	}
 	_exitButtonClicked(questionModal) {
-		questionModal.style.display = "flex";
+		questionModal.style.display = 'flex';
 	}
 	_exitYesButtonClicked() {
 		this.clientInfo.socket.close();
 		this._exitPingpongPage();
 	}
 	_exitNoButtonClicked(questionModal) {
-		questionModal.style.display = "none";
+		questionModal.style.display = 'none';
 	}
 
 	_exitPingpongPage() {
 		// PingpongPageManager, PingpongRenderer, Player에서 소켓과의 모든 상호작용 삭제
-		this.clientInfo.socket.removeEventListener("close", this.exitPingpongPageRef);
+		this.clientInfo.socket.removeEventListener(
+			'close',
+			this.exitPingpongPageRef
+		);
 		this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
 		this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
 		this.player.unsubscribeWindow.call(this.player);

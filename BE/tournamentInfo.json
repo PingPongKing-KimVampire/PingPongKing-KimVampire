@@ -1,0 +1,27 @@
+{
+  "event": "getTournamentGameInfo",
+  "content": {
+    "row1": [
+      {
+        "clientIdList": ["1", "2"],
+        "roomId": "123456",
+        "state": "playing | finished",
+        "score": [0, 10]
+      },
+      {
+        "clientIdList": ["1", "2"],
+        "roomId": "1234",
+        "state": "playing | finished",
+        "score": [10, 0]
+      }
+    ],
+    "row2": [
+      {
+        "clientIdList": ["1", "2"],
+        "roomId": "123456",
+        "state": "playing | finished",
+        "score": [0, 10]
+      }
+    ]
+  }
+}

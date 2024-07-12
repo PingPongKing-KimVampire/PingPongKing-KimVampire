@@ -40,9 +40,9 @@ class LobbyPageManager {
 	}
 
 	async initPage() {
-		// const waitingRoomInfoList = await this._getWaitingRoomList();
-		// this._renderWaitingRoom(waitingRoomInfoList);
-		// this._listenWaitingRoomUpdate();
+		const waitingRoomInfoList = await this._getWaitingRoomList();
+		this._renderWaitingRoom(waitingRoomInfoList);
+		this._listenWaitingRoomUpdate();
 
 		this._autoSetScollTrackColor();
 		this._adjustButtonSize();
@@ -53,7 +53,7 @@ class LobbyPageManager {
 	_setFriendManagementButton() {
 		this.friendManagementButton = document.querySelector("#friendManagementButton");
 		this.friendManagementButton.addEventListener("click", () => {
-			// this.clientInfo.lobbySocket.close();
+			this.clientInfo.lobbySocket.close();
 			this.renderFriendManagementPage();
 		});
 	}
@@ -241,7 +241,7 @@ class LobbyPageManager {
 		};
 		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
 
-		const { teamLeftList, teamRightList } = await new Promise(resolve => {
+		const { teamLeftList, teamRightList, teamLeftAbility, teamRightAbility } = await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener(
 				"message",
 				function listener(messageEvent) {
@@ -264,6 +264,8 @@ class LobbyPageManager {
 			teamRightMode,
 			teamLeftTotalPlayerCount,
 			teamRightTotalPlayerCount,
+			teamLeftAbility,
+			teamRightAbility,
 		};
 		this._unsubscribeWindow();
 		this.clientInfo.lobbySocket.close();

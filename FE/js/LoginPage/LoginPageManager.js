@@ -45,13 +45,13 @@ class LoginPageManager {
 		try {
 			await this._loginRequest(id, pw);
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			// const lobbySocket = await this._connectLobbySocket(id);
+			const lobbySocket = await this._connectLobbySocket(id);
 
 			this.clientInfo.id = userData.id;
 			this.clientInfo.nickname = userData.nickname;
 			this.clientInfo.avatarUrl = userData.avatarUrl;
 			this.clientInfo.socket = socket;
-			// this.clientInfo.lobbySocket = lobbySocket;
+			this.clientInfo.lobbySocket = lobbySocket;
 			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
 
@@ -278,17 +278,27 @@ class LoginPageManager {
 			},
 		};
 		lobbySocket.send(JSON.stringify(enterLobbyMessage));
-		await new Promise(resolve => {
-			lobbySocket.addEventListener(
-				"message",
-				function (messageEvent) {
-					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === "enterLobbyResponse" && content.message === "OK") {
-						lobbySocket.removeEventListener("message", listener);
-						resolve();
-					}
-				}.bind(this),
-			);
+		// await new Promise(resolve => {
+		// 	lobbySocket.addEventListener(
+		// 		"message",
+		// 		function (messageEvent) {
+		// 			const { event, content } = JSON.parse(messageEvent.data);
+		// 			if (event === "enterLobbyResponse" && content.message === "OK") {
+		// 				lobbySocket.removeEventListener("message", listener);
+		// 				resolve();
+		// 			}
+		// 		}.bind(this),
+		// 	);
+		// });
+		return new Promise(resolve => {
+			const listener = function (messageEvent) {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === "enterLobbyResponse" && content.message === "OK") {
+					lobbySocket.removeEventListener("message", listener);
+					resolve(lobbySocket);
+				}
+			};
+			lobbySocket.addEventListener("message", listener);
 		});
 	}
 

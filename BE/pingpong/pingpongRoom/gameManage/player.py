@@ -1,31 +1,66 @@
 from utils.printer import Printer
 
 class Player:
-    def __init__(self, nickname, ability, player_count=1):
+    def __init__(self, nickname, ability, team, player_count=1):
         self.nickname = nickname
         self.pos_x = 0
         self.pos_y = 0
-        self.team = None
+        self.dx = 0
+        self.dy = 0
+        self.target_x = 0
+        self.target_y = 0
+        self.max_speed = 15
+        self.team = team
         self.ability = ability
         self.paddle_width, self.paddle_height = self.set_paddle_size(player_count)
-        if self.ability is not 'human':
-            self.set_player_ability(self.ability) # todo
-    
+
     def set_paddle_size(self, player_count):
-        board_width = 1550
-        board_height = 1000
-        base_paddle_height = 150
-        min_paddle_height = 50
-        
-        paddle_height = max(base_paddle_height / player_count, min_paddle_height)
-        paddle_width = 150
-        
-        return paddle_width, paddle_height
-        
-    def update_pos(self, x, y):
+        if player_count == 1:
+            return 10, 150
+        elif player_count == 2:
+            return 9, 120
+        elif player_count == 3:
+            return 8, 100
+        elif player_count == 4:
+            return 7, 80
+        else:
+            return 5, 50
+
+    def reset_pos(self):
+        if self.team == 'left':
+            x = 1550 / 4
+        else:
+            x = 1550 / 4 * 3
+        y = 1000 / 2
         self.pos_x = x
         self.pos_y = y
-        
+        self.target_x = x
+        self.target_y = y
+
+    def _calculate_distance(self):
+        return ((self.target_x - self.pos_x) ** 2 + (self.target_y - self.pos_y) ** 2) ** 0.5
+
+    def move(self):
+        self.pos_x += self.dx
+        self.pos_y += self.dy
+        return self.pos_x, self.pos_y
+
+    def needs_update(self):
+        distance = self._calculate_distance()
+        if distance < 1:
+            return False
+        speed = min(self.max_speed, distance)
+        self.dx = (self.target_x - self.pos_x) / distance * speed
+        self.dy = (self.target_y - self.pos_y) / distance * speed
+        # if ( self.dx ** 2 + self.dy ** 2 ) ** 0.5 > self.max_speed:
+        #     Printer.log(f"Player {self.nickname} speed is too fast", "yellow")
+        #     return False
+        return True
+            
+    def update_target(self, x, y):
+        self.target_x = x
+        self.target_y = y
+
     def get_pos(self):
         return self.pos_x, self.pos_y
     
@@ -35,22 +70,16 @@ class Player:
     def set_mode(self, mode):
         self.mode = mode
 
-    def set_player_ability(self, ability):
-        if ability == 'human':
-            return
-        elif ability == 'jiantBlocker':
-            pass
-        elif ability == 'speedTwister':
-            pass
-        elif ability == 'illusionFaker':
-            pass
-        elif ability == 'ghostSmasher':
-            pass
+    def modify_paddle_size(self, size):
+        if size == 'small':
+            self.set_paddle_small()
+        elif size == 'big':
+            self.set_paddle_big()
         
     def set_paddle_small(self):
-        self.paddle_height = self.paddle_height / 2
-        self.paddle_width = self.paddle_width / 2
+        self.paddle_height = self.paddle_height / 1.5
+        # self.paddle_width = self.paddle_width / 1
 
     def set_paddle_big(self):
         self.paddle_height = self.paddle_height * 2
-        self.paddle_width = self.paddle_width * 2
+        self.paddle_width = self.paddle_width * 4

@@ -164,7 +164,7 @@ class GameManager:
         players_to_check = self.team_right if self.ball.dx > 0 else self.team_left
         for player in players_to_check.values():
             if self._is_ball_colliding_with_paddle(player):
-                self.ball.reversal_random_dx()
+                self.ball.reversal_random()
 
     def _is_ball_colliding_with_paddle(self, player):
         if (self.ball.pos_y >= player.pos_y - player.paddle_height / 2 and
