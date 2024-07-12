@@ -276,3 +276,37 @@
 		font-size: 0.9rem;
 	}
 }
+
+/* @keyframes drawLine {
+	from {
+	  stroke-dasharray: 0, 100;
+	  stroke-dashoffset: 0;
+	  stroke: rgba(255, 255, 255, 0.3);
+	}
+	to {
+	  stroke-dasharray: 100, 0;
+	  stroke-dashoffset: 0;
+	  stroke: rgba(255, 255, 255, 1);
+	}
+  }
+  
+  .line-animation {
+	animation: drawLine 2s forwards;
+  } */
+
+
+  @keyframes drawLine {
+	from {
+	  stroke-dasharray: 0, 100;
+	  stroke-dashoffset: 100;
+	}
+	to {
+	  stroke-dasharray: 100, 0;
+	  stroke-dashoffset: 0;
+	}
+  }
+  
+  .line-animation {
+	animation: drawLine 2s forwards;
+  }
+  
