@@ -253,6 +253,10 @@ class UserRepository:
     @sync_to_async
     def get_user_by_id(id):
         return User.objects.filter(id=id).first()
+    
+    @staticmethod
+    def get_user_by_id_sync(id):
+        return User.objects.filter(id=id).first()
 
     @staticmethod
     def get_user_by_username(username):
