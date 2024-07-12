@@ -1,13 +1,14 @@
-.FriendListContainer {
+.chatContainer .FriendListContainer {
 	padding: 2.5%;
 	box-sizing: border-box;
 	overflow-y: scroll;
+	background-color: rgb(2, 4, 31);
 }
-.FriendListContainer::-webkit-scrollbar {
+.chatContainer .FriendListContainer::-webkit-scrollbar {
 	display: none;
 }
 
-.friendItem {
+.chatContainer .friendItem {
 	position: relative;
 	display: flex;
 	flex-direction: row;
@@ -20,24 +21,24 @@
 	color: white;
 	margin: 1% 0;
 }
-.friendItem:hover {
+.chatContainer .friendItem:hover {
 	background-color: rgb(213, 112, 255);
 	color: rgb(2, 4, 31);
 	transition: 0.3s;
 	cursor: pointer;
 }
-.selectedFriendItem {
+.chatContainer .selectedFriendItem {
 	background-color: rgb(213, 112, 255);
 	color: rgb(2, 4, 31);
 }
 
-.avatarContainer {
+.chatContainer .avatarContainer {
 	position: relative;
 	width: 23%;
 	aspect-ratio: 1/1;
 	margin: 0 8% 0 6%;
 }
-.avatarImgFrame {
+.chatContainer .avatarImgFrame {
 	height: 100%;
 	width: 100%;
 	border-radius: 15rem;
@@ -46,10 +47,10 @@
 	background: linear-gradient(to bottom, rgb(50, 26, 81), rgb(2, 4, 31));
 	overflow: hidden;
 }
-.avatarImg {
+.chatContainer .avatarImg {
 	width: 100%;
 }
-.activeState {
+.chatContainer .activeState {
 	position: absolute;
 	bottom: 4%;
 	right: 0%;
@@ -59,7 +60,7 @@
 	border-radius: 10rem;
 }
 
-.infoBox {
+.chatContainer .infoBox {
 	height: 50%;
 	width: 55%;
 	display: flex;
@@ -67,7 +68,7 @@
 	justify-content: space-between;
 	align-items: flex-start;
 }
-.nickname {
+.chatContainer .nickname {
 	width: 100%;
 	font-size: 1.6rem;
 	font-weight: 800;
@@ -76,7 +77,7 @@
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
-.recentMessage {
+.chatContainer .recentMessage {
 	width: 67%;
 	font-size: 1.1rem;
 	font-weight: 400;
@@ -86,7 +87,7 @@
 	overflow: hidden;
 }
 
-.inviteButton {
+.chatContainer .inviteButton {
 	position: absolute;
 	right: 5%;
 	bottom: 15%;
@@ -102,7 +103,7 @@
 	justify-content: center;
 	align-items: center;
 }
-.disabledInviteButton {
+.chatContainer .disabledInviteButton {
 	background-color: rgb(190, 190, 190);
 	color: rgb(130, 130, 130);
 }

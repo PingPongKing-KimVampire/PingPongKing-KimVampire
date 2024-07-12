@@ -57,7 +57,7 @@ class LoginPageManager {
 
 			this.onLoginSuccess();
 		} catch (error) {
-			this.warning.textContent = "아이디 또는 비밀번호가 올바르지 않습니다.";
+			this.warning.textContent = error.message;
 		}
 	}
 
@@ -67,24 +67,29 @@ class LoginPageManager {
 			password: pw,
 		};
 		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/login`;
+		let response;
 		try {
-			const response = await fetch(url, {
+			response = await fetch(url, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify(userData),
 			});
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-			const bearerAccessToken = response.headers.get("Authorization");
-			const accessToken = bearerAccessToken.replace("Bearer ", "");
-			if (!accessToken) throw new Error("No AccessToken");
-			this.accessToken = accessToken;
 		} catch (error) {
-			throw error;
+			throw new Error('서버의 응답이 없습니다.');
 		}
+		if (!response.ok) {
+			if (400 <= response.status && response.status < 500) {
+				throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.');
+			} else if (500 <= response.status) {
+				throw new Error('서버와의 연결이 불안정합니다.');
+			}
+		}
+		const bearerAccessToken = response.headers.get("Authorization");
+		const accessToken = bearerAccessToken.replace("Bearer ", "");
+		if (!accessToken) throw new Error('서버와의 연결이 불안정합니다.');
+		this.accessToken = accessToken;
 	}
 
 	async _connectGlobalSocket(id) {
@@ -218,7 +223,10 @@ class LoginPageManager {
 				const acceptedClient = this.clientInfo.friendInfo.clientListIFriendRequested.find(client => client.id === content.clientInfo.id);
 				if (acceptedClient) {
 					this.clientInfo.friendInfo.clientListIFriendRequested = this.clientInfo.friendInfo.clientListIFriendRequested.filter(client => client.id !== content.clientInfo.id);
-
+					acceptedClient.chat = {
+						recentTimestamp: null,
+						unreadMessageCount: 0
+					}
 					this.clientInfo.friendInfo.friendList.push(acceptedClient);
 				}
 			} else if (event === "notifyFriendRequestRejected") {

@@ -106,7 +106,7 @@ class PageRouter {
 
 	_onLoginSuccess() {
 		this.renderPage("chatting");
-		// this.renderPage("friendManagement");
+		this.renderPage("friendManagement");
 	}
 
 	_onEnterSignup() {

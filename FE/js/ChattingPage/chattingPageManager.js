@@ -3,82 +3,6 @@ class ChattingPageManager {
 		console.log("Chatting Page!");
 
 		this.clientInfo = clientInfo;
-		//추후 삭제해야함
-		// this.clientInfo = {
-		// 	id: 1,
-		// 	friendInfo: {},
-		// };
-		// TODO : 임시 하드코딩
-		// this.clientInfo.friendInfo.friendList = [
-		// 	{
-		// 		id: 1,
-		// 		nickname: "조뱀파이어어어어어어",
-		// 		avatarUrl: "images/playerA.png",
-		// 		activeState: "ACTIVE",
-		// 		chat: {
-		// 			recentMessage: "하이하이하이하이하이하이하이하이",
-		// 			recentTimestamp: "2024-07-02T14:30:00Z",
-		// 			unreadMessageCount: 1,
-		// 		},
-		// 	},
-		// 	{
-		// 		id: 2,
-		// 		nickname: "박뱀파이어",
-		// 		avatarUrl: "images/humanIcon.png",
-		// 		activeState: "ACTIVE",
-		// 		chat: {
-		// 			recentMessage: "하이하이하이하이하이하이하이하이",
-		// 			recentTimestamp: "2024-07-02T14:30:00Z",
-		// 			unreadMessageCount: 3,
-		// 		},
-		// 	},
-		// 	{
-		// 		id: 3,
-		// 		nickname: "이뱀파이어",
-		// 		avatarUrl: "images/playerB.png",
-		// 		activeState: "INACTIVE",
-		// 		chat: {
-		// 			recentMessage: "하이하이하이하이하이하이하이하이",
-		// 			recentTimestamp: "2024-07-02T14:30:00Z",
-		// 			unreadMessageCount: 0,
-		// 		},
-		// 	},
-		// 	{
-		// 		id: 4,
-		// 		nickname: "김뱀파이어",
-		// 		avatarUrl: "images/playerA.png",
-		// 		activeState: "ACTIVE",
-		// 		chat: {
-		// 			recentMessage: "하이하이하이하이하이하이하이하이",
-		// 			recentTimestamp: "2024-07-02T14:30:00Z",
-		// 			unreadMessageCount: 2,
-		// 		},
-		// 	},
-		// 	{
-		// 		id: 5,
-		// 		nickname: "최뱀파이어",
-		// 		avatarUrl: "images/playerA.png",
-		// 		activeState: "ACTIVE",
-		// 		chat: {
-		// 			recentMessage: "하이하이하이하이하이하이하이하이",
-		// 			recentTimestamp: "2024-07-02T14:30:00Z",
-		// 			unreadMessageCount: 0,
-		// 		},
-		// 	},
-		// 	{
-		// 		id: 6,
-		// 		nickname: "정뱀파이어",
-		// 		avatarUrl: "images/playerA.png",
-		// 		activeState: "INACTIVE",
-		// 		chat: {
-		// 			recentMessage: "하이하이하이하이하이하이하이하이",
-		// 			recentTimestamp: "2024-07-02T14:30:00Z",
-		// 			unreadMessageCount: 1000,
-		// 		},
-		// 	},
-		// ];
-		//친구 없는 경우
-		// this.clientInfo.friendInfo.friendList = []
 		this._appendChatButton();
 
 		this._initPage();
@@ -94,15 +18,16 @@ class ChattingPageManager {
 
 		document.body.appendChild(button);
 		this._renderTotalUnreadMessageCount();
-		// this.clientInfo.socket.addEventListener('message', (messageEvent) => {
-		// 	const { event, content } = JSON.parse(messageEvent.data);
-		// 	if (event === 'notifyMessageArrive') {
-		// 		this._renderTotalUnreadMessageCount();
-		// 	}
-		// })
+		this.clientInfo.socket.addEventListener("message", messageEvent => {
+			const { event, content } = JSON.parse(messageEvent.data);
+			if (event === "notifyMessageArrive" || event === "notifyFriendDeleted" || event === "deleteFriendResponse") {
+				setTimeout(() => {
+					this._renderTotalUnreadMessageCount();
+				}, 0);
+			}
+		});
 	}
 	_renderTotalUnreadMessageCount() {
-		console.log(this.clientInfo);
 		const count = this.clientInfo.friendInfo.friendList.reduce((acc, current) => {
 			return acc + current.chat.unreadMessageCount;
 		}, 0);
@@ -172,28 +97,19 @@ class ChattingPageManager {
 		window.addEventListener("click", this.noFriendContainerWindowClickListener);
 
 		// 친구가 새로 생긴경우
-		// this.noFriendAndGetFriendListener = (messageEvent) => {
-		// 	const { event, content } = JSON.parse(messageEvent.data);
-		// 	if (
-		// 		(event === 'acceptFriendRequestResponse' && content.message === 'OK') ||
-		// 		event === 'notifyFriendRequestAccepted'
-		// 	) {
-		// 		this._closeNoFriendChatContainer();
-		// 		this._openChatContainer();
-		// 	}
-		// };
-		// this.clientInfo.socket.addEventListener(
-		// 	'message',
-		// 	this.noFriendAndGetFriendListener
-		// );
+		this.noFriendAndGetFriendListener = messageEvent => {
+			const { event, content } = JSON.parse(messageEvent.data);
+			if ((event === "acceptFriendRequestResponse" && content.message === "OK") || event === "notifyFriendRequestAccepted") {
+				this._closeNoFriendChatContainer();
+				this._openChatContainer();
+			}
+		};
+		this.clientInfo.socket.addEventListener("message", this.noFriendAndGetFriendListener);
 	}
 
 	_closeNoFriendChatContainer() {
 		window.removeEventListener("click", this.noFriendContainerWindowClickListener);
-		// this.clientInfo.socket.removeEventListener(
-		// 	'message',
-		// 	this.noFriendAndGetFriendListener
-		// );
+		this.clientInfo.socket.removeEventListener("message", this.noFriendAndGetFriendListener);
 		this._noFriendContainerOpened = false;
 		this.noFriendContainer.remove();
 		this.noFriendContainer = null;
@@ -222,7 +138,7 @@ class ChattingPageManager {
 		if (this.readingFriendId) {
 			await this._sendStopReadingMessage();
 		}
-		this.clientInfo.socket.removeEventListener('message', this._messageArriveListener);
+		this.clientInfo.socket.removeEventListener("message", this._messageArriveListener);
 	}
 
 	_getSortedFriendList() {
@@ -233,18 +149,40 @@ class ChattingPageManager {
 	}
 
 	_setInputButton() {
-		this.inputBox = document.querySelector(".inputBox");
-		document.querySelector(".inputButton").addEventListener("click", () => {
-			if (this.inputBox.value === "") return;
-			const sendMessage = {
+		const sendMessage = () => {
+			const messageContent = this.inputBox.value.trim();
+			if (messageContent === "") return;
+			const sendMessageObj = {
 				event: "sendMessage",
 				content: {
 					clientId: this.readingFriendId,
-					message: this.inputBox.value
-				}
-			}
-			this.clientInfo.socket.send(JSON.stringify(sendMessage));
+					message: messageContent,
+				},
+			};
+			this.clientInfo.socket.send(JSON.stringify(sendMessageObj));
 			this.inputBox.value = "";
+		};
+
+		this.inputBox = document.querySelector(".inputBox");
+		const inputButton = document.querySelector(".inputButton");
+
+		inputButton.addEventListener("click", sendMessage);
+
+		let isComposing = false;
+
+		this.inputBox.addEventListener("compositionstart", () => {
+			isComposing = true;
+		});
+
+		this.inputBox.addEventListener("compositionend", () => {
+			isComposing = false;
+		});
+
+		this.inputBox.addEventListener("keydown", e => {
+			if (e.key === "Enter" && !isComposing) {
+				e.preventDefault();
+				sendMessage();
+			}
 		});
 	}
 
@@ -261,7 +199,7 @@ class ChattingPageManager {
 				if (this.readingFriendId) {
 					await this._sendStopReadingMessage();
 				}
-				this._setSelectedFriendItem(item);
+				// this._setSelectedFriendItem(item);
 				this._renderEntireMessage(parseInt(item.dataset.id));
 			});
 		});
@@ -276,37 +214,47 @@ class ChattingPageManager {
 		};
 		this.readingFriendId = null;
 		this.clientInfo.socket.send(JSON.stringify(stopReadingChatMessage));
-		await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'stopReadingChatResponse' && content.message === 'OK') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "stopReadingChatResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve();
 				}
-			}
-			this.clientInfo.socket.addEventListener('message', listener);
+			};
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
 	}
 
 	// TODO : 대기실 페이지일 때만 초대 버튼 표시하기
-	_setSelectedFriendItem(friendItem) {
-		// if (this.selectedFriendItem) {
-		// 	this.selectedFriendItem.classList.remove("selectedFriendItem");
-		// 	this.selectedInviteButton.classList.add("invisible");
-		// }
-		// this.selectedFriendItem = friendItem;
-		// this.selectedInviteButton = friendItem.querySelector(".inviteButton");
-		// this.selectedFriendItem.classList.add("selectedFriendItem");
-		// this.selectedInviteButton.classList.remove("invisible");
-	}
+	// _setSelectedFriendItem(friendItem) {
+	// 	if (this.selectedFriendItem) {
+	// 		this.selectedFriendItem.classList.remove("selectedFriendItem");
+	// 		this.selectedInviteButton.classList.add("invisible");
+	// 	}
+	// 	this.selectedFriendItem = friendItem;
+	// 	this.selectedInviteButton = friendItem.querySelector(".inviteButton");
+	// 	this.selectedFriendItem.classList.add("selectedFriendItem");
+	// 	this.selectedInviteButton.classList.remove("invisible");
+	// }
 
 	_renderFriendList() {
-		document.querySelector(".FriendListContainer").innerHTML = this._getFriendListHTML();
+		const friendListContainer = document.querySelector(".FriendListContainer");
+		friendListContainer.innerHTML = this._getFriendListHTML();
+		friendListContainer.querySelectorAll(".friendItem").forEach(friendItem => {
+			const id = friendItem.dataset.id;
+			console.log(id);
+			console.log(friendItem.querySelector(".avatarImg"));
+			friendItem.querySelector(".avatarImg").addEventListener("click", e => {
+				e.stopPropagation();
+				alert(`ID는 ${id}다`);
+			});
+		});
 		const friendItems = Array.from(document.querySelectorAll(".friendItem"));
 		const readingItem = friendItems.find(item => {
 			return parseInt(item.dataset.id) === this.readingFriendId;
 		});
-		this._setSelectedFriendItem(readingItem);
+		// this._setSelectedFriendItem(readingItem);
 		this._setFriendItems();
 	}
 
@@ -315,19 +263,19 @@ class ChattingPageManager {
 		const getTotalChatDataMessage = {
 			event: "getTotalChatData",
 			content: {
-				clientId: id
-			}
-		}
+				clientId: id,
+			},
+		};
 		this.clientInfo.socket.send(JSON.stringify(getTotalChatDataMessage));
-		const messageList = await new Promise((resolve) => {
-			const listener = (messageEvent) => {
+		const messageList = await new Promise(resolve => {
+			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'getTotalChatDataResponse') {
-					this.clientInfo.socket.removeEventListener('message', listener);
+				if (event === "getTotalChatDataResponse") {
+					this.clientInfo.socket.removeEventListener("message", listener);
 					resolve(content.messageList);
 				}
-			}
-			this.clientInfo.socket.addEventListener('message', listener);
+			};
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
 
 		this.readingFriendId = id;
@@ -338,22 +286,10 @@ class ChattingPageManager {
 			this._renderTotalUnreadMessageCount();
 		}
 
-		// const messageList = [
-		// 	{ senderId: 1, content: "오늘 한 판 고고?" },
-		// 	{ senderId: 2, content: "너 개못하잖아" },
-		// 	{ senderId: 1, content: "까부네 ㅋㅋ" },
-		// 	{ senderId: 2, content: "드루와라" },
-		// 	{
-		// 		senderId: 2,
-		// 		content:
-		// 			"늘 저녁 뭐 먹을까? 치킨이 땡기는데, 네 생각은 어때? 우리 동네에 새로 생긴 치킨집이 있다던데, 거기 한번 가볼까? 맛있다는 평이 많아서 기대돼. 어떤 메뉴 먹고 싶어? 양념치킨? 후라이드치킨? 아니면 반반치킨? 나는 반반치킨이 좋아. 다양한 맛을 즐길 수 있어서 좋아. 7시에 만나서 같이 먹자. 너도 그때까지 배고프지 않게 간단한 간식 먹고 있어. 그럼 이따 보자!",
-		// 	},
-		// ];
-
 		const messageListHTML = messageList.reduce((acc, message) => {
 			const senderSide = message.senderId === this.clientInfo.id ? "rightSender" : "leftSender";
 			const messageHTML = `<div class="messageBubble ${senderSide}">${message.content}</div>`;
-			return acc + messageHTML;
+			return messageHTML + acc;
 		}, "");
 		this.messageListContainer.innerHTML = messageListHTML;
 		this.messageListContainer.scrollTop = this.messageListContainer.scrollHeight;
@@ -395,7 +331,6 @@ class ChattingPageManager {
 			event === "notifyFriendActiveStateChange"
 		) {
 			this._renderFriendList();
-			this._renderTotalUnreadMessageCount();
 		}
 	};
 
@@ -417,10 +352,10 @@ class ChattingPageManager {
                     </div>
                     <div class="infoBox">
                         <div class="nickname">${friend.nickname}</div>
-                        <div class="recentMessage">${friend.chat.recentMessage}</div>
+                        <div class="recentMessage">${friend.chat?.recentMessage ? friend.chat.recentMessage : ""}</div>
                     </div>
                     <div class="inviteButton invisible ${friend.activeState === "ACTIVE" ? "" : "disabledInviteButton"}">초대</div>
-					<div class="unreadCount ${friend.chat.unreadMessageCount === 0 ? "invisible" : ""}">${getUnreadCount(friend)}</div>
+					<div class="unreadCount ${!friend.chat?.unreadMessageCount ? "invisible" : ""}">${getUnreadCount(friend)}</div>
                 </button>
             `;
 		};
