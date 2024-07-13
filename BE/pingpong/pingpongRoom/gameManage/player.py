@@ -1,9 +1,10 @@
 from utils.printer import Printer
 
 class Player:
-    def __init__(self, nickname, ability, team):
+    def __init__(self, nickname, ability, team, image_uri):
         self.nickname = nickname
         self.team = team
+        self.image_uri = image_uri
         self.ready_state = 'NOTREADY'
         self.pos_x = 0
         self.pos_y = 0

@@ -18,7 +18,7 @@ class StateManager:
 
     def _initialize(self) -> None:
         self.channel_layer = None
-        self.clients: Dict[str, str] = {}
+        # self.clients: Dict[str, str] = {}
         self.rooms: Dict[str, Dict[str, Any]] = {}
         self.match_making_loop_task = None
         self.match_queue = []
@@ -41,10 +41,9 @@ class StateManager:
         return len(self.match_queue) >= 4
 
     async def group_match_clients(self, match_clients, tournament_id) -> None:
-        for consumer in match_clients:
-            await asyncio.gather(*[add_group(consumer, tournament_id)]) # gather : 병렬적으로 실행하지만, 순서는 보장됨
-            await notify_group(self.channel_layer, tournament_id, 
-                               'notifyMatchMakingComplete', {'tournamentId': tournament_id})
+        await asyncio.gather(*[add_group(consumer, tournament_id) for consumer in match_clients])
+        await notify_group(self.channel_layer, tournament_id, 
+                            'notifyMatchMakingComplete', {'tournamentId': tournament_id})
 
     async def match_making_loop(self) -> None:
         while self.is_match_task_running:
@@ -75,17 +74,15 @@ class StateManager:
     def get_tournament_client_list(self, tournament_id: str) -> List[Dict[str, str]]:
         return self.tournaments.get(tournament_id, {}).get('clients', {})
 
-    # Client Management
-    def add_client(self, consumer: Any, client_id: str, nickname: str) -> None:
+    def add_channel_layer(self, channel_layer) -> None:
         if self.channel_layer is None:
-            self.channel_layer = consumer.channel_layer
-        self.clients[client_id] = nickname
+            self.channel_layer = channel_layer
 
-    def remove_client(self, client_id: str) -> None:
-        self.clients.pop(client_id, None)
+    # def remove_client(self, client_id: str) -> None:
+    #     self.clients.pop(client_id, None)
 
-    def get_client_nickname(self, client_id: str) -> str:
-        return self.clients.get(client_id, '')
+    # def get_client_nickname(self, client_id: str) -> str:
+    #     return self.clients.get(client_id, '')
 
     # Room Management
     def create_room(self, content: Dict[str, Any]) -> str:
@@ -146,6 +143,17 @@ class StateManager:
         room = self.rooms.get(room_id, None)
         return room.check_game_ready()
 
+    def get_entering_room_info(self, room_id: str) -> Dict[str, Any]:
+        team_left_list, team_right_list = self.get_waiting_room_player_list(room_id)
+        team_left_ability, team_right_ability = self.get_room_ability(room_id)
+        content = {
+            'teamLeftList': team_left_list,
+            'teamRightList': team_right_list,
+            'teamLeftAbility': team_left_ability,
+            'teamRightAbility': team_right_ability
+        }
+        return content
+
     # Asynchronous Methods
     async def notify_room_enter(self, room_id: str, client_id: str, nickname: str, team: str) -> None:
         enter_data = {'clientId': client_id, 'clientNickname': nickname, 'team': team}
@@ -185,16 +193,14 @@ class StateManager:
             await game_manager.trigger_game()
 
     async def notify_lobby(self, event: str, content: Dict[str, Any]) -> None:
-        # Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
         if self.channel_layer:
+            Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
             await notify_group(self.channel_layer, 'lobby', event, content)
 
     async def notify_room(self, room_id: str, event: str, content: Dict[str, Any]) -> None:
         # Printer.log(f"!!!!! notify ROOM {room_id} !!!!!", "cyan")
         if self.channel_layer:
             await notify_group(self.channel_layer, room_id, event, content)
-
-
 
     # Test Methods
     def create_test_room(self) -> None:
