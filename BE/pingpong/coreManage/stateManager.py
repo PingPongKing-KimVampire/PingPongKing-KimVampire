@@ -107,14 +107,14 @@ class StateManager:
         room = self.rooms.get(room_id, )
         return room.get_room_ability()
 
-    def enter_waiting_room(self, room_id: str, client_id: str, nickname: str) -> Optional[str]:
+    def enter_waiting_room(self, room_id: str, client_id: str, nickname: str, image_uri: str) -> Optional[str]:
         is_you_create = False
         room = self.rooms.get(room_id)
         if not room:
             return None
         if room.is_room_empty():
             is_you_create = True
-        team = room.enter_room(client_id, nickname)
+        team = room.enter_room(client_id, nickname, image_uri)
         return team, is_you_create
 
     def remove_client_from_room(self, room_id: str, client_id: str) -> None:
