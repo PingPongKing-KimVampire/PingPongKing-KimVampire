@@ -408,7 +408,7 @@ class PingpongRenderer {
 	_endGame({ winTeam }) {
 		const winBoard =
 			this.me.team === winTeam ? this.rightBoard : this.leftBoard;
-		const loseBoard = this.me.team === team ? this.leftBoard : this.rightBoard;
+		const loseBoard = this.me.team === winTeam ? this.leftBoard : this.rightBoard;
 		winBoard.style.backgroundColor = 'blue';
 		loseBoard.style.backgroundColor = 'red';
 	}

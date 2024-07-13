@@ -7,6 +7,8 @@ import SignupPageManager from "./SignupPage/SignupPageManager.js";
 import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js";
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
+import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
+import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -31,6 +33,7 @@ class PageRouter {
 				teamLeftTotalPlayerCount: null,
 				teamRightTotalPlayerCount: null,
 			},
+			tournamentInfo: null, // TODO : 토너먼트에서 나왔을 때 다시 null로 세팅
 			friendInfo: {
 				friendList: [
 					{
@@ -84,6 +87,7 @@ class PageRouter {
 				this._onEnterWaitingRoom.bind(this),
 				this._renderFriendManagementPage.bind(this),
 				this._renderEditProfilePage.bind(this),
+				this._joinTournamentWaitingPage.bind(this)
 			);
 			await lobbyPageManager.initPage();
 		} else if (url === "waitingRoomCreation") {
@@ -108,6 +112,12 @@ class PageRouter {
 		} else if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
 			const chattingPageManager = new ChattingPageManager(this.clientInfo);
+		} else if (url === "waitingTournament") {
+			this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
+			const waitingTournamentPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this._joinLobbyPage.bind(this), this._joinTournamentPage.bind(this));
+		} else if (url === "tournament") {
+			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
+			const tournamentPageManager = new TournamentPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._joinLobbyPage.bind(this));
 		}
 	}
 
@@ -166,6 +176,18 @@ class PageRouter {
 			newLink.setAttribute("data-dynamic", "true");
 			document.head.appendChild(newLink);
 		});
+	}
+
+	_joinTournamentWaitingPage() {
+		this.renderPage("waitingTournament");
+	}
+
+	_joinLobbyPage() {
+		this.renderPage("lobby");
+	}
+
+	_joinTournamentPage() {
+		this.renderPage("tournament");
 	}
 }
 
