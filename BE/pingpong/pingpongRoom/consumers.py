@@ -37,6 +37,16 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"conetnt : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
+    
+    async def set_consumer_info(self, client_id):
+        from user.repositories import UserRepository
+        user =  await UserRepository.get_user_by_id(client_id)
+        if user is None:
+            await self.close()
+            return
+        self.client_id = client_id
+        self.nickname = user.nickname
+        self.image_uri = user.image_uri
 
     async def receive(self, text_data):
         message = json.loads(text_data)
@@ -76,15 +86,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await stateManager.notify_ready_state_change(self.room_id, self.client_id, is_ready)
             
     async def enter_waiting_room(self, content):
-        self.client_id = content['clientId']
-        # 프론트랑 인증 얘기해보기
-        from user.repositories import UserRepository
-        user =  await UserRepository.get_user_by_id(self.client_id)
-        if user is None:
-            await self.close()
-            return
-        self.nickname = user.nickname
-        self.image_uri = user.image_uri
+        self.set_consumer_info(content['clientId'])
         team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.image_uri)
         if team == None:
             # 실패시 처리 추가해야 할 듯?

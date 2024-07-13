@@ -50,8 +50,15 @@ class StateManager:
             if self.is_match_queue_full():
                 match_clients = self.match_queue[:4]
                 self.match_queue = self.match_queue[4:]
-                client_list = {consumer.client_id: consumer.nickname for consumer in match_clients}
-                tournament_id = self.create_tournament_manager(client_list)
+                # "clientInfo" : { clientId : str, nickname : str, imageUri : str}
+                client_info_list = []
+                for consumer in match_clients:
+                    client_info_list.append({
+                        'clientId': consumer.client_id,
+                        'nickname': consumer.nickname,
+                        'imageUri': consumer.image_uri
+                    })
+                tournament_id = self.create_tournament_manager(client_info_list)
                 await self.group_match_clients(match_clients, tournament_id)
             if not self.match_queue:
                 self.is_match_task_running = False
@@ -65,14 +72,6 @@ class StateManager:
 
     def get_tournament_manager(self, tournament_id: str) -> TournamentManager:
         return self.tournaments.get(tournament_id, None)
-
-    # Tournament Management
-
-    def get_tournament_room(self, tournament_id: str) -> Dict[str, Any]:
-        return self.tournaments.get(tournament_id, {})
-    
-    def get_tournament_client_list(self, tournament_id: str) -> List[Dict[str, str]]:
-        return self.tournaments.get(tournament_id, {}).get('clients', {})
 
     def add_channel_layer(self, channel_layer) -> None:
         if self.channel_layer is None:

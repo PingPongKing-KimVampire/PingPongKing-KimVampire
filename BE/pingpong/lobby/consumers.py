@@ -22,6 +22,16 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         await add_group(self, 'lobby')
         Printer.log(f"New client connected from {ip}", "green")
 
+    async def set_consumer_info(self, client_id):
+        from user.repositories import UserRepository
+        user =  await UserRepository.get_user_by_id(client_id)
+        if user is None:
+            await self.close()
+            return
+        self.client_id = client_id
+        self.nickname = user.nickname
+        self.image_uri = user.image_uri
+
     async def disconnect(self, close_code):
         if self.client_id:
             stateManager.remove_client(self.client_id)
@@ -57,15 +67,8 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             await self.match_making_cancel(self)
 
     async def enter_lobby(self, client_id):
-        # 프론트랑 인증 얘기해보기
-        from user.repositories import UserRepository
-        user =  await UserRepository.get_user_by_id(client_id)
-        if user is None:
-            await self.close()
-            return
-        self.client_id = client_id
-        self.nickname = user.nickname
-        self.image_uri = user.image_uri
+        self.set_consumer_info(client_id)
+        
         Printer.log(f"Client {client_id} entered lobby : {self.nickname} (id : {self.client_id})", "blue")
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 

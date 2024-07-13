@@ -15,15 +15,13 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         self.tournament_state = "semi-final"
         self.tournament_info = stateManager.get_tournament_room(self.tournament_id)
         await self.accept()
+        await add_group(self, self.tournament_id)
         Printer.log(f"Client connected to tournament room {self.room_id}", "green")
 
     async def disconnect(self, close_code):
         if self.client_id:
             # await self.game_manager.give_up_game(self)
-            # room_id_team = f"{self.room_id}-{self.team}"
-            # await stateManager.leave_waiting_room(self, self.room_id, self.client_id)
-            # await discard_group(self, self.room_id)
-            # await discard_group(self, room_id_team)
+            await discard_group(self, self.tournament_id)
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
@@ -32,6 +30,16 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"conetnt : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
+    
+    async def set_consumer_info(self, client_id):
+        from user.repositories import UserRepository
+        user =  await UserRepository.get_user_by_id(client_id)
+        if user is None:
+            await self.close()
+            return
+        self.client_id = client_id
+        self.nickname = user.nickname
+        self.image_uri = user.image_uri
 
     async def receive(self, text_data):
         message = json.loads(text_data)
@@ -44,19 +52,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             pass
 
     async def enter_tournament_room(self, content):
-        self.client_id = content['clientId']
-        self.nickname = stateManager.get_client_nickname(self.client_id)
-        # 인증 해야함
-        await add_group(self, self.tournament_id)
-        client_list = stateManager.get_tournament_client_list(self.tournament_id)
-        client_list_data = []
-        for client_id, nickname in client_list.items():
-            content = {
-                "clientId" : client_id,
-                "nickname" : nickname,
-                "clientAvartarUrl" : "/테스트중_수정할것.png"
-                # "clientAvartarUrl" : stateManager.get_client_avatar_url(client_id)
-            }
-            client_list_data.append(content)
+        self.set_consumer_info(content['clientId'])
+        client_info_list = self.tournament_manager.get_client_info_list()
         await self._send("enterTournamentRoomResponse", 
-                         { "tournamentClientList": client_list_data })
+                         { "tournamentClientList": client_info_list })
