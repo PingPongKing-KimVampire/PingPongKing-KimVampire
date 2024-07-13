@@ -12,6 +12,9 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         self.is_init = False
         self.client_id = None
         self.nickname = None
+        self.avartar_url = None
+        headers = dict(self.scope['headers'])
+        # token = headers.get(b'authorization').decode('utf-8').split(' ')[1]
         await self.accept()
 
         ip = self.scope['client'][0] # scope 공부해볼것
@@ -39,13 +42,8 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"event : {event}", "white")
         Printer.log(f"content : {content}\n", "white")
 
-        if not self.is_init:
-            if event == 'enterLobby':
-                await self.enter_lobby(content['clientId'])
-            else:
-                await self.close()
-            return
-
+        if event == 'enterLobby': # 인증 생기면 없애기
+            await self.enter_lobby(content['clientId'])
         await self.handle_event(event, content)
 
     async def handle_event(self, event, content):
@@ -65,9 +63,9 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         if user is None:
             await self.close()
             return
-        self.is_init = True
-        self.nickname = user.nickname
         self.client_id = client_id
+        self.nickname = user.nickname
+        self.image_uri = user.image_uri
         Printer.log(f"Client {client_id} entered lobby : {self.nickname} (id : {self.client_id})", "blue")
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})
 
@@ -78,7 +76,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
                 'message': 'OK',
                 'roomId': room_id
         })
-        # await stateManager.notify_lobby('notifyWaitingRoomCreated', {'content': {'roomId': room_id}})
 
     async def get_waiting_room_list_response(self):
         room_list = stateManager.get_waiting_room_list()

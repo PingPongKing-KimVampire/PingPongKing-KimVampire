@@ -57,14 +57,14 @@ class GameRoomManager:
     def get_room_ability(self):
         return self.left_ability, self.right_ability
 
-    def enter_room(self, client_id, nickname):
+    def enter_room(self, client_id, nickname, image_uri):
         team = None
         if len(self.team_left) < self.left_max_count:
-            player =  Player(nickname, ability=None, team='left')
+            player = Player(nickname, ability=None, team='left', image_uri=image_uri)
             self.team_left[client_id] = player
             team = 'left'
         elif len(self.team_right) < self.right_max_count:
-            player = Player(nickname, ability=None, team='right')
+            player = Player(nickname, ability=None, team='right', image_uri=image_uri)
             self.team_right[client_id] = player
             team = 'right'
         self.clients[client_id] = player
@@ -93,10 +93,10 @@ class GameRoomManager:
         team_list = self.team_left if team == 'left' else self.team_right
         data = []
         for client_id, player in team_list.items():
-            print("player: ", player.nickname, player.ready_state)
             data.append({
                 'clientId': client_id,
                 'clientNickname': player.nickname,
+                # 'imageUri': player.image_uri,
                 'readyState': player.ready_state
             })
         return data

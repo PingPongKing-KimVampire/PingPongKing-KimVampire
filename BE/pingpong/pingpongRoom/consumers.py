@@ -10,11 +10,13 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.client_id = None
         self.nickname = None
+        self.image_uri = None
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.game_manager = stateManager.rooms[self.room_id]
         self.game_state = 'waiting'
         self.team = None
         await self.accept()
+        await add_group(self, self.room_id)
         # url을 수동으로 입력하면 접근이 가능한건가?
         Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
 
@@ -82,29 +84,15 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
         self.nickname = user.nickname
-        team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname)
+        self.image_uri = user.image_uri
+        team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.image_uri)
         if team == None:
             # 실패시 처리 추가해야 할 듯?
             await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
             Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
             return
-        self.team = team
-        await stateManager.notify_room_enter(self.room_id, self.client_id, self.nickname, team)
-        if is_you_create:
-            await stateManager.notify_room_created(self.room_id)
-        else:
-            await stateManager.notify_room_change(self.room_id)
-        await add_group(self, self.room_id)
-        await add_group(self, f"{self.room_id}-{team}")
-        
-        team_left_list, team_right_list = stateManager.get_waiting_room_player_list(self.room_id)
-        team_left_ability, team_right_ability = stateManager.get_room_ability(self.room_id)
-        await self._send(event='enterWaitingRoomResponse',
-                         content={'teamLeftList': team_left_list, 
-                                  'teamRightList': team_right_list,
-                                  'teamLeftAbility': team_left_ability,
-                                  'teamRightAbility': team_right_ability
-                                  })
+
+        await self.send_enter_response(self.room_id, team, is_you_create)
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
 
     async def select_ability(self, content):
@@ -112,6 +100,20 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         stateManager.change_client_ability(self.room_id, self.client_id, ability)
         await stateManager.notify_select_ability(self.room_id, self.client_id, ability)
         Printer.log(f"Client {self.client_id} selected ability {content['ability']}", "blue")
+
+    async def send_enter_response(self, room_id, team, is_you_create):
+        self.team = team
+        await add_group(self, f"{self.room_id}-{team}")
+
+        await stateManager.notify_room_enter(self.room_id, self.client_id, self.nickname, team)
+        
+        if is_you_create:
+            await stateManager.notify_room_created(self.room_id)
+        else:
+            await stateManager.notify_room_change(self.room_id)
+
+        content = stateManager.get_entering_room_info(room_id)
+        await self._send(event='enterWaitingRoomResponse', content=content)
 
     """
     Notify methods
