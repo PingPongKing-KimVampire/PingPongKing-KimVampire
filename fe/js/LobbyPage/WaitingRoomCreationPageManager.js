@@ -2,7 +2,7 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class WaitingRoomCreationPageManager {
-	constructor(app, clientInfo, onEnterWaitingRoom) {
+	constructor(app, clientInfo, onEnterWaitingRoom, renderLobby) {
 		console.log("Create Waiting Room Page!");
 		app.innerHTML = this._getHTML();
 		this.clientInfo = {
@@ -24,6 +24,7 @@ class WaitingRoomCreationPageManager {
 		};
 		this.clientInfo = clientInfo;
 		this.onEnterWaitingRoom = onEnterWaitingRoom;
+		this.renderLobby = renderLobby;
 
 		this.titleInput = document.querySelector("#titleInput");
 		this.modeSelection = document.querySelector(".selectionContainer:nth-of-type(2)");
@@ -40,6 +41,7 @@ class WaitingRoomCreationPageManager {
 		this._setTitleModeSelection();
 		this._setHumanCountSelection();
 		this._setCompleteButtonSelection();
+		this._setExitButton();
 	}
 
 	_setTitleModeSelection() {
@@ -69,6 +71,12 @@ class WaitingRoomCreationPageManager {
 	_setCompleteButtonSelection() {
 		// complete 버튼 클릭 시 대기실 생성 메시지 전송
 		this.completeButton.addEventListener("click", this._createAndEnterRoom.bind(this));
+	}
+
+	_setExitButton() {
+		document.querySelector(".exitButton").addEventListener("click", () => {
+			this.renderLobby();
+		});
 	}
 
 	_checkSelectedAll() {

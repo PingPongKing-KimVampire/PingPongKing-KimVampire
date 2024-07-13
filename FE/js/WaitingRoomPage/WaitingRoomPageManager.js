@@ -1,7 +1,8 @@
-import windowObservable from '../../WindowObservable.js';
+import windowObservable from "../../WindowObservable.js";
 
 import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
+import { _connectLobbySocket } from "../connect.js";
 
 class WaitingRoomPageManager {
 	constructor(app, clientInfo, _onStartPingpongGame, _onExitWaitingRoom) {
@@ -47,82 +48,40 @@ class WaitingRoomPageManager {
 			team: null,
 			mode: null,
 			readyState: null,
-			selectAbility: false
-		}
-		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find((player) => player.clientId === this.clientInfo.id);
+			selectAbility: false,
+		};
+		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.clientId === this.clientInfo.id);
 		if (myPlayer) {
 			this.me.readyState = myPlayer.readyState;
-			this.me.team = 'left';
+			this.me.team = "left";
 		} else {
-			myPlayer = this.clientInfo.gameInfo.teamRightList.find((player) => player.clientId === this.clientInfo.id);
+			myPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.clientId === this.clientInfo.id);
 			this.me.readyState = myPlayer.readyState;
-			this.me.team = 'right';
+			this.me.team = "right";
 		}
-		this.me.mode = this.me.team === 'left' ? this.clientInfo.gameInfo.teamLeftMode : this.clientInfo.gameInfo.teamRightMode;
+		this.me.mode = this.me.team === "left" ? this.clientInfo.gameInfo.teamLeftMode : this.clientInfo.gameInfo.teamRightMode;
 	}
 	_initPage() {
 		this.app.innerHTML = this._getHTML();
 
-		this.leftReadyText = document.querySelector(
-			".teamPanel:first-of-type .readyText"
-		);
-		this.rightReadyText = document.querySelector(
-			".teamPanel:last-of-type .readyText"
-		);
+		this.leftReadyText = document.querySelector(".teamPanel:first-of-type .readyText");
+		this.rightReadyText = document.querySelector(".teamPanel:last-of-type .readyText");
 
 		const orientation = windowObservable.getOrientation();
 		this._toggleReadyTextVisible(orientation);
 		this._subscribeWindow();
-		document
-			.querySelector("#readyButton")
-			.addEventListener("click", (event) => {
-				this._sendMyReadyStateChangeMessage.call(this);
-			});
+		document.querySelector("#readyButton").addEventListener("click", event => {
+			this._sendMyReadyStateChangeMessage.call(this);
+		});
 		this._manageExitRoom();
 		this._setAbilityButtons();
 	}
 
-	//login 페이지와 중복되는 로직임. 어떻게 공유할 것인지 생각해야함.
-	//loginPage의 static 메서드로 만드는것은 어떨까?
-	//this바인딩해서 주면 괜찮을듯
-	async _connectLobbySocket(id) {
-		const lobbySocket = new WebSocket(
-			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
-		);
-		await new Promise((resolve) => {
-			lobbySocket.addEventListener("open", () => {
-				resolve();
-			});
-		});
-		const enterLobbyMessage = {
-			event: "enterLobby",
-			content: {
-				clientId: id,
-			},
-		};
-		lobbySocket.send(JSON.stringify(enterLobbyMessage));
-
-		await new Promise((resolve) => {
-			lobbySocket.addEventListener(
-				"message",
-				function listener(messageEvent) {
-					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === "enterLobbyResponse" && content.message === "OK") {
-						lobbySocket.removeEventListener("message", listener);
-						resolve();
-					}
-				}.bind(this)
-			);
-		});
-
-		return lobbySocket;
-	}
-
 	_setAbilityButtons() {
-		this.abilityModal = document.querySelector('.abilitySelectionModal');
-		const leftAbilityButton = document.querySelector('.teamPanel:first-of-type .abilityButton');
-		const rightAbilityButton = document.querySelector('.teamPanel:last-of-type .abilityButton');
-		if (this.me.team === 'left') {
+		this.abilityModal = document.querySelector(".abilitySelectionModal");
+		const leftAbilityButton = document.querySelector(".teamPanel:first-of-type .abilityButton");
+		const rightAbilityButton = document.querySelector(".teamPanel:last-of-type .abilityButton");
+		if (this.me.team === "left") {
 			this.myAbilityButton = leftAbilityButton;
 			this.opponentAbilityButton = rightAbilityButton;
 		} else {
@@ -130,12 +89,12 @@ class WaitingRoomPageManager {
 			this.opponentAbilityButton = leftAbilityButton;
 		}
 		if (this.myAbilityButton) {
-			this.myAbilityButton.addEventListener('click', this._displayAbilityModal.bind(this));
+			this.myAbilityButton.addEventListener("click", this._displayAbilityModal.bind(this));
 		}
 	}
 
 	_listenWaitingRoomEvent() {
-		const listener = (messageEvent) => {
+		const listener = messageEvent => {
 			const message = JSON.parse(messageEvent.data);
 			const { event, content } = message;
 			if (event === "notifyWaitingRoomEnter") {
@@ -154,22 +113,18 @@ class WaitingRoomPageManager {
 			} else if (event === "notifyGameReady") {
 				//3, 2, 1 추후 구현
 			} else if (event === "notifyGameStart") {
-				content.playerInfo.forEach((player) => {
-					let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find((leftPlayer) => leftPlayer.clientId === player.clientId);
-					if (!targetPlayer)
-						targetPlayer = this.clientInfo.gameInfo.teamRightList.find((rightPlayer) => rightPlayer.clientId === player.clientId);
+				content.playerInfo.forEach(player => {
+					let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(leftPlayer => leftPlayer.clientId === player.clientId);
+					if (!targetPlayer) targetPlayer = this.clientInfo.gameInfo.teamRightList.find(rightPlayer => rightPlayer.clientId === player.clientId);
 					targetPlayer.ability = player.ability;
 					targetPlayer.paddleHeight = player.paddleHeight;
 					targetPlayer.paddleWidth = player.paddleWidth;
-				})
+				});
 				this.clientInfo.gameInfo.sizeInfo = content.boardInfo;
-				this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener(
-					'message',
-					listener
-				);
+				this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", listener);
 				this._onStartPingpongGame();
 			} else if (event === "notifySelectAbility") {
-				if (content.team === 'left') {
+				if (content.team === "left") {
 					this.clientInfo.gameInfo.teamLeftAbility = content.ability;
 				} else {
 					this.clientInfo.gameInfo.teamRightAbility = content.ability;
@@ -180,10 +135,7 @@ class WaitingRoomPageManager {
 				this._initPage();
 			}
 		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener(
-			"message",
-			listener
-		);
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", listener);
 	}
 
 	_pushNewPlayer(clientId, clientNickname, team) {
@@ -203,58 +155,41 @@ class WaitingRoomPageManager {
 	}
 
 	_popPlayer(clientId) {
-		this.clientInfo.gameInfo.teamLeftList =
-			this.clientInfo.gameInfo.teamLeftList.filter((player) => {
-				player.clientId !== clientId;
-			});
-		this.clientInfo.gameInfo.teamRightList =
-			this.clientInfo.gameInfo.teamRightList.filter((player) => {
-				player.clientId !== clientId;
-			});
+		this.clientInfo.gameInfo.teamLeftList = this.clientInfo.gameInfo.teamLeftList.filter(player => {
+			player.clientId !== clientId;
+		});
+		this.clientInfo.gameInfo.teamRightList = this.clientInfo.gameInfo.teamRightList.filter(player => {
+			player.clientId !== clientId;
+		});
 	}
 
 	_updateReadyState(clientId, readyState) {
-		this.clientInfo.gameInfo.teamLeftList.forEach((player) => {
+		this.clientInfo.gameInfo.teamLeftList.forEach(player => {
 			if (player.clientId === clientId) player.readyState = readyState;
 		});
-		this.clientInfo.gameInfo.teamRightList.forEach((player) => {
+		this.clientInfo.gameInfo.teamRightList.forEach(player => {
 			if (player.clientId === clientId) player.readyState = readyState;
 		});
 	}
 
 	_sendMyReadyStateChangeMessage() {
-		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(
-			(player) => player.clientId === this.clientInfo.id
-		);
-		if (!myPlayer)
-			myPlayer = this.clientInfo.gameInfo.teamRightList.find(
-				(player) => player.clientId === this.clientInfo.id
-			);
+		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.clientId === this.clientInfo.id);
+		if (!myPlayer) myPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.clientId === this.clientInfo.id);
 
-		const changedReadyState =
-			myPlayer.readyState === "READY" ? "NOTREADY" : "READY";
+		const changedReadyState = myPlayer.readyState === "READY" ? "NOTREADY" : "READY";
 		const readyMessage = {
 			event: "changeReadyState",
 			content: {
 				state: changedReadyState,
 			},
 		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.send(
-			JSON.stringify(readyMessage)
-		);
+		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(readyMessage));
 	}
 
 	_changeMyReadyState(clientId) {
-		let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(
-			(player) => player.clientId === clientId
-		);
-		if (!targetPlayer)
-			targetPlayer = this.clientInfo.gameInfo.teamRightList.find(
-				(player) => player.clientId === clientId
-			);
-		targetPlayer.readyState === "READY"
-			? (targetPlayer.readyState = "NOTREADY")
-			: (targetPlayer.readyState = "READY");
+		let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.clientId === clientId);
+		if (!targetPlayer) targetPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.clientId === clientId);
+		targetPlayer.readyState === "READY" ? (targetPlayer.readyState = "NOTREADY") : (targetPlayer.readyState = "READY");
 	}
 
 	_subscribeWindow() {
@@ -273,62 +208,57 @@ class WaitingRoomPageManager {
 	}
 
 	_displayAbilityModal() {
-		this.abilityModal.style.display = 'flex';
-		this.abilityModal.addEventListener('click', this._modalClicked);
+		this.abilityModal.style.display = "flex";
+		this.abilityModal.addEventListener("click", this._modalClicked);
 	}
-	_modalClicked = (event) => {
-		const selectedItem = event.target.closest('.abilityItem');
-		if (selectedItem === null)
-			return;
+	_modalClicked = event => {
+		const selectedItem = event.target.closest(".abilityItem");
+		if (selectedItem === null) return;
 		const selectAbilityMessage = {
 			event: "selectAbility",
-			content: { ability: selectedItem.value }
-		}
+			content: { ability: selectedItem.value },
+		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(selectAbilityMessage));
-		this.abilityModal.style.display = 'none';
-		this.abilityModal.removeEventListener('click', this._modalClicked);
-	}
+		this.abilityModal.style.display = "none";
+		this.abilityModal.removeEventListener("click", this._modalClicked);
+	};
 
 	_manageExitRoom() {
-		const exitButton = document.querySelector('.exitButton');
-		const exitYesButton = document.querySelector(
-			'.questionModal .activatedButton:nth-of-type(1)');
-		const exitNoButton = document.querySelector(
-			'.questionModal .activatedButton:nth-of-type(2)');
-		const questionModal = document.querySelector('.questionModal');
+		const exitButton = document.querySelector(".exitButton");
+		const exitYesButton = document.querySelector(".questionModal .activatedButton:nth-of-type(1)");
+		const exitNoButton = document.querySelector(".questionModal .activatedButton:nth-of-type(2)");
+		const questionModal = document.querySelector(".questionModal");
 
-		exitButton.addEventListener('click', () => {
-			questionModal.style.display = 'flex';
+		exitButton.addEventListener("click", () => {
+			questionModal.style.display = "flex";
 		});
-		exitYesButton.addEventListener('click', () => {
+		exitYesButton.addEventListener("click", () => {
 			this._exitWaitingRoom();
 		});
-		exitNoButton.addEventListener('click', () => {
-			questionModal.style.display = 'none';
-		})
+		exitNoButton.addEventListener("click", () => {
+			questionModal.style.display = "none";
+		});
 	}
 	async _exitWaitingRoom() {
 		this.clientInfo.gameInfo.pingpongRoomSocket.close();
 		this.clientInfo.gameInfo = null;
-		this.clientInfo.lobbySocket = await this._connectLobbySocket(
-			this.clientInfo.id
-		);
+		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
 		this._onExitWaitingRoom();
 	}
 
 	_getHTML() {
-		let readyButtonStyle = '';
-		if (this.me.readyState === 'READY') {
-			readyButtonStyle = 'activatedButton';
-		} else if (this.me.mode === 'human') {
-			readyButtonStyle = 'generalButton';
-		} else if (this.me.mode === 'vampire' && this.me.selectAbility) {
-			readyButtonStyle = 'generalButton';
+		let readyButtonStyle = "";
+		if (this.me.readyState === "READY") {
+			readyButtonStyle = "activatedButton";
+		} else if (this.me.mode === "human") {
+			readyButtonStyle = "generalButton";
+		} else if (this.me.mode === "vampire" && this.me.selectAbility) {
+			readyButtonStyle = "generalButton";
 		} else {
-			readyButtonStyle = 'disabledButton';
+			readyButtonStyle = "disabledButton";
 		}
-		let abilityModalHTML = '';
-		if (this.clientInfo.gameInfo.teamLeftMode === 'vampire' && this.clientInfo.gameInfo.teamRightMode === 'vampire') {
+		let abilityModalHTML = "";
+		if (this.clientInfo.gameInfo.teamLeftMode === "vampire" && this.clientInfo.gameInfo.teamRightMode === "vampire") {
 			abilityModalHTML = `${this._getVamVamAbilityModalHTML()}`;
 		} else {
 			abilityModalHTML = `${this._getVamHuAbilityModalHTML()}`;
@@ -341,21 +271,11 @@ class WaitingRoomPageManager {
 					<div id="mode">${this._getMode()}</div>
 				</div>
 				<div id="panel">
-					${this._getTeamPanelHTML(
-						this.clientInfo.gameInfo.teamLeftMode,
-						this.clientInfo.gameInfo.teamLeftList,
-						this.clientInfo.gameInfo.teamLeftTotalPlayerCount,
-						this.clientInfo.gameInfo.teamLeftAbility
-					)}
+					${this._getTeamPanelHTML(this.clientInfo.gameInfo.teamLeftMode, this.clientInfo.gameInfo.teamLeftList, this.clientInfo.gameInfo.teamLeftTotalPlayerCount, this.clientInfo.gameInfo.teamLeftAbility)}
 					<div id="vsText">VS</div>
-					${this._getTeamPanelHTML(
-						this.clientInfo.gameInfo.teamRightMode,
-						this.clientInfo.gameInfo.teamRightList,
-						this.clientInfo.gameInfo.teamRightTotalPlayerCount,
-						this.clientInfo.gameInfo.teamRightAbility
-					)}
+					${this._getTeamPanelHTML(this.clientInfo.gameInfo.teamRightMode, this.clientInfo.gameInfo.teamRightList, this.clientInfo.gameInfo.teamRightTotalPlayerCount, this.clientInfo.gameInfo.teamRightAbility)}
 				</div>
-				<button class="${readyButtonStyle}" id="readyButton" ${readyButtonStyle === 'disabledButton' ? 'disabled' : ''}>
+				<button class="${readyButtonStyle}" id="readyButton" ${readyButtonStyle === "disabledButton" ? "disabled" : ""}>
 					Ready
 				</button>
 			</div>
@@ -364,10 +284,8 @@ class WaitingRoomPageManager {
 		`;
 	}
 	_getMode() {
-		const left =
-			this.clientInfo.gameInfo.teamLeftMode === "vampire" ? "뱀파이어" : "인간";
-		const right = 
-			this.clientInfo.gameInfo.teamRightMode === "vampire" ? "뱀파이어" : "인간";
+		const left = this.clientInfo.gameInfo.teamLeftMode === "vampire" ? "뱀파이어" : "인간";
+		const right = this.clientInfo.gameInfo.teamRightMode === "vampire" ? "뱀파이어" : "인간";
 		return `${left} VS ${right} 모드`;
 	}
 
@@ -379,14 +297,14 @@ class WaitingRoomPageManager {
 		} else {
 			infoHTML = this._getPlayerInfoListHTML(teamList, totalPlayerCount);
 		}
-		const readyAll = teamList.length === totalPlayerCount && teamList.every((player) => player.readyState === 'READY');
+		const readyAll = teamList.length === totalPlayerCount && teamList.every(player => player.readyState === "READY");
 		return `
 			<div class="teamPanel">
 				<div class="status">
 					<img class="teamIcon ${mode}Icon" src="images/${mode}Icon.png">
 					<div class="readyText">
 						Ready!
-						<div class="readyStroke ${readyAll ? 'on' : ''}">Ready!</div>
+						<div class="readyStroke ${readyAll ? "on" : ""}">Ready!</div>
 					</div>
 				</div>
 				<div class="info">${infoHTML}</div>
@@ -395,14 +313,13 @@ class WaitingRoomPageManager {
 	}
 
 	_getPlayerEmptyInfoHTML(mode) {
-		const abilityBtnHTML =
-			'<button class="abilityButton generalButton">?</button>';
+		const abilityBtnHTML = '<button class="abilityButton generalButton">?</button>';
 		return `
 			<div class="nameContainer">
 				<div class="name">?</div>
 			</div>
 			<div class="avatar">
-				${mode === 'vampire' ? abilityBtnHTML : ''}
+				${mode === "vampire" ? abilityBtnHTML : ""}
 				<div class="avatarImgFrame emptyFrame">
 					<div class="avatarQuestionMark">?</div>
 				</div>
@@ -419,10 +336,10 @@ class WaitingRoomPageManager {
 					<img class="abilityImg" src="images/ability/${selectAbility}.png">
 				</div>`;
 		} else {
-			abilityBtnInnerHTML = `${isMine ? '능력<br>선택' : '?'}`;
+			abilityBtnInnerHTML = `${isMine ? "능력<br>선택" : "?"}`;
 		}
 		let abilityBtnHTML = `
-			<button class="abilityButton generalButton ${isMine ? 'myAbilityButton' : ''}">
+			<button class="abilityButton generalButton ${isMine ? "myAbilityButton" : ""}">
 				${abilityBtnInnerHTML}
 			</button>
 		`;
@@ -432,9 +349,9 @@ class WaitingRoomPageManager {
 				<div class="name">${player.clientNickname}</div>
 			</div>
 			<div class="avatar">
-				${mode === 'vampire' ? abilityBtnHTML : ''}
+				${mode === "vampire" ? abilityBtnHTML : ""}
 				<div class="avatarImgFrame">
-					<img class="avatarImg ${player.readyState === 'READY' ? 'on' : ''}" 
+					<img class="avatarImg ${player.readyState === "READY" ? "on" : ""}" 
 						src="images/playerA.png">
 				</div>
 			</div>
@@ -443,7 +360,7 @@ class WaitingRoomPageManager {
 
 	_getPlayerInfoListHTML(playerList, totalPlayerCount) {
 		let listHTML = "";
-		playerList.forEach((player) => {
+		playerList.forEach(player => {
 			listHTML += `
 				<div class="listItem ${player.clientId === this.clientInfo.id ? "me" : ""}">
 					${this._getPlayerInfoItemHTML(player)}
@@ -460,8 +377,7 @@ class WaitingRoomPageManager {
 	_getPlayerInfoItemHTML(player) {
 		return `
 			<div class="avatarImgFrame">
-				<img class="avatarImg ${player.readyState === "READY" ? "on" : ""
-			}" src="images/playerA.png">
+				<img class="avatarImg ${player.readyState === "READY" ? "on" : ""}" src="images/playerA.png">
 			</div>
 			<div class="listName">${player.clientNickname}</div>
 		`;
@@ -488,18 +404,10 @@ class WaitingRoomPageManager {
 			<div class="abilitySelectionModal">
 				<div class="abilityContainer" id="vamVamAbilityContainer">
 					<div class="abilitySubContainer">
-						${this._getAbilityItemHTML(
-							'스피드 트위스터',
-							'speedTwister',
-							'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
-						)}
+						${this._getAbilityItemHTML("스피드 트위스터", "speedTwister", "패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.")}
 					</div>
 					<div class="abilitySubContainer">
-						${this._getAbilityItemHTML(
-							'고스트 스매셔',
-							'ghostSmasher',
-							'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
-						)}
+						${this._getAbilityItemHTML("고스트 스매셔", "ghostSmasher", "패들로 공을 쳤을 때, 공이 잠시 투명해진다.")}
 					</div>
 				</div>
 			</div>
@@ -510,28 +418,12 @@ class WaitingRoomPageManager {
 			<div class="abilitySelectionModal">
 				<div class="abilityContainer">
 					<div class="abilitySubContainer">
-						${this._getAbilityItemHTML(
-							'자이언트 블로커',
-							'jiantBlocker',
-							'뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.'
-						)}
-						${this._getAbilityItemHTML(
-							'스피드 트위스터',
-							'speedTwister',
-							'패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.'
-						)}
+						${this._getAbilityItemHTML("자이언트 블로커", "jiantBlocker", "뱀파이어 패들의 크기는 커지고, 인간 패들의 크기는 작아진다.")}
+						${this._getAbilityItemHTML("스피드 트위스터", "speedTwister", "패들로 공을 쳤을 때, 공의 속도와 이동 방향이 왜곡된다.")}
 					</div>
 					<div class="abilitySubContainer">
-						${this._getAbilityItemHTML(
-							'일루젼 페이커',
-							'illusionFaker',
-							'패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.'
-						)}
-						${this._getAbilityItemHTML(
-							'고스트 스매셔',
-							'ghostSmasher',
-							'패들로 공을 쳤을 때, 공이 잠시 투명해진다.'
-						)}
+						${this._getAbilityItemHTML("일루젼 페이커", "illusionFaker", "패들로 공을 쳤을 때, 인간 팀이 판별할 수 없는 가짜 공이 생성된다.")}
+						${this._getAbilityItemHTML("고스트 스매셔", "ghostSmasher", "패들로 공을 쳤을 때, 공이 잠시 투명해진다.")}
 					</div>
 				</div>
 			</div>

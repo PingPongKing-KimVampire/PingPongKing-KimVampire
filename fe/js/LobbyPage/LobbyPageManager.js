@@ -4,7 +4,7 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class LobbyPageManager {
-	constructor(app, clientInfo, onClickWatingRoomCreationButton, onCLickWaitingRoomButton, renderFriendManagementPage) {
+	constructor(app, clientInfo, onClickWatingRoomCreationButton, onCLickWaitingRoomButton, renderFriendManagementPage, renderEditProfilePage) {
 		console.log("Lobby Page!");
 		app.innerHTML = this._getHTML();
 
@@ -29,6 +29,7 @@ class LobbyPageManager {
 		this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
 		this.onCLickWaitingRoomButton = onCLickWaitingRoomButton;
 		this.renderFriendManagementPage = renderFriendManagementPage;
+		this.renderEditProfilePage = renderEditProfilePage;
 		this._setCreateWaitingRoomButton();
 
 		this.enterRoomModal = document.querySelector(".questionModal");
@@ -48,13 +49,24 @@ class LobbyPageManager {
 		this._adjustButtonSize();
 
 		this._setFriendManagementButton();
+		this._setProfileButton();
 	}
 
 	_setFriendManagementButton() {
 		this.friendManagementButton = document.querySelector("#friendManagementButton");
 		this.friendManagementButton.addEventListener("click", () => {
 			this.clientInfo.lobbySocket.close();
+			this.clientInfo.lobbySocket = null;
 			this.renderFriendManagementPage();
+		});
+	}
+
+	_setProfileButton() {
+		this.profileButton = document.querySelector("#profileButton");
+		this.profileButton.addEventListener("click", () => {
+			this.clientInfo.lobbySocket.close();
+			this.clientInfo.lobbySocket = null;
+			this.renderEditProfilePage();
 		});
 	}
 
@@ -277,6 +289,7 @@ class LobbyPageManager {
 	_getHTML() {
 		return `
     <div id="friendTest">
+	  <button id="profileButton">프로필 관리 페이지</button>
       <button id="friendManagementButton">친구 관리 페이지</button>
       <span id="friendRequestCount">1</span>
     </div>

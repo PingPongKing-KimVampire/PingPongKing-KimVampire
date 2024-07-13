@@ -1,7 +1,11 @@
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
+import { _connectLobbySocket } from "../connect.js";
+
 import windowObservable from "../../WindowObservable.js";
 
 class FriendManagementPageManager {
-	constructor(app, clientInfo) {
+	constructor(app, clientInfo, renderLobby) {
 		console.log("Friend Management Page!");
 
 		// TODO : 임시 하드 코딩
@@ -53,6 +57,7 @@ class FriendManagementPageManager {
 
 		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
+		this.renderLobby = renderLobby;
 
 		this._initPage();
 	}
@@ -60,6 +65,7 @@ class FriendManagementPageManager {
 	_initPage() {
 		this.searchKeyword = "";
 		this._setTabButtons();
+		this._setExitButton();
 		this._renderSearchClientTab();
 		this._listenNotifyEvent();
 		this._autoSetScrollTrackColor();
@@ -86,6 +92,15 @@ class FriendManagementPageManager {
 				}
 				this.prevTabButton = event.target;
 			});
+		});
+	}
+
+	_setExitButton() {
+		this.exitButton = document.querySelector(".exitButton");
+		this.exitButton.addEventListener("click", async () => {
+			this._unsubscribeWindow();
+			this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
+			this.renderLobby();
 		});
 	}
 
@@ -272,8 +287,8 @@ class FriendManagementPageManager {
 			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(client => client.id !== newFriendClient.id);
 			newFriendClient.chat = {
 				recentTimestamp: null,
-				unreadMessageCount: 0
-			}
+				unreadMessageCount: 0,
+			};
 			this.clientInfo.friendInfo.friendList.push(newFriendClient);
 			this._renderTabByCurrentMode();
 		}

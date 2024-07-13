@@ -243,8 +243,6 @@ class ChattingPageManager {
 		friendListContainer.innerHTML = this._getFriendListHTML();
 		friendListContainer.querySelectorAll(".friendItem").forEach(friendItem => {
 			const id = friendItem.dataset.id;
-			console.log(id);
-			console.log(friendItem.querySelector(".avatarImg"));
 			friendItem.querySelector(".avatarImg").addEventListener("click", e => {
 				e.stopPropagation();
 				alert(`ID는 ${id}다`);

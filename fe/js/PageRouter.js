@@ -8,8 +8,8 @@ import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js"
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 
-export const SERVER_ADDRESS = '127.0.0.1';
-export const SERVER_PORT = '3001';
+export const SERVER_ADDRESS = "127.0.0.1";
+export const SERVER_PORT = "3001";
 
 class PageRouter {
 	constructor() {
@@ -77,11 +77,18 @@ class PageRouter {
 			await loginPageManager.initPage();
 		} else if (url === "lobby") {
 			this._loadCSS(["css/LobbyPage/lobbyPage.css"]);
-			const lobbyPageManager = new NewLobbyPageManager(this.app, this.clientInfo, this._onClickWatingRoomCreationButton.bind(this), this._onEnterWaitingRoom.bind(this), this._renderFriendManagementPage.bind(this));
+			const lobbyPageManager = new NewLobbyPageManager(
+				this.app,
+				this.clientInfo,
+				this._onClickWatingRoomCreationButton.bind(this),
+				this._onEnterWaitingRoom.bind(this),
+				this._renderFriendManagementPage.bind(this),
+				this._renderEditProfilePage.bind(this),
+			);
 			await lobbyPageManager.initPage();
 		} else if (url === "waitingRoomCreation") {
 			this._loadCSS(["css/LobbyPage/waitingRoomCreationPage.css"]);
-			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this._onEnterWaitingRoom.bind(this));
+			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this._onEnterWaitingRoom.bind(this), this._renderLobby.bind(this));
 		} else if (url === "pingpong") {
 			this._loadCSS(["css/PingpongPage/pingpongPage.css"]);
 			const pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this._onExitPingpongGame.bind(this));
@@ -94,10 +101,10 @@ class PageRouter {
 			const signupPageManager = new SignupPageManager(this.app, this.clientInfo, this._onSignupSuccess.bind(this));
 		} else if (url === "editProfile") {
 			this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
-			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo);
+			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
 		} else if (url === "friendManagement") {
 			this._loadCSS(["css/FriendManagementPage/friendManagementPage.css"]);
-			const friendManagementPageManager = new FriendManagementPageManager(this.app, this.clientInfo);
+			const friendManagementPageManager = new FriendManagementPageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
 		} else if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
 			const chattingPageManager = new ChattingPageManager(this.clientInfo);
@@ -105,6 +112,11 @@ class PageRouter {
 	}
 
 	_onLoginSuccess() {
+		this.renderPage("chatting");
+		this.renderPage("lobby");
+	}
+
+	_renderLobby() {
 		this.renderPage("lobby");
 	}
 
@@ -134,6 +146,10 @@ class PageRouter {
 
 	_renderFriendManagementPage() {
 		this.renderPage("friendManagement");
+	}
+
+	_renderEditProfilePage() {
+		this.renderPage("editProfile");
 	}
 
 	_loadCSS(filenames) {

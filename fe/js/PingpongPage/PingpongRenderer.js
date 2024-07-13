@@ -208,7 +208,6 @@ class PingpongRenderer {
 		// console.log(targetFakeBall);
 		// targetFakeBall.element.classList.add("pop");
 		// targetFakeBall.element.addEventListener("transitionend", ()=>{
-		// 	console.log("here");
 		// targetFakeBall.element.remove();
 		// })
 		targetFakeBall.element.remove();
