@@ -1,5 +1,6 @@
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
+import { _connectLobbySocket } from "../connect.js";
 
 class LoginPageManager {
 	constructor(app, clientInfo, onLoginSuccess, onEnterSignupPage) {
@@ -45,7 +46,7 @@ class LoginPageManager {
 		try {
 			await this._loginRequest(id, pw);
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			const lobbySocket = await this._connectLobbySocket(userData.id);
+			const lobbySocket = await _connectLobbySocket(userData.id);
 
 			this.clientInfo.id = userData.id;
 			this.clientInfo.nickname = userData.nickname;
@@ -77,18 +78,18 @@ class LoginPageManager {
 				body: JSON.stringify(userData),
 			});
 		} catch (error) {
-			throw new Error('서버의 응답이 없습니다.');
+			throw new Error("서버의 응답이 없습니다.");
 		}
 		if (!response.ok) {
 			if (400 <= response.status && response.status < 500) {
-				throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.');
+				throw new Error("아이디 또는 비밀번호가 올바르지 않습니다.");
 			} else if (500 <= response.status) {
-				throw new Error('서버와의 연결이 불안정합니다.');
+				throw new Error("서버와의 연결이 불안정합니다.");
 			}
 		}
 		const bearerAccessToken = response.headers.get("Authorization");
 		const accessToken = bearerAccessToken.replace("Bearer ", "");
-		if (!accessToken) throw new Error('서버와의 연결이 불안정합니다.');
+		if (!accessToken) throw new Error("서버와의 연결이 불안정합니다.");
 		this.accessToken = accessToken;
 	}
 
@@ -225,8 +226,8 @@ class LoginPageManager {
 					this.clientInfo.friendInfo.clientListIFriendRequested = this.clientInfo.friendInfo.clientListIFriendRequested.filter(client => client.id !== content.clientInfo.id);
 					acceptedClient.chat = {
 						recentTimestamp: null,
-						unreadMessageCount: 0
-					}
+						unreadMessageCount: 0,
+					};
 					this.clientInfo.friendInfo.friendList.push(acceptedClient);
 				}
 			} else if (event === "notifyFriendRequestRejected") {
@@ -263,44 +264,6 @@ class LoginPageManager {
 	// 	}
 	// 	return null;
 	// }
-
-	async _connectLobbySocket(id) {
-		const lobbySocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`);
-		await new Promise(resolve => {
-			lobbySocket.addEventListener("open", () => {
-				resolve();
-			});
-		});
-		const enterLobbyMessage = {
-			event: "enterLobby",
-			content: {
-				clientId: id,
-			},
-		};
-		lobbySocket.send(JSON.stringify(enterLobbyMessage));
-		// await new Promise(resolve => {
-		// 	lobbySocket.addEventListener(
-		// 		"message",
-		// 		function (messageEvent) {
-		// 			const { event, content } = JSON.parse(messageEvent.data);
-		// 			if (event === "enterLobbyResponse" && content.message === "OK") {
-		// 				lobbySocket.removeEventListener("message", listener);
-		// 				resolve();
-		// 			}
-		// 		}.bind(this),
-		// 	);
-		// });
-		return new Promise(resolve => {
-			const listener = function (messageEvent) {
-				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === "enterLobbyResponse" && content.message === "OK") {
-					lobbySocket.removeEventListener("message", listener);
-					resolve(lobbySocket);
-				}
-			};
-			lobbySocket.addEventListener("message", listener);
-		});
-	}
 
 	_getHTML() {
 		return `

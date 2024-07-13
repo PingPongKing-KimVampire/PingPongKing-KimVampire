@@ -1,0 +1,299 @@
+#container {
+	height: 80%;
+	width: 55%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+#root {
+	height: 25%;
+	width: 50%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+#subTrees {
+	height: 62.5%;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+}
+
+.subTree {
+	height: 100%;
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.final, .semiFinal {
+	height: 40%;
+	width: 100%;
+}
+.final {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.semiFinal {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+.player {
+	height: 100%;
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.final .player, .semiFinal .player {
+	width: 50%;
+}
+
+.avatar {
+	position: relative;
+	height: 75%;
+	aspect-ratio: 1/1;
+}
+
+.avatarImgFrame {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-end;
+	border-radius: 10rem;
+	border: 0.12rem solid rgb(213, 112, 255);
+	box-sizing: border-box;
+	background: linear-gradient(to bottom, rgb(50, 26, 81), rgb(2, 4, 31));
+	filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.5));
+	overflow: hidden;
+	position: relative;
+	z-index: 2;
+}
+.emptyPlayer .avatarImgFrame {
+	align-items: center;
+	background: none;
+	background-color: rgb(1, 4, 37);
+	filter: none;
+	border: 0.1rem solid rgba(255, 255, 255, 0.3);
+	font-size: 1.8rem;
+	font-weight: 200;
+	color: rgba(255, 255, 255, 0.3);
+}
+.avatarImg {
+	width: 100%;
+}
+
+.crownImg {
+	position: absolute;
+	bottom: 90%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 50%;
+	z-index: 1;
+}
+
+.nickname {
+	height: 25%;
+	width: 80%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.nicknameText {
+	font-size: 1.5rem;
+	font-weight: 200;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.emptyPlayer .nicknameText {
+	color: rgba(255, 255, 255, 0.3);
+}
+
+#lineCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#elementCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.observeButton {
+	position: absolute;
+	transform: translateX(-50%);
+	font-size: 1.2rem;
+	font-weight: 500;
+	padding: 0.3% 0.9%;
+}
+.observeButton:hover {
+	background-color: rgb(213, 112, 255);
+	border-color: rgb(213, 112, 255);
+	color: rgb(1, 4, 37);
+	font-weight: 700;
+}
+
+.scoreBox {
+	position: absolute;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 4%;
+}
+.scoreBox .score {
+	font-size: 1.7rem;
+	font-weight: 200;
+}
+
+#tournamentExitButton {
+	position: absolute;
+	height: 6%;
+	top: 3%;
+	left: 2%;
+	padding: 0 1.5% 0 3%;
+	font-size: 1.5rem;
+	z-index: 1;
+}
+#tournamentExitButton img {
+	position: absolute;
+	top: 50%;
+	left: 5%;
+	transform: translateY(-55%);
+	height: 50%;
+}
+#tournamentExitButton:hover {
+	background-color: rgb(213, 112, 255);
+	border-color: rgb(1, 4, 37);
+	color: rgb(1, 4, 37);
+	font-weight: 900;
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
+	#container {
+		width: 65%;
+	}
+	.scoreBox {
+		width: 4.5%;
+	}
+	#tournamentExitButton {
+		padding: 0 2% 0 4%;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
+	#container {
+		width: 80%;
+	}
+	#tournamentExitButton {
+		height: 5.5%;
+		font-size: 1.45rem;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	#container {
+		width: 85%;
+		height: 72%;
+	}
+	.scoreBox {
+		width: 6%;
+	}
+	#tournamentExitButton {
+		height: 5%;
+		font-size: 1.4rem;
+		padding: 0 2.3% 0 4.6%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1) {
+	#container {
+		height: 65%;
+		width: 90%;
+	}
+	.nicknameText {
+		font-size: 1.3rem;
+	}
+	.scoreBox {
+		width: 8%;
+	}
+	.scoreBox .score {
+		font-size: 1.5rem;
+	}
+	#tournamentExitButton {
+		top: 2%;
+		left: 3%;
+		height: 5%;
+		font-size: 1.4rem;
+		padding: 0 3% 0 6%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+	#container {
+		height: 57%;
+		width: 90%;
+	}
+	.observeButton {
+		font-size: 1rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+	#container {
+		height: 50%;
+		width: 90%;
+	}
+	.nicknameText {
+		font-size: 1rem;
+	}
+	.scoreBox .score {
+		font-size: 1.2rem;
+	}
+	.observeButton {
+		font-size: 0.8rem;
+	}
+	#tournamentExitButton {
+		height: 4.5%;
+		font-size: 1.3rem;
+		padding: 0 3.5% 0 7%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+	#container {
+		height: 37%;
+		width: 90%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+	#container {
+		height: 30%;
+		width: 90%;
+	}
+	.nicknameText {
+		font-size: 0.7rem;
+	}
+	.scoreBox .score {
+		font-size: 0.9rem;
+	}
+	#tournamentExitButton {
+		height: 4%;
+		font-size: 1.2rem;
+		padding: 0 3.5% 0 7%;
+	}
+}

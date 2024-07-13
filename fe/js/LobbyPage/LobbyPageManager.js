@@ -4,7 +4,7 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class LobbyPageManager {
-	constructor(app, clientInfo, onClickWatingRoomCreationButton, onCLickWaitingRoomButton, renderFriendManagementPage) {
+	constructor(app, clientInfo, onClickWatingRoomCreationButton, onCLickWaitingRoomButton, renderFriendManagementPage, renderEditProfilePage, joinWaitingTournamentPage) {
 		console.log("Lobby Page!");
 		app.innerHTML = this._getHTML();
 
@@ -29,6 +29,9 @@ class LobbyPageManager {
 		this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
 		this.onCLickWaitingRoomButton = onCLickWaitingRoomButton;
 		this.renderFriendManagementPage = renderFriendManagementPage;
+		this.renderEditProfilePage = renderEditProfilePage;
+		this.joinWaitingTournamentPage = joinWaitingTournamentPage;
+		this._setTournamentJoinButton();
 		this._setCreateWaitingRoomButton();
 
 		this.enterRoomModal = document.querySelector(".questionModal");
@@ -48,13 +51,24 @@ class LobbyPageManager {
 		this._adjustButtonSize();
 
 		this._setFriendManagementButton();
+		this._setProfileButton();
 	}
 
 	_setFriendManagementButton() {
 		this.friendManagementButton = document.querySelector("#friendManagementButton");
 		this.friendManagementButton.addEventListener("click", () => {
 			this.clientInfo.lobbySocket.close();
+			this.clientInfo.lobbySocket = null;
 			this.renderFriendManagementPage();
+		});
+	}
+
+	_setProfileButton() {
+		this.profileButton = document.querySelector("#profileButton");
+		this.profileButton.addEventListener("click", () => {
+			this.clientInfo.lobbySocket.close();
+			this.clientInfo.lobbySocket = null;
+			this.renderEditProfilePage();
 		});
 	}
 
@@ -110,6 +124,7 @@ class LobbyPageManager {
 
 	_subscribeWindow() {
 		this._adjustButtonSizeRef = this._adjustButtonSize.bind(this);
+		// TODO : _adjustButtonSizeRef에 this가 안 붙음. 잘 안 되고 있을 듯?
 		windowObservable.subscribeResize(_adjustButtonSizeRef);
 		this._autoSetScollTrackColorRef = this._autoSetScollTrackColor.bind(this);
 		windowObservable.subscribeResize(_autoSetScollTrackColorRef);
@@ -119,6 +134,31 @@ class LobbyPageManager {
 		windowObservable.unsubscribeResize(this._adjustButtonSizeRef);
 		windowObservable.unsubscribeResize(this._autoSetScollTrackColorRef);
 	}
+
+	_setTournamentJoinButton(){
+		const tournamentJoinButton = document.querySelector(".tournamentJoinButton");
+		tournamentJoinButton.addEventListener("click", async () => {
+			// const startMatchMakingMessage = {
+			// 	event: "startMatchMaking",
+			// 	content: {},
+			// };
+			// this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
+			// await new Promise(resolve => {
+			// 	const listener = messageEvent => {
+			// 		const { event, content } = JSON.parse(messageEvent.data);
+			// 		if (event === "startMatchMakingResponse" && content.message === "OK") {
+			// 			this.clientInfo.lobbySocket.removeEventListener("message", listener);
+			// 			resolve();
+			// 		}
+			// 	};
+			// 	this.clientInfo.lobbySocket.addEventListener("message", listener);
+			// });
+
+			this._unsubscribeWindow();
+			this.joinWaitingTournamentPage();
+		});
+	}
+
 
 	_setCreateWaitingRoomButton() {
 		const createWaitingRoomButton = document.querySelector(".createWaitingRoomButton");
@@ -142,16 +182,21 @@ class LobbyPageManager {
 	}
 
 	_adjustButtonSize() {
-		const button = document.querySelector(".createWaitingRoomButton");
+		const createWaitingRoomButton = document.querySelector(".createWaitingRoomButton");
+		const createTournamentJoinButton = document.querySelector(".tournamentJoinButton");
 		const viewWidth = window.innerWidth;
 		const viewHeight = window.innerHeight;
 
 		if (viewWidth < viewHeight) {
-			button.style.height = "4vh";
-			button.style.width = "calc(4vh * 4 / 1)";
+			createWaitingRoomButton.style.height = "4vh";
+			createWaitingRoomButton.style.width = "calc(4vh * 4 / 1)";
+			createTournamentJoinButton.style.height = "4vh";
+			createTournamentJoinButton.style.width = "calc(4vh * 4 / 1)";
 		} else {
-			button.style.width = "16vw";
-			button.style.height = "calc(16vw * 1 / 4)";
+			createWaitingRoomButton.style.width = "16vw";
+			createWaitingRoomButton.style.height = "calc(16vw * 1 / 4)";
+			createTournamentJoinButton.style.width = "16vw";
+			createTournamentJoinButton.style.height = "calc(16vw * 1 / 4)";
 		}
 	}
 
@@ -277,17 +322,25 @@ class LobbyPageManager {
 	_getHTML() {
 		return `
     <div id="friendTest">
+	  <button id="profileButton">프로필 관리 페이지</button>
       <button id="friendManagementButton">친구 관리 페이지</button>
       <span id="friendRequestCount">1</span>
     </div>
     <div class="lobby">
       <div class="lobbyInner">
-          ${this._getWaitingRoomCreationButtonHtml()}
-          ${this._getWaitingRoomListContainerHtml()}
+		<div class="lobbyTab">
+			${this._getTournamentJoinButtonHtml()}
+			${this._getWaitingRoomCreationButtonHtml()}
+		</div>
+        ${this._getWaitingRoomListContainerHtml()}
       </div>
     </div>
-    ${this._getEnterWaitingRoomModalHTML()};
+    ${this._getEnterWaitingRoomModalHTML()}
   `;
+	}
+
+	_getTournamentJoinButtonHtml(){
+		return `<button class="tournamentJoinButton">토너먼트 참가하기</button>`;
 	}
 
 	_getWaitingRoomCreationButtonHtml() {

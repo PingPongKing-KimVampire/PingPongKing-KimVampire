@@ -30,7 +30,7 @@ class PingpongPageManager {
 		// clientId;
 		// clientNickname;
 		// readyState;
-    // ability;
+		// ability;
 		// paddleHeight;
 		// paddleWidth;
 
@@ -40,17 +40,33 @@ class PingpongPageManager {
 	}
 
 	async initPage() {
-    //하드코딩
-    this.clientInfo.gameInfo.sizeInfo.paddleWidth = 15;
-    this.clientInfo.gameInfo.sizeInfo.paddleHeight = 150;
+		//하드코딩
+		this.clientInfo.gameInfo.sizeInfo.paddleWidth = 15;
+		this.clientInfo.gameInfo.sizeInfo.paddleHeight = 150;
 		this.app.innerHTML = this._getPingpongHTML();
 
 		this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
 		this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 
 		this._manageExitRoom(); // 탁구장 나가기 처리
-		this.exitPingpongPageRef = this._exitPingpongPage.bind(this);
-		this.clientInfo.socket.addEventListener('close', this.exitPingpongPageRef); // 탁구장 폐쇄 감지
+
+		// 탁구장 폐쇄 감지
+		// TODO : 현재 테스트 불가능
+		const closeListener = () => {
+			this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener('close', closeListener);
+			this._cleanupPingpongInteraction();
+			this._displayGameOverModal();
+		}
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener('close', closeListener);
+
+		// TODO : 탁구장 폐쇄 감지가 불가능해서 임시로 notifyGameEnd API 활용
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener('message', (messageEvent) => {
+			const { event } = JSON.parse(messageEvent.data);
+			if (event === 'notifyGameEnd') {
+				console.log('notify game end!');
+				this._displayGameOverModal();
+			}
+		})
 	}
 
 	_manageExitRoom() {
@@ -80,24 +96,27 @@ class PingpongPageManager {
 	}
 	_exitYesButtonClicked() {
 		this.clientInfo.socket.close();
-		this._exitPingpongPage();
+		this._cleanupPingpongInteraction();
+		this.onExitPingpong();
 	}
 	_exitNoButtonClicked(questionModal) {
 		questionModal.style.display = 'none';
 	}
 
-	_exitPingpongPage() {
+	_cleanupPingpongInteraction() {
 		// PingpongPageManager, PingpongRenderer, Player에서 소켓과의 모든 상호작용 삭제
-		this.clientInfo.socket.removeEventListener(
-			'close',
-			this.exitPingpongPageRef
-		);
+		// TODO : 남아있는 리스너 확인하기
 		this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
 		this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
 		this.player.unsubscribeWindow.call(this.player);
-		this.onExitPingpong();
-		// window.getEventListeners(this.clientInfo.socket);
-		// TODO : 남아있는 리스너 확인하기
+	}
+
+	_displayGameOverModal() {
+		const gameOverModal = document.querySelector('#gameOverModal');
+		gameOverModal.style.display = 'flex';
+		document.querySelector('#gameOverModal button').addEventListener('click', () => {
+			this.onExitPingpong();
+		});
 	}
 
 	_getPingpongHTML() {
@@ -107,6 +126,7 @@ class PingpongPageManager {
 				${this._getPlayBoardHTML()}
 			</div>
 			${this._getquestionModalHTML()}
+			${this._getGameOverModalHTML()}
 		`;
 	}
 
@@ -154,6 +174,17 @@ class PingpongPageManager {
 						<button class="activatedButton">네</button>
 						<button class="activatedButton">아니오</button>
 					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	_getGameOverModalHTML() {
+		return `
+			<div id="gameOverModal">
+				<div id="contentBox">
+					임시 게임 종료 화면
+					<button class="generalButton">나가기</button>
 				</div>
 			</div>
 		`;

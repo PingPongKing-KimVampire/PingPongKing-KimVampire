@@ -1,12 +1,14 @@
 import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
+import { _connectLobbySocket } from "../connect.js";
 
 class EditProfilePageManager {
-	constructor(app, clientInfo) {
+	constructor(app, clientInfo, renderLobbyPage) {
 		this.clientInfo = clientInfo;
 
 		this._setDefaultAvatars();
 		app.innerHTML = this._getHTML();
+		this.renderLobbyPage = renderLobbyPage;
 		this._initPage();
 	}
 
@@ -45,7 +47,7 @@ class EditProfilePageManager {
 	}
 
 	_checkNickname = async () => {
-		if (this.nicknameInput.value === '' || this.nicknameInput.value === this.clientInfo.nickname) {
+		if (this.nicknameInput.value === "" || this.nicknameInput.value === this.clientInfo.nickname) {
 			this.nicknameWarning.textContent = "";
 			return false;
 		}
@@ -61,10 +63,8 @@ class EditProfilePageManager {
 				return false;
 			}
 		} catch (error) {
-			if (error instanceof Error)
-				this.nicknameWarning.textContent = error.message;
-			if (error instanceof TypeError && error.message === `Failed to fetch`)
-				this.nicknameWarning.textContent = "서버의 응답이 없습니다.";
+			if (error instanceof Error) this.nicknameWarning.textContent = error.message;
+			if (error instanceof TypeError && error.message === `Failed to fetch`) this.nicknameWarning.textContent = "서버의 응답이 없습니다.";
 			return;
 		}
 		this.nicknameWarning.textContent = "";
@@ -84,7 +84,7 @@ class EditProfilePageManager {
 			},
 		});
 		if (!response.ok) {
-			throw new Error('서버와의 연결이 불안정합니다.');
+			throw new Error("서버와의 연결이 불안정합니다.");
 		}
 		const data = await response.json();
 		return data.is_available;
@@ -198,8 +198,9 @@ class EditProfilePageManager {
 	_renderExitModal = () => {
 		this.exitModal.style.display = "flex";
 	};
-	_exitEditProfilePage = () => {
-		// TODO : 프로필 편집 페이지에서 뒤로 가는 로직 작성하기
+	_exitEditProfilePage = async  () => {
+		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
+		this.renderLobbyPage();
 	};
 	_hideExitModal = () => {
 		this.exitModal.style.display = "none";

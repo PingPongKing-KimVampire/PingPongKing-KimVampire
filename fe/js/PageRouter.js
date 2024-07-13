@@ -7,9 +7,11 @@ import SignupPageManager from "./SignupPage/SignupPageManager.js";
 import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js";
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
+import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
+import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
 
-export const SERVER_ADDRESS = '127.0.0.1';
-export const SERVER_PORT = '3001';
+export const SERVER_ADDRESS = "127.0.0.1";
+export const SERVER_PORT = "3001";
 
 class PageRouter {
 	constructor() {
@@ -31,6 +33,7 @@ class PageRouter {
 				teamLeftTotalPlayerCount: null,
 				teamRightTotalPlayerCount: null,
 			},
+			tournamentInfo: null, // TODO : 토너먼트에서 나왔을 때 다시 null로 세팅
 			friendInfo: {
 				friendList: [
 					{
@@ -77,11 +80,19 @@ class PageRouter {
 			await loginPageManager.initPage();
 		} else if (url === "lobby") {
 			this._loadCSS(["css/LobbyPage/lobbyPage.css"]);
-			const lobbyPageManager = new NewLobbyPageManager(this.app, this.clientInfo, this._onClickWatingRoomCreationButton.bind(this), this._onEnterWaitingRoom.bind(this), this._renderFriendManagementPage.bind(this));
+			const lobbyPageManager = new NewLobbyPageManager(
+				this.app,
+				this.clientInfo,
+				this._onClickWatingRoomCreationButton.bind(this),
+				this._onEnterWaitingRoom.bind(this),
+				this._renderFriendManagementPage.bind(this),
+				this._renderEditProfilePage.bind(this),
+				this._joinTournamentWaitingPage.bind(this)
+			);
 			await lobbyPageManager.initPage();
 		} else if (url === "waitingRoomCreation") {
 			this._loadCSS(["css/LobbyPage/waitingRoomCreationPage.css"]);
-			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this._onEnterWaitingRoom.bind(this));
+			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this._onEnterWaitingRoom.bind(this), this._renderLobby.bind(this));
 		} else if (url === "pingpong") {
 			this._loadCSS(["css/PingpongPage/pingpongPage.css"]);
 			const pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this._onExitPingpongGame.bind(this));
@@ -94,17 +105,28 @@ class PageRouter {
 			const signupPageManager = new SignupPageManager(this.app, this.clientInfo, this._onSignupSuccess.bind(this));
 		} else if (url === "editProfile") {
 			this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
-			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo);
+			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
 		} else if (url === "friendManagement") {
 			this._loadCSS(["css/FriendManagementPage/friendManagementPage.css"]);
-			const friendManagementPageManager = new FriendManagementPageManager(this.app, this.clientInfo);
+			const friendManagementPageManager = new FriendManagementPageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
 		} else if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
 			const chattingPageManager = new ChattingPageManager(this.clientInfo);
+		} else if (url === "waitingTournament") {
+			this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
+			const waitingTournamentPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this._joinLobbyPage.bind(this), this._joinTournamentPage.bind(this));
+		} else if (url === "tournament") {
+			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
+			const tournamentPageManager = new TournamentPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._joinLobbyPage.bind(this));
 		}
 	}
 
 	_onLoginSuccess() {
+		this.renderPage("chatting");
+		this.renderPage("lobby");
+	}
+
+	_renderLobby() {
 		this.renderPage("lobby");
 	}
 
@@ -136,6 +158,10 @@ class PageRouter {
 		this.renderPage("friendManagement");
 	}
 
+	_renderEditProfilePage() {
+		this.renderPage("editProfile");
+	}
+
 	_loadCSS(filenames) {
 		// 동적으로 추가된 기존 CSS 파일 제거하기
 		const existingLinks = document.querySelectorAll('link[data-dynamic="true"]');
@@ -150,6 +176,18 @@ class PageRouter {
 			newLink.setAttribute("data-dynamic", "true");
 			document.head.appendChild(newLink);
 		});
+	}
+
+	_joinTournamentWaitingPage() {
+		this.renderPage("waitingTournament");
+	}
+
+	_joinLobbyPage() {
+		this.renderPage("lobby");
+	}
+
+	_joinTournamentPage() {
+		this.renderPage("tournament");
 	}
 }
 
