@@ -135,6 +135,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
                 channel_name_map.pop(self.client_id)
             discard_group(self, 'lobby')
             await self.close()
+        stateManager.add_channel_layer(self.channel_layer)
         client_id = decoded_token['user_id']
         # state manage
         if client_id in stateManager.clients:
@@ -145,7 +146,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         self.client_nickname = decoded_token['nickname']
         # add user 회원가입에서 이루어짐, 추후에 알림 기능 적용을 위해서 채널 만들고 관리할 필요 있음
         # stateManager.add_user(client_id, decoded_token['nickname'])
-        # await stateManager._add_client(self, client_id, decoded_token['nickname'])
         user = await UserRepository.get_user_by_id(client_id)
         response = {
             "clientId": client_id,
@@ -153,7 +153,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             "clientAvatarUrl": user.get_image_uri(),
             "message": "OK"
         }
-        await add_group(self, 'lobby')
         channel_name_map[self.client_id] = self.channel_name
         content = {
                 "clientId": self.client_id,

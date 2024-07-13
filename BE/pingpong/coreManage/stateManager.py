@@ -75,11 +75,9 @@ class StateManager:
     def get_tournament_client_list(self, tournament_id: str) -> List[Dict[str, str]]:
         return self.tournaments.get(tournament_id, {}).get('clients', {})
 
-    # Client Management
-    def add_client(self, consumer: Any, client_id: str, nickname: str) -> None:
+    def add_channel_layer(self, channel_layer) -> None:
         if self.channel_layer is None:
-            self.channel_layer = consumer.channel_layer
-        self.clients[client_id] = nickname
+            self.channel_layer = channel_layer
 
     def remove_client(self, client_id: str) -> None:
         self.clients.pop(client_id, None)
@@ -185,8 +183,8 @@ class StateManager:
             await game_manager.trigger_game()
 
     async def notify_lobby(self, event: str, content: Dict[str, Any]) -> None:
-        # Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
         if self.channel_layer:
+            Printer.log(f"!!!!! notify LOBBY !!!!!", "cyan")
             await notify_group(self.channel_layer, 'lobby', event, content)
 
     async def notify_room(self, room_id: str, event: str, content: Dict[str, Any]) -> None:
