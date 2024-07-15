@@ -21,14 +21,16 @@ NORMAL_SPEED = 10
 
 
 class GameRoomManager:
-    def __init__(self, channel_layer, room_id, title, left_mode, right_mode, left_max_count, right_max_count):
+    def __init__(self, channel_layer, room_id, title, left_mode='human', right_mode='human', left_max_count=1, right_max_count=1, mode='tournament'):
         self.channel_layer = channel_layer
+
+        self.mode = mode
 
         #common game room info
         self.room_id = room_id
         self.title = title
-        self.clients = {}
-        self.team_left = {}
+        self.clients = {} # {client_id : Player}
+        self.team_left = {} 
         self.team_right = {}
         self.left_max_count = left_max_count
         self.right_max_count = right_max_count
@@ -49,7 +51,12 @@ class GameRoomManager:
         self.fake_ball = {}
         self.queue = Queue()
 
+        self.winner = None
+
     # getter
+
+    def get_score(self):
+        return self.score
     
     def get_room_client_count(self):
         return len(self.clients)
@@ -185,9 +192,9 @@ class GameRoomManager:
         self.is_end = False
         self._reset_round()
         asyncio.create_task(self._notify_game_ready_and_start())
-        asyncio.create_task(self._game_loop())
-        # asyncio.create_task(self._input_loop())
+        game_loop_task = asyncio.create_task(self._game_loop())
         asyncio.create_task(self._paddle_update_loop())
+        return game_loop_task
 
     # Game Loop
 
@@ -201,13 +208,7 @@ class GameRoomManager:
             ball_state = self._detect_collisions(self.ball)
             await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-
-    # async def _input_loop(self):
-    #     while self.is_playing and not self.is_end:
-    #         while not self.queue.empty():
-    #             client_id, content = await self.queue.get()
-    #             self._update_paddle_position(client_id, content)
-    #         await asyncio.sleep(0.01)
+        return self.winner
 
     def update_target(self, client_id, x, y):
         self.clients[client_id].update_target(x, y)
@@ -344,7 +345,8 @@ class GameRoomManager:
         self._add_score()
         await self._notify_score_update()
         if self._check_game_end():
-            await self._end_game_loop()
+            self.winner = self._end_game_loop()
+            await self._notify_game_room('notifyGameEnd', {'winTeam': self.winner})
         else:
             self._reset_round()
 
@@ -360,7 +362,7 @@ class GameRoomManager:
     async def _end_game_loop(self):
         team = 'left' if self.score[LEFT] >= 5 else 'right'
         self._end_game()
-        await self._notify_game_room('notifyGameEnd', {'winTeam': team})
+        return team
 
     def _reset_round(self):
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
@@ -372,7 +374,6 @@ class GameRoomManager:
     def _end_game(self):
         self.is_playing = False
         self.is_end = True
-        self._reset_game()
         
     def _reset_game(self):
         self.score = {LEFT: 0, RIGHT: 0}
@@ -384,10 +385,10 @@ class GameRoomManager:
         self._reset_round()
 
     async def give_up_game(self, consumer):
-        self._end_game()
         client_id = consumer.client_id
         if self.is_playing:
             await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
+        self._end_game()
     
     ### Notify methods
 

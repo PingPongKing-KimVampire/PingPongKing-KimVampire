@@ -3,6 +3,7 @@ import json
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
 from coreManage.group import add_group, discard_group, notify_group
+import asyncio
 
 stateManager = StateManager()
 
@@ -14,6 +15,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         self.nickname = None
         self.tournament_state = "semi-final"
         self.tournament_info = stateManager.get_tournament_room(self.tournament_id)
+        self.gameroom_id_now = None
         await self.accept()
         await add_group(self, self.tournament_id)
         Printer.log(f"Client connected to tournament room {self.room_id}", "green")
@@ -54,5 +56,10 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def enter_tournament_room(self, content):
         self.set_consumer_info(content['clientId'])
         client_info_list = self.tournament_manager.get_client_info_list()
+        self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
         await self._send("enterTournamentRoomResponse", 
                          { "tournamentClientList": client_info_list })
+        await asyncio.sleep(3)
+        await self._send("notifyYourGameRoomReady", 
+                         {'pingpongroomId' : self.gameroom_id_now, 
+                          'stage' : self.tournament_state})
