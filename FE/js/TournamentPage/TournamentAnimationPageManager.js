@@ -2,15 +2,16 @@ import windowObservable from "../../WindowObservable.js";
 
 import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
 
-class TournamentPageManager {
-	constructor(app, clientInfo, _onStartPingpongGame, _joinLobbyPage) {
+class TournamentAnimationPageManager {
+	constructor(app, clientInfo, _onStartPingpongGame) {
 		this.app = app;
 		this._onStartPingpongGame = _onStartPingpongGame;
-		this._joinLobbyPage = _joinLobbyPage;
 		this.clientInfo = clientInfo;
-		this.clientInfo.id = "1"; // TODO : 임시 하드코딩
+
+		this.step = "semiFinalEnd"; //semiFinalEnd|finalEnd|semiFinalStart|finalStart| -> Start가 필요할지 따져보자
+
+		//step별로 항상 다른 정보를 띄어주면 어떨까?
 
 		this.playerList = [
 			// TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
@@ -43,13 +44,13 @@ class TournamentPageManager {
 					clientIdList: ["1", "2"],
 					score: [0, 10],
 					roomId: "123456",
-					state: "finished",
+					state: "finished", //notStarted|isPlaying|finished
 				},
 				{
 					clientIdList: ["3", "4"],
 					score: [10, 0],
 					roomId: "1234",
-					state: "isPlaying",
+					state: "finished",
 				},
 			],
 			final: [
@@ -57,13 +58,13 @@ class TournamentPageManager {
 					clientIdList: ["1", "3"],
 					score: [0, 10],
 					roomId: "123456",
-					state: "notStared"
-				}
-			]
+					state: "notStarted",
+				},
+			],
 		};
 
 		// this._getTournamentInfo();
-		setTimeout(this._renderTournamentAnimation.bind(this, "final"));
+		// setTimeout(this._renderTournamentAnimation.bind(this, "final"));
 		this._initPage();
 	}
 
@@ -72,7 +73,6 @@ class TournamentPageManager {
 		requestAnimationFrame(this._renderBracket.bind(this)); // TODO : 가끔 안 먹을 때 있음!ㅠㅠ
 		this._subscribeWindow();
 		// this._listenTournamentEvent(); TODO : 현재 테스트 불가능함
-		this._setTournamentExitButton();
 	}
 
 	async _getTournamentInfo() {
@@ -228,44 +228,6 @@ class TournamentPageManager {
 		this._onStartPingpongGame();
 	}
 
-	_setTournamentExitButton() {
-		document.querySelector('#tournamentExitButton').addEventListener('click', async () => {
-			// this.clientInfo.tournamentInfo.tournamentSocket.close(); TODO : 이후에 주석 풀기
-			// this.clientInfo.lobbySocket = await this._connectLobbySocket(); TODO : 현재 테스트 불가
-			this.clientInfo.tournamentInfo = null;
-			this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
-			this._joinLobbyPage();
-		})
-	}
-	async _connectLobbySocket() {
-		const lobbySocket = new WebSocket(
-			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby/`
-		);
-		await new Promise(resolve => {
-			lobbySocket.addEventListener('open', () => {
-				resolve();
-			});
-		});
-		const enterLobbyMessage = {
-			event: "enterLobby",
-			content: { cliendId: this.clientInfo.id }
-		}
-		lobbySocket.send(JSON.stringify(enterLobbyMessage));
-		
-		await new Promise(resolve => {
-			const listener = (messageEvent) => {
-				const { event, content } = JSON.parse(messageEvent.data);
-				console.log(JSON.parse(messageEvent.data));
-				if (event === "enterLobbyResponse" && content.message === "OK") {
-					lobbySocket.removeEventListener('message', listener);
-					resolve();
-				}
-			}
-			lobbySocket.addEventListener('message', listener);
-		});
-		return lobbySocket;
-	}
-
 	_renderBracket() {
 		const elementCanvas = document.querySelector("#elementCanvas");
 		elementCanvas.innerHTML = "";
@@ -292,6 +254,7 @@ class TournamentPageManager {
 				line.setAttribute("stroke", "rgba(255, 255, 255, 0.3)");
 				line.setAttribute("stroke-width", "0.1rem");
 				lineCanvas.append(line);
+				return line;
 			}
 			const winner = document.querySelector("#root").getBoundingClientRect();
 			const final1 = document.querySelector(".subTree:first-of-type .final").getBoundingClientRect();
@@ -450,22 +413,23 @@ class TournamentPageManager {
 			});
 		};
 
+		const renderAnimation = () => {
+			//선을 찾고, 렌더링
+		};
+
 		renderLines();
 		renderElements();
+		renderAnimation();
 	}
 
 	// TODO : playerList의 clientId와 final의 clientIdList 타입을 맞춰야 할 듯
 	_getHTML() {
 		let winner = null;
-		const [final] = this.tournamentInfo.final;
-		if (final.state === "finished") {
-			winner = this._getWinningPlayer(final.score, final.clientIdList);
-		}
-		const exitable = this._getExitable();
+		// const [final] = this.tournamentInfo.final;
+		// if (final.state === "finished") {
+		// 	winner = this._getWinningPlayer(final.score, final.clientIdList);
+		// }
 		return `
-			<button id="tournamentExitButton" class="generalButton ${!exitable ? 'invisible' : ''}" ${!exitable ? 'disabled' : ''}>
-				<img src="images/exitImg.png">토너먼트에서 나가기
-			</button>
 			<div id="container">
 				${this._getRootHTML(winner)}
 				${this._getSubTreesHTML()}
@@ -475,24 +439,7 @@ class TournamentPageManager {
 		`;
 	}
 
-	_getExitable() {
-		// 종료된 준결승 경기에서 내가 졌다면 나가기 가능
-		const isSemiFinalExitable = (semiFinal) => {
-			if (semiFinal.state === 'finished' && semiFinal.clientIdList.includes(this.clientInfo.id)) {
-				const winningPlayer = this._getWinningPlayer(semiFinal.score, semiFinal.clientIdList);
-				return winningPlayer.clientId !== this.clientInfo.id;
-			}
-			return false;
-		};
-		if (this.tournamentInfo.semiFinal.some(isSemiFinalExitable))
-			return true;
-		// 결승까지 종료됐다면 나가기 가능
-		if (this.tournamentInfo.final[0].state === 'finished') {
-			return true;
-		}
-		return false;
-	}
-
+	//현재 step에 따라 다르게 표시할 생각
 	_getRootHTML(finalist) {
 		return `
 			<div id="root">
@@ -500,16 +447,20 @@ class TournamentPageManager {
 			</div>
 		`;
 	}
+
+	//현재 step에 따라 다르게 표시할 생각
 	_getSubTreesHTML() {
 		let leftFinalist = null;
 		let rightFinalist = null;
 		const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
-		if (leftSemiFinal.state === "finished") {
-			leftFinalist = this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList);
-		}
-		if (rightSemiFinal.state === "finished") {
-			rightFinalist = this._getWinningPlayer(rightSemiFinal.score, rightSemiFinal.clientIdList);
-		}
+
+		// 특정 step이상일때 띄어주는거로 변경
+		// if (leftSemiFinal.state === "finished") {
+		// 	leftFinalist = this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList);
+		// }
+		// if (rightSemiFinal.state === "finished") {
+		// 	rightFinalist = this._getWinningPlayer(rightSemiFinal.score, rightSemiFinal.clientIdList);
+		// }
 		return `
 			<div id="subTrees">
 				${this._getSubTreeHTML(leftFinalist, this.playerList.slice(0, 2))}
@@ -567,4 +518,4 @@ class TournamentPageManager {
 	}
 }
 
-export default TournamentPageManager;
+export default TournamentAnimationPageManager;
