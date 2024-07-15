@@ -67,7 +67,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             await self.match_making_cancel(self)
 
     async def enter_lobby(self, client_id):
-        self.set_consumer_info(client_id)
+        await self.set_consumer_info(client_id)
         
         Printer.log(f"Client {client_id} entered lobby : {self.nickname} (id : {self.client_id})", "blue")
         await self._send(event='enterLobbyResponse', content={'message': 'OK'})

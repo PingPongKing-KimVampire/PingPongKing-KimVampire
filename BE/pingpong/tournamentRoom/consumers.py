@@ -14,7 +14,6 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         self.client_id = None
         self.nickname = None
         self.tournament_state = "semi-final"
-        self.tournament_info = stateManager.get_tournament_room(self.tournament_id)
         self.gameroom_id_now = None
         await self.accept()
         await add_group(self, self.tournament_id)
@@ -51,15 +50,29 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         if event == "enterTournamentRoom":
             await self.enter_tournament_room(content)
         elif event == "getTournamentGameInfo":
-            pass
+            await self.get_tournament_game_info_reponse()
+
+    async def get_tournament_game_info_reponse(self):
+        data = self.tournament_manager.get_tournament_info_list()
+        await self._send("getTournamnetGameInfoResponse", data)
 
     async def enter_tournament_room(self, content):
-        self.set_consumer_info(content['clientId'])
+        await self.set_consumer_info(content['clientId'])
         client_info_list = self.tournament_manager.get_client_info_list()
         self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
         await self._send("enterTournamentRoomResponse", 
                          { "tournamentClientList": client_info_list })
         await asyncio.sleep(3)
-        await self._send("notifyYourGameRoomReady", 
-                         {'pingpongroomId' : self.gameroom_id_now, 
-                          'stage' : self.tournament_state})
+        await self.tournament_manager.notify_your_game_room_ready(self, self.gameroom_id_now, self.tournament_state)
+
+    async def notifyGameEnd(self, content):
+        winner_id = content['winner_id']
+        if self.tournament_state == 'semi-final':
+            await self.tournament_manager.add_semi_final_winner(winner_id)
+        elif self.tournament_state == 'final':
+            pass
+
+    async def updateGameroomScore(self, content):
+        team = content['team']
+        score = content['score']
+        self.tournament_manager.update_room_score(self.tournament_state, self.gameroom_id_now, team, score)

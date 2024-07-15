@@ -75,7 +75,6 @@ class GameRoomManager:
             self.team_right[client_id] = player
             team = 'right'
         self.clients[client_id] = player
-        print()
         return team
 
     def remove_client(self, client_id):
