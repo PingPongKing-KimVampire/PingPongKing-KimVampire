@@ -4,7 +4,8 @@ from .player import Player
 from asyncio import Queue
 import uuid
 import random
-import time
+import copy
+from django.utils import timezone
 
 FRAME_PER_SECOND = 60
 LEFT = 'left'
@@ -56,9 +57,18 @@ class GameRoomManager:
         self.end_time = None
         self.win_team = None
         self.round_hit_map = []
-        self.game_data = []
+        self.game_data = {}
 
     # getter
+
+    def get_game_mode(self):
+        if self.left_mode == 'human' and self.right_mode == 'human':
+            mode = 'HUMAN_HUMAN'
+        elif self.left_mode == 'vampire' and self.right_mode == 'human':
+            mode = 'VAMPIRE_HUMAN'
+        else:
+            mode = 'VAMPIRE_VAMPIRE'
+        return mode
     
     def get_client_id_list(self, team):
         if team == 'left':
@@ -87,7 +97,6 @@ class GameRoomManager:
             self.team_right[client_id] = player
             team = 'right'
         self.clients[client_id] = player
-        print()
         return team
 
     def remove_client(self, client_id):
@@ -212,7 +221,7 @@ class GameRoomManager:
 
     async def _game_loop(self):
         await asyncio.sleep(1.5)
-        self.start_time = time.time()
+        self.start_time = timezone.now()
         await self._notify_all_paddle_positions()
         while self.is_playing and not self.is_end:
             is_ghost = self.ball.move()
@@ -221,14 +230,14 @@ class GameRoomManager:
             ball_state = self._detect_collisions(self.ball)
             await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-        self.end_time = time.time()
+        self.end_time = timezone.now()
         await self.save_data_to_db()
 
     async def save_data_to_db(self):
         data = {
             "start_time" : self.start_time,
             "end_time" : self.end_time,
-            "mode": "HUMAN_HUMAN",
+            "mode": self.get_game_mode(),
             "team1_users": self.get_team_list('left'),
             "team1_kind": self.left_mode,
             "team2_users": self.get_team_list('right'),
@@ -238,16 +247,7 @@ class GameRoomManager:
             "win_team" : self.win_team,
             "team1_score" : self.score[LEFT],
             "team2_score" : self.score[RIGHT],
-            "round": {
-                    1 : {
-                        "win_team": "team1",
-                        "ball_hits": [{"y": 10.32, "x": 2.33, "type": "PADDLE | SCORE"},... ] 
-                    },
-                    2 : {
-                        "win_team": "team1",
-                        "ball_hits": [{"y": 10.32, "x": 2.33, "type": "PADDLE | SCORE"},... ] 
-                    },
-            }
+            "round": self.game_data
         }
 
     # async def _input_loop(self):
@@ -424,7 +424,7 @@ class GameRoomManager:
     def save_data(self, round_win_team):
         data = {
             'win_team' : round_win_team,
-            'ball_hits' : self.round_hit_map
+            'ball_hits' : copy.deepcopy(self.round_hit_map)
         }
         self.game_data[self.round] = data
         self.round_hit_map = []
@@ -440,7 +440,6 @@ class GameRoomManager:
     def _end_game(self):
         self.is_playing = False
         self.is_end = True
-        self._reset_game()
         
     def _reset_game(self):
         self.score = {LEFT: 0, RIGHT: 0}
