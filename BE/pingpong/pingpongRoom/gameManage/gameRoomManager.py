@@ -238,9 +238,9 @@ class GameRoomManager:
             "start_time" : self.start_time,
             "end_time" : self.end_time,
             "mode": self.get_game_mode(),
-            "team1_users": self.get_team_list('left'),
+            "team1_users": self.get_client_id_list('left'),
             "team1_kind": self.left_mode,
-            "team2_users": self.get_team_list('right'),
+            "team2_users": self.get_client_id_list('right'),
             "team2_kind": self.right_mode,
             "team1_ability": self.left_ability,
             "team2_ability": self.right_ability,
@@ -249,6 +249,9 @@ class GameRoomManager:
             "team2_score" : self.score[RIGHT],
             "round": self.game_data
         }
+        from pingpongRoom.repositories import GameRepository
+        game = await GameRepository.save_game_async(data)
+        # game None 처리 필요
 
     # async def _input_loop(self):
     #     while self.is_playing and not self.is_end:
@@ -415,6 +418,7 @@ class GameRoomManager:
         await self._notify_game_room('notifyGameEnd', {'winTeam': team})
 
     def _reset_round(self):
+        self.round = self.round + 1
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
         self.ball.reset_ball(serve_position, self.board_height / 2, 0)
         for player in self.clients.values():

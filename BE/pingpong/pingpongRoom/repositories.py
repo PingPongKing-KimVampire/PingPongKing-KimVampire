@@ -87,28 +87,18 @@ class GameRepository:
 	
 	@staticmethod
 	def save_round(game_id, order, team):
-	def save_round(game_id, order, team):
 		game = Game.objects.get(id=game_id)
 		if game is None:
 			return None
 		round = Round.objects.create(game=game, order=order, win_team=team)
 		return round
-	
-	@staticmethod
-	def save_hit(round, type, y_coordinate, x_coordinate):
-		BallHit.objects.create(round=round, kind=type, y_coordinate=y_coordinate, x_coordinate=x_coordinate)
-			return None
-		round = Round.objects.create(game=game, order=order, win_team=team)
-		return round
-	
+		
 	@staticmethod
 	def save_hit(round, type, y_coordinate, x_coordinate):
 		BallHit.objects.create(round=round, kind=type, y_coordinate=y_coordinate, x_coordinate=x_coordinate)
 
 class TeamRepository:
 	@staticmethod
-	def create_team(user_id_list, game, kind, effect, score):
-		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score)
 	def create_team(user_id_list, game, kind, effect, score):
 		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score)
 		for user_id in user_id_list:
