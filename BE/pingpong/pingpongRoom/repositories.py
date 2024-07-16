@@ -11,6 +11,7 @@ class GameRepository:
 	@staticmethod
 	@sync_to_async
 	def save_game_async(meta_info):
+		print(meta_info)
 		mode = meta_info["mode"]
 		start_time = meta_info["start_time"]
 		end_time = meta_info["end_time"]
@@ -18,8 +19,14 @@ class GameRepository:
 		opponent_user_id_list = meta_info["team2_users"]
 		our_team_kind = meta_info["team1_kind"]
 		opponent_team_kind = meta_info["team2_kind"]
-		our_team_ability = meta_info["team1_ability"]
-		opponent_team_ability = meta_info["team2_ability"]
+		if meta_info["team1_ability"] is not None:
+			our_team_ability = meta_info["team1_ability"]
+		else:
+			our_team_ability = "none"
+		if meta_info["team2_ability"] is not None:
+			opponent_team_ability = meta_info["team2_ability"]
+		else:
+			opponent_team_ability = "none"
 		our_team_score = meta_info["team1_score"]
 		opponent_team_score = meta_info["team2_score"]
 		round_info_dict = meta_info["round"]
@@ -50,10 +57,10 @@ class GameRepository:
 			   start_time,
 			   end_time, 
 			   round_info_dict):
-		if mode not in modes or our_team_ability not in abilities or \
-			opponent_team_ability not in abilities or our_team_kind not in team_kinds \
-			or opponent_team_kind not in team_kinds:
-			return None
+		# if mode not in modes or our_team_ability not in abilities or \
+		# 	opponent_team_ability not in abilities or our_team_kind not in team_kinds \
+		# 	or opponent_team_kind not in team_kinds:
+		# 	return None
 		game = Game.objects.create(mode=mode, start_at=start_time, end_at=end_time)
 		our_team = TeamRepository.create_team(our_user_id_list, game, our_team_kind, our_team_ability, our_team_score)
 		print("our team", our_team.id)
