@@ -4,6 +4,7 @@ from .player import Player
 from asyncio import Queue
 import uuid
 import random
+import time
 
 FRAME_PER_SECOND = 60
 LEFT = 'left'
@@ -53,11 +54,21 @@ class GameRoomManager:
         #statics
         self.start_time = None
         self.end_time = None
+        self.win_team = None
         self.round_hit_map = []
-        self.hits_map = []
-        self.round_win_team = []
+        self.game_data = []
 
     # getter
+    
+    def get_client_id_list(self, team):
+        if team == 'left':
+            team = self.team_left
+        else:
+            team = self.team_right
+        data = []
+        for client_id, player in team.items():
+            data.append(client_id)
+        return data
     
     def get_room_client_count(self):
         return len(self.clients)
@@ -201,6 +212,7 @@ class GameRoomManager:
 
     async def _game_loop(self):
         await asyncio.sleep(1.5)
+        self.start_time = time.time()
         await self._notify_all_paddle_positions()
         while self.is_playing and not self.is_end:
             is_ghost = self.ball.move()
@@ -209,6 +221,34 @@ class GameRoomManager:
             ball_state = self._detect_collisions(self.ball)
             await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
+        self.end_time = time.time()
+        await self.save_data_to_db()
+
+    async def save_data_to_db(self):
+        data = {
+            "start_time" : self.start_time,
+            "end_time" : self.end_time,
+            "mode": "HUMAN_HUMAN",
+            "team1_users": self.get_team_list('left'),
+            "team1_kind": self.left_mode,
+            "team2_users": self.get_team_list('right'),
+            "team2_kind": self.right_mode,
+            "team1_ability": self.left_ability,
+            "team2_ability": self.right_ability,
+            "win_team" : self.win_team,
+            "team1_score" : self.score[LEFT],
+            "team2_score" : self.score[RIGHT],
+            "round": {
+                    1 : {
+                        "win_team": "team1",
+                        "ball_hits": [{"y": 10.32, "x": 2.33, "type": "PADDLE | SCORE"},... ] 
+                    },
+                    2 : {
+                        "win_team": "team1",
+                        "ball_hits": [{"y": 10.32, "x": 2.33, "type": "PADDLE | SCORE"},... ] 
+                    },
+            }
+        }
 
     # async def _input_loop(self):
     #     while self.is_playing and not self.is_end:
@@ -361,7 +401,13 @@ class GameRoomManager:
             return 'right'
         
     def _check_game_end(self):
-        return self.score[LEFT] >= 5 or self.score[RIGHT] >= 5
+        if self.score[LEFT] >= 5:
+            self.win_team = 'left'
+            return True
+        elif self.score[RIGHT] >= 5:
+            self.win_team = 'right'
+            return True
+        return False
 
     async def _end_game_loop(self):
         team = 'left' if self.score[LEFT] >= 5 else 'right'
@@ -376,8 +422,11 @@ class GameRoomManager:
         asyncio.create_task(self._notify_all_paddle_positions())
 
     def save_data(self, round_win_team):
-        self.round_win_team.append(round_win_team)
-        self.hits_map.append(self.round_hit_map)
+        data = {
+            'win_team' : round_win_team,
+            'ball_hits' : self.round_hit_map
+        }
+        self.game_data[self.round] = data
         self.round_hit_map = []
 
     def save_hit_map(self, type, y, x):
