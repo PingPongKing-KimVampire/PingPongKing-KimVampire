@@ -11,6 +11,8 @@ class User(models.Model):
     password = models.CharField(max_length=100, null=True)
     nickname = models.CharField(max_length=20, unique=True, null=True)
     image_uri = models.URLField(blank=True, null=True)  # Optional field
+    win = models.IntegerField(default=0, null=False)
+    lose = models.IntegerField(default=0, null=False)
     def __str__(self):
         return self.username
     def set_password(self, raw_password):
@@ -64,7 +66,10 @@ class BlockedRelationship(models.Model):
 
 class Team(models.Model):
     id = models.BigAutoField(primary_key=True)
+    kind = models.CharField(max_length=20, default="HUMAN", null=False)
     game = models.ForeignKey('Game', related_name='teams', on_delete=models.CASCADE)
+    effect = models.CharField(max_length=20, null=False, default="none")
+    score = models.IntegerField(default=0, null=False)
 
 class TeamUser(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -73,23 +78,25 @@ class TeamUser(models.Model):
 
 class Game(models.Model):
     id = models.BigAutoField(primary_key=True)
-    start_at = models.DateTimeField(default=timezone.now, null=False)
-    end_at = models.DateTimeField(blank=True, null=True)
+    mode = models.CharField(max_length=20, default="HUMAN", null=False)
+    start_at = models.DateTimeField(null=True)
+    end_at = models.DateTimeField(null=True)
 
     def finish(self):
         self.end_at = timezone.now()
 
 class Round(models.Model):
     id = models.BigAutoField(primary_key=True)
+    order = models.IntegerField(null=True)
     game = models.ForeignKey(Game, related_name='rounds', on_delete=models.CASCADE)
     win_team = models.ForeignKey(Team, related_name='wins', on_delete=models.CASCADE)
 
 class BallHit(models.Model):
     id = models.BigAutoField(primary_key=True)
     round = models.ForeignKey(Round, related_name='hits_round', on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, related_name='hits_team', on_delete=models.CASCADE)
     x_coordinate = models.DecimalField(max_digits=10, decimal_places=6)
     y_coordinate = models.DecimalField(max_digits=10, decimal_places=6)
+    kind = models.CharField(max_length=20, default="PADDLE", null=False)
 
     def __str__(self):
         return f"Point({self.x_coordinate}, {self.y_coordinate})"

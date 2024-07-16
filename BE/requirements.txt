@@ -7,3 +7,6 @@ psycopg2-binary
 djangorestframework-simplejwt
 djangorestframework-simplejwt[crypto]
 django-cors-headers
+pytest
+pytest-django
+pytest-asyncio
