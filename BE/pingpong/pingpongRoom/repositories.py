@@ -1,4 +1,5 @@
 from lobby.models import User, Team, TeamUser, Game, Round, BallHit
+from lobby.models import User, Team, TeamUser, Game, Round, BallHit
 from asgiref.sync import sync_to_async
 
 abilities = {"jiantBlocker", "ghostSmasher", "speedTwister", "illusionFaker", "none"}
@@ -6,7 +7,13 @@ modes = {"HUMAN_HUMAN", "VAMPIRE_VAMPIRE", "VAMPIRE_HUMAN"}
 team_kinds = {"HUMAN", "VAMPIRE"}
 ball_kinds = {"PADDLE", "SCORE"}
 
+abilities = {"jiantBlocker", "ghostSmasher", "speedTwister", "illusionFaker", "none"}
+modes = {"HUMAN_HUMAN", "VAMPIRE_VAMPIRE", "VAMPIRE_HUMAN"}
+team_kinds = {"HUMAN", "VAMPIRE"}
+ball_kinds = {"PADDLE", "SCORE"}
+
 class GameRepository:
+	# 게임 끝나고 사용할 함수
 	# 게임 끝나고 사용할 함수
 	@staticmethod
 	@sync_to_async
@@ -80,8 +87,16 @@ class GameRepository:
 	
 	@staticmethod
 	def save_round(game_id, order, team):
+	def save_round(game_id, order, team):
 		game = Game.objects.get(id=game_id)
 		if game is None:
+			return None
+		round = Round.objects.create(game=game, order=order, win_team=team)
+		return round
+	
+	@staticmethod
+	def save_hit(round, type, y_coordinate, x_coordinate):
+		BallHit.objects.create(round=round, kind=type, y_coordinate=y_coordinate, x_coordinate=x_coordinate)
 			return None
 		round = Round.objects.create(game=game, order=order, win_team=team)
 		return round
@@ -92,6 +107,8 @@ class GameRepository:
 
 class TeamRepository:
 	@staticmethod
+	def create_team(user_id_list, game, kind, effect, score):
+		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score)
 	def create_team(user_id_list, game, kind, effect, score):
 		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score)
 		for user_id in user_id_list:
