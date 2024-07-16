@@ -17,7 +17,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def verify_token(cls, token):
         try:
             decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=[api_settings.ALGORITHM])
-            print(decoded_token)
+            print("Decoded Token : ", decoded_token)
             return decoded_token
         except ExpiredSignatureError:
             raise InvalidTokenError('Token has expired')

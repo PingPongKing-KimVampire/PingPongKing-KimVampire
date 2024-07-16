@@ -33,9 +33,7 @@ class WaitingTournamentPageManager {
 	}
 
 	async _connectTournamentSocket(id) {
-		const tournamentSocket = new WebSocket(
-			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournamentRoom/${id}`
-		);
+		const tournamentSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournamentRoom/${id}`,['authorization', this.accessToken]);
 		await new Promise((resolve) => {
 			tournamentSocket.addEventListener('open', () => {
 				resolve();

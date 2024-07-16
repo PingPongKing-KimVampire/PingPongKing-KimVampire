@@ -94,7 +94,7 @@ class LoginPageManager {
 	}
 
 	async _connectGlobalSocket(id) {
-		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`);
+		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`, ['authorization', this.accessToken]);
 		await new Promise(resolve => {
 			socket.addEventListener("open", () => {
 				resolve();

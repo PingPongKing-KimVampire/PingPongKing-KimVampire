@@ -20,29 +20,27 @@ channel_name_map = {}
 class GlobalConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from .serializers import CustomTokenObtainPairSerializer
-        self.is_init = False
+        self.is_init = True
         self.read_receiver_id = None
-        # 주석 친 코드 : 연결 과정에서 하는 거 프론트에서 처리된 이후에 처리
-        # headers = dict(self.scope['headers'])
-        # bearer_access_token = headers.get(b'authorization', b'').decode('utf-8')
+        headers = dict(self.scope['headers'])
+        token = headers.get(b'sec-websocket-protocol', b'')
         try:
             # token_array = bearer_access_token.split(" ")
             # if token_array[0] != "Bearer":
             #     raise InvalidTokenError("Bearer Error")
             # access_token = token_array[1]
-            # decoded_token = CustomTokenObtainPairSerializer.verify_token(access_token)
-            await self.accept()
+            decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+            await self.accept(subprotocol="authorization")
             Printer.log("WebSocket connection established", "green")      
-            asyncio.create_task(self.check_timeout(60))
         except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
             Printer.log("Invalid Authorization header, closing connection", "red")
             await self.close()
         
-    async def check_timeout(self, timeout):
-        await asyncio.sleep(timeout)
-        if not self.is_init:
-            Printer.log("Client not initialized within timeout period, disconnecting...", "yellow")
-            await self.close()
+    # async def check_timeout(self, timeout):
+    #     await asyncio.sleep(timeout)
+    #     if not self.is_init:
+    #         Printer.log("Client not initialized within timeout period, disconnecting...", "yellow")
+    #         await self.close()
 
     async def disconnect(self, close_code):
         if self.is_init:
@@ -53,7 +51,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
                 "activeState": "INACTIVE"
             }
             channel_name_map.pop(self.client_id)
-            discard_group(self, 'lobby')
+            await discard_group(self, 'lobby')
             await self.notify_all_group_activation("notify_friend_active_state_change", content)
             Printer.log("notify inactivated to all friends", "red")
         Printer.log("WebSocket connection closed", "red")
@@ -68,15 +66,18 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         message = json.loads(text_data)
         event = message.get('event')
         content = message.get('content')
+        Printer.log("<<<<<")
+        Printer.log(f"event : {event}")
+        Printer.log(f"content : {content}")
 
-        if event == 'initClient':
-            access_token = content['accessToken']
-            await self.init_client(access_token)
-            return
-        if not self.client_id:
-            self.is_init = False
-            await self.close()
-            return
+        # if event == 'initClient':
+        #     access_token = content['accessToken']
+        #     await self.init_client(access_token)
+        #     return
+        # if not self.client_id:
+        #     self.is_init = False
+        #     await self.close()
+        #     return
         if event == 'updateClientInfo':
             waiting_room_info = content['waitingRoomInfo']
             await self.updateClientInfo(waiting_room_info)
