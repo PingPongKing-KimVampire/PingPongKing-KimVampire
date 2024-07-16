@@ -88,15 +88,23 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             
     async def enter_waiting_room(self, content):
         await self.set_consumer_info(content['clientId'])
-        team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.image_uri)
-        if team == None:
-            # 실패시 처리 추가해야 할 듯?
-            await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
-            Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
-            return
 
-        await self.send_enter_response(self.room_id, team, is_you_create)
+        mode = content['mode']
+        if mode == 'normal':
+            team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.image_uri)
+            if team == None: # 실패시 처리 추가해야 할 듯?
+                await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
+                Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
+                return
+
+            self.team = team
+            await add_group(self, f"{self.room_id}-{team}")
+
+            await self.send_enter_response(self.room_id, team, is_you_create)
+        else: # tournament
+            pass # tournament enter response 어떻게?
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
+            
 
     async def select_ability(self, content):
         ability = content['ability']
@@ -104,11 +112,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await stateManager.notify_select_ability(self.room_id, self.client_id, ability)
         Printer.log(f"Client {self.client_id} selected ability {content['ability']}", "blue")
 
-    async def send_enter_response(self, room_id, team, is_you_create):
-        self.team = team
-        await add_group(self, f"{self.room_id}-{team}")
-
-        await stateManager.notify_room_enter(self.room_id, self.client_id, self.nickname, team)
+    async def send_enter_response(self, room_id, is_you_create):
+        await stateManager.notify_room_enter(self.room_id, self.client_id, self.nickname, self.team)
         
         if is_you_create:
             await stateManager.notify_room_created(self.room_id)
@@ -130,7 +135,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def notifyScoreUpdate(self, content):
         if self.game_mode == 'tournament':
-            await notify_group(self.channel_layer, f"tournament_{self.room_id}", 'notifyScoreUpdate', content['content'])
+            await notify_group(self.channel_layer, f"tournament_{self.room_id}", 'updateGameroomScore', content['content'])
         await self._send(event='notifyScoreUpdate', content=content['content'])
     
     async def notifySelectAbility(self, content):
@@ -153,6 +158,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def notifyGameStart(self, content):
         self.game_state = 'playing'
+        if self.game_mode == 'tournament':
+            await notify_group(self.channel_layer, f"tournament_{self.room_id}", "notifyGameStart", {})
         await self._send(event='notifyGameStart', content=content['content'])
 
     async def notifyGameGiveUp(self, content):

@@ -47,10 +47,19 @@ class TournamentManager:
     def get_tournament_info_list(self):
         return self.tournamnet_info_list
 
-    async def add_semi_final_winner(self, client_id):
-        self.semi_final_winners.append(client_id)
+    def change_tournamanet_info_game_state(self, tournament_state, room_id, state):
+        for gameroom_info in self.tournamnet_info_list[tournament_state]:
+            if room_id == gameroom_info['roomId']:
+                gameroom_info[state] = state
+                break
+
+    def add_semi_final_winner(self, client_id):
+        for client_info in self.client_info_list:
+            if client_id == client_info['clientId']:
+                self.semi_final_winners.append(client_info)
         if self.semi_final_winners.__len__() == 2:
-            await self.all_team_finish()
+            return self.make_final_room()
+        return None
 
     def make_semi_final_rooms(self):
         room_id_1, game_manager_1 = self.make_game_room()
@@ -59,35 +68,31 @@ class TournamentManager:
 
         semi_final_arr = []
         for i in range(2):
-            client_1_id = self.client_info_list[i]['clientId']
-            client_2_id = self.client_info_list[i + 1]['clientId']
-            if i == 0:
-                room_id = room_id_1
-            elif i == 1:
-                room_id = room_id_2
-            semi_final_arr.append({
-                'clientIdList' : [client_1_id, client_2_id],
-                'score' : [0,0],
-                'roomId' : room_id,
-                'state' : 'notStarted'
-            })
+            client_1 = self.client_info_list[i]
+            client_2 = self.client_info_list[i + 1]
+            room_id = room_id_1 if i == 0 else room_id_2
+            game_manager = game_manager_1 if i == 0 else game_manager_2
+            semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
         self.tournamnet_info_list['semi-final'] = semi_final_arr
     
-    def all_team_finish(self):
-        self.make_final_room()
-
-
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()
         self.game_manager_list['final'] = game_manager
-        client_1_id = self.semi_final_winners[0]
-        client_2_id = self.semi_final_winners[1]
-        self.tournamnet_info_list['final'] = {
-            'clientIdList' : [client_1_id, client_2_id],
+        client_1 = self.semi_final_winners[0]
+        client_2 = self.semi_final_winners[1]
+        self.tournamnet_info_list['final'] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
+        return room_id
+
+    def set_game_room_data(self, client_1, client_2, room_id, game_manager):
+        data = {
+            'clientIdList' : [client_1['clientId'], client_2['clientId']],
             'score' : [0,0],
             'roomId' : room_id,
             'state' : 'notStarted'
         }
+        game_manager.enter_room(client_1['clientId'], client_1['nickname'], client_1['imageUri'])
+        game_manager.enter_room(client_2['clientId'], client_2['nickname'], client_2['imageUri'])
+        return data
 
     def make_game_room(self):
         game_room_id = str(uuid.uuid4())
@@ -103,11 +108,21 @@ class TournamentManager:
                     gameroom_info['score'][1] = score
                 break
 
-    async def notify_your_game_room_ready(self, consumer, game_room_id, tournament_state):
-        await add_group(consumer, f"tournament_{game_room_id}")
-        await self._send("notifyYourGameRoomReady", 
-                         {'pingpongroomId' : self.gameroom_id, 
-                          'stage' : tournament_state})
+    async def notify_all_team_finish(self, tournament_state):
+        await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
+        asyncio.create_task(self.start_final_room())
+
+    async def start_final_room(self):
+        room_id = self.tournamnet_info_list['final']['roonId']
+        for client_info in self.semi_final_winners:
+            await add_group(client_info['clientId'], f"tournament_{room_id}")
+        await asyncio.sleep(3)
+        data = {
+            'pingpongroomId' : room_id,
+            'stage' : 'final'
+        }
+        await notify_group(self.channel_layer, f"tournament_{room_id}", 
+                           "notifyYourGameReady", data)
     
     async def notify_tournament_room(self, event, content):
         await self.channel_layer.group_send(

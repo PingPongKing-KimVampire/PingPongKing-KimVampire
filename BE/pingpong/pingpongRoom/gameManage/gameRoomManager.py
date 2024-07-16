@@ -191,9 +191,8 @@ class GameRoomManager:
         self.is_end = False
         self._reset_round()
         asyncio.create_task(self._notify_game_ready_and_start())
-        game_loop_task = asyncio.create_task(self._game_loop())
+        asyncio.create_task(self._game_loop())
         asyncio.create_task(self._paddle_update_loop())
-        return game_loop_task
 
     # Game Loop
 

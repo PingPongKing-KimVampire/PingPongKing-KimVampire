@@ -177,9 +177,10 @@ class StateManager:
         room = self.rooms.get(room_id, None)
         game_manager = room
         if game_manager:
-            if game_manager.mode == 'tournamnet':
+            if game_manager.mode == 'normal':
                 await self.notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo': {'roomId': room_id}})
-            await game_manager.trigger_game()
+            else:
+                await game_manager.trigger_game()
 
     async def notify_lobby(self, event: str, content: Dict[str, Any]) -> None:
         if self.channel_layer:

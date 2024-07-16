@@ -63,16 +63,33 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         await self._send("enterTournamentRoomResponse", 
                          { "tournamentClientList": client_info_list })
         await asyncio.sleep(3)
-        await self.tournament_manager.notify_your_game_room_ready(self, self.gameroom_id_now, self.tournament_state)
+        await add_group(self, f"tournament_{self.gameroom_id_now}")
+        await self._send("notifyYourGameRoomReady", 
+                         {'pingpongroomId' : self.gameroom_id_now, 
+                          'stage' : self.tournament_state})
 
     async def notifyGameEnd(self, content):
         winner_id = content['winner_id']
+        self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, 'finished')
         if self.tournament_state == 'semi-final':
-            await self.tournament_manager.add_semi_final_winner(winner_id)
+            if self.client_id == winner_id:
+                self.tournament_state = 'final'
+            room_id = self.tournament_manager.add_semi_final_winner(winner_id)
+            if room_id:
+                await self.tournament_manager.notify_all_team_finish('semi-final')
         elif self.tournament_state == 'final':
-            pass
+            await self.tournament_manager.notify_all_team_finish('final')
+        await discard_group(self, f"tournament_{self.gameroom_id_now}")
+        self.gameroom_id_now = None
 
     async def updateGameroomScore(self, content):
         team = content['team']
         score = content['score']
         self.tournament_manager.update_room_score(self.tournament_state, self.gameroom_id_now, team, score)
+
+    async def notifyYourGameReady(self, content):
+        content = content['content']
+        await self._send("notifyYourGameReady", content)
+
+    async def notifyGameStart(self, content):
+        self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, 'playing')
