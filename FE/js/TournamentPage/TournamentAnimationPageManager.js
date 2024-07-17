@@ -323,7 +323,7 @@ class TournamentAnimationPageManager {
 
 	_listenTournamentEvent() {
 		const listener = async messageEvent => {
-			const message = JSON.parse(messageEvent);
+			const message = JSON.parse(messageEvent.data);
 			const { event, content } = message;
 			if (event === "notifyYourGameRoomReady") {
 				await this._enterWaitingRoom(content.pingpongroomID); // TODO : tournamentID가 roomId 맞나?
