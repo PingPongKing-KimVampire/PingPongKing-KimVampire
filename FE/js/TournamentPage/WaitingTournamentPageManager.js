@@ -46,7 +46,6 @@ class WaitingTournamentPageManager {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === 'enterTournamentRoomResponse') {
-					console.log("here");
 					tournamentSocket.removeEventListener('message', listener);
 					resolve(content.tournamentClientList);
 				}

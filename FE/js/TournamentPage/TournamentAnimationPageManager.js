@@ -14,71 +14,71 @@ class TournamentAnimationPageManager {
 		// this.clientInfo.tournamentInfo.tournamentSocket
 		// this.clientInfo.tournamentInfo.tournamentClientList
 
-		this.clientInfo = {
-			tournamentInfo: {
-				tournamentClientList: {},
-			},
-		};
+		// this.clientInfo = {
+		// 	tournamentInfo: {
+		// 		tournamentClientList: {},
+		// 	},
+		// };
 
-		this.clientInfo.tournamentInfo.tournamentClientList = [
-			// TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
-			{
-				clientId: "1",
-				clientNickname: "김뱀파이어어어어어어어어엉어어어어어",
-				avartarUrl: "images/playerA.png",
-			},
-			{
-				clientId: "2",
-				clientNickname: "김뱀파이어",
-				avartarUrl: "images/playerB.png",
-			},
-			{
-				clientId: "3",
-				clientNickname: "김뱀파",
-				avartarUrl: "images/playerC.svg",
-			},
-			{
-				clientId: "4",
-				clientNickname: "김뱀",
-				avartarUrl: "images/noFriendVampire3.webp",
-			},
-		];
+		// this.clientInfo.tournamentInfo.tournamentClientList = [
+		// 	// TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
+		// 	{
+		// 		id: "1",
+		// 		nickname: "김뱀파이어어어어어어어어엉어어어어어",
+		// 		avartarUrl: "images/playerA.png",
+		// 	},
+		// 	{
+		// 		id: "2",
+		// 		nickname: "김뱀파이어",
+		// 		avartarUrl: "images/playerB.png",
+		// 	},
+		// 	{
+		// 		id: "3",
+		// 		nickname: "김뱀파",
+		// 		avartarUrl: "images/playerC.svg",
+		// 	},
+		// 	{
+		// 		id: "4",
+		// 		nickname: "김뱀",
+		// 		avartarUrl: "images/noFriendVampire3.webp",
+		// 	},
+		// ];
 
-		this.tournamentInfo = {
-			semiFinal: [
-				{
-					clientIdList: ["1", "2"],
-					score: [0, 10],
-					roomId: "123456",
-					state: "finished", //notStarted|isPlaying|finished
-				},
-				{
-					clientIdList: ["3", "4"],
-					score: [10, 0],
-					roomId: "1234",
-					state: "isPlaying",
-				},
-			],
-			final: [
-				{
-					clientIdList: ["2", "3"],
-					score: [10, 0],
-					roomId: "123456",
-					state: "finished",
-				},
-			],
-		};
+		// this.tournamentInfo = {
+		// 	semiFinal: [
+		// 		{
+		// 			clientIdList: ["1", "2"],
+		// 			score: [0, 10],
+		// 			roomId: "123456",
+		// 			state: "finished", //notStarted|isPlaying|finished
+		// 		},
+		// 		{
+		// 			clientIdList: ["3", "4"],
+		// 			score: [10, 0],
+		// 			roomId: "1234",
+		// 			state: "isPlaying",
+		// 		},
+		// 	],
+		// 	final: [
+		// 		{
+		// 			clientIdList: ["2", "3"],
+		// 			score: [10, 0],
+		// 			roomId: "123456",
+		// 			state: "finished",
+		// 		},
+		// 	],
+		// };
 
-		// this._getTournamentInfo();
 		// 정보 업데이트
 		setTimeout(this._initAnimation.bind(this, "final"), 1000);
 		this._initPage();
 	}
-
-	_initPage() {
+	
+	async _initPage() {
+		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
-		// this._listenTournamentEvent(); TODO : 현재 테스트 불가능함
+		this._listenTournamentEvent(); //TODO : 현재 테스트 불가능함
 
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
@@ -88,12 +88,12 @@ class TournamentAnimationPageManager {
 		});
 	}
 
-	_initAnimation(stage) {
-		// stage = "final"; //하드코딩
-		// console.log(stage);
+	async _initAnimation(stage) {
+		stage = "final"; //하드코딩
+		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
-		// this._listenTournamentEvent(); TODO : 현재 테스트 불가능함
+		this._listenTournamentEvent(); // TODO : 현재 테스트 불가능함
 
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
@@ -309,9 +309,7 @@ class TournamentAnimationPageManager {
 			};
 			this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
 		});
-		this.tournamentInfo.semiFinal = semiFinal;
-		this.tournamentInfo.final = final;
-		this._initPage();
+		this.tournamentInfo = {semiFinal, final};
 	}
 
 	_subscribeWindow() {
@@ -434,7 +432,7 @@ class TournamentAnimationPageManager {
 			}
 			teamList.push({
 				clinetId: player.clientId,
-				clientNickname: this.clientInfo.tournamentInfo.tournamentClientList.find(p => p.clientId === player.clientId).clientNickname,
+				clientNickname: this.clientInfo.tournamentInfo.tournamentClientList.find(p => p.id === player.id).nickname,
 				readyState: "READY",
 				ability: null,
 				paddleWidth: player.paddleWidth,
@@ -912,7 +910,7 @@ class TournamentAnimationPageManager {
 					${isWinner ? '<img class="crownImg" src="images/tournamentCrown.png">' : ""}
 				</div>
 				<div class="nickname">
-					<div class="nicknameText">${player.clientNickname}</div>
+					<div class="nicknameText">${player.nickname}</div>
 				</div>
 			</div>
 		`;
@@ -922,7 +920,7 @@ class TournamentAnimationPageManager {
 		const [score1, score2] = score;
 		const [clientId1, clientId2] = clientIdList;
 		const winnerId = score1 > score2 ? clientId1 : clientId2;
-		return this.clientInfo.tournamentInfo.tournamentClientList.find(player => player.clientId === winnerId);
+		return this.clientInfo.tournamentInfo.tournamentClientList.find(player => player.id === winnerId);
 	}
 }
 
