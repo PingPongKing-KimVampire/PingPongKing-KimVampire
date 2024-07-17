@@ -9,7 +9,6 @@ import FriendManagementPageManager from "./FriendManagementPage/FriendManagement
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
 import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
-import TournamentPageManager from './TournamentPage/TournamentPageManager.js';
 import TournamentAnimationPageManager from './TournamentPage/TournamentAnimationPageManager.js';
 
 export const SERVER_ADDRESS = "127.0.0.1";

@@ -54,7 +54,7 @@ class PingpongRenderer {
 		this.me = null;
 
 		//관전자는 오른쪽 팀처럼 처리한다.
-		if (this.clientInfo.gameContainer.role === 'observer') {
+		if (this.clientInfo.gameInfo.role === 'observer') {
 			this.me = { team: 'right' };
 		}
 

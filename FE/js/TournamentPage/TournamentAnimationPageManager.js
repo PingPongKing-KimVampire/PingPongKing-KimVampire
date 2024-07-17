@@ -9,9 +9,7 @@ class TournamentAnimationPageManager {
 		this._onStartPingpongGame = _onStartPingpongGame;
 		this.clientInfo = clientInfo;
 
-		this.step = "semiFinalEnd"; //semiFinalEnd|finalEnd|semiFinalStart|finalStart| -> Start가 필요할지 따져보자
-
-		//step별로 항상 다른 정보를 띄어주면 어떨까?
+		//tournamentSocket의 리스너는 토너먼트 시작과 나가기때만 등록, 해제한다?
 
 		this.playerList = [
 			// TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
@@ -24,17 +22,17 @@ class TournamentAnimationPageManager {
 			{
 				clientId: "2",
 				clientNickname: "김뱀파이어",
-				avartarUrl: "images/playerA.png",
+				avartarUrl: "images/playerB.png",
 			},
 			{
 				clientId: "3",
 				clientNickname: "김뱀파",
-				avartarUrl: "images/playerA.png",
+				avartarUrl: "images/playerC.svg",
 			},
 			{
 				clientId: "4",
 				clientNickname: "김뱀",
-				avartarUrl: "images/playerA.png",
+				avartarUrl: "images/noFriendVampire3.webp",
 			},
 		];
 
@@ -50,13 +48,13 @@ class TournamentAnimationPageManager {
 					clientIdList: ["3", "4"],
 					score: [10, 0],
 					roomId: "1234",
-					state: "finished",
+					state: "isPlaying",
 				},
 			],
 			final: [
 				{
-					clientIdList: ["1", "3"],
-					score: [0, 10],
+					clientIdList: ["2", "3"],
+					score: [10, 0],
 					roomId: "123456",
 					state: "notStarted",
 				},
@@ -64,15 +62,225 @@ class TournamentAnimationPageManager {
 		};
 
 		// this._getTournamentInfo();
+		// 정보 업데이트
 		// setTimeout(this._renderTournamentAnimation.bind(this, "final"));
 		this._initPage();
 	}
 
 	_initPage() {
 		this.app.innerHTML = this._getHTML();
-		requestAnimationFrame(this._renderBracket.bind(this)); // TODO : 가끔 안 먹을 때 있음!ㅠㅠ
 		this._subscribeWindow();
 		// this._listenTournamentEvent(); TODO : 현재 테스트 불가능함
+
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				this.point = this._calculatePoints();
+				this._renderCurrentTournamentInfo();
+			});
+		});
+	}
+
+	_initAnimation(stage){
+		stage = "final"; //하드코딩
+		this.app.innerHTML = this._getHTML();
+		this._subscribeWindow();
+		// this._listenTournamentEvent(); TODO : 현재 테스트 불가능함
+
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				this.point = this._calculatePoints();
+				this._renderBracket();
+				this._renderAnimtation(stage);
+			});
+		});
+	}
+
+	async _renderAnimtation(stage) {
+		if (stage === "semiFinal") {
+			await this._renderPolylineAnimation("leftSemiFinal");
+			this._renderPlayer("leftSemiFinal");
+			this._renderScoreBox("leftSemiFinal");
+			await this._renderPolylineAnimation("rightSemiFinal");
+			this._renderPlayer("rightSemiFinal");
+			this._renderScoreBox("rightSemiFinal");
+		} else if (this.stage === "final") {
+			//하얀 선만 렌더링
+			const animationPromise1 = this._renderPolylineAnimation("leftSemiFinal");
+			const animationPromise2 = this._renderPolylineAnimation("rightSemiFinal");
+			await Promise.all([animationPromise1, animationPromise2]);
+			this._renderScoreBox("leftSemiFinal");
+			this._renderScoreBox("rightSemiFinal");
+			this._renderPlayer("leftSemiFinal");
+			this._renderPlayer("rightSemiFinal");
+			await this._renderPolylineAnimation("final");
+			this._renderPlayer("final");
+			this._renderScoreBox("final");
+			//나가기?
+		}
+	}
+
+	_renderPlayer(type) {
+		if (type === "leftSemiFinal") {
+			const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
+			const leftFinalContainer = document.querySelector(".subTree:first-of-type .final");
+			leftFinalContainer.innerHTML = this._getPlayerHTML(this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList));
+		} else if (type === "rightSemiFinal") {
+			const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
+			const rightFinalContainer = document.querySelector(".subTree:last-of-type .final");
+			rightFinalContainer.innerHTML = this._getPlayerHTML(this._getWinningPlayer(rightSemiFinal.score, rightSemiFinal.clientIdList));
+		} else if (type === "final") {
+			const [final] = this.tournamentInfo.final;
+			const winnerContainer = document.querySelector("#root");
+			winnerContainer.innerHTML = this._getPlayerHTML(this._getWinningPlayer(final.score, final.clientIdList), true); //승자 판단해서 렌더링 해야함
+		}
+	}
+
+	_renderScoreBox(type) {
+		const createScoreBox = (leftScore, rightScore) => {
+			const scoreBox = document.createElement("div");
+			scoreBox.classList.add("scoreBox");
+			scoreBox.innerHTML = `
+				<div class="score">${leftScore}</div>
+				<div class="score">${rightScore}</div>
+			`;
+			this._setElementPos(type, scoreBox);
+			return scoreBox;
+		};
+		if (type === "leftSemiFinal") {
+			const leftScore = this.tournamentInfo.semiFinal[0].score[0];
+			const rightScore = this.tournamentInfo.semiFinal[0].score[1];
+			const scoreBox = createScoreBox(leftScore, rightScore);
+			elementCanvas.append(scoreBox);
+		} else if (type === "rightSemiFinal") {
+			const leftScore = this.tournamentInfo.semiFinal[1].score[0];
+			const rightScore = this.tournamentInfo.semiFinal[1].score[1];
+			const scoreBox = createScoreBox(leftScore, rightScore);
+			elementCanvas.append(scoreBox);
+		} else if (type === "final") {
+			const leftScore = this.tournamentInfo.final[0].score[0];
+			const rightScore = this.tournamentInfo.final[0].score[1];
+			const scoreBox = createScoreBox(leftScore, rightScore);
+			elementCanvas.append(scoreBox);
+		}
+	}
+
+	_setElementPos(type, element) {
+		if (type === "final") {
+			element.style.top = `${this.point.pointBelowWinner.y * 1.04}px`;
+			element.style.left = `${this.point.pointBelowWinner.x}px`;
+		} else if (type === "leftSemiFinal") {
+			element.style.top = `${this.point.pointBelowFinal1.y * 1.02}px`;
+			element.style.left = `${this.point.pointBelowFinal1.x}px`;
+		} else if (type === "rightSemiFinal") {
+			element.style.top = `${this.point.pointBelowFinal2.y * 1.02}px`;
+			element.style.left = `${this.point.pointBelowFinal2.x}px`;
+		}
+	}
+
+	_renderPolylineAnimation(type) {
+		return new Promise(resolve => {
+			function createPolyline() {
+				const lineCanvas = document.querySelector("#lineCanvas");
+				const svgNS = "http://www.w3.org/2000/svg";
+				const polyline = document.createElementNS(svgNS, "polyline");
+				polyline.setAttribute("stroke", "rgba(255, 255, 255, 1)");
+				polyline.setAttribute("stroke-width", "0.1rem");
+				polyline.setAttribute("fill", "none");
+
+				lineCanvas.append(polyline);
+
+				return polyline;
+			}
+			let firstLine;
+			let secondLine;
+			let thirdLine;
+			if (type === "leftSemiFinal") {
+				if (this.tournamentInfo.semiFinal[0].score[0] > this.tournamentInfo.semiFinal[0].score[1]) {
+					firstLine = document.querySelector("#leftSemiFinalLeftTeamTopToTop");
+					secondLine = document.querySelector("#leftSemiFinalLeftTeamAboveToRight");
+					thirdLine = document.querySelector("#leftSemiFinalAboveToTop");
+				} else {
+					firstLine = document.querySelector("#leftSemiFinalRightTeamTopToTop");
+					secondLine = document.querySelector("#leftSemiFinalRightTeamAboveToLeft");
+					thirdLine = document.querySelector("#leftSemiFinalAboveToTop");
+				}
+			} else if (type === "rightSemiFinal") {
+				if (this.tournamentInfo.semiFinal[1].score[0] > this.tournamentInfo.semiFinal[1].score[1]) {
+					firstLine = document.querySelector("#rightSemiFinalLeftTeamTopToTop");
+					secondLine = document.querySelector("#rightSemiFinalLeftTeamAboveToRight");
+					thirdLine = document.querySelector("#RightSemiFinalAboveToTop");
+				} else {
+					firstLine = document.querySelector("#rightSemiFinalRightTeamTopToTop");
+					secondLine = document.querySelector("#rightSemiFinalRightTeamAboveToLeft");
+					thirdLine = document.querySelector("#RightSemiFinalAboveToTop");
+				}
+			} else if (type === "final") {
+				if (this.tournamentInfo.final[0].score[0] > this.tournamentInfo.final[0].score[1]) {
+					firstLine = document.querySelector("#finalLeftTeamTopToTop");
+					secondLine = document.querySelector("#finalLeftTeamAboveToRight");
+					thirdLine = document.querySelector("#finalAboveCenterToTop");
+				} else {
+					firstLine = document.querySelector("#finalRightTeamTopToTop");
+					secondLine = document.querySelector("#finalRightTeamAboveToLeft");
+					thirdLine = document.querySelector("#finalAboveCenterToTop");
+				}
+			}
+			const lineElementList = [firstLine, secondLine, thirdLine];
+
+			const points = [];
+			lineElementList.forEach((lineElement, idx) => {
+				const x1 = parseFloat(lineElement.getAttribute("x1"));
+				const y1 = parseFloat(lineElement.getAttribute("y1"));
+				points.push({ x: x1, y: y1 });
+				if (idx === lineElementList.length - 1) {
+					const x2 = parseFloat(lineElement.getAttribute("x2"));
+					const y2 = parseFloat(lineElement.getAttribute("y2"));
+					points.push({ x: x2, y: y2 });
+				}
+			});
+
+			const polyline = createPolyline();
+			const frameRate = 60; //초당 프레임 수
+			const duration = 1000; //애니메이션 총 지속시간
+			const totalFrames = duration / (1000 / frameRate); //애니메이션 동안 실행될 총 프레임 수
+			let currentFrame = 0; //현재 프레임
+
+			function animatePolyline() {
+				const progress = currentFrame / totalFrames; //0~1사이의 현재 진행률
+				const pointIndex = Math.floor(progress * (points.length - 1)); //현재 진행중인 선분의 인덱스 결정
+				if (pointIndex === points.length - 1) {
+					resolve();
+					return;
+				}
+
+				const startPoint = points[pointIndex]; //진행중인 선분의 시작점
+				const endPoint = points[pointIndex + 1]; //진행중인 선분의 끝점
+				const segmentProgress = (progress * (points.length - 1)) % 1; //진행중인 선분의 퍼센트
+
+				const currentX = startPoint.x + (endPoint.x - startPoint.x) * segmentProgress;
+				const currentY = startPoint.y + (endPoint.y - startPoint.y) * segmentProgress;
+
+				//현재까지 그려진 점들의 좌표
+				const currentPoints = points
+					.slice(0, pointIndex + 1)
+					.map(p => `${p.x},${p.y}`)
+					.join(" ");
+				//현재까지 그려진 점들의 좌표
+				const currentLine = `${currentPoints} ${currentX},${currentY}`;
+				//현재까지 그려진 점들의 좌표 + 현재좌표를 추가한다.
+
+				polyline.setAttribute("points", currentLine); //point 속성에 등록
+
+				if (currentFrame < totalFrames) {
+					currentFrame++;
+					requestAnimationFrame(animatePolyline);
+				} else {
+					resolve();
+				}
+			}
+
+			animatePolyline();
+		});
 	}
 
 	async _getTournamentInfo() {
@@ -113,13 +321,13 @@ class TournamentAnimationPageManager {
 				await this._enterWaitingRoom(content.tournamentID); // TODO : tournamentID가 roomId 맞나?
 				this._enterPingpongRoom();
 			} else if (event === "notifyAllTeamFinish") {
-				this._renderTournamentAnimation(content.stage);
+				this._renderAlertTournament(content.stage);
 			}
 		};
 		this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
 	}
 
-	async _renderTournamentAnimation(stage) {
+	async _renderAlertTournament(stage) {
 		async function _renderTournamentWarning() {
 			return new Promise(resolve => {
 				let count = 1;
@@ -228,6 +436,88 @@ class TournamentAnimationPageManager {
 		this._onStartPingpongGame();
 	}
 
+	_calculatePoints() {
+		const winner = document.querySelector("#root").getBoundingClientRect();
+		const final1 = document.querySelector(".subTree:first-of-type .final").getBoundingClientRect();
+		const final2 = document.querySelector(".subTree:last-of-type .final").getBoundingClientRect();
+
+		const getTopCenterPos = rect => {
+			return { x: rect.left + rect.width / 2, y: rect.top };
+		};
+		const getBottomCenterPos = rect => {
+			return { x: rect.left + rect.width / 2, y: rect.bottom };
+		};
+
+		const final1TopCenter = getTopCenterPos(final1);
+		const final2TopCenter = getTopCenterPos(final2);
+		const winnerBottomCenter = getBottomCenterPos(winner);
+
+		const pointAboveFinal1 = {
+			x: final1TopCenter.x,
+			y: (final1TopCenter.y + winnerBottomCenter.y) / 2,
+		};
+		const pointAboveFinal2 = {
+			x: final2TopCenter.x,
+			y: (final2TopCenter.y + winnerBottomCenter.y) / 2,
+		};
+		const pointBelowWinner = { x: winnerBottomCenter.x, y: pointAboveFinal1.y };
+
+		const semiFinal1 = document.querySelector(".subTree:first-of-type .semiFinal .player:first-of-type").getBoundingClientRect();
+		const semiFinal2 = document.querySelector(".subTree:first-of-type .semiFinal .player:last-of-type").getBoundingClientRect();
+		const semiFinal3 = document.querySelector(".subTree:last-of-type .semiFinal .player:first-of-type").getBoundingClientRect();
+		const semiFinal4 = document.querySelector(".subTree:last-of-type .semiFinal .player:last-of-type").getBoundingClientRect();
+
+		const semiFinal1TopCenter = getTopCenterPos(semiFinal1);
+		const semiFinal2TopCenter = getTopCenterPos(semiFinal2);
+		const semiFinal3TopCenter = getTopCenterPos(semiFinal3);
+		const semiFinal4TopCenter = getTopCenterPos(semiFinal4);
+		const final1BottomCenter = getBottomCenterPos(final1);
+		const final2BottomCenter = getBottomCenterPos(final2);
+
+		const pointAboveSemiFinal1 = {
+			x: semiFinal1TopCenter.x,
+			y: (semiFinal1TopCenter.y + final1BottomCenter.y) / 2,
+		};
+		const pointAboveSemiFinal2 = {
+			x: semiFinal2TopCenter.x,
+			y: (semiFinal2TopCenter.y + final1BottomCenter.y) / 2,
+		};
+		const pointAboveSemiFinal3 = {
+			x: semiFinal3TopCenter.x,
+			y: (semiFinal3TopCenter.y + final2BottomCenter.y) / 2,
+		};
+		const pointAboveSemiFinal4 = {
+			x: semiFinal4TopCenter.x,
+			y: (semiFinal4TopCenter.y + final2BottomCenter.y) / 2,
+		};
+
+		const pointBelowFinal1 = { x: final1BottomCenter.x, y: pointAboveSemiFinal1.y };
+		const pointBelowFinal2 = { x: final2BottomCenter.x, y: pointAboveSemiFinal3.y };
+
+		return {
+			getTopCenterPos,
+			getBottomCenterPos,
+			final1TopCenter,
+			final2TopCenter,
+			winnerBottomCenter,
+			pointAboveFinal1,
+			pointAboveFinal2,
+			pointBelowWinner,
+			semiFinal1TopCenter,
+			semiFinal2TopCenter,
+			semiFinal3TopCenter,
+			semiFinal4TopCenter,
+			final1BottomCenter,
+			final2BottomCenter,
+			pointAboveSemiFinal1,
+			pointAboveSemiFinal2,
+			pointAboveSemiFinal3,
+			pointAboveSemiFinal4,
+			pointBelowFinal1,
+			pointBelowFinal2,
+		};
+	}
+
 	_renderBracket() {
 		const elementCanvas = document.querySelector("#elementCanvas");
 		elementCanvas.innerHTML = "";
@@ -255,6 +545,106 @@ class TournamentAnimationPageManager {
 				line.setAttribute("stroke-width", "0.1rem");
 				lineCanvas.append(line);
 				return line;
+			}
+			const winner = document.querySelector("#root").getBoundingClientRect();
+			const final1 = document.querySelector(".subTree:first-of-type .final").getBoundingClientRect();
+			const final2 = document.querySelector(".subTree:last-of-type .final").getBoundingClientRect();
+
+			const final1TopCenter = getTopCenterPos(final1);
+			const final2TopCenter = getTopCenterPos(final2);
+			const winnerBottomCenter = getBottomCenterPos(winner);
+
+			const pointAboveFinal1 = {
+				x: final1TopCenter.x,
+				y: (final1TopCenter.y + winnerBottomCenter.y) / 2,
+			};
+			const pointAboveFinal2 = {
+				x: final2TopCenter.x,
+				y: (final2TopCenter.y + winnerBottomCenter.y) / 2,
+			};
+			pointBelowWinner = { x: winnerBottomCenter.x, y: pointAboveFinal1.y };
+
+			createLine(final1TopCenter, pointAboveFinal1).id = "finalLeftTeamTopToTop";
+			createLine(final2TopCenter, pointAboveFinal2).id = "finalRightTeamTopToTop";
+			createLine(pointAboveFinal1, pointBelowWinner).id = "finalLeftTeamAboveToRight";
+			createLine(pointAboveFinal2, pointBelowWinner).id = "finalRightTeamAboveToLeft";
+			createLine(pointBelowWinner, winnerBottomCenter).id = "finalAboveCenterToTop";
+
+			const semiFinal1 = document.querySelector(".subTree:first-of-type .semiFinal .player:first-of-type").getBoundingClientRect();
+			const semiFinal2 = document.querySelector(".subTree:first-of-type .semiFinal .player:last-of-type").getBoundingClientRect();
+			const semiFinal3 = document.querySelector(".subTree:last-of-type .semiFinal .player:first-of-type").getBoundingClientRect();
+			const semiFinal4 = document.querySelector(".subTree:last-of-type .semiFinal .player:last-of-type").getBoundingClientRect();
+
+			const semiFinal1TopCenter = getTopCenterPos(semiFinal1);
+			const semiFinal2TopCenter = getTopCenterPos(semiFinal2);
+			const semiFinal3TopCenter = getTopCenterPos(semiFinal3);
+			const semiFinal4TopCenter = getTopCenterPos(semiFinal4);
+			const final1BottomCenter = getBottomCenterPos(final1);
+			const final2BottomCenter = getBottomCenterPos(final2);
+
+			const pointAboveSemiFinal1 = {
+				x: semiFinal1TopCenter.x,
+				y: (semiFinal1TopCenter.y + final1BottomCenter.y) / 2,
+			};
+			const pointAboveSemiFinal2 = {
+				x: semiFinal2TopCenter.x,
+				y: (semiFinal2TopCenter.y + final1BottomCenter.y) / 2,
+			};
+			const pointAboveSemiFinal3 = {
+				x: semiFinal3TopCenter.x,
+				y: (semiFinal3TopCenter.y + final2BottomCenter.y) / 2,
+			};
+			const pointAboveSemiFinal4 = {
+				x: semiFinal4TopCenter.x,
+				y: (semiFinal4TopCenter.y + final2BottomCenter.y) / 2,
+			};
+
+			pointBelowFinal1 = { x: final1BottomCenter.x, y: pointAboveSemiFinal1.y };
+			pointBelowFinal2 = { x: final2BottomCenter.x, y: pointAboveSemiFinal3.y };
+
+			createLine(semiFinal1TopCenter, pointAboveSemiFinal1).id = "leftSemiFinalLeftTeamTopToTop";
+			createLine(semiFinal2TopCenter, pointAboveSemiFinal2).id = "leftSemiFinalRightTeamTopToTop";
+			createLine(semiFinal3TopCenter, pointAboveSemiFinal3).id = "rightSemiFinalLeftTeamTopToTop";
+			createLine(semiFinal4TopCenter, pointAboveSemiFinal4).id = "rightSemiFinalRightTeamTopToTop";
+
+			createLine(pointAboveSemiFinal1, pointBelowFinal1).id = "leftSemiFinalLeftTeamAboveToRight";
+			createLine(pointAboveSemiFinal2, pointBelowFinal1).id = "leftSemiFinalRightTeamAboveToLeft";
+			createLine(pointAboveSemiFinal3, pointBelowFinal2).id = "rightSemiFinalLeftTeamAboveToRight";
+			createLine(pointAboveSemiFinal4, pointBelowFinal2).id = "rightSemiFinalRightTeamAboveToLeft";
+
+			createLine(pointBelowFinal1, final1BottomCenter).id = "leftSemiFinalAboveToTop";
+			createLine(pointBelowFinal2, final2BottomCenter).id = "RightSemiFinalAboveToTop";
+		};
+
+		renderLines();
+	}
+
+	_renderCurrentTournamentInfo() {
+		const elementCanvas = document.querySelector("#elementCanvas");
+		elementCanvas.innerHTML = "";
+		const lineCanvas = document.querySelector("#lineCanvas");
+		lineCanvas.innerHTML = "";
+
+		let pointBelowWinner;
+		let pointBelowFinal1;
+		let pointBelowFinal2;
+
+		const getTopCenterPos = rect => {
+			return { x: rect.left + rect.width / 2, y: rect.top };
+		};
+		const getBottomCenterPos = rect => {
+			return { x: rect.left + rect.width / 2, y: rect.bottom };
+		};
+		const renderLines = () => {
+			function createLine(pos1, pos2) {
+				const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+				line.setAttribute("x1", pos1.x);
+				line.setAttribute("y1", pos1.y);
+				line.setAttribute("x2", pos2.x);
+				line.setAttribute("y2", pos2.y);
+				line.setAttribute("stroke", "rgba(255, 255, 255, 0.3)");
+				line.setAttribute("stroke-width", "0.1rem");
+				lineCanvas.append(line);
 			}
 			const winner = document.querySelector("#root").getBoundingClientRect();
 			const final1 = document.querySelector(".subTree:first-of-type .final").getBoundingClientRect();
@@ -413,25 +803,14 @@ class TournamentAnimationPageManager {
 			});
 		};
 
-		const renderAnimation = () => {
-			//선을 찾고, 렌더링
-		};
-
 		renderLines();
 		renderElements();
-		renderAnimation();
 	}
 
-	// TODO : playerList의 clientId와 final의 clientIdList 타입을 맞춰야 할 듯
 	_getHTML() {
-		let winner = null;
-		// const [final] = this.tournamentInfo.final;
-		// if (final.state === "finished") {
-		// 	winner = this._getWinningPlayer(final.score, final.clientIdList);
-		// }
 		return `
 			<div id="container">
-				${this._getRootHTML(winner)}
+				${this._getRootHTML()}
 				${this._getSubTreesHTML()}
 			</div>
 			<svg id="lineCanvas"></svg>
@@ -439,40 +818,27 @@ class TournamentAnimationPageManager {
 		`;
 	}
 
-	//현재 step에 따라 다르게 표시할 생각
-	_getRootHTML(finalist) {
+	_getRootHTML() {
 		return `
 			<div id="root">
-				${finalist ? this._getPlayerHTML(finalist, true) : this._getEmptyPlayerHTML(true)}
+				${this._getEmptyPlayerHTML(true)}
 			</div>
 		`;
 	}
 
-	//현재 step에 따라 다르게 표시할 생각
 	_getSubTreesHTML() {
-		let leftFinalist = null;
-		let rightFinalist = null;
-		const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
-
-		// 특정 step이상일때 띄어주는거로 변경
-		// if (leftSemiFinal.state === "finished") {
-		// 	leftFinalist = this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList);
-		// }
-		// if (rightSemiFinal.state === "finished") {
-		// 	rightFinalist = this._getWinningPlayer(rightSemiFinal.score, rightSemiFinal.clientIdList);
-		// }
 		return `
 			<div id="subTrees">
-				${this._getSubTreeHTML(leftFinalist, this.playerList.slice(0, 2))}
-				${this._getSubTreeHTML(rightFinalist, this.playerList.slice(2))}
+				${this._getSubTreeHTML(this.playerList.slice(0, 2))}
+				${this._getSubTreeHTML(this.playerList.slice(2, 4))}
 			</div>
 		`;
 	}
-	_getSubTreeHTML(finalist, semiFinalist) {
+	_getSubTreeHTML(semiFinalist) {
 		return `
 			<div class="subTree">
 				<div class="final">
-					${finalist ? this._getPlayerHTML(finalist) : this._getEmptyPlayerHTML()}
+					${this._getEmptyPlayerHTML()}
 				</div>
 				<div class="semiFinal">
 					${this._getPlayerHTML(semiFinalist[0])}
@@ -499,7 +865,7 @@ class TournamentAnimationPageManager {
 			<div class="player">
 				<div class="avatar">
 					<div class="avatarImgFrame">
-						<img class="avatarImg" src="${player.avartarUrl}">
+						<img class="avatarImg fadeInEffect" src="${player.avartarUrl}">
 					</div>
 					${isWinner ? '<img class="crownImg" src="images/tournamentCrown.png">' : ""}
 				</div>

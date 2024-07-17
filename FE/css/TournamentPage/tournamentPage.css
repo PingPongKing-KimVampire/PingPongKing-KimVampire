@@ -361,4 +361,17 @@
   .line-animation {
 	animation: drawLine 2s forwards;
   }
+
+.fadeInEffect{
+	opacity: 0; /* 초기 상태는 투명 */
+	animation: fadeIn 2s forwards; /* 2초 동안 서서히 등장 */
+  }
   
+  @keyframes fadeIn {
+	from {
+	  opacity: 0; /* 시작할 때 완전히 투명 */
+	}
+	to {
+	  opacity: 1; /* 끝날 때 완전히 불투명 */
+	}
+  }
