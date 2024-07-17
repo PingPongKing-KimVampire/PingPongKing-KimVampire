@@ -28,7 +28,7 @@ class WaitingTournamentPageManager {
 
 	async _connectTournamentSocket(id) {
 		const tournamentSocket = new WebSocket(
-			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournamentRoom/${id}`
+			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}/`
 		);
 		await new Promise((resolve) => {
 			tournamentSocket.addEventListener('open', () => {
@@ -46,6 +46,7 @@ class WaitingTournamentPageManager {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === 'enterTournamentRoomResponse') {
+					console.log("here");
 					tournamentSocket.removeEventListener('message', listener);
 					resolve(content.tournamentClientList);
 				}
@@ -64,7 +65,7 @@ class WaitingTournamentPageManager {
 				this._unsubscribeWindow();
 				const tournamentId = content.tournamentId;
 				const { tournamentSocket, tournamentClientList } =
-					await _connectTournamentSocket(tournamentId);
+					await this._connectTournamentSocket(tournamentId);
 				this.clientInfo.tournamentInfo = {
 					tournamentSocket,
 					tournamentClientList,
