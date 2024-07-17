@@ -28,7 +28,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def _send(self, event=str, content=str):
         Printer.log(f">>>>> Tournament {self.tournament_id} sent >>>>>", "bright_cyan")
         Printer.log(f"event : {event}", "white")
-        Printer.log(f"conetent : {content}\n", "white")
+        Printer.log(f"content : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
     
@@ -49,7 +49,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         
         Printer.log(f"<<<< Tournament {self.tournament_id} recieve <<<<<", "bright_cyan")
         Printer.log(f"event : {event}", "white")
-        Printer.log(f"conetent : {content}\n", "white")
+        Printer.log(f"content : {content}\n", "white")
         if event == "enterTournamentRoom":
             await self.enter_tournament_room(content)
         elif event == "getTournamentGameInfo":

@@ -61,7 +61,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     async def _send(self, event, content):
         Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
         Printer.log(f"event : {event}", "cyan")
-        # Printer.log(f"conetent : {content}", "cyan")
+        # Printer.log(f"content : {content}", "cyan")
         await self.send(json.dumps({ 'event': event, 'content': content }))
 
     async def receive(self, text_data):
