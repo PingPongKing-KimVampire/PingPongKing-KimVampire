@@ -46,7 +46,7 @@ class LoginPageManager {
 		try {
 			await this._loginRequest(id, pw);
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			const lobbySocket = await _connectLobbySocket(userData.id);
+			const lobbySocket = await _connectLobbySocket(userData.id, this.accessToken);
 
 			this.clientInfo.id = userData.id;
 			this.clientInfo.nickname = userData.nickname;
@@ -104,7 +104,6 @@ class LoginPageManager {
 			event: "initClient",
 			content: {
 				clientId: id,
-				accessToken: this.accessToken,
 			},
 		};
 		socket.send(JSON.stringify(initClientMessage));
