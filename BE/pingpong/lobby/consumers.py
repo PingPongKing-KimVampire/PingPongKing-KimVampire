@@ -3,6 +3,8 @@ import json
 from coreManage.stateManager import StateManager
 from utils.printer import Printer
 from coreManage.group import add_group, discard_group, notify_group
+from user.serializers import CustomTokenObtainPairSerializer
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 
 stateManager = StateManager()
@@ -14,12 +16,14 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         self.nickname = None
         self.avartar_url = None
         headers = dict(self.scope['headers'])
-        # token = headers.get(b'authorization').decode('utf-8').split(' ')[1]
-        await self.accept(subprotocol="authorization")
+        token = headers.get(b'sec-websocket-protocol', b'')
+        try:
+            decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+            await self.accept(subprotocol="authorization")
+            await add_group(self, 'lobby')
+        except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
 
-        ip = self.scope['client'][0] # scope 공부해볼것
-        # sessionId = self.scope['session']['session_key']
-        await add_group(self, 'lobby')
+
         Printer.log(f"New client connected from {ip}", "green")
 
     async def disconnect(self, close_code):
