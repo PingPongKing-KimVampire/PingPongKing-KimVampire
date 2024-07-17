@@ -65,11 +65,14 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
         await self._send("enterTournamentRoomResponse", 
                          { "tournamentClientList": client_info_list })
+        asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
+
+    async def start_semi_final_room(self, gameroom_id, tournament_state):                     
+        await add_group(self, f"tournament_{gameroom_id}")
         await asyncio.sleep(3)
-        await add_group(self, f"tournament_{self.gameroom_id_now}")
         await self._send("notifyYourGameRoomReady", 
-                         {'pingpongroomId' : self.gameroom_id_now, 
-                          'stage' : self.tournament_state})
+                         {'pingpongroomId' : gameroom_id, 
+                          'stage' : tournament_state})
 
     async def notifyGameEnd(self, content):
         winner_id = content['winner_id']
