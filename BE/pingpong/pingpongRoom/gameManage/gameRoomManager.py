@@ -100,9 +100,9 @@ class GameRoomManager:
         data = []
         for client_id, player in team_list.items():
             data.append({
-                'clientId': client_id,
-                'clientNickname': player.nickname,
-                # 'imageUri': player.image_uri,
+                'id': client_id,
+                'nickname': player.nickname,
+                'avartarUrl': player.image_uri,
                 'readyState': player.ready_state
             })
         return data
@@ -206,9 +206,6 @@ class GameRoomManager:
             for client_id, player in self.clients.items():
                 if player.needs_update():
                     pos_x, pos_y = player.move()
-                    # print("player pos: ", pos_x, pos_y)
-                    # if debug_x - pos_x > 15 or debug_y - pos_y > 15:
-                    #     print("debug pos: ", debug_x, debug_y)
                     content = {'xPosition': pos_x, 'yPosition': pos_y}
                     await self._notify_paddle_location_update(client_id, content)
                     debug_x, debug_y = player.pos_x, player.pos_y
@@ -239,8 +236,7 @@ class GameRoomManager:
             count = self.team_left.__len__()
         from utils.printer import Printer
         await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
-        for i in range(count):
-        # for i in range(count - 1):
+        for i in range(count - 1):
             id = str(uuid.uuid4())
             self.fake_ball[id] = Ball(NORMAL_SPEED, self.ball_radius)
             rand = random.randint(-15, 15)
@@ -271,20 +267,12 @@ class GameRoomManager:
         await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
             {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
-    # def _update_paddle_position(self, client_id, content):
-    #     player = self.clients[client_id]
-    #     player.update_target(content['xPosition'], content['yPosition'])
-
     def _detect_collisions(self, ball):
         state = NOHIT
         if ball.get_right_x() >= self.board_width:
-            # print("right_x: ", ball.get_right_x())
-            # print("board_width: ", self.board_width)
             self.serve_turn = LEFT
             return SCORE
         elif ball.get_left_x() <= 0:
-            # print("left_x: ", ball.get_left_x())
-            # print("board_width: ", self.board_width)
             self.serve_turn = RIGHT
             return SCORE
         elif ball.get_top_y() <= 0 or ball.get_bottom_y() >= self.board_height:

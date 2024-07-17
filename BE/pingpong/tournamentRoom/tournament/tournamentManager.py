@@ -13,13 +13,13 @@ class TournamentManager:
         for consumer in consumers:
             self.consumers[consumer.client_id] = consumer
 
-        # "clientInfo" : { clientId : str, nickname : str, imageUri : str}
+        # "clientInfo" : { id : str, nickname : str, avartarUrl : str}
         self.client_info_list = []
         for consumer in consumers:
             self.client_info_list.append({
-                'clientId': consumer.client_id,
+                'id': consumer.client_id,
                 'nickname': consumer.nickname,
-                'imageUri': consumer.image_uri
+                'avartarUrl': consumer.image_uri
             })
 
         self.tournament_state = "semi-final" # semi-final, final
@@ -55,7 +55,7 @@ class TournamentManager:
 
     def add_semi_final_winner(self, client_id):
         for client_info in self.client_info_list:
-            if client_id == client_info['clientId']:
+            if client_id == client_info['id']:
                 self.semi_final_winners.append(client_info)
         if self.semi_final_winners.__len__() == 2:
             return self.make_final_room()
@@ -85,13 +85,13 @@ class TournamentManager:
 
     def set_game_room_data(self, client_1, client_2, room_id, game_manager):
         data = {
-            'clientIdList' : [client_1['clientId'], client_2['clientId']],
+            'clientIdList' : [client_1['id'], client_2['id']],
             'score' : [0,0],
             'roomId' : room_id,
             'state' : 'notStarted'
         }
-        game_manager.enter_room(client_1['clientId'], client_1['nickname'], client_1['imageUri'])
-        game_manager.enter_room(client_2['clientId'], client_2['nickname'], client_2['imageUri'])
+        game_manager.enter_room(client_1['id'], client_1['nickname'], client_1['avartarUrl'])
+        game_manager.enter_room(client_2['id'], client_2['nickname'], client_2['avartarUrl'])
         return data
 
     def make_game_room(self):
@@ -115,7 +115,7 @@ class TournamentManager:
     async def start_final_room(self):
         room_id = self.tournamnet_info_list['final']['roonId']
         for client_info in self.semi_final_winners:
-            await add_group(client_info['clientId'], f"tournament_{room_id}")
+            await add_group(client_info['id'], f"tournament_{room_id}")
         await asyncio.sleep(3)
         data = {
             'pingpongroomId' : room_id,
