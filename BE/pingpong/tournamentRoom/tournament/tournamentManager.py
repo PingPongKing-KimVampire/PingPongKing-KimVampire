@@ -79,23 +79,23 @@ class TournamentManager:
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()
         self.game_manager_list['final'] = game_manager
-        self.tournament_info_list['final'] = {
+        self.tournament_info_list['final'] = [{
             'clientIdList' : [],
             'score' : [0,0],
             'roomId' : room_id,
             'state' : 'notStarted'
-        }
+        }]
         
     def get_final_room_data(self):
         game_manager = self.game_manager_list['final']
-        room_id = self.tournament_info_list['final']['roomId']
+        room_id = self.tournament_info_list['final'][0]['roomId']
         return room_id, game_manager
     
     def enter_final_room(self):
         room_id, game_manager = self.get_final_room_data()
         client_1 = self.semi_final_winners[0]
         client_2 = self.semi_final_winners[1]
-        self.tournament_info_list['final'] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
+        self.tournament_info_list['final'][0] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
         return room_id
 
     def set_game_room_data(self, client_1, client_2, room_id, game_manager):
@@ -128,7 +128,7 @@ class TournamentManager:
         asyncio.create_task(self.start_final_room())
 
     async def start_final_room(self):
-        room_id = self.tournament_info_list['final']['roonId']
+        room_id = self.tournament_info_list['final'][0]['roomId']
         for client_info in self.semi_final_winners:
             await add_group(client_info['id'], f"tournament_{room_id}")
         await asyncio.sleep(3)
