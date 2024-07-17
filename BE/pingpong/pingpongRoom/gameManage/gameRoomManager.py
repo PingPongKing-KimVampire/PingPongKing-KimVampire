@@ -346,7 +346,7 @@ class GameRoomManager:
     def _check_game_end(self):
         return self.score[LEFT] >= 5 or self.score[RIGHT] >= 5
 
-    async def _end_game_loop(self):
+    def _end_game_loop(self):
         team = 'left' if self.score[LEFT] >= 5 else 'right'
         self._end_game()
         return team
