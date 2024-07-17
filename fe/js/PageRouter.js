@@ -8,7 +8,6 @@ import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js"
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
-import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
 import TournamentAnimationPageManager from './TournamentPage/TournamentAnimationPageManager.js';
 
 export const SERVER_ADDRESS = "127.0.0.1";
@@ -116,10 +115,7 @@ class PageRouter {
 		} else if (url === "waitingTournament") {
 			this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
 			const waitingTournamentPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this._joinLobbyPage.bind(this), this._joinTournamentPage.bind(this));
-		} else if (url === "tournament") {
-			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
-			const tournamentPageManager = new TournamentPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._joinLobbyPage.bind(this));
-		}  else if (url === 'tournamentAnimation') {
+		} else if (url === 'tournamentAnimation') {
 			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
 			const tournamentAnimationPageManager = new TournamentAnimationPageManager(
 				this.app,
@@ -195,7 +191,7 @@ class PageRouter {
 	}
 
 	_joinTournamentPage() {
-		this.renderPage("tournament");
+		this.renderPage("tournamentAnimation");
 	}
 }
 

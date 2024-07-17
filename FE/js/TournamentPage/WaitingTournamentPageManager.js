@@ -10,12 +10,6 @@ class WaitingTournamentPageManager {
 		this.joinLobbyPage = joinLobbyPage;
 		this.joinTournamentPage = joinTournamentPage;
 		this.initPage();
-
-		//3초뒤 tournamentPage로 이동하도록 하드코딩
-		setTimeout(() => {
-			this.clientInfo.lobbySocket.close();
-			this.joinTournamentPage();
-		}, 3000);
 	}
 
 	async initPage() {
@@ -66,6 +60,7 @@ class WaitingTournamentPageManager {
 		this.NotifyMatchMakingCompleteListener = async (messageEvent) => {
 			const { event, content } = JSON.parse(messageEvent.data);
 			if (event === 'notifyMatchMakingComplete') {
+				console.log("매치매이킹 성공!");
 				this._unsubscribeWindow();
 				const tournamentId = content.tournamentId;
 				const { tournamentSocket, tournamentClientList } =
@@ -89,21 +84,21 @@ class WaitingTournamentPageManager {
 			'.leaveWaitingTournamentButton'
 		);
 		leaveWaitingTournamentButton.addEventListener('click', async () => {
-			// const startMatchMakingMessage = {
-			// 	event: "cancelMatchMaking",
-			// 	content: {},
-			// };
-			// this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
-			// await new Promise(resolve => {
-			// 	const listener = messageEvent => {
-			// 		const { event, content } = JSON.parse(messageEvent.data);
-			// 		if (event === "cancelMatchMakingResponse" && content.message === "OK") {
-			// 			this.clientInfo.lobbySocket.removeEventListener("message", listener);
-			// 			resolve();
-			// 		}
-			// 	};
-			// 	this.clientInfo.lobbySocket.addEventListener("message", listener);
-			// });
+			const startMatchMakingMessage = {
+				event: "cancelMatchMaking",
+				content: {},
+			};
+			this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
+			await new Promise(resolve => {
+				const listener = messageEvent => {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === "cancelMatchMakingResponse" && content.message === "OK") {
+						this.clientInfo.lobbySocket.removeEventListener("message", listener);
+						resolve();
+					}
+				};
+				this.clientInfo.lobbySocket.addEventListener("message", listener);
+			});
 
 			this._removePageListener();
 			this._unsubscribeWindow();
