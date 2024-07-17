@@ -34,7 +34,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.client_id:
-            stateManager.remove_client(self.client_id)
             Printer.log(f"Client {self.client_id} disconnected", "red")
             await discard_group(self, 'lobby')
 

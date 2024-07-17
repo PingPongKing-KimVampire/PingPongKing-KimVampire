@@ -89,20 +89,16 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def enter_waiting_room(self, content):
         await self.set_consumer_info(content['clientId'])
 
-        mode = content['mode']
-        if mode == 'normal':
-            team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.image_uri)
-            if team == None: # 실패시 처리 추가해야 할 듯?
-                await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
-                Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
-                return
+        team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.image_uri)
+        if team == None: # 실패시 처리 추가해야 할 듯?
+            await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
+            Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
+            return
 
-            self.team = team
-            await add_group(self, f"{self.room_id}-{team}")
+        self.team = team
+        await add_group(self, f"{self.room_id}-{team}")
 
-            await self.send_enter_response(self.room_id, team, is_you_create)
-        else: # tournament
-            pass # tournament enter response 어떻게?
+        await self.send_enter_response(self.room_id, is_you_create)
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
             
 
