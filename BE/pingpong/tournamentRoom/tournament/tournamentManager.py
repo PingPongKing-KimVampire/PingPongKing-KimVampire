@@ -22,13 +22,13 @@ class TournamentManager:
                 'avatarUrl': consumer.image_uri
             })
 
-        self.tournament_state = "semi-final" # semi-final, final
+        self.tournament_state = "semiFinal" # semiFinal, final
         self.tournament_info_list = {
-            'semi-final' : None,
+            'semiFinal' : None,
             'final' : None
         }
         self.game_manager_list = {
-            'semi-final' : None,
+            'semiFinal' : None,
             'final' : None
         }
         self.semi_final_winners = []
@@ -64,7 +64,7 @@ class TournamentManager:
     def make_semi_final_rooms(self):
         room_id_1, game_manager_1 = self.make_game_room()
         room_id_2, game_manager_2 = self.make_game_room()
-        self.game_manager_list['semi-final'] = [game_manager_1, game_manager_2]
+        self.game_manager_list['semiFinal'] = [game_manager_1, game_manager_2]
 
         semi_final_arr = []
         for i in range(2):
@@ -73,7 +73,7 @@ class TournamentManager:
             room_id = room_id_1 if i == 0 else room_id_2
             game_manager = game_manager_1 if i == 0 else game_manager_2
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
-        self.tournament_info_list['semi-final'] = semi_final_arr
+        self.tournament_info_list['semiFinal'] = semi_final_arr
     
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()

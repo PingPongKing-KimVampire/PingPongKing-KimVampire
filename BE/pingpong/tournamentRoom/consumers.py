@@ -13,7 +13,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
         self.client_id = None
         self.nickname = None
-        self.tournament_state = "semi-final"
+        self.tournament_state = "semiFinal"
         self.gameroom_id_now = None
         await self.accept()
         await add_group(self, self.tournament_id)
@@ -74,12 +74,12 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def notifyGameEnd(self, content):
         winner_id = content['winner_id']
         self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, 'finished')
-        if self.tournament_state == 'semi-final':
+        if self.tournament_state == 'semiFinal':
             if self.client_id == winner_id:
                 self.tournament_state = 'final'
             room_id = self.tournament_manager.add_semi_final_winner(winner_id)
             if room_id:
-                await self.tournament_manager.notify_all_team_finish('semi-final')
+                await self.tournament_manager.notify_all_team_finish('semiFinal')
         elif self.tournament_state == 'final':
             await self.tournament_manager.notify_all_team_finish('final')
         await discard_group(self, f"tournament_{self.gameroom_id_now}")
