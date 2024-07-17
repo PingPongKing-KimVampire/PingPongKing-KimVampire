@@ -346,6 +346,11 @@
 	animation: drawLine 2s forwards;
   } */
 
+  .whitePolyline {
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: 0.1rem;
+    fill: none;
+}
 
   @keyframes drawLine {
 	from {
