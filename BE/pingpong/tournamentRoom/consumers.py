@@ -17,7 +17,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         self.gameroom_id_now = None
         await self.accept()
         await add_group(self, self.tournament_id)
-        Printer.log(f"Client connected to tournament room {self.room_id}", "green")
+        Printer.log(f"Client connected to tournament room {self.tournament_id}", "green")
 
     async def disconnect(self, close_code):
         if self.client_id:
@@ -26,7 +26,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
-        Printer.log(f">>>>> Tournamnet {self.room_id} sent >>>>>", "bright_cyan")
+        Printer.log(f">>>>> Tournamnet {self.tournament_id} sent >>>>>", "bright_cyan")
         Printer.log(f"event : {event}", "white")
         Printer.log(f"conetnt : {content}\n", "white")
         data = { 'event': event, 'content': content }
