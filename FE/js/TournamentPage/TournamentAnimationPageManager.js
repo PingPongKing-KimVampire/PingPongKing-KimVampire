@@ -25,22 +25,22 @@ class TournamentAnimationPageManager {
 		// 	{
 		// 		id: "1",
 		// 		nickname: "김뱀파이어어어어어어어어엉어어어어어",
-		// 		avartarUrl: "images/playerA.png",
+		// 		avatarUrl: "images/playerA.png",
 		// 	},
 		// 	{
 		// 		id: "2",
 		// 		nickname: "김뱀파이어",
-		// 		avartarUrl: "images/playerB.png",
+		// 		avatarUrl: "images/playerB.png",
 		// 	},
 		// 	{
 		// 		id: "3",
 		// 		nickname: "김뱀파",
-		// 		avartarUrl: "images/playerC.svg",
+		// 		avatarUrl: "images/playerC.svg",
 		// 	},
 		// 	{
 		// 		id: "4",
 		// 		nickname: "김뱀",
-		// 		avartarUrl: "images/noFriendVampire3.webp",
+		// 		avatarUrl: "images/noFriendVampire3.webp",
 		// 	},
 		// ];
 
@@ -75,10 +75,10 @@ class TournamentAnimationPageManager {
 	}
 	
 	async _initPage() {
+		this._listenTournamentEvent();
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
-		this._listenTournamentEvent(); //TODO : 현재 테스트 불가능함
 
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
@@ -89,11 +89,11 @@ class TournamentAnimationPageManager {
 	}
 
 	async _initAnimation(stage) {
+		this._listenTournamentEvent();
 		stage = "final"; //하드코딩
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
-		this._listenTournamentEvent(); // TODO : 현재 테스트 불가능함
 
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
@@ -326,7 +326,7 @@ class TournamentAnimationPageManager {
 			const message = JSON.parse(messageEvent);
 			const { event, content } = message;
 			if (event === "notifyYourGameRoomReady") {
-				await this._enterWaitingRoom(content.tournamentID); // TODO : tournamentID가 roomId 맞나?
+				await this._enterWaitingRoom(content.pingpongroomID); // TODO : tournamentID가 roomId 맞나?
 				this._enterPingpongRoom();
 			} else if (event === "notifyAllTeamFinish") {
 				this._renderAlertTournament(content.stage);
@@ -400,8 +400,6 @@ class TournamentAnimationPageManager {
 			teamLeftAbility: null,
 			teamRightAbility: null,
 		};
-		this.clientInfo.lobbySocket.close();
-		this.clientInfo.lobbySocket = null;
 	}
 
 	async _enterPingpongRoom() {
@@ -441,6 +439,7 @@ class TournamentAnimationPageManager {
 		});
 		this.clientInfo.gameInfo.sizeInfo = boardInfo;
 		this._unsubscribeWindow();
+		console.log("START PINGPONG GAME");
 		this._onStartPingpongGame();
 	}
 
@@ -905,7 +904,7 @@ class TournamentAnimationPageManager {
 			<div class="player">
 				<div class="avatar">
 					<div class="avatarImgFrame">
-						<img class="avatarImg fadeInEffect" src="${player.avartarUrl}">
+						<img class="avatarImg fadeInEffect" src="${player.avatarUrl}">
 					</div>
 					${isWinner ? '<img class="crownImg" src="images/tournamentCrown.png">' : ""}
 				</div>
