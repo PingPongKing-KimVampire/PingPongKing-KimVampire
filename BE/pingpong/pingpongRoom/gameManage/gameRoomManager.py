@@ -102,7 +102,7 @@ class GameRoomManager:
             data.append({
                 'id': client_id,
                 'nickname': player.nickname,
-                'avartarUrl': player.image_uri,
+                'avatarUrl': player.image_uri,
                 'readyState': player.ready_state
             })
         return data

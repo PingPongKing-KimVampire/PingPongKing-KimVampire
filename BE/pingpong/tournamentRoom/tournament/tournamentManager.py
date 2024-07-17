@@ -19,7 +19,7 @@ class TournamentManager:
             self.client_info_list.append({
                 'id': consumer.client_id,
                 'nickname': consumer.nickname,
-                'avartarUrl': consumer.image_uri
+                'avatarUrl': consumer.image_uri
             })
 
         self.tournament_state = "semi-final" # semi-final, final
@@ -90,8 +90,8 @@ class TournamentManager:
             'roomId' : room_id,
             'state' : 'notStarted'
         }
-        game_manager.enter_room(client_1['id'], client_1['nickname'], client_1['avartarUrl'])
-        game_manager.enter_room(client_2['id'], client_2['nickname'], client_2['avartarUrl'])
+        game_manager.enter_room(client_1['id'], client_1['nickname'], client_1['avatarUrl'])
+        game_manager.enter_room(client_2['id'], client_2['nickname'], client_2['avatarUrl'])
         return data
 
     def make_game_room(self):
