@@ -84,11 +84,11 @@ class WaitingTournamentPageManager {
 			'.leaveWaitingTournamentButton'
 		);
 		leaveWaitingTournamentButton.addEventListener('click', async () => {
-			const startMatchMakingMessage = {
+			const cancelMatchMakingMessage = {
 				event: "cancelMatchMaking",
 				content: {},
 			};
-			this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
+			this.clientInfo.lobbySocket.send(JSON.stringify(cancelMatchMakingMessage));
 			await new Promise(resolve => {
 				const listener = messageEvent => {
 					const { event, content } = JSON.parse(messageEvent.data);

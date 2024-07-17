@@ -138,21 +138,21 @@ class LobbyPageManager {
 	_setTournamentJoinButton(){
 		const tournamentJoinButton = document.querySelector(".tournamentJoinButton");
 		tournamentJoinButton.addEventListener("click", async () => {
-			// const startMatchMakingMessage = {
-			// 	event: "startMatchMaking",
-			// 	content: {},
-			// };
-			// this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
-			// await new Promise(resolve => {
-			// 	const listener = messageEvent => {
-			// 		const { event, content } = JSON.parse(messageEvent.data);
-			// 		if (event === "startMatchMakingResponse" && content.message === "OK") {
-			// 			this.clientInfo.lobbySocket.removeEventListener("message", listener);
-			// 			resolve();
-			// 		}
-			// 	};
-			// 	this.clientInfo.lobbySocket.addEventListener("message", listener);
-			// });
+			const startMatchMakingMessage = {
+				event: "startMatchMaking",
+				content: {},
+			};
+			this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
+			await new Promise(resolve => {
+				const listener = messageEvent => {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === "startMatchMakingResponse" && content.message === "OK") {
+						this.clientInfo.lobbySocket.removeEventListener("message", listener);
+						resolve();
+					}
+				};
+				this.clientInfo.lobbySocket.addEventListener("message", listener);
+			});
 
 			this._unsubscribeWindow();
 			this.joinWaitingTournamentPage();

@@ -22,16 +22,13 @@ class StateManager:
         self.match_making_loop_task = None
         self.match_queue = []
         self.is_match_task_running = False
-        self.tournaments = {str, Any}
+        self.tournaments = {}
         
     def get_channel_layer(self):
         return self.channel_layer
 
     # Matchmaking Management
     def add_to_match_queue(self, consumer) -> None:
-        if self.match_making_loop_task is None or self.match_making_loop_task.done():
-            self.is_match_task_running = True
-            self.match_making_loop_task = create_task(self.match_making_loop())
         self.match_queue.append(consumer)
         Printer.log(f"Client {consumer.client_id} added to match queue", "blue")
 
@@ -48,16 +45,13 @@ class StateManager:
                             'notifyMatchMakingComplete', {'tournamentId': tournament_id})
 
     async def match_making_loop(self) -> None:
-        while self.is_match_task_running:
+        while 1:
             if self.is_match_queue_full():
                 match_clients = self.match_queue[:4]
                 self.match_queue = self.match_queue[4:]
                 tournament_id = self.create_tournament_manager(match_clients)
                 await self.group_match_clients(match_clients, tournament_id)
-            if not self.match_queue:
-                self.is_match_task_running = False
             await sleep(1)
-        self.match_making_loop_task = None
 
     def create_tournament_manager(self, match_clients) -> str:
         tournament_id = str(uuid.uuid4())
@@ -71,6 +65,7 @@ class StateManager:
         if self.channel_layer is None:
             self.channel_layer = channel_layer
             self.make_test_rooms()
+            create_task(self.match_making_loop())
 
     # Room Management
     def create_room(self, content: Dict[str, Any]) -> str:
