@@ -70,7 +70,7 @@ class TournamentAnimationPageManager {
 		// };
 
 		// 정보 업데이트
-		setTimeout(this._initAnimation.bind(this, "final"), 1000);
+		// setTimeout(this._initAnimation.bind(this, "final"), 1000);
 		this._initPage();
 	}
 	
@@ -357,7 +357,7 @@ class TournamentAnimationPageManager {
 		await _renderTournamentWarning.call(this);
 
 		//5초 후 토너먼트 화면으로 이동하고 애니메이션을 렌더링함
-		if (stage === "semi-final") {
+		if (stage === "semiFinal") {
 		} else if (stage === "final") {
 		}
 	}
