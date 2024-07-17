@@ -25,22 +25,12 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         headers = dict(self.scope['headers'])
         token = headers.get(b'sec-websocket-protocol', b'')
         try:
-            # token_array = bearer_access_token.split(" ")
-            # if token_array[0] != "Bearer":
-            #     raise InvalidTokenError("Bearer Error")
-            # access_token = token_array[1]
             decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
             await self.accept(subprotocol="authorization")
             Printer.log("WebSocket connection established", "green")      
         except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
             Printer.log("Invalid Authorization header, closing connection", "red")
             await self.close()
-        
-    # async def check_timeout(self, timeout):
-    #     await asyncio.sleep(timeout)
-    #     if not self.is_init:
-    #         Printer.log("Client not initialized within timeout period, disconnecting...", "yellow")
-    #         await self.close()
 
     async def disconnect(self, close_code):
         if self.is_init:

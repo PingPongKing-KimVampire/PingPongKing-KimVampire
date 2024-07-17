@@ -15,7 +15,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         self.avartar_url = None
         headers = dict(self.scope['headers'])
         # token = headers.get(b'authorization').decode('utf-8').split(' ')[1]
-        await self.accept()
+        await self.accept(subprotocol="authorization")
 
         ip = self.scope['client'][0] # scope 공부해볼것
         # sessionId = self.scope['session']['session_key']
