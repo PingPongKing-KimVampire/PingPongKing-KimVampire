@@ -174,22 +174,11 @@ class GameRoomManager:
         for player in team.values():
             player.modify_paddle_size(size)
         
-    def set_players(self, room):
-        # left_mode = self.set_team_ability(self.team_left)
-        self.check_jiant_blocker(self.left_mode, self.right_mode)
-
-    def set_team_ability(self, team):
-        for player in team.values():
-            # player.ability = 'jiantBlocker'
-            # player.ability = 'speedTwister'
-            player.ability = 'illusionFaker'
-            # player.ability = 'ghostSmasher'
-        return player.ability
-        
     async def trigger_game(self):
         self.is_playing = True
         self.is_end = False
         self._reset_round()
+        self.check_jiant_blocker(self.left_ability, self.right_ability)
         asyncio.create_task(self._notify_game_ready_and_start())
         asyncio.create_task(self._game_loop())
         asyncio.create_task(self._paddle_update_loop())
