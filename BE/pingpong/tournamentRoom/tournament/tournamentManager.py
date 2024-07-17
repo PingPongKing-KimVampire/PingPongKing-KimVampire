@@ -23,7 +23,7 @@ class TournamentManager:
             })
 
         self.tournament_state = "semi-final" # semi-final, final
-        self.tournamnet_info_list = {
+        self.tournament_info_list = {
             'semi-final' : None,
             'final' : None
         }
@@ -38,17 +38,17 @@ class TournamentManager:
         return self.client_info_list
 
     def get_game_room_id_now(self, client_id, client_state):
-        for gameroom_info in self.tournamnet_info_list[client_state]:
+        for gameroom_info in self.tournament_info_list[client_state]:
             for id in gameroom_info['clientIdList']:
                 if client_id == id:
                     return gameroom_info['roomId']
         return None
 
     def get_tournament_info_list(self):
-        return self.tournamnet_info_list
+        return self.tournament_info_list
 
     def change_tournamanet_info_game_state(self, tournament_state, room_id, state):
-        for gameroom_info in self.tournamnet_info_list[tournament_state]:
+        for gameroom_info in self.tournament_info_list[tournament_state]:
             if room_id == gameroom_info['roomId']:
                 gameroom_info[state] = state
                 break
@@ -73,14 +73,14 @@ class TournamentManager:
             room_id = room_id_1 if i == 0 else room_id_2
             game_manager = game_manager_1 if i == 0 else game_manager_2
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
-        self.tournamnet_info_list['semi-final'] = semi_final_arr
+        self.tournament_info_list['semi-final'] = semi_final_arr
     
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()
         self.game_manager_list['final'] = game_manager
         client_1 = self.semi_final_winners[0]
         client_2 = self.semi_final_winners[1]
-        self.tournamnet_info_list['final'] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
+        self.tournament_info_list['final'] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
         return room_id
 
     def set_game_room_data(self, client_1, client_2, room_id, game_manager):
@@ -100,7 +100,7 @@ class TournamentManager:
         return game_room_id, game_room_manager
 
     def update_room_score(self, state, room_id, team, score):
-        for gameroom_info in self.tournamnet_info_list[state]:
+        for gameroom_info in self.tournament_info_list[state]:
             if gameroom_info['roomId'] == room_id:
                 if team == 'left':
                     gameroom_info['score'][0] = score
@@ -113,7 +113,7 @@ class TournamentManager:
         asyncio.create_task(self.start_final_room())
 
     async def start_final_room(self):
-        room_id = self.tournamnet_info_list['final']['roonId']
+        room_id = self.tournament_info_list['final']['roonId']
         for client_info in self.semi_final_winners:
             await add_group(client_info['id'], f"tournament_{room_id}")
         await asyncio.sleep(3)

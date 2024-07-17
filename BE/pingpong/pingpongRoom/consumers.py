@@ -36,7 +36,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         if not (event == "notifyBallLocationUpdate" or event == "notifyPaddleLocationUpdate"):
             Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
             Printer.log(f"event : {event}", "white")
-            Printer.log(f"conetnt : {content}\n", "white")
+            Printer.log(f"conetent : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
     
