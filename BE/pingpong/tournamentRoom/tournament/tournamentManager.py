@@ -33,6 +33,7 @@ class TournamentManager:
         }
         self.semi_final_winners = []
         self.make_semi_final_rooms()
+        self.make_final_room()
 
     def get_client_info_list(self):
         return self.client_info_list
@@ -58,7 +59,7 @@ class TournamentManager:
             if client_id == client_info['id']:
                 self.semi_final_winners.append(client_info)
         if self.semi_final_winners.__len__() == 2:
-            return self.make_final_room()
+            return self.enter_final_room()
         return None
 
     def make_semi_final_rooms(self):
@@ -74,10 +75,24 @@ class TournamentManager:
             game_manager = game_manager_1 if i == 0 else game_manager_2
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
         self.tournament_info_list['semiFinal'] = semi_final_arr
-    
+
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()
         self.game_manager_list['final'] = game_manager
+        self.tournament_info_list['final'] = {
+            'clientIdList' : [],
+            'score' : [0,0],
+            'roomId' : room_id,
+            'state' : 'notStarted'
+        }
+        
+    def get_final_room_data(self):
+        game_manager = self.game_manager_list['final']
+        room_id = self.tournament_info_list['final']['roomId']
+        return room_id, game_manager
+    
+    def enter_final_room(self):
+        room_id, game_manager = self.get_final_room_data()
         client_1 = self.semi_final_winners[0]
         client_2 = self.semi_final_winners[1]
         self.tournament_info_list['final'] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
