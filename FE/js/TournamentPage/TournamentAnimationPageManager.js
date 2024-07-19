@@ -406,7 +406,7 @@ class TournamentAnimationPageManager {
 		// 바로 준비 완료 메시지 보내기
 		const changeReadyStateMessage = {
 			event: "changeReadyState",
-			content: { readyState: "READY" },
+			content: { state: "READY" },
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(changeReadyStateMessage));
 		// 3초 후 notifyGameStart 메시지 받기

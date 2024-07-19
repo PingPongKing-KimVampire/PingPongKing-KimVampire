@@ -66,6 +66,7 @@ class GameRoomManager:
 
     def enter_room(self, client_id, nickname, image_uri):
         team = None
+        player = None
         if len(self.team_left) < self.left_max_count:
             player = Player(nickname, ability=None, team='left', image_uri=image_uri)
             self.team_left[client_id] = player
@@ -74,7 +75,8 @@ class GameRoomManager:
             player = Player(nickname, ability=None, team='right', image_uri=image_uri)
             self.team_right[client_id] = player
             team = 'right'
-        self.clients[client_id] = player
+        if player:
+            self.clients[client_id] = player
         return team
 
     def remove_client(self, client_id):
