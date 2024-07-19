@@ -326,7 +326,7 @@ class TournamentAnimationPageManager {
 			const message = JSON.parse(messageEvent.data);
 			const { event, content } = message;
 			if (event === "notifyYourGameRoomReady") {
-				await this._enterWaitingRoom(content.pingpongroomID); // TODO : tournamentID가 roomId 맞나?
+				await this._enterWaitingRoom(content.pingpongroomId);
 				this._enterPingpongRoom();
 			} else if (event === "notifyAllTeamFinish") {
 				this._renderAlertTournament(content.stage);
