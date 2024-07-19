@@ -66,8 +66,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def handle_playing_event(self, event, content):
         if event == 'updatePaddleLocation':
             await self.update_paddle_location(content)
-            content = {'clientId': self.client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
-            await stateManager.notify_room(self.room_id, 'notifyPaddleLocationUpdate', content)
         
     async def handle_waiting_event(self, event, content):
         if event == 'changeReadyState':
@@ -110,7 +108,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Client {self.client_id} selected ability {content['ability']}", "blue")
 
     async def send_enter_response(self, room_id, is_you_create):
-        await stateManager.notify_room_enter(self.room_id, self.client_id, self.nickname, self.team)
+        await stateManager.notify_room_enter(self.room_id, self.client_id, self.image_uri, self.nickname, self.team)
         
         if is_you_create:
             await stateManager.notify_room_created(self.room_id)
