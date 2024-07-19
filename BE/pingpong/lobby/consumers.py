@@ -3,24 +3,44 @@ import json
 from coreManage.stateManager import StateManager
 from utils.printer import Printer
 from coreManage.group import add_group, discard_group, notify_group
+from django.core.exceptions import ObjectDoesNotExist
 
 
 stateManager = StateManager()
 
 class LobbyConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.is_init = False
+        from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+        from user.serializers import CustomTokenObtainPairSerializer
+        from user.repositories import UserRepository
         self.client_id = None
         self.nickname = None
         self.avartar_url = None
         headers = dict(self.scope['headers'])
-        # token = headers.get(b'authorization').decode('utf-8').split(' ')[1]
-        await self.accept()
+        token = headers.get(b'sec-websocket-protocol', b'')
+        try:
+            decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+            client_id = decoded_token['user_id']
+            user =  await UserRepository.get_user_by_id(client_id)
+            if user is None:
+                raise ObjectDoesNotExist("user not found")
+            self.enter_lobby(user)
+            await add_group(self, 'lobby')
+            await self.accept(subprotocol="authorization")
+            Printer.log("Lobby WebSocket connection established", "green")      
+        except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
+            Printer.log("Authorize Failed, disconnect.", "red")
+            await self.close()
 
-        ip = self.scope['client'][0] # scope 공부해볼것
-        # sessionId = self.scope['session']['session_key']
-        await add_group(self, 'lobby')
-        Printer.log(f"New client connected from {ip}", "green")
+    async def set_consumer_info(self, client_id):
+        from user.repositories import UserRepository
+        user =  await UserRepository.get_user_by_id(client_id)
+        if user is None:
+            await self.close()
+            return
+        self.client_id = client_id
+        self.nickname = user.nickname
+        self.image_uri = user.image_uri
 
     async def set_consumer_info(self, client_id):
         from user.repositories import UserRepository
@@ -37,6 +57,12 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             Printer.log(f"Client {self.client_id} disconnected", "red")
             await discard_group(self, 'lobby')
 
+    def enter_lobby(self, user):
+        self.client_id = user.username
+        self.nickname = user.nickname
+        self.image_uri = user.image_uri
+        Printer.log(f"Client {self.client_id} entered lobby : {self.nickname} (id : {self.client_id})", "blue")
+
     async def _send(self, event, content):
         Printer.log(f">>>>> LOBBY sent >>>>>", "bright_cyan")
         Printer.log(f"event : {event}", "white")
@@ -51,8 +77,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"event : {event}", "white")
         Printer.log(f"content : {content}\n", "white")
 
-        if event == 'enterLobby': # 인증 생기면 없애기
-            await self.enter_lobby(content['clientId'])
         await self.handle_event(event, content)
 
     async def handle_event(self, event, content):

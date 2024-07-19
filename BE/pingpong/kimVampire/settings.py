@@ -47,10 +47,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'channels',
+    'kimVampire',
     'coreManage',
     'lobby',
     'pingpongRoom',
-    'kimVampire',
     'user',
     'tournamentRoom'
 ]
