@@ -9,6 +9,7 @@ import FriendManagementPageManager from "./FriendManagementPage/FriendManagement
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
 import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
+import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -103,7 +104,11 @@ class PageRouter {
 		} else if (url === "signup") {
 			this._loadCSS(["css/SignupPage/signupPage.css"]);
 			const signupPageManager = new SignupPageManager(this.app, this.clientInfo, this._onSignupSuccess.bind(this));
-		} else if (url === "editProfile") {
+		} else if(url === "Profile") {
+			this._loadCSS(["css/ProfilePage/profilePage.css"]);
+			const profilePageManager = new ProfilePageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
+		}
+		else if (url === "editProfile") {
 			this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
 			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
 		} else if (url === "friendManagement") {
