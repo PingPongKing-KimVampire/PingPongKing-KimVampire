@@ -138,7 +138,7 @@ class StateManager:
         return content
 
     # Asynchronous Methods
-    async def notify_room_enter(self, room_id: str, client_id: str, nickname: str, avatar_url: str, team: str) -> None:
+    async def notify_room_enter(self, room_id: str, client_id: str, avatar_url: str, nickname: str, team: str) -> None:
         enter_data = {'id': client_id, 'nickname': nickname, 'avatarUrl' : avatar_url, 'team': team}
         await self.notify_room(room_id, event='notifyWaitingRoomEnter', content=enter_data)
 
