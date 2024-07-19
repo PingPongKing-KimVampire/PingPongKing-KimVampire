@@ -69,12 +69,13 @@ class TournamentManager:
 
         semi_final_arr = []
         for i in range(2):
-            client_1 = self.client_info_list[i]
-            client_2 = self.client_info_list[i + 1]
+            client_1 = self.client_info_list[2 * i]
+            client_2 = self.client_info_list[2 * i + 1]
             room_id = room_id_1 if i == 0 else room_id_2
             game_manager = game_manager_1 if i == 0 else game_manager_2
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
         self.tournament_info_list['semiFinal'] = semi_final_arr
+        # print(self.tournament_info_list['semiFinal'])
 
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()

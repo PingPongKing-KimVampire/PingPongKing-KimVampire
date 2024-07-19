@@ -63,6 +63,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         await self.set_consumer_info(content['clientId'])
         client_info_list = self.tournament_manager.get_client_info_list()
         self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
+        # print(self.gameroom_id_now)
         await self._send("enterTournamentRoomResponse", 
                          { "tournamentClientList": client_info_list })
         asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
