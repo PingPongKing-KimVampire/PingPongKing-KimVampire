@@ -47,11 +47,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'channels',
+    'coreManage',
     'lobby',
     'pingpongRoom',
     'kimVampire',
     'user',
-    'coreManage',
+    'tournamentRoom'
 ]
 
 APPEND_SLASH = False

@@ -5,7 +5,8 @@ from pingpongRoom.gameManage.gameRoomManager import GameRoomManager
 from coreManage.group import add_group, discard_group, notify_group
 
 class TournamentManager:
-    def __init__(self, channel_layer, room_id, consumers):
+    def __init__(self, stateManager, channel_layer, room_id, consumers):
+        self.stateManager = stateManager
         self.channel_layer = channel_layer
         self.room_id = room_id
         # "consumers = { client_id : consumer }"
@@ -74,8 +75,8 @@ class TournamentManager:
             room_id = room_id_1 if i == 0 else room_id_2
             game_manager = game_manager_1 if i == 0 else game_manager_2
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
+            self.stateManager.rooms[room_id] = game_manager
         self.tournament_info_list['semiFinal'] = semi_final_arr
-        # print(self.tournament_info_list['semiFinal'])
 
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()
@@ -86,6 +87,7 @@ class TournamentManager:
             'roomId' : room_id,
             'state' : 'notStarted'
         }]
+        self.stateManager.rooms[room_id] = game_manager
         
     def get_final_room_data(self):
         game_manager = self.game_manager_list['final']

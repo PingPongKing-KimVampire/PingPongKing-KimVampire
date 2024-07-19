@@ -55,7 +55,7 @@ class StateManager:
 
     def create_tournament_manager(self, match_clients) -> str:
         tournament_id = str(uuid.uuid4())
-        self.tournaments[tournament_id] = TournamentManager(self.channel_layer, tournament_id, match_clients)
+        self.tournaments[tournament_id] = TournamentManager(self, self.channel_layer, tournament_id, match_clients)
         return tournament_id
 
     def get_tournament_manager(self, tournament_id: str) -> TournamentManager:
@@ -107,7 +107,8 @@ class StateManager:
     def get_waiting_room_list(self) -> List[Dict[str, Any]]:
         data = []
         for room in self.rooms.values():
-            data.append(room.get_room_data())
+            if room.mode == 'normal':
+                data.append(room.get_room_data())
         return data
 
     def get_waiting_room_player_list(self, room_id: str) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
