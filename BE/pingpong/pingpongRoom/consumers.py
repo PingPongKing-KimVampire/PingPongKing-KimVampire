@@ -66,8 +66,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def handle_playing_event(self, event, content):
         if event == 'updatePaddleLocation':
             await self.update_paddle_location(content)
-            content = {'clientId': self.client_id, 'xPosition': content['xPosition'], 'yPosition': content['yPosition']}
-            await stateManager.notify_room(self.room_id, 'notifyPaddleLocationUpdate', content)
         
     async def handle_waiting_event(self, event, content):
         if event == 'changeReadyState':
