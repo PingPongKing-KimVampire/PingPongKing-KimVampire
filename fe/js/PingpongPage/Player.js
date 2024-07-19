@@ -10,13 +10,13 @@ class Player {
     this.clientInfo = clientInfo;
     if (
       this.clientInfo.gameInfo.teamLeftList.find(
-        (player) => player.clientId === clientInfo.id
+        (player) => player.id === clientInfo.id
       )
     )
       this.myTeam = "left";
     if (
       this.clientInfo.gameInfo.teamRightList.find(
-        (player) => player.clientId === clientInfo.id
+        (player) => player.id === clientInfo.id
       )
     )
       this.myTeam = "right";
@@ -36,9 +36,9 @@ class Player {
     this.orientation = null;
     this.updateSubBoardRect();
     this.orientation = windowObservable.getOrientation();
-    this.me = this.clientInfo.gameInfo.teamLeftList.find((leftPlayer)=>leftPlayer.clientId===this.clientInfo.id);
+    this.me = this.clientInfo.gameInfo.teamLeftList.find((leftPlayer)=>leftPlayer.id===this.clientInfo.id);
     if(!this.me)
-      this.me = this.clientInfo.gameInfo.teamRightList.find((rightPlayer)=>rightPlayer.clientId===this.clientInfo.id);
+      this.me = this.clientInfo.gameInfo.teamRightList.find((rightPlayer)=>rightPlayer.id===this.clientInfo.id);
   }
 
 	_subscribeWindow() {
