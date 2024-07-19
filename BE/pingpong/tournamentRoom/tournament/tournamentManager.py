@@ -14,13 +14,13 @@ class TournamentManager:
         for consumer in consumers:
             self.consumers[consumer.client_id] = consumer
 
-        # "clientInfo" : { id : str, nickname : str, avartarUrl : str}
+        # "clientInfo" : { id : str, nickname : str, avartaUrl : str}
         self.client_info_list = []
         for consumer in consumers:
             self.client_info_list.append({
                 'id': consumer.client_id,
                 'nickname': consumer.nickname,
-                'avatarUrl': consumer.image_uri
+                'avatarUrl': consumer.avatar_url
             })
 
         self.tournament_state = "semiFinal" # semiFinal, final

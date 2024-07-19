@@ -15,7 +15,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         from user.repositories import UserRepository
         self.client_id = None
         self.nickname = None
-        self.avartar_url = None
+        self.avatar_url = None
         headers = dict(self.scope['headers'])
         token = headers.get(b'sec-websocket-protocol', b'')
         try:

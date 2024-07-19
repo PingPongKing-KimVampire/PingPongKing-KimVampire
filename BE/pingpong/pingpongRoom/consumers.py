@@ -9,20 +9,6 @@ stateManager = StateManager()
 
 class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-<<<<<<< HEAD
-        self.channel_layer = stateManager.get_channel_layer()
-        self.client_id = None
-        self.nickname = None
-        self.image_uri = None
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.game_manager = stateManager.rooms[self.room_id]
-        self.game_state = 'waiting'
-        self.team = None
-        self.game_mode = self.game_manager.mode
-        await self.accept()
-        await add_group(self, self.room_id)
-        Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
-=======
         from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
         from user.serializers import CustomTokenObtainPairSerializer
         from user.repositories import UserRepository
@@ -59,7 +45,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             return
         await self.send_enter_response(self.room_id, team, is_you_create)
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
->>>>>>> origin/be/feat/authorize
 
     async def disconnect(self, close_code):
         if self.client_id:
@@ -125,25 +110,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         stateManager.change_client_ready_state(self.room_id, self.client_id, is_ready)
         await stateManager.notify_ready_state_change(self.room_id, self.client_id, is_ready)
             
-<<<<<<< HEAD
-    async def enter_waiting_room(self, content):
-        await self.set_consumer_info(content['clientId'])
-
-        team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.image_uri)
-        if team == None: # 실패시 처리 추가해야 할 듯?
-            await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
-            Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
-            return
-
-        self.team = team
-        await add_group(self, f"{self.room_id}-{team}")
-
-        await self.send_enter_response(self.room_id, is_you_create)
-        Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
-            
-=======
-
->>>>>>> origin/be/feat/authorize
 
     async def select_ability(self, content):
         ability = content['ability']

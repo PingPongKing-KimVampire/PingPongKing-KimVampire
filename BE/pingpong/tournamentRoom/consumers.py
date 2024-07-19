@@ -26,11 +26,10 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
                 raise ObjectDoesNotExist("user not found")
             self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
             self.tournament_state = "semi-final"
-            self.tournament_info = stateManager.get_tournament_room(self.tournament_id)
             await self.enter_tournament_room(user)
-            await self.accept()
+            await self.accept(subprotocol="authorization")
             Printer.log(f"Client connected to tournament room {self.room_id}", "green")
-        except:
+        except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
             await self.close()
             
     async def enter_tournament_room(self, user):
@@ -41,9 +40,9 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         client_list_data = []
         for client_id, nickname in client_list.items():
             content = {
-                "clientId" : client_id,
+                "id" : client_id,
                 "nickname" : nickname,
-                "clientAvartarUrl" : "/테스트중_수정할것.png"
+                "avatarUrl" : "/테스트중_수정할것.png"
                 # "clientAvartarUrl" : stateManager.get_client_avatar_url(client_id)
             }
             client_list_data.append(content)
@@ -54,7 +53,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         if self.client_id:
             # await self.game_manager.give_up_game(self)
             await discard_group(self, self.tournament_id)
-            Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
+            # Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
         Printer.log(f">>>>> Tournament {self.tournament_id} sent >>>>>", "bright_cyan")
@@ -81,23 +80,13 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"<<<< Tournament {self.tournament_id} recieve <<<<<", "bright_cyan")
         Printer.log(f"event : {event}", "white")
         Printer.log(f"content : {content}\n", "white")
-        if event == "enterTournamentRoom":
-            await self.enter_tournament_room(content)
-        elif event == "getTournamentGameInfo":
+        if event == "getTournamentGameInfo":
             await self.get_tournament_game_info_reponse()
 
     async def get_tournament_game_info_reponse(self):
         data = self.tournament_manager.get_tournament_info_list()
         await self._send("getTournamentGameInfoResponse", data)
 
-    async def enter_tournament_room(self, content):
-        await self.set_consumer_info(content['clientId'])
-        client_info_list = self.tournament_manager.get_client_info_list()
-        self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
-        # print(self.gameroom_id_now)
-        await self._send("enterTournamentRoomResponse", 
-                         { "tournamentClientList": client_info_list })
-        asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
 
     async def start_semi_final_room(self, gameroom_id, tournament_state):                     
         await add_group(self, f"tournament_{gameroom_id}")

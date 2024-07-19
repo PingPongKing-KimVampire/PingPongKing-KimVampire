@@ -163,7 +163,7 @@ class WaitingRoomCreationPageManager {
 	}
 
 	async _enterWaitingRoom(roomId, gameTitle, teamLeftMode, teamRightMode, teamLeftTotalPlayerCount, teamRightTotalPlayerCount) {
-		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/`, ['authorization', this.accessToken]);
+		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ['authorization', this.accessToken]);
 
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {

@@ -98,8 +98,8 @@ class WaitingRoomPageManager {
 			const message = JSON.parse(messageEvent.data);
 			const { event, content } = message;
 			if (event === "notifyWaitingRoomEnter") {
-				const { id, nickname, team, avartarUrl } = content;
-				this._pushNewPlayer(id, nickname, team, avartarUrl);
+				const { id, nickname, team, avatarUrl } = content;
+				this._pushNewPlayer(id, nickname, team, avatarUrl);
 				this._initPage();
 			} else if (event === "notifyWaitingRoomExit") {
 				const clientId = content.clientId;

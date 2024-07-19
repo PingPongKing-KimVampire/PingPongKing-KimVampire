@@ -46,7 +46,7 @@ class LoginPageManager {
 		try {
 			await this._loginRequest(id, pw);
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			const lobbySocket = await _connectLobbySocket(userData.id, this.accessToken);
+			const lobbySocket = await _connectLobbySocket(this.accessToken);
 
 			this.clientInfo.id = userData.id;
 			this.clientInfo.nickname = userData.nickname;
@@ -54,6 +54,7 @@ class LoginPageManager {
 			this.clientInfo.socket = socket;
 			this.clientInfo.lobbySocket = lobbySocket;
 			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
+			this.clientInfo.accessToken = this.accessToken;
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
 
 			this.onLoginSuccess();
@@ -94,7 +95,7 @@ class LoginPageManager {
 	}
 
 	async _connectGlobalSocket(id) {
-		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws/`, ['authorization', this.accessToken]);
+		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws`, ['authorization', this.accessToken]);
 		await new Promise(resolve => {
 			socket.addEventListener("open", () => {
 				resolve();
