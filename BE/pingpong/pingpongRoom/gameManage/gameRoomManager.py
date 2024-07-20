@@ -251,6 +251,8 @@ class GameRoomManager:
         }
         from pingpongRoom.repositories import GameRepository
         game = await GameRepository.save_game_async(data)
+        game = await GameRepository.get_games_by_user_id(self.clients[0])
+        print(game)
         # game None 처리 필요
 
     # async def _input_loop(self):

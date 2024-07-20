@@ -7,13 +7,7 @@ modes = {"HUMAN_HUMAN", "VAMPIRE_VAMPIRE", "VAMPIRE_HUMAN"}
 team_kinds = {"HUMAN", "VAMPIRE"}
 ball_kinds = {"PADDLE", "SCORE"}
 
-abilities = {"jiantBlocker", "ghostSmasher", "speedTwister", "illusionFaker", "none"}
-modes = {"HUMAN_HUMAN", "VAMPIRE_VAMPIRE", "VAMPIRE_HUMAN"}
-team_kinds = {"HUMAN", "VAMPIRE"}
-ball_kinds = {"PADDLE", "SCORE"}
-
 class GameRepository:
-	# 게임 끝나고 사용할 함수
 	# 게임 끝나고 사용할 함수
 	@staticmethod
 	@sync_to_async

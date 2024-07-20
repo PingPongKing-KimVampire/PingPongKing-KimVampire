@@ -82,9 +82,6 @@ class Game(models.Model):
     start_at = models.DateTimeField(null=True)
     end_at = models.DateTimeField(null=True)
 
-    def finish(self):
-        self.end_at = timezone.now()
-
 class Round(models.Model):
     id = models.BigAutoField(primary_key=True)
     order = models.IntegerField(null=True)
