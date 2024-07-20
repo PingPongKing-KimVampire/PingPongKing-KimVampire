@@ -55,7 +55,7 @@ class TournamentManager:
     def change_tournamanet_info_game_state(self, tournament_state, room_id, state):
         for gameroom_info in self.tournament_info_list[tournament_state]:
             if room_id == gameroom_info['roomId']:
-                gameroom_info[state] = state
+                gameroom_info['state'] = state
                 break
 
     def add_semi_final_winner(self, client_id):
@@ -136,7 +136,7 @@ class TournamentManager:
 
     async def notify_all_team_finish(self, tournament_state):
         await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
-        if tournament_state == "semiFinal":
+        if self.tournament_state == "final":
             asyncio.create_task(self.start_final_room())
 
     async def start_final_room(self):
