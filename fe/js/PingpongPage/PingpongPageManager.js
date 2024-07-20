@@ -66,7 +66,7 @@ class PingpongPageManager {
 			const { event } = JSON.parse(messageEvent.data);
 			if (event === 'notifyGameEnd') {
 				console.log('notify game end!');
-				this._displayGameOverModal();
+				this.clientInfo.gameInfo.pingpongRoomSocket.close();
 			}
 		})
 	}
