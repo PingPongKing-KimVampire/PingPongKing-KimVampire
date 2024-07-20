@@ -26,12 +26,14 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         try:
             await stateManager.authorize_client(self, dict(self.scope['headers']))
             await self.accept(subprotocol="authorization")
-            self.set_tournament_room_consumer(self.scope['url_route']['kwargs']['tournament_id'])
-            await self.send_tournament_room_accept_response()
-            await add_group(self, self.tournament_id)
-            Printer.log(f"Client connected to tournament room {self.tournament_id}", "green")
         except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
             await self.close()
+        self.set_tournament_room_consumer(self.scope['url_route']['kwargs']['tournament_id'])
+        await self.send_tournament_room_accept_response()
+        await add_group(self, self.tournament_id)
+        self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
+        asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
+        Printer.log(f"Client connected to tournament room {self.tournament_id}", "green")
 
     def set_tournament_room_consumer(self, tournament_id):
         self.tournament_id = tournament_id
@@ -78,8 +80,6 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def get_tournament_game_info_reponse(self):
         data = self.tournament_manager.get_tournament_info_list()
         await self._send("getTournamentGameInfoResponse", data)
-        self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
-        asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
 
     async def start_semi_final_room(self, gameroom_id, tournament_state):                     
         await add_group(self, f"tournament_{gameroom_id}")
@@ -120,6 +120,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
 
     async def notifyAllTeamFinish(self, content):
         if self.tournament_state == 'final':
+            print('결승 시작')
             self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
             await add_group(self, f"tournament_{self.gameroom_id_now}")
         await self._send("notifyAllTeamFinish", content['content'])
