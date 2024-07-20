@@ -55,6 +55,15 @@ class GameRoomManager:
 
     # getter
 
+    def get_client_team_in_room(self, id):
+        for client_id, player in self.team_left.items():
+            if id == client_id:
+                return 'left'
+        for client_id, player in self.team_right.items():
+            if id == client_id:
+                return 'right'
+        return None
+
     def get_score(self):
         return self.score
     

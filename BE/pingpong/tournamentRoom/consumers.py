@@ -15,6 +15,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         from user.repositories import UserRepository
         self.client_id = None
         self.nickname = None
+        self.gameroom_id_now = None
         self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
         headers = dict(self.scope['headers'])
         token = headers.get(b'sec-websocket-protocol', b'')
@@ -25,7 +26,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             if user is None:
                 raise ObjectDoesNotExist("user not found")
             self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
-            self.tournament_state = "semi-final"
+            self.tournament_state = "semiFinal"
             await self.accept(subprotocol="authorization")
             await self.enter_tournament_room(user)
             Printer.log(f"Client connected to tournament room {self.tournament_id}", "green")
@@ -35,7 +36,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def enter_tournament_room(self, user):
         await add_group(self, self.tournament_id)
         self.nickname = user.nickname
-        self.avatarUrl = user.image_uri
+        self.avatarUrl = user.get_image_uri()
         tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
         client_info_list = tournament_manager.get_client_info_list()
         client_list_data = []
@@ -86,6 +87,8 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def get_tournament_game_info_reponse(self):
         data = self.tournament_manager.get_tournament_info_list()
         await self._send("getTournamentGameInfoResponse", data)
+        self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
+        asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
 
 
     async def start_semi_final_room(self, gameroom_id, tournament_state):                     
@@ -96,13 +99,14 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
                           'stage' : tournament_state})
 
     async def notifyGameEnd(self, content):
+        content = content['content']
         winner_id = content['winner_id']
         self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, 'finished')
         if self.tournament_state == 'semiFinal':
             if self.client_id == winner_id:
                 self.tournament_state = 'final'
-            room_id = self.tournament_manager.add_semi_final_winner(winner_id)
-            if room_id:
+            self.tournament_manager.add_semi_final_winner(winner_id)
+            if self.tournament_manager.is_ready_final_room():
                 await self.tournament_manager.notify_all_team_finish('semiFinal')
         elif self.tournament_state == 'final':
             await self.tournament_manager.notify_all_team_finish('final')
@@ -110,6 +114,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         self.gameroom_id_now = None
 
     async def updateGameroomScore(self, content):
+        content = content['content']
         team = content['team']
         score = content['score']
         self.tournament_manager.update_room_score(self.tournament_state, self.gameroom_id_now, team, score)
@@ -120,3 +125,9 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
 
     async def notifyGameStart(self, content):
         self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, 'playing')
+
+    async def notifyAllTeamFinish(self, content):
+        if self.tournament_state == 'final':
+            self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
+            await add_group(self, f"tournament_{self.gameroom_id_now}")
+        self._send("notifyAllTeamFinish", content['content'])

@@ -22,6 +22,9 @@ class TournamentManager:
                 'nickname': consumer.nickname,
                 'avatarUrl': consumer.avatar_url
             })
+            # print('id:', consumer.client_id)
+            # print('nickname:', consumer.nickname)
+            # print('avatarUrl: ', consumer.avatar_url)
 
         self.tournament_state = "semiFinal" # semiFinal, final
         self.tournament_info_list = {
@@ -59,6 +62,10 @@ class TournamentManager:
         for client_info in self.client_info_list:
             if client_id == client_info['id']:
                 self.semi_final_winners.append(client_info)
+                print(self.semi_final_winners.__len__())
+                break
+
+    def is_ready_final_room(self):
         if self.semi_final_winners.__len__() == 2:
             return self.enter_final_room()
         return None
@@ -76,6 +83,9 @@ class TournamentManager:
             game_manager = game_manager_1 if i == 0 else game_manager_2
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
             self.stateManager.rooms[room_id] = game_manager
+            # print('id:', client_1['id'])
+            # print('nickname:', client_1['nickname'])
+            # print('avatarUrl: ', client_1['avatarUrl'])
         self.tournament_info_list['semiFinal'] = semi_final_arr
 
     def make_final_room(self):
@@ -128,12 +138,11 @@ class TournamentManager:
 
     async def notify_all_team_finish(self, tournament_state):
         await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
-        asyncio.create_task(self.start_final_room())
+        if tournament_state == "semiFinal":
+            asyncio.create_task(self.start_final_room())
 
     async def start_final_room(self):
         room_id = self.tournament_info_list['final'][0]['roomId']
-        for client_info in self.semi_final_winners:
-            await add_group(client_info['id'], f"tournament_{room_id}")
         await asyncio.sleep(3)
         data = {
             'pingpongroomId' : room_id,
