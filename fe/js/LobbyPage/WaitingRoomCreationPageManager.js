@@ -171,14 +171,6 @@ class WaitingRoomCreationPageManager {
 			});
 		});
 
-		const enterWaitingRoomMessage = {
-			event: "enterWaitingRoom",
-			content: {
-				clientId: this.clientInfo.id,
-			},
-		};
-		pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
-
 		const { teamLeftList, teamRightList } = await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener(
 				"message",
