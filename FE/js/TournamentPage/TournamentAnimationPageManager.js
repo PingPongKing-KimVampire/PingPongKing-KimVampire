@@ -93,7 +93,6 @@ class TournamentAnimationPageManager {
 	}
 
 	async _initAnimation(stage) {
-		this._listenTournamentEvent();
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
@@ -424,7 +423,6 @@ class TournamentAnimationPageManager {
 			this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", listener);
 		});
 		// teamLeftList, teamRightList 세팅 후 핑퐁룸 입장
-		console.log(this.clientInfo.tournamentInfo.tournamentClientList)
 		playerInfo.forEach(player => {
 			let teamList;
 			if (player.team === "left") {
@@ -444,8 +442,6 @@ class TournamentAnimationPageManager {
 		});
 		this.clientInfo.gameInfo.sizeInfo = boardInfo;
 		this._unsubscribeWindow();
-		console.log("START PINGPONG GAME");
-		console.log(this.clientInfo);
 		this._onStartPingpongGame();
 	}
 
