@@ -7,8 +7,8 @@ class StatisticsPageManager {
 
 		this.points1 = [1, 2, 2, 2, 2, 3, 3, 3]; // TODO : 임시 하드코딩
 		this.points2 = [0, 0, 1, 2, 3, 3, 4, 5];
-		this.maxPoint = Math.max(...this.points1, ...this.points2);
-		this.round = 8;
+		this.winningScore = 5;
+		this.round = this.points1.length;
 
 		this._initPage();
 	}
@@ -33,7 +33,7 @@ class StatisticsPageManager {
 		const circleCanvas = document.querySelector('#graphCircleCanvas');
 		circleCanvas.innerHTML = '';
 		const graphRect = document.querySelector('#graphContainer').getBoundingClientRect();
-		const scale = { x: graphRect.width / this.round, y: graphRect.height / this.maxPoint };
+		const scale = { x: graphRect.width / this.round, y: graphRect.height / this.winningScore };
 
 		const renderLine = (points, color) => {
 			function createLine(pos1, pos2, color) {
@@ -53,11 +53,14 @@ class StatisticsPageManager {
 				circleButton.style.top = `${pos.y}px`;
 				circleCanvas.append(circleButton);
 			}
-			let prevPoint = { x: graphRect.left, y: graphRect.bottom }
+			let prevPoint = { 
+				x: window.scrollX + graphRect.left, 
+				y: window.scrollY + graphRect.bottom
+			}
 			points.forEach((point, index) => {
 				const currentPoint = {
-					x: graphRect.left + ((index + 1) * scale.x),
-					y: graphRect.bottom - (point * scale.y)
+					x: window.scrollX + graphRect.left + ((index + 1) * scale.x),
+					y: window.scrollY + graphRect.bottom - (point * scale.y)
 				}
 				createLine(prevPoint, currentPoint, color);
 				createCircle(currentPoint);
@@ -123,7 +126,7 @@ class StatisticsPageManager {
 						${this._getGraphLabelsHTML(0, this.round)}
 						</div>
 					<div id="yLabels">
-						${this._getGraphLabelsHTML(0, this.maxPoint)}
+						${this._getGraphLabelsHTML(0, this.winningScore)}
 					</div>
 				</div>
 			</div>
