@@ -52,10 +52,11 @@ class TournamentManager:
     def get_tournament_info_list(self):
         return self.tournament_info_list
 
-    def change_tournamanet_info_game_state(self, tournament_state, room_id, state):
+    def change_tournamanet_info_game_state(self, tournament_state, room_id, winner_id, state):
         for gameroom_info in self.tournament_info_list[tournament_state]:
             if room_id == gameroom_info['roomId']:
                 gameroom_info['state'] = state
+                gameroom_info['winnerId'] = winner_id
                 break
 
     def add_semi_final_winner(self, client_id):
@@ -91,6 +92,7 @@ class TournamentManager:
         self.tournament_info_list['final'] = [{
             'clientIdList' : [],
             'score' : [0,0],
+            'winnerId' : None,
             'roomId' : room_id,
             'state' : 'notStarted'
         }]
@@ -113,6 +115,7 @@ class TournamentManager:
         data = {
             'clientIdList' : [client_1['id'], client_2['id']],
             'score' : [0,0],
+            'winnerId' : None,
             'roomId' : room_id,
             'state' : 'notStarted'
         }
@@ -134,9 +137,9 @@ class TournamentManager:
                     gameroom_info['score'][1] = score
                 break
 
-    async def notify_all_team_finish(self, tournament_state):
+    async def notify_all_team_finish(self, consumer, tournament_state):
         await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
-        if self.tournament_state == "final":
+        if consumer.tournament_state == "final":
             asyncio.create_task(self.start_final_room())
 
     async def start_final_room(self):
@@ -148,7 +151,7 @@ class TournamentManager:
             'stage' : self.tournament_state
         }
         await notify_group(self.channel_layer, f"tournament_{room_id}", 
-                           "notifyYourGameReady", data)
+                           "notifyYourGameRoomReady", data)
     
     async def notify_tournament_room(self, event, content):
         await self.channel_layer.group_send(
