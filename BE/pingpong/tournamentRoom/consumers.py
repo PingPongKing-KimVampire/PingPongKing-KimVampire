@@ -26,9 +26,9 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
                 raise ObjectDoesNotExist("user not found")
             self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
             self.tournament_state = "semi-final"
-            await self.enter_tournament_room(user)
             await self.accept(subprotocol="authorization")
-            Printer.log(f"Client connected to tournament room {self.room_id}", "green")
+            await self.enter_tournament_room(user)
+            Printer.log(f"Client connected to tournament room {self.tournament_id}", "green")
         except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
             await self.close()
             
@@ -36,14 +36,14 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         await add_group(self, self.tournament_id)
         self.nickname = user.nickname
         self.avatarUrl = user.image_uri
-        client_list = stateManager.get_tournament_client_list(self.tournament_id)
+        tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
+        client_info_list = tournament_manager.get_client_info_list()
         client_list_data = []
-        for client_id, nickname in client_list.items():
+        for client_info in client_info_list:
             content = {
-                "id" : client_id,
-                "nickname" : nickname,
-                "avatarUrl" : "/테스트중_수정할것.png"
-                # "clientAvartarUrl" : stateManager.get_client_avatar_url(client_id)
+                "id" : client_info['id'],
+                "nickname" : client_info['nickname'],
+                "avatarUrl" : client_info['avatarUrl']
             }
             client_list_data.append(content)
         await self._send("enterTournamentRoomResponse", 
