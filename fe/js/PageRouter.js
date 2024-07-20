@@ -10,6 +10,8 @@ import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
 import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
+import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
+import StatisticsPageManager from "./StatisticsPage/StatisticsPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -124,6 +126,10 @@ class PageRouter {
 		} else if (url === "tournamentAnimation") {
 			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
 			const tournamentAnimationPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._renderTournamentPage.bind(this), this._renderLobby.bind(this));
+			const tournamentPageManager = new TournamentPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._joinLobbyPage.bind(this));
+		} else if (url === "statistics") {
+			this._loadCSS(["css/StatisticsPage/statisticsPage.css"]);
+			const statisticsPageManager = new StatisticsPageManager(this.app, this.clientInfo);
 		}
 	}
 
