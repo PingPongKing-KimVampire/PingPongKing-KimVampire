@@ -19,6 +19,8 @@ NORMALIZE = 6
 
 NORMAL_SPEED = 10
 
+END_SCORE = 2
+
 
 class GameRoomManager:
     def __init__(self, channel_layer, room_id, title, left_mode='human', right_mode='human', left_max_count=1, right_max_count=1, mode='tournament'):
@@ -343,10 +345,10 @@ class GameRoomManager:
             self.score[RIGHT] += 1
         
     def _check_game_end(self):
-        return self.score[LEFT] >= 5 or self.score[RIGHT] >= 5
+        return self.score[LEFT] >= END_SCORE or self.score[RIGHT] >= END_SCORE
 
     def _end_game_loop(self):
-        team = 'left' if self.score[LEFT] >= 5 else 'right'
+        team = 'left' if self.score[LEFT] >= END_SCORE else 'right'
         self._end_game()
         return team
 

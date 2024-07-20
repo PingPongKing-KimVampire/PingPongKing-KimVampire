@@ -83,9 +83,6 @@ class TournamentManager:
             game_manager = game_manager_1 if i == 0 else game_manager_2
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
             self.stateManager.rooms[room_id] = game_manager
-            # print('id:', client_1['id'])
-            # print('nickname:', client_1['nickname'])
-            # print('avatarUrl: ', client_1['avatarUrl'])
         self.tournament_info_list['semiFinal'] = semi_final_arr
 
     def make_final_room(self):
@@ -109,6 +106,7 @@ class TournamentManager:
         client_1 = self.semi_final_winners[0]
         client_2 = self.semi_final_winners[1]
         self.tournament_info_list['final'][0] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
+        print(self.tournament_info_list['final'])
         return room_id
 
     def set_game_room_data(self, client_1, client_2, room_id, game_manager):
@@ -137,16 +135,18 @@ class TournamentManager:
                 break
 
     async def notify_all_team_finish(self, tournament_state):
+        print('여기')
         await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
         if tournament_state == "semiFinal":
             asyncio.create_task(self.start_final_room())
 
     async def start_final_room(self):
+        self.tournament_state = 'final'
         room_id = self.tournament_info_list['final'][0]['roomId']
         await asyncio.sleep(3)
         data = {
             'pingpongroomId' : room_id,
-            'stage' : 'final'
+            'stage' : self.tournament_state
         }
         await notify_group(self.channel_layer, f"tournament_{room_id}", 
                            "notifyYourGameReady", data)

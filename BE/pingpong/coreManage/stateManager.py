@@ -1,11 +1,20 @@
+import django
+django.setup()
+
 from typing import Dict, Any, Optional, List, Tuple
 import uuid
 from asyncio import sleep, create_task
 import asyncio
+from django.core.exceptions import ObjectDoesNotExist
+
 from .group import notify_group, add_group
 from pingpongRoom.gameManage.gameRoomManager import GameRoomManager
 from utils.printer import Printer
 from tournamentRoom.tournament.tournamentManager import TournamentManager
+
+from user.serializers import CustomTokenObtainPairSerializer
+from user.repositories import UserRepository
+
 
 class StateManager:
     _instance: Optional['StateManager'] = None
@@ -26,6 +35,19 @@ class StateManager:
         
     def get_channel_layer(self):
         return self.channel_layer
+
+    async def authorize_client(self, consumer, headers):
+        token = headers.get(b'sec-websocket-protocol', b'')
+        decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+        consumer.client_id = decoded_token['user_id']
+        user =  await UserRepository.get_user_by_id(consumer.client_id)
+        if user is None:
+                raise ObjectDoesNotExist("user not found")
+        consumer.nickname = user.nickname
+        consumer.avatar_url = user.get_image_uri()
+        # print(consumer.client_id)
+        # print(consumer.nickname)
+        # print(consumer.avatar_url)
 
     # Matchmaking Management
     def add_to_match_queue(self, consumer) -> None:
