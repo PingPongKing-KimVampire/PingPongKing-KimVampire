@@ -72,16 +72,15 @@ class TournamentAnimationPageManager {
 
 		// 정보 업데이트
 		// setTimeout(this._initAnimation.bind(this, "final"), 1000);
-		if(this.clientInfo.tournamentInfo.renderingMode === "normal"){
+		if (this.clientInfo.tournamentInfo.renderingMode === "normal") {
 			this._initPage();
-		} else if(this.clientInfo.tournamentInfo.renderingMode === "animation"){
+		} else if (this.clientInfo.tournamentInfo.renderingMode === "animation") {
 			this._initAnimation(this.clientInfo.tournamentInfo.stage);
 		}
 	}
-	
+
 	async _initPage() {
-		if(!this.clientInfo.tournamentInfo.isInit)
-		{
+		if (!this.clientInfo.tournamentInfo.isInit) {
 			this._listenTournamentEvent();
 			this.clientInfo.tournamentInfo.isInit = true;
 		}
@@ -98,7 +97,7 @@ class TournamentAnimationPageManager {
 	}
 
 	async _initAnimation(stage) {
-		this.clientInfo.tournamentInfo.renderingMode === "normal" //미래에 렌더링할때는 변경하지 않는 한 normal
+		this.clientInfo.tournamentInfo.renderingMode === "normal"; //미래에 렌더링할때는 변경하지 않는 한 normal
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
@@ -140,15 +139,15 @@ class TournamentAnimationPageManager {
 		if (type === "leftSemiFinal") {
 			const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
 			const leftFinalContainer = document.querySelector(".subTree:first-of-type .final");
-			leftFinalContainer.innerHTML = this._getPlayerHTML(this._getWinningPlayer(leftSemiFinal.score, leftSemiFinal.clientIdList));
+			leftFinalContainer.innerHTML = this._getPlayerHTML(this._findPlayer(leftSemiFinal.winnerId));
 		} else if (type === "rightSemiFinal") {
 			const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
 			const rightFinalContainer = document.querySelector(".subTree:last-of-type .final");
-			rightFinalContainer.innerHTML = this._getPlayerHTML(this._getWinningPlayer(rightSemiFinal.score, rightSemiFinal.clientIdList));
+			rightFinalContainer.innerHTML = this._getPlayerHTML(this._findPlayer(rightSemiFinal.winnerId));
 		} else if (type === "final") {
 			const [final] = this.tournamentInfo.final;
 			const winnerContainer = document.querySelector("#root");
-			winnerContainer.innerHTML = this._getPlayerHTML(this._getWinningPlayer(final.score, final.clientIdList), true); //승자 판단해서 렌더링 해야함
+			winnerContainer.innerHTML = this._getPlayerHTML(this._findPlayer(final.winnerId), true);
 		}
 	}
 
@@ -194,7 +193,7 @@ class TournamentAnimationPageManager {
 		}
 	}
 
-	_addPolylineInCanvas(){
+	_addPolylineInCanvas() {
 		const lineCanvas = document.querySelector("#lineCanvas");
 		const svgNS = "http://www.w3.org/2000/svg";
 		const polyline = document.createElementNS(svgNS, "polyline");
@@ -203,54 +202,54 @@ class TournamentAnimationPageManager {
 		return polyline;
 	}
 
-	_getPointListForPolyline(type){
+	_getPointListForPolyline(type) {
 		let firstLine;
 		let secondLine;
 		let thirdLine;
 		if (type === "leftSemiFinal") {
-			if (this.tournamentInfo.semiFinal[0].score[0] > this.tournamentInfo.semiFinal[0].score[1]) {
+			if (this.tournamentInfo.semiFinal[0].winnerId === this.tournamentInfo.semiFinal[0].clientIdList[0]) {
 				firstLine = document.querySelector("#leftSemiFinalLeftTeamTopToTop");
 				secondLine = document.querySelector("#leftSemiFinalLeftTeamAboveToRight");
 				thirdLine = document.querySelector("#leftSemiFinalAboveToTop");
-			} else {
+			} else if (this.tournamentInfo.semiFinal[0].winnerId === this.tournamentInfo.semiFinal[0].clientIdList[1]) {
 				firstLine = document.querySelector("#leftSemiFinalRightTeamTopToTop");
 				secondLine = document.querySelector("#leftSemiFinalRightTeamAboveToLeft");
 				thirdLine = document.querySelector("#leftSemiFinalAboveToTop");
 			}
 		} else if (type === "rightSemiFinal") {
-			if (this.tournamentInfo.semiFinal[1].score[0] > this.tournamentInfo.semiFinal[1].score[1]) {
+			if (this.tournamentInfo.semiFinal[1].winnerId === this.tournamentInfo.semiFinal[1].clientIdList[0]) {
 				firstLine = document.querySelector("#rightSemiFinalLeftTeamTopToTop");
 				secondLine = document.querySelector("#rightSemiFinalLeftTeamAboveToRight");
 				thirdLine = document.querySelector("#RightSemiFinalAboveToTop");
-			} else {
+			} else if (this.tournamentInfo.semiFinal[1].winnerId === this.tournamentInfo.semiFinal[1].clientIdList[1]) {
 				firstLine = document.querySelector("#rightSemiFinalRightTeamTopToTop");
 				secondLine = document.querySelector("#rightSemiFinalRightTeamAboveToLeft");
 				thirdLine = document.querySelector("#RightSemiFinalAboveToTop");
 			}
 		} else if (type === "final") {
-			if (this.tournamentInfo.final[0].score[0] > this.tournamentInfo.final[0].score[1]) {
+			if (this.tournamentInfo.final[0].winnerId === this.tournamentInfo.final[0].clientIdList[0]) {
 				firstLine = document.querySelector("#finalLeftTeamTopToTop");
 				secondLine = document.querySelector("#finalLeftTeamAboveToRight");
 				thirdLine = document.querySelector("#finalAboveCenterToTop");
-			} else {
+			} else if (this.tournamentInfo.final[0].winnerId === this.tournamentInfo.final[0].clientIdList[1]) {
 				firstLine = document.querySelector("#finalRightTeamTopToTop");
 				secondLine = document.querySelector("#finalRightTeamAboveToLeft");
 				thirdLine = document.querySelector("#finalAboveCenterToTop");
 			}
 		}
-			const lineElementList = [firstLine, secondLine, thirdLine];
+		const lineElementList = [firstLine, secondLine, thirdLine];
 
-			const pointList = [];
-			lineElementList.forEach((lineElement, idx) => {
-				const x1 = parseFloat(lineElement.getAttribute("x1"));
-				const y1 = parseFloat(lineElement.getAttribute("y1"));
-				pointList.push({ x: x1, y: y1 });
-				if (idx === lineElementList.length - 1) {
-					const x2 = parseFloat(lineElement.getAttribute("x2"));
-					const y2 = parseFloat(lineElement.getAttribute("y2"));
-					pointList.push({ x: x2, y: y2 });
-				}
-			});
+		const pointList = [];
+		lineElementList.forEach((lineElement, idx) => {
+			const x1 = parseFloat(lineElement.getAttribute("x1"));
+			const y1 = parseFloat(lineElement.getAttribute("y1"));
+			pointList.push({ x: x1, y: y1 });
+			if (idx === lineElementList.length - 1) {
+				const x2 = parseFloat(lineElement.getAttribute("x2"));
+				const y2 = parseFloat(lineElement.getAttribute("y2"));
+				pointList.push({ x: x2, y: y2 });
+			}
+		});
 		return pointList;
 	}
 
@@ -317,7 +316,7 @@ class TournamentAnimationPageManager {
 			};
 			this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
 		});
-		this.tournamentInfo = {semiFinal, final};
+		this.tournamentInfo = { semiFinal, final };
 	}
 
 	_subscribeWindow() {
@@ -363,14 +362,14 @@ class TournamentAnimationPageManager {
 			});
 		}
 		await _renderTournamentWarning.call(this);
-		this.clientInfo.tournamentInfo.renderingMode = "animation"
+		this.clientInfo.tournamentInfo.renderingMode = "animation";
 		this.clientInfo.tournamentInfo.stage = stage;
 		this.renderTournamentPage();
 	}
 
 	async _enterWaitingRoom(roomId) {
 		// 핑퐁룸 소켓에 연결
-		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ['authorization', this.clientInfo.accessToken]);
+		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {
 				resolve();
@@ -744,7 +743,7 @@ class TournamentAnimationPageManager {
 			}
 
 			async function startObserveGame(roomId) {
-				const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ['authorization', this.clientInfo.accessToken]);
+				const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
 				await new Promise(resolve => {
 					pingpongRoomSocket.addEventListener("open", () => {
 						resolve();
@@ -828,8 +827,11 @@ class TournamentAnimationPageManager {
 		};
 
 		const renderPolyline = () => {
-			function setPolylinePoints(polyline, pointList){
-				polyline.setAttribute("points", pointList.reduce((acc, cur, idx)=>acc+`${cur.x} ${cur.y}${idx!==pointList.length-1?",":""}`, ""));
+			function setPolylinePoints(polyline, pointList) {
+				polyline.setAttribute(
+					"points",
+					pointList.reduce((acc, cur, idx) => acc + `${cur.x} ${cur.y}${idx !== pointList.length - 1 ? "," : ""}`, ""),
+				);
 			}
 			if (this.tournamentInfo.final[0].state !== "notStarted") {
 				const leftPolyline = this._addPolylineInCanvas();
@@ -921,11 +923,15 @@ class TournamentAnimationPageManager {
 		`;
 	}
 
-	_getWinningPlayer(score, clientIdList) {
-		const [score1, score2] = score;
-		const [clientId1, clientId2] = clientIdList;
-		const winnerId = score1 > score2 ? clientId1 : clientId2;
-		return this.clientInfo.tournamentInfo.tournamentClientList.find(player => player.id === winnerId);
+	// _getWinningPlayer(score, clientIdList) {
+	// 	const [score1, score2] = score;
+	// 	const [clientId1, clientId2] = clientIdList;
+	// 	const winnerId = score1 > score2 ? clientId1 : clientId2;
+	// 	return this.clientInfo.tournamentInfo.tournamentClientList.find(player => player.id === winnerId);
+	// }
+
+	_findPlayer(id) {
+		return this.clientInfo.tournamentInfo.tournamentClientList.find(player => player.id === id);
 	}
 }
 
