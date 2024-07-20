@@ -277,8 +277,9 @@ class GameRoomManager:
                 room_id_team = f"{self.room_id}-left"
         else:
             room_id_team = self.room_id
-        await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
-            {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
+        if self.is_playing:
+            await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
+                {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
     def _detect_collisions(self, ball):
         state = NOHIT
