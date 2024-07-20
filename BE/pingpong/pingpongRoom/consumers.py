@@ -31,7 +31,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await add_group(self, self.room_id)
             Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
         except:
-            self.close()
+            await self.close(subprotocol="authorization")
 
     def set_pingpong_room_consumer(self, room_id):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -49,7 +49,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             # 실패시 처리 추가해야 할 것.
             await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
             Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
-            self.close()
+            await self.close(subprotocol="authorization")
         Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
         Printer.log(f"team : {self.team}", "blue")
             
@@ -173,7 +173,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         if self.game_mode == 'tournament' and self.team == win_team:
             await notify_group(self.channel_layer, f"tournament_{self.room_id}", "notifyGameEnd", {'winner_id' : self.client_id})
         await self._send(event='notifyGameEnd', content=content)
-        self.close()
+        await self.close(subprotocol="authorization")
 
     async def notifyGhostBall(self, content):
         Printer.log(f"Ghost ball", "green")

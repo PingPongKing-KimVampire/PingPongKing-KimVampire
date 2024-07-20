@@ -135,7 +135,6 @@ class TournamentManager:
                 break
 
     async def notify_all_team_finish(self, tournament_state):
-        print('여기')
         await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
         if tournament_state == "semiFinal":
             asyncio.create_task(self.start_final_room())
@@ -143,7 +142,7 @@ class TournamentManager:
     async def start_final_room(self):
         self.tournament_state = 'final'
         room_id = self.tournament_info_list['final'][0]['roomId']
-        await asyncio.sleep(3)
+        await asyncio.sleep(10)
         data = {
             'pingpongroomId' : room_id,
             'stage' : self.tournament_state
