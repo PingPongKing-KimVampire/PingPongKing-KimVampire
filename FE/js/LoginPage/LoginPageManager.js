@@ -116,9 +116,9 @@ class LoginPageManager {
 					if (event === "initClientResponse" && content.message === "OK") {
 						socket.removeEventListener("message", listener);
 						resolve({
-							nickname: content.clientNickname,
-							avatarUrl: content.clientAvatarUrl,
-							id: content.clientId,
+							nickname: content.nickname,
+							avatarUrl: content.avatarUrl,
+							id: content.id,
 						});
 					}
 				}.bind(this),

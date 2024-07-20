@@ -2,7 +2,7 @@ import Player from './Player.js';
 import PingpongRenderer from './PingpongRenderer.js';
 
 class PingpongPageManager {
-	constructor(app, clientInfo, onExitPingpong) {
+	constructor(app, clientInfo, onExitPingpong, renderTournament) {
 		this.app = app;
 		this.clientInfo = {
 			socket: null,
@@ -36,6 +36,7 @@ class PingpongPageManager {
 
 		this.clientInfo = clientInfo;
 		this.onExitPingpong = onExitPingpong;
+		this.renderTournament = renderTournament;
 		this.playerList = [];
 	}
 
@@ -98,6 +99,11 @@ class PingpongPageManager {
 	_exitYesButtonClicked() {
 		this.clientInfo.socket.close();
 		this._cleanupPingpongInteraction();
+		if(this.clientInfo.tournamentInfo)
+		{
+			this.renderTournament();
+			return;
+		}
 		this.onExitPingpong();
 	}
 	_exitNoButtonClicked(questionModal) {
@@ -116,6 +122,11 @@ class PingpongPageManager {
 		const gameOverModal = document.querySelector('#gameOverModal');
 		gameOverModal.style.display = 'flex';
 		document.querySelector('#gameOverModal button').addEventListener('click', () => {
+			if(this.clientInfo.tournamentInfo)
+			{
+				this.renderTournament();
+				return;
+			}
 			this.onExitPingpong();
 		});
 	}

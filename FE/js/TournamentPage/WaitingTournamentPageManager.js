@@ -33,13 +33,6 @@ class WaitingTournamentPageManager {
 				resolve();
 			});
 		});
-		const enterTournamentMessage = {
-			event: 'enterTournamentRoom',
-			content: {
-				clientId: this.clientInfo.id,
-			},
-		};
-		tournamentSocket.send(JSON.stringify(enterTournamentMessage));
 		const tournamentClientList = await new Promise((resolve) => {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -66,6 +59,7 @@ class WaitingTournamentPageManager {
 				this.clientInfo.tournamentInfo = {
 					tournamentSocket,
 					tournamentClientList,
+					isInit: false
 				};
 				this.clientInfo.lobbySocket.close();
 				this.joinTournamentPage();

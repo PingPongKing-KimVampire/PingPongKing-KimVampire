@@ -75,7 +75,11 @@ class TournamentAnimationPageManager {
 	}
 	
 	async _initPage() {
-		this._listenTournamentEvent();
+		if(!this.clientInfo.tournamentInfo.isInit)
+		{
+			this._listenTournamentEvent();
+			this.clientInfo.tournamentInfo.isInit = true;
+		}
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
@@ -90,7 +94,6 @@ class TournamentAnimationPageManager {
 
 	async _initAnimation(stage) {
 		this._listenTournamentEvent();
-		stage = "final"; //하드코딩
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
@@ -421,6 +424,7 @@ class TournamentAnimationPageManager {
 			this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", listener);
 		});
 		// teamLeftList, teamRightList 세팅 후 핑퐁룸 입장
+		console.log(this.clientInfo.tournamentInfo.tournamentClientList)
 		playerInfo.forEach(player => {
 			let teamList;
 			if (player.team === "left") {
@@ -429,8 +433,9 @@ class TournamentAnimationPageManager {
 				teamList = this.clientInfo.gameInfo.teamRightList;
 			}
 			teamList.push({
-				clinetId: player.clientId,
-				clientNickname: this.clientInfo.tournamentInfo.tournamentClientList.find(p => p.id === player.id).nickname,
+				id: player.clientId,
+				nickname: this.clientInfo.tournamentInfo.tournamentClientList.find(p => p.id === player.clientId).nickname,
+				avatarUrl: this.clientInfo.tournamentInfo.tournamentClientList.find(p => p.id === player.clientId).avatarUrl,
 				readyState: "READY",
 				ability: null,
 				paddleWidth: player.paddleWidth,
@@ -440,6 +445,7 @@ class TournamentAnimationPageManager {
 		this.clientInfo.gameInfo.sizeInfo = boardInfo;
 		this._unsubscribeWindow();
 		console.log("START PINGPONG GAME");
+		console.log(this.clientInfo);
 		this._onStartPingpongGame();
 	}
 

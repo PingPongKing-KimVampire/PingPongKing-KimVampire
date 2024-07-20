@@ -95,7 +95,7 @@ class PageRouter {
 			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this._onEnterWaitingRoom.bind(this), this._renderLobby.bind(this));
 		} else if (url === "pingpong") {
 			this._loadCSS(["css/PingpongPage/pingpongPage.css"]);
-			const pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this._onExitPingpongGame.bind(this));
+			const pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this._onExitPingpongGame.bind(this), this._renderTournamentPage.bind(this));
 			await pingpongPageManager.initPage();
 		} else if (url === "waitingRoom") {
 			this._loadCSS(["css/WaitingRoomPage/waitingRoomPage.css", "css/WaitingRoomPage/abilitySelectionModal.css"]);
@@ -191,6 +191,10 @@ class PageRouter {
 	}
 
 	_joinTournamentPage() {
+		this.renderPage("tournamentAnimation");
+	}
+
+	_renderTournamentPage(){
 		this.renderPage("tournamentAnimation");
 	}
 }
