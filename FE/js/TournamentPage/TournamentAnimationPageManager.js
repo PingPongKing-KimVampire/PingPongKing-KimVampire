@@ -349,7 +349,7 @@ class TournamentAnimationPageManager {
 				const tournamentWarning = document.createElement("div");
 				tournamentWarning.className = "tournamentWarning";
 				tournamentWarning.textContent = `${count}초 후 토너먼트로 돌아갑니다`;
-				this.app.append(tournamentWarning);
+				document.body.append(tournamentWarning);
 				const intervalId = setInterval(() => {
 					count--;
 					if (count == -1) {
