@@ -117,7 +117,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         await self._send("notifyYourGameRoomReady", content)
 
     async def notifyGameStart(self, content):
-        self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, 'playing')
+        self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, self, 'playing')
 
     async def notifyAllTeamFinish(self, content):
         if self.tournament_state == 'final':
