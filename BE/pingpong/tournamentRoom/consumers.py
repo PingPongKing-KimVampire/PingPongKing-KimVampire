@@ -112,9 +112,9 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         score = content['score']
         self.tournament_manager.update_room_score(self.tournament_state, self.gameroom_id_now, team, score)
 
-    async def notifyYourGameReady(self, content):
+    async def notifyYourGameRoomReady(self, content):
         content = content['content']
-        await self._send("notifyYourGameReady", content)
+        await self._send("notifyYourGameRoomReady", content)
 
     async def notifyGameStart(self, content):
         self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, 'playing')
