@@ -17,24 +17,24 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.avatar_uri = None
         headers = dict(self.scope['headers'])
         token = headers.get(b'sec-websocket-protocol', b'')
-        # try:
-        decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
-        self.client_id = decoded_token['user_id']
-        user =  await UserRepository.get_user_by_id(self.client_id)
-        if user is None:
-            raise ObjectDoesNotExist("user not found")
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.game_manager = stateManager.rooms[self.room_id]
-        self.game_mode = self.game_manager.mode
-        print(self.game_mode)
-        self.game_state = 'waiting'
-        self.team = None
-        await self.enter_waiting_room(user)
-        await self.accept(subprotocol="authorization")
-        await add_group(self, self.room_id)
-        Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
-        # except:
-        #     self.close()
+        try:
+            decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+            self.client_id = decoded_token['user_id']
+            user =  await UserRepository.get_user_by_id(self.client_id)
+            if user is None:
+                raise ObjectDoesNotExist("user not found")
+            self.room_id = self.scope['url_route']['kwargs']['room_id']
+            self.game_manager = stateManager.rooms[self.room_id]
+            self.game_mode = self.game_manager.mode
+            print(self.game_mode)
+            self.game_state = 'waiting'
+            self.team = None
+            await self.enter_waiting_room(user)
+            await self.accept(subprotocol="authorization")
+            await add_group(self, self.room_id)
+            Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
+        except:
+            self.close()
             
     async def enter_waiting_room(self, user):
         self.nickname = user.nickname
@@ -184,6 +184,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         if self.game_mode == 'tournament' and self.team == win_team:
             await notify_group(self.channel_layer, f"tournament_{self.room_id}", "notifyGameEnd", {'winner_id' : self.client_id})
         await self._send(event='notifyGameEnd', content=content)
+        self.close()
 
     async def notifyGhostBall(self, content):
         Printer.log(f"Ghost ball", "green")

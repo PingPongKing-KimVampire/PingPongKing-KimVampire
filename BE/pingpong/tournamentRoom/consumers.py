@@ -22,7 +22,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         try:
             decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
             self.client_id = decoded_token['user_id']
-            user =  await UserRepository.get_user_by_id(self.client_id)
+            user = await UserRepository.get_user_by_id(self.client_id)
             if user is None:
                 raise ObjectDoesNotExist("user not found")
             self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)

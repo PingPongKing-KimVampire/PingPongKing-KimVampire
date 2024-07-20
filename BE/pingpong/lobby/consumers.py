@@ -18,19 +18,19 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         self.avatar_url = None
         headers = dict(self.scope['headers'])
         token = headers.get(b'sec-websocket-protocol', b'')
-        # try:
-        decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
-        client_id = decoded_token['user_id']
-        user =  await UserRepository.get_user_by_id(client_id)
-        if user is None:
-            raise ObjectDoesNotExist("user not found")
-        self.enter_lobby(user)
-        await add_group(self, 'lobby')
-        await self.accept(subprotocol="authorization")
-        Printer.log("Lobby WebSocket connection established", "green")      
-        # except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
-        #     Printer.log("Authorize Failed, disconnect.", "red")
-        #     await self.close()
+        try:
+            decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+            client_id = decoded_token['user_id']
+            user =  await UserRepository.get_user_by_id(client_id)
+            if user is None:
+                raise ObjectDoesNotExist("user not found")
+            self.enter_lobby(user)
+            await add_group(self, 'lobby')
+            await self.accept(subprotocol="authorization")
+            Printer.log("Lobby WebSocket connection established", "green")      
+        except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
+            Printer.log("Authorize Failed, disconnect.", "red")
+            await self.close()
 
     async def disconnect(self, close_code):
         if self.client_id:
