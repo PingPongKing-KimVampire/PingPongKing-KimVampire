@@ -120,7 +120,8 @@ class PageRouter {
 			const tournamentAnimationPageManager = new TournamentAnimationPageManager(
 				this.app,
 				this.clientInfo,
-				this._onStartPingpongGame.bind(this)
+				this._onStartPingpongGame.bind(this),
+				this._renderTournamentPage.bind(this)
 			);
 		}
 	}

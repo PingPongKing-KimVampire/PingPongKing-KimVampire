@@ -4,9 +4,10 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class TournamentAnimationPageManager {
-	constructor(app, clientInfo, _onStartPingpongGame) {
+	constructor(app, clientInfo, _onStartPingpongGame, renderTournamentPage) {
 		this.app = app;
 		this._onStartPingpongGame = _onStartPingpongGame;
+		this.renderTournamentPage = renderTournamentPage;
 		this.clientInfo = clientInfo;
 
 		//tournamentSocket의 리스너는 토너먼트 시작과 나가기때만 등록, 해제한다?
@@ -71,7 +72,11 @@ class TournamentAnimationPageManager {
 
 		// 정보 업데이트
 		// setTimeout(this._initAnimation.bind(this, "final"), 1000);
-		this._initPage();
+		if(this.clientInfo.tournamentInfo.renderingMode === "normal"){
+			this._initPage();
+		} else if(this.clientInfo.tournamentInfo.renderingMode === "animation"){
+			this._initAnimation(this.clientInfo.tournamentInfo.stage);
+		}
 	}
 	
 	async _initPage() {
@@ -93,6 +98,7 @@ class TournamentAnimationPageManager {
 	}
 
 	async _initAnimation(stage) {
+		this.clientInfo.tournamentInfo.renderingMode === "normal" //미래에 렌더링할때는 변경하지 않는 한 normal
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
@@ -340,7 +346,7 @@ class TournamentAnimationPageManager {
 	async _renderAlertTournament(stage) {
 		async function _renderTournamentWarning() {
 			return new Promise(resolve => {
-				let count = 1;
+				let count = 4;
 				const tournamentWarning = document.createElement("div");
 				tournamentWarning.className = "tournamentWarning";
 				tournamentWarning.textContent = `${count}초 후 토너먼트로 돌아갑니다`;
@@ -357,11 +363,9 @@ class TournamentAnimationPageManager {
 			});
 		}
 		await _renderTournamentWarning.call(this);
-
-		//5초 후 토너먼트 화면으로 이동하고 애니메이션을 렌더링함
-		if (stage === "semiFinal") {
-		} else if (stage === "final") {
-		}
+		this.clientInfo.tournamentInfo.renderingMode = "animation"
+		this.clientInfo.tournamentInfo.stage = stage;
+		this.renderTournamentPage();
 	}
 
 	async _enterWaitingRoom(roomId) {

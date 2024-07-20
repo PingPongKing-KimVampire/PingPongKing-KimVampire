@@ -188,37 +188,6 @@
 	font-weight: 900;
 }
 
-.tournamentWarning {
-	position: absolute;
-	top: 10%;
-	right: 10%;
-	padding: 1%;
-	color: #ffcc00; /* 밝은 색상으로 변경 */
-	border: 0.2rem dashed rgb(213, 112, 255); /* 분홍색 대시드 보더로 변경 */
-	border-radius: 15px; /* 둥근 모서리 */
-
-	width: 12rem;
-	height: 1rem;
-	z-index: 1000;
-	
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
-	
-	/* 애니메이션 추가 */
-	animation: wobble 1s infinite;
-  }
-  
-  @keyframes wobble {
-	0%, 100% {
-	  transform: rotate(-5deg);
-	}
-	50% {
-	  transform: rotate(5deg);
-	}
-  }
-
 @media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
 	#container {
 		width: 65%;

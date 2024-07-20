@@ -59,7 +59,9 @@ class WaitingTournamentPageManager {
 				this.clientInfo.tournamentInfo = {
 					tournamentSocket,
 					tournamentClientList,
-					isInit: false
+					isInit: false,
+					renderingMode: "normal", //normal or animation
+					stage: "semiFinal"
 				};
 				this.clientInfo.lobbySocket.close();
 				this.joinTournamentPage();
