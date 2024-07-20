@@ -4,6 +4,8 @@ import random
 from pingpongRoom.gameManage.gameRoomManager import GameRoomManager
 from coreManage.group import add_group, discard_group, notify_group
 
+import json
+
 class TournamentManager:
     def __init__(self, stateManager, channel_layer, room_id, consumers):
         self.stateManager = stateManager
@@ -58,6 +60,11 @@ class TournamentManager:
                 gameroom_info['state'] = state
                 gameroom_info['winnerId'] = winner_id
                 break
+        print('change tournament state')
+        print('tournament state : ', tournament_state)
+        print('state : ', state)
+        print('winner_id : ', winner_id)
+        print(json.dumps(self.tournament_info_list))
 
     def add_semi_final_winner(self, client_id):
         for client_info in self.client_info_list:
@@ -85,6 +92,8 @@ class TournamentManager:
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
             self.stateManager.rooms[room_id] = game_manager
         self.tournament_info_list['semiFinal'] = semi_final_arr
+        print('make semi final rooms')
+        print(json.dumps(self.tournament_info_list))
 
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()
@@ -97,6 +106,8 @@ class TournamentManager:
             'state' : 'notStarted'
         }]
         self.stateManager.rooms[room_id] = game_manager
+        print('make final rooms')
+        print(json.dumps(self.tournament_info_list))
         
     def get_final_room_data(self):
         game_manager = self.game_manager_list['final']
@@ -108,7 +119,8 @@ class TournamentManager:
         client_1 = self.semi_final_winners[0]
         client_2 = self.semi_final_winners[1]
         self.tournament_info_list['final'][0] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
-        print(self.tournament_info_list['final'])
+        print('enter final room')
+        print(json.dumps(self.tournament_info_list))
         return room_id
 
     def set_game_room_data(self, client_1, client_2, room_id, game_manager):
