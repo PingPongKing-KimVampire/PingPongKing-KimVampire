@@ -1,62 +1,127 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+from django.core.exceptions import ObjectDoesNotExist
 import json
+
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
 from coreManage.group import add_group, discard_group, notify_group
+import asyncio
 
 stateManager = StateManager()
 
 class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
-        self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
+        # Client Info
         self.client_id = None
         self.nickname = None
-        self.tournament_state = "semi-final"
-        self.tournament_info = stateManager.get_tournament_room(self.tournament_id)
-        await self.accept()
-        Printer.log(f"Client connected to tournament room {self.room_id}", "green")
+        self.gameroom_id_now = None
 
-    async def disconnect(self, close_code):
-        if self.client_id:
-            # await self.game_manager.give_up_game(self)
-            # room_id_team = f"{self.room_id}-{self.team}"
-            # await stateManager.leave_waiting_room(self, self.room_id, self.client_id)
-            # await discard_group(self, self.room_id)
-            # await discard_group(self, room_id_team)
-            Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
+        # Tournament Room Info
+        self.tournament_id = None
+        self.tournament_manager = None
+        self.tournament_state = None
+        self.gameroom_id_now = None
 
-    async def _send(self, event=str, content=str):
-        Printer.log(f">>>>> Tournamnet {self.room_id} sent >>>>>", "bright_cyan")
-        Printer.log(f"event : {event}", "white")
-        Printer.log(f"conetnt : {content}\n", "white")
-        data = { 'event': event, 'content': content }
-        await self.send(json.dumps(data))
-
-    async def receive(self, text_data):
-        message = json.loads(text_data)
-        
-        event = message.get('event')
-        content = message.get('content')
-        if event == "enterTournamentRoom":
-            await self.enter_tournament_room(content)
-        elif event == "getTournamentGameInfo":
-            pass
-
-    async def enter_tournament_room(self, content):
-        self.client_id = content['clientId']
-        self.nickname = stateManager.get_client_nickname(self.client_id)
-        # 인증 해야함
+        try:
+            await stateManager.authorize_client(self, dict(self.scope['headers']))
+            await self.accept(subprotocol="authorization")
+        except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
+            await self.close()
+        self.set_tournament_room_consumer(self.scope['url_route']['kwargs']['tournament_id'])
+        await self.send_tournament_room_accept_response()
         await add_group(self, self.tournament_id)
-        client_list = stateManager.get_tournament_client_list(self.tournament_id)
+        self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
+        asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
+        Printer.log(f"Client connected to tournament room {self.tournament_id}", "green")
+
+    def set_tournament_room_consumer(self, tournament_id):
+        self.tournament_id = tournament_id
+        self.tournament_state = "semiFinal"
+        self.tournament_manager = stateManager.get_tournament_manager(self.tournament_id)
+
+    async def send_tournament_room_accept_response(self): 
+        client_info_list = self.tournament_manager.get_client_info_list()
         client_list_data = []
-        for client_id, nickname in client_list.items():
+        for client_info in client_info_list:
             content = {
-                "clientId" : client_id,
-                "nickname" : nickname,
-                "clientAvartarUrl" : "/테스트중_수정할것.png"
-                # "clientAvartarUrl" : stateManager.get_client_avatar_url(client_id)
+                "id" : client_info['id'],
+                "nickname" : client_info['nickname'],
+                "avatarUrl" : client_info['avatarUrl']
             }
             client_list_data.append(content)
         await self._send("enterTournamentRoomResponse", 
                          { "tournamentClientList": client_list_data })
+            
+    async def disconnect(self, close_code):
+        if self.client_id:
+            # await self.game_manager.give_up_game(self)
+            await discard_group(self, self.tournament_id)
+            # Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
+
+    async def _send(self, event=str, content=str):
+        Printer.log(f">>>>> Tournament {self.tournament_id} sent >>>>>", "bright_cyan")
+        Printer.log(f"event : {event}", "white")
+        Printer.log(f"content : {content}\n", "white")
+        data = { 'event': event, 'content': content }
+        await self.send(json.dumps(data))
+    
+    async def receive(self, text_data):
+        message = json.loads(text_data)
+        event = message.get('event')
+        content = message.get('content')
+        
+        Printer.log(f"<<<< Tournament {self.tournament_id} recieve <<<<<", "bright_cyan")
+        Printer.log(f"event : {event}", "white")
+        Printer.log(f"content : {content}\n", "white")
+        if event == "getTournamentGameInfo":
+            await self.get_tournament_game_info_reponse()
+
+    async def get_tournament_game_info_reponse(self):
+        data = self.tournament_manager.get_tournament_info_list()
+        await self._send("getTournamentGameInfoResponse", data)
+
+    async def start_semi_final_room(self, gameroom_id, tournament_state):                     
+        await add_group(self, f"tournament_{gameroom_id}")
+        await asyncio.sleep(3)
+        await self._send("notifyYourGameRoomReady", 
+                         {'pingpongroomId' : gameroom_id, 
+                          'stage' : tournament_state})
+
+    async def notifyGameEnd(self, content):
+        content = content['content']
+        winner_id = content['winner_id']
+        Printer.log(f"winner id : {winner_id}")
+        self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, winner_id, 'finished')
+        await discard_group(self, f"tournament_{self.gameroom_id_now}")
+        self.gameroom_id_now = None
+
+        if self.tournament_state == 'semiFinal':
+            if self.client_id == winner_id:
+                self.tournament_state = 'final'
+                self.tournament_manager.add_semi_final_winner(winner_id)
+            if self.tournament_manager.is_ready_final_room():
+                await self.tournament_manager.notify_all_team_finish(self, 'semiFinal')
+        elif self.tournament_state == 'final':
+            self.tournament_state = 'finish'
+            await self.tournament_manager.notify_all_team_finish(self, 'final')
+
+    async def updateGameroomScore(self, content):
+        content = content['content']
+        team = content['team']
+        score = content['score']
+        self.tournament_manager.update_room_score(self.tournament_state, self.gameroom_id_now, team, score)
+
+    async def notifyYourGameRoomReady(self, content):
+        content = content['content']
+        await self._send("notifyYourGameRoomReady", content)
+
+    async def notifyGameStart(self, content):
+        self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, None, 'playing')
+
+    async def notifyAllTeamFinish(self, content):
+        if self.tournament_state == 'final':
+            print('결승 시작')
+            self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
+            await add_group(self, f"tournament_{self.gameroom_id_now}")
+        await self._send("notifyAllTeamFinish", content['content'])

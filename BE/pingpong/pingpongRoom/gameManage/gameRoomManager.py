@@ -19,16 +19,20 @@ NORMALIZE = 6
 
 NORMAL_SPEED = 10
 
+END_SCORE = 2
+
 
 class GameRoomManager:
-    def __init__(self, channel_layer, room_id, title, left_mode, right_mode, left_max_count, right_max_count):
+    def __init__(self, channel_layer, room_id, title, left_mode='human', right_mode='human', left_max_count=1, right_max_count=1, mode='tournament'):
         self.channel_layer = channel_layer
+
+        self.mode = mode
 
         #common game room info
         self.room_id = room_id
         self.title = title
-        self.clients = {}
-        self.team_left = {}
+        self.clients = {} # {client_id : Player}
+        self.team_left = {} 
         self.team_right = {}
         self.left_max_count = left_max_count
         self.right_max_count = right_max_count
@@ -49,7 +53,21 @@ class GameRoomManager:
         self.fake_ball = {}
         self.queue = Queue()
 
+        self.winner = None
+
     # getter
+
+    def get_client_team_in_room(self, id):
+        for client_id, player in self.team_left.items():
+            if id == client_id:
+                return 'left'
+        for client_id, player in self.team_right.items():
+            if id == client_id:
+                return 'right'
+        return None
+
+    def get_score(self):
+        return self.score
     
     def get_room_client_count(self):
         return len(self.clients)
@@ -59,6 +77,7 @@ class GameRoomManager:
 
     def enter_room(self, client_id, nickname, image_uri):
         team = None
+        player = None
         if len(self.team_left) < self.left_max_count:
             player = Player(nickname, ability=None, team='left', image_uri=image_uri)
             self.team_left[client_id] = player
@@ -67,8 +86,8 @@ class GameRoomManager:
             player = Player(nickname, ability=None, team='right', image_uri=image_uri)
             self.team_right[client_id] = player
             team = 'right'
-        self.clients[client_id] = player
-        print()
+        if player:
+            self.clients[client_id] = player
         return team
 
     def remove_client(self, client_id):
@@ -94,9 +113,9 @@ class GameRoomManager:
         data = []
         for client_id, player in team_list.items():
             data.append({
-                'clientId': client_id,
-                'clientNickname': player.nickname,
-                # 'imageUri': player.image_uri,
+                'id': client_id,
+                'nickname': player.nickname,
+                'avatarUrl': player.image_uri,
                 'readyState': player.ready_state
             })
         return data
@@ -168,25 +187,13 @@ class GameRoomManager:
         for player in team.values():
             player.modify_paddle_size(size)
         
-    def set_players(self, room):
-        # left_mode = self.set_team_ability(self.team_left)
-        self.check_jiant_blocker(self.left_mode, self.right_mode)
-
-    def set_team_ability(self, team):
-        for player in team.values():
-            # player.ability = 'jiantBlocker'
-            # player.ability = 'speedTwister'
-            player.ability = 'illusionFaker'
-            # player.ability = 'ghostSmasher'
-        return player.ability
-        
     async def trigger_game(self):
         self.is_playing = True
         self.is_end = False
         self._reset_round()
+        self.check_jiant_blocker(self.left_ability, self.right_ability)
         asyncio.create_task(self._notify_game_ready_and_start())
         asyncio.create_task(self._game_loop())
-        # asyncio.create_task(self._input_loop())
         asyncio.create_task(self._paddle_update_loop())
 
     # Game Loop
@@ -201,13 +208,7 @@ class GameRoomManager:
             ball_state = self._detect_collisions(self.ball)
             await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-
-    # async def _input_loop(self):
-    #     while self.is_playing and not self.is_end:
-    #         while not self.queue.empty():
-    #             client_id, content = await self.queue.get()
-    #             self._update_paddle_position(client_id, content)
-    #         await asyncio.sleep(0.01)
+        return self.winner
 
     def update_target(self, client_id, x, y):
         self.clients[client_id].update_target(x, y)
@@ -218,9 +219,6 @@ class GameRoomManager:
             for client_id, player in self.clients.items():
                 if player.needs_update():
                     pos_x, pos_y = player.move()
-                    # print("player pos: ", pos_x, pos_y)
-                    # if debug_x - pos_x > 15 or debug_y - pos_y > 15:
-                    #     print("debug pos: ", debug_x, debug_y)
                     content = {'xPosition': pos_x, 'yPosition': pos_y}
                     await self._notify_paddle_location_update(client_id, content)
                     debug_x, debug_y = player.pos_x, player.pos_y
@@ -251,8 +249,7 @@ class GameRoomManager:
             count = self.team_left.__len__()
         from utils.printer import Printer
         await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
-        for i in range(count):
-        # for i in range(count - 1):
+        for i in range(count - 1):
             id = str(uuid.uuid4())
             self.fake_ball[id] = Ball(NORMAL_SPEED, self.ball_radius)
             rand = random.randint(-15, 15)
@@ -280,23 +277,16 @@ class GameRoomManager:
                 room_id_team = f"{self.room_id}-left"
         else:
             room_id_team = self.room_id
-        await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
-            {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
-
-    # def _update_paddle_position(self, client_id, content):
-    #     player = self.clients[client_id]
-    #     player.update_target(content['xPosition'], content['yPosition'])
+        if self.is_playing:
+            await self._notify_game_room_group(room_id_team, 'notifyBallLocationUpdate', 
+                {'xPosition': self.ball.pos_x, 'yPosition': self.ball.pos_y})
 
     def _detect_collisions(self, ball):
         state = NOHIT
         if ball.get_right_x() >= self.board_width:
-            # print("right_x: ", ball.get_right_x())
-            # print("board_width: ", self.board_width)
             self.serve_turn = LEFT
             return SCORE
         elif ball.get_left_x() <= 0:
-            # print("left_x: ", ball.get_left_x())
-            # print("board_width: ", self.board_width)
             self.serve_turn = RIGHT
             return SCORE
         elif ball.get_top_y() <= 0 or ball.get_bottom_y() >= self.board_height:
@@ -344,7 +334,8 @@ class GameRoomManager:
         self._add_score()
         await self._notify_score_update()
         if self._check_game_end():
-            await self._end_game_loop()
+            self.winner = self._end_game_loop()
+            await self._notify_game_room('notifyGameEnd', {'winTeam': self.winner})
         else:
             self._reset_round()
 
@@ -355,12 +346,12 @@ class GameRoomManager:
             self.score[RIGHT] += 1
         
     def _check_game_end(self):
-        return self.score[LEFT] >= 5 or self.score[RIGHT] >= 5
+        return self.score[LEFT] >= END_SCORE or self.score[RIGHT] >= END_SCORE
 
-    async def _end_game_loop(self):
-        team = 'left' if self.score[LEFT] >= 5 else 'right'
+    def _end_game_loop(self):
+        team = 'left' if self.score[LEFT] >= END_SCORE else 'right'
         self._end_game()
-        await self._notify_game_room('notifyGameEnd', {'winTeam': team})
+        return team
 
     def _reset_round(self):
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
@@ -372,7 +363,6 @@ class GameRoomManager:
     def _end_game(self):
         self.is_playing = False
         self.is_end = True
-        self._reset_game()
         
     def _reset_game(self):
         self.score = {LEFT: 0, RIGHT: 0}
@@ -384,10 +374,10 @@ class GameRoomManager:
         self._reset_round()
 
     async def give_up_game(self, consumer):
-        self._end_game()
         client_id = consumer.client_id
         if self.is_playing:
             await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
+        self._end_game()
     
     ### Notify methods
 
@@ -417,7 +407,7 @@ class GameRoomManager:
             "teamInfo" : { "leftTeamAbilitfy " : self.left_mode, "rightTeamAbility" : self.right_mode},
             "boardInfo" : board_data
         }
-        await self._notify_game_room('notifyGameReady', {})
+        await self._notify_game_room('notifyGameRoomReady', {})
         await asyncio.sleep(1.5)
         await self._notify_game_room('notifyGameStart', data)
 

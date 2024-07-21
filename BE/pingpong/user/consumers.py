@@ -20,28 +20,16 @@ channel_name_map = {}
 class GlobalConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from .serializers import CustomTokenObtainPairSerializer
-        self.is_init = False
+        self.is_init = True
         self.read_receiver_id = None
-        # 주석 친 코드 : 연결 과정에서 하는 거 프론트에서 처리된 이후에 처리
-        # headers = dict(self.scope['headers'])
-        # bearer_access_token = headers.get(b'authorization', b'').decode('utf-8')
+        headers = dict(self.scope['headers'])
+        token = headers.get(b'sec-websocket-protocol', b'')
         try:
-            # token_array = bearer_access_token.split(" ")
-            # if token_array[0] != "Bearer":
-            #     raise InvalidTokenError("Bearer Error")
-            # access_token = token_array[1]
-            # decoded_token = CustomTokenObtainPairSerializer.verify_token(access_token)
-            await self.accept()
+            self.decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+            await self.accept(subprotocol="authorization")
             Printer.log("WebSocket connection established", "green")      
-            asyncio.create_task(self.check_timeout(60))
         except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
             Printer.log("Invalid Authorization header, closing connection", "red")
-            await self.close()
-        
-    async def check_timeout(self, timeout):
-        await asyncio.sleep(timeout)
-        if not self.is_init:
-            Printer.log("Client not initialized within timeout period, disconnecting...", "yellow")
             await self.close()
 
     async def disconnect(self, close_code):
@@ -53,7 +41,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
                 "activeState": "INACTIVE"
             }
             channel_name_map.pop(self.client_id)
-            discard_group(self, 'lobby')
+            await discard_group(self, 'lobby')
             await self.notify_all_group_activation("notify_friend_active_state_change", content)
             Printer.log("notify inactivated to all friends", "red")
         Printer.log("WebSocket connection closed", "red")
@@ -61,21 +49,19 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     async def _send(self, event, content):
         Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
         Printer.log(f"event : {event}", "cyan")
-        # Printer.log(f"conetnt : {content}", "cyan")
+        # Printer.log(f"content : {content}", "cyan")
         await self.send(json.dumps({ 'event': event, 'content': content }))
 
     async def receive(self, text_data):
         message = json.loads(text_data)
         event = message.get('event')
         content = message.get('content')
+        Printer.log("<<<<<")
+        Printer.log(f"event : {event}")
+        Printer.log(f"content : {content}")
 
         if event == 'initClient':
-            access_token = content['accessToken']
-            await self.init_client(access_token)
-            return
-        if not self.client_id:
-            self.is_init = False
-            await self.close()
+            await self.init_client()
             return
         if event == 'updateClientInfo':
             waiting_room_info = content['waitingRoomInfo']
@@ -123,30 +109,29 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         elif event == 'getClientListIBlocked':
             await self.get_client_list_blocked_by_user()
 
-    async def init_client(self, access_token):
-        from .serializers import CustomTokenObtainPairSerializer
+    async def init_client(self):
         from .repositories import UserRepository
-        try:
-            decoded_token = CustomTokenObtainPairSerializer.verify_token(access_token)
-        except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
-            Printer.log("Invalid Authorization header, closing connection", "red")
-            self.is_init = False
-            if (hasattr(self, 'client_id') and self.client_id in channel_name_map):
-                channel_name_map.pop(self.client_id)
-            discard_group(self, 'lobby')
-            await self.close()
+        # try:
+        #     decoded_token = CustomTokenObtainPairSerializer.verify_token(access_token)
+        # except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
+        #     Printer.log("Invalid Authorization header, closing connection", "red")
+        #     self.is_init = False
+        #     if (hasattr(self, 'client_id') and self.client_id in channel_name_map):
+        #         channel_name_map.pop(self.client_id)
+        #     discard_group(self, 'lobby')
+        #     await self.close()
         stateManager.add_channel_layer(self.channel_layer)
-        client_id = decoded_token['user_id']
+        client_id = self.decoded_token['user_id']
         
         self.client_id = client_id
-        self.client_nickname = decoded_token['nickname']
+        self.client_nickname = self.decoded_token['nickname']
         # add user 회원가입에서 이루어짐, 추후에 알림 기능 적용을 위해서 채널 만들고 관리할 필요 있음
         # stateManager.add_user(client_id, decoded_token['nickname'])
         user = await UserRepository.get_user_by_id(client_id)
         response = {
-            "clientId": client_id,
-            "clientNickname": user.nickname,
-            "clientAvatarUrl": user.get_image_uri(),
+            "id": client_id,
+            "nickname": user.nickname,
+            "avatarUrl": user.get_image_uri(),
             "message": "OK"
         }
         channel_name_map[self.client_id] = self.channel_name

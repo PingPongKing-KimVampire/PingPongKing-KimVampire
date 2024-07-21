@@ -199,7 +199,7 @@ class EditProfilePageManager {
 		this.exitModal.style.display = "flex";
 	};
 	_exitEditProfilePage = async  () => {
-		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
+		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
 		this.renderLobbyPage();
 	};
 	_hideExitModal = () => {

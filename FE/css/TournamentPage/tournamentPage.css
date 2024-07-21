@@ -297,3 +297,91 @@
 		padding: 0 3.5% 0 7%;
 	}
 }
+
+/* @keyframes drawLine {
+	from {
+	  stroke-dasharray: 0, 100;
+	  stroke-dashoffset: 0;
+	  stroke: rgba(255, 255, 255, 0.3);
+	}
+	to {
+	  stroke-dasharray: 100, 0;
+	  stroke-dashoffset: 0;
+	  stroke: rgba(255, 255, 255, 1);
+	}
+  }
+  
+  .line-animation {
+	animation: drawLine 2s forwards;
+  } */
+
+  .whitePolyline {
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: 0.1rem;
+    fill: none;
+}
+
+  @keyframes drawLine {
+	from {
+	  stroke-dasharray: 0, 100;
+	  stroke-dashoffset: 100;
+	}
+	to {
+	  stroke-dasharray: 100, 0;
+	  stroke-dashoffset: 0;
+	}
+  }
+  
+  .line-animation {
+	animation: drawLine 2s forwards;
+  }
+
+.fadeInEffect{
+	opacity: 0; /* 초기 상태는 투명 */
+	animation: fadeIn 2s forwards; /* 2초 동안 서서히 등장 */
+  }
+  
+@keyframes fadeIn {
+	from {
+	opacity: 0; /* 시작할 때 완전히 투명 */
+	}
+	to {
+	opacity: 1; /* 끝날 때 완전히 불투명 */
+	}
+}
+
+.tournamentExitButton {
+	width: 15%;
+	aspect-ratio: 5/1;
+	position: absolute;
+	border: 0.12rem solid white;
+	border-radius: 2rem;
+	background-color: transparent;
+	top: 3%;
+	left: 2%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+
+.tournamentExitButton:hover {
+	cursor: pointer;
+}
+
+.tournamentExitButtonImg{
+	height: 50%;
+	aspect-ratio: 1/1;
+	background: url("../../images/exitImg.png") center/cover;
+}
+
+.tournamentExitButtonText{
+	width: 75%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	font-size: 1.3rem;
+}
+

@@ -2,7 +2,7 @@ import Player from './Player.js';
 import PingpongRenderer from './PingpongRenderer.js';
 
 class PingpongPageManager {
-	constructor(app, clientInfo, onExitPingpong) {
+	constructor(app, clientInfo, onExitPingpong, renderTournament) {
 		this.app = app;
 		this.clientInfo = {
 			socket: null,
@@ -36,6 +36,7 @@ class PingpongPageManager {
 
 		this.clientInfo = clientInfo;
 		this.onExitPingpong = onExitPingpong;
+		this.renderTournament = renderTournament;
 		this.playerList = [];
 	}
 
@@ -46,7 +47,8 @@ class PingpongPageManager {
 		this.app.innerHTML = this._getPingpongHTML();
 
 		this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
-		this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
+		if(this.clientInfo.gameInfo.role !== "observer")
+			this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 
 		this._manageExitRoom(); // 탁구장 나가기 처리
 
@@ -64,7 +66,7 @@ class PingpongPageManager {
 			const { event } = JSON.parse(messageEvent.data);
 			if (event === 'notifyGameEnd') {
 				console.log('notify game end!');
-				this._displayGameOverModal();
+				this.clientInfo.gameInfo.pingpongRoomSocket.close();
 			}
 		})
 	}
@@ -97,6 +99,11 @@ class PingpongPageManager {
 	_exitYesButtonClicked() {
 		this.clientInfo.socket.close();
 		this._cleanupPingpongInteraction();
+		if(this.clientInfo.tournamentInfo)
+		{
+			this.renderTournament();
+			return;
+		}
 		this.onExitPingpong();
 	}
 	_exitNoButtonClicked(questionModal) {
@@ -115,6 +122,11 @@ class PingpongPageManager {
 		const gameOverModal = document.querySelector('#gameOverModal');
 		gameOverModal.style.display = 'flex';
 		document.querySelector('#gameOverModal button').addEventListener('click', () => {
+			if(this.clientInfo.tournamentInfo)
+			{
+				this.renderTournament();
+				return;
+			}
 			this.onExitPingpong();
 		});
 	}
@@ -136,7 +148,7 @@ class PingpongPageManager {
 				<div id="leftDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamLeftScore?0:this.clientInfo.gameInfo.teamLeftScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>
@@ -146,7 +158,7 @@ class PingpongPageManager {
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">0</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamRightScore?0:this.clientInfo.gameInfo.teamRightScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>

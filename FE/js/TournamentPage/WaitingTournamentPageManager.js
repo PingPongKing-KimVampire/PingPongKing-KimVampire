@@ -10,12 +10,6 @@ class WaitingTournamentPageManager {
 		this.joinLobbyPage = joinLobbyPage;
 		this.joinTournamentPage = joinTournamentPage;
 		this.initPage();
-
-		//3초뒤 tournamentPage로 이동하도록 하드코딩
-		setTimeout(() => {
-			this.clientInfo.lobbySocket.close();
-			this.joinTournamentPage();
-		}, 3000);
 	}
 
 	async initPage() {
@@ -33,21 +27,12 @@ class WaitingTournamentPageManager {
 	}
 
 	async _connectTournamentSocket(id) {
-		const tournamentSocket = new WebSocket(
-			`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournamentRoom/${id}`
-		);
+		const tournamentSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`,['authorization', this.clientInfo.accessToken]);
 		await new Promise((resolve) => {
 			tournamentSocket.addEventListener('open', () => {
 				resolve();
 			});
 		});
-		const enterTournamentMessage = {
-			event: 'enterTournamentRoom',
-			content: {
-				clientId: this.clientInfo.id,
-			},
-		};
-		tournamentSocket.send(JSON.stringify(enterTournamentMessage));
 		const tournamentClientList = await new Promise((resolve) => {
 			const listener = (messageEvent) => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -66,13 +51,17 @@ class WaitingTournamentPageManager {
 		this.NotifyMatchMakingCompleteListener = async (messageEvent) => {
 			const { event, content } = JSON.parse(messageEvent.data);
 			if (event === 'notifyMatchMakingComplete') {
+				console.log("매치매이킹 성공!");
 				this._unsubscribeWindow();
 				const tournamentId = content.tournamentId;
 				const { tournamentSocket, tournamentClientList } =
-					await _connectTournamentSocket(tournamentId);
+					await this._connectTournamentSocket(tournamentId);
 				this.clientInfo.tournamentInfo = {
 					tournamentSocket,
 					tournamentClientList,
+					isInit: false,
+					renderingMode: "normal", //normal or animation
+					stage: "semiFinal"
 				};
 				this.clientInfo.lobbySocket.close();
 				this.joinTournamentPage();
@@ -89,21 +78,21 @@ class WaitingTournamentPageManager {
 			'.leaveWaitingTournamentButton'
 		);
 		leaveWaitingTournamentButton.addEventListener('click', async () => {
-			// const startMatchMakingMessage = {
-			// 	event: "cancelMatchMaking",
-			// 	content: {},
-			// };
-			// this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
-			// await new Promise(resolve => {
-			// 	const listener = messageEvent => {
-			// 		const { event, content } = JSON.parse(messageEvent.data);
-			// 		if (event === "cancelMatchMakingResponse" && content.message === "OK") {
-			// 			this.clientInfo.lobbySocket.removeEventListener("message", listener);
-			// 			resolve();
-			// 		}
-			// 	};
-			// 	this.clientInfo.lobbySocket.addEventListener("message", listener);
-			// });
+			const cancelMatchMakingMessage = {
+				event: "cancelMatchMaking",
+				content: {},
+			};
+			this.clientInfo.lobbySocket.send(JSON.stringify(cancelMatchMakingMessage));
+			await new Promise(resolve => {
+				const listener = messageEvent => {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === "cancelMatchMakingResponse" && content.message === "OK") {
+						this.clientInfo.lobbySocket.removeEventListener("message", listener);
+						resolve();
+					}
+				};
+				this.clientInfo.lobbySocket.addEventListener("message", listener);
+			});
 
 			this._removePageListener();
 			this._unsubscribeWindow();

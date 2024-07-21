@@ -31,8 +31,8 @@ class WaitingRoomPageManager {
 		};
 
 		// const playerInfo = {
-		// 	clientId: null,
-		// 	clientNickname: null,
+		// 	id: null,
+		// 	nickname: null,
 		// 	readyState: null
 		// }
 		this.clientInfo = clientInfo;
@@ -50,12 +50,12 @@ class WaitingRoomPageManager {
 			readyState: null,
 			selectAbility: false,
 		};
-		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.clientId === this.clientInfo.id);
+		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.id === this.clientInfo.id);
 		if (myPlayer) {
 			this.me.readyState = myPlayer.readyState;
 			this.me.team = "left";
 		} else {
-			myPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.clientId === this.clientInfo.id);
+			myPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.id === this.clientInfo.id);
 			this.me.readyState = myPlayer.readyState;
 			this.me.team = "right";
 		}
@@ -98,8 +98,8 @@ class WaitingRoomPageManager {
 			const message = JSON.parse(messageEvent.data);
 			const { event, content } = message;
 			if (event === "notifyWaitingRoomEnter") {
-				const { clientId, clientNickname, team } = content;
-				this._pushNewPlayer(clientId, clientNickname, team);
+				const { id, nickname, team, avatarUrl } = content;
+				this._pushNewPlayer(id, nickname, team, avatarUrl);
 				this._initPage();
 			} else if (event === "notifyWaitingRoomExit") {
 				const clientId = content.clientId;
@@ -114,8 +114,8 @@ class WaitingRoomPageManager {
 				//3, 2, 1 추후 구현
 			} else if (event === "notifyGameStart") {
 				content.playerInfo.forEach(player => {
-					let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(leftPlayer => leftPlayer.clientId === player.clientId);
-					if (!targetPlayer) targetPlayer = this.clientInfo.gameInfo.teamRightList.find(rightPlayer => rightPlayer.clientId === player.clientId);
+					let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(leftPlayer => leftPlayer.id === player.clientId);
+					if (!targetPlayer) targetPlayer = this.clientInfo.gameInfo.teamRightList.find(rightPlayer => rightPlayer.id === player.clientId);
 					targetPlayer.ability = player.ability;
 					targetPlayer.paddleHeight = player.paddleHeight;
 					targetPlayer.paddleWidth = player.paddleWidth;
@@ -138,43 +138,44 @@ class WaitingRoomPageManager {
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", listener);
 	}
 
-	_pushNewPlayer(clientId, clientNickname, team) {
-		if (this.clientInfo.id === clientId) return;
+	_pushNewPlayer(id, nickname, team, avatarUrl) {
+		if (this.clientInfo.id === id) return;
 		if (team === "left")
 			this.clientInfo.gameInfo.teamLeftList.push({
-				clientId,
-				clientNickname,
+				id,
+				nickname,
+				avatarUrl,
 				readyState: "NOTREADY",
 			});
 		if (team === "right")
 			this.clientInfo.gameInfo.teamRightList.push({
-				clientId,
-				clientNickname,
+				id,
+				nickname,
 				readyState: "NOTREADY",
 			});
 	}
 
-	_popPlayer(clientId) {
+	_popPlayer(id) {
 		this.clientInfo.gameInfo.teamLeftList = this.clientInfo.gameInfo.teamLeftList.filter(player => {
-			player.clientId !== clientId;
+			player.id !== id;
 		});
 		this.clientInfo.gameInfo.teamRightList = this.clientInfo.gameInfo.teamRightList.filter(player => {
-			player.clientId !== clientId;
+			player.id !== id;
 		});
 	}
 
-	_updateReadyState(clientId, readyState) {
+	_updateReadyState(id, readyState) {
 		this.clientInfo.gameInfo.teamLeftList.forEach(player => {
-			if (player.clientId === clientId) player.readyState = readyState;
+			if (player.id === id) player.readyState = readyState;
 		});
 		this.clientInfo.gameInfo.teamRightList.forEach(player => {
-			if (player.clientId === clientId) player.readyState = readyState;
+			if (player.id === id) player.readyState = readyState;
 		});
 	}
 
 	_sendMyReadyStateChangeMessage() {
-		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.clientId === this.clientInfo.id);
-		if (!myPlayer) myPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.clientId === this.clientInfo.id);
+		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.id === this.clientInfo.id);
+		if (!myPlayer) myPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.id === this.clientInfo.id);
 
 		const changedReadyState = myPlayer.readyState === "READY" ? "NOTREADY" : "READY";
 		const readyMessage = {
@@ -186,9 +187,9 @@ class WaitingRoomPageManager {
 		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(readyMessage));
 	}
 
-	_changeMyReadyState(clientId) {
-		let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.clientId === clientId);
-		if (!targetPlayer) targetPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.clientId === clientId);
+	_changeMyReadyState(id) {
+		let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.id === id);
+		if (!targetPlayer) targetPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.id === id);
 		targetPlayer.readyState === "READY" ? (targetPlayer.readyState = "NOTREADY") : (targetPlayer.readyState = "READY");
 	}
 
@@ -242,7 +243,7 @@ class WaitingRoomPageManager {
 	async _exitWaitingRoom() {
 		this.clientInfo.gameInfo.pingpongRoomSocket.close();
 		this.clientInfo.gameInfo = null;
-		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
+		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
 		this._onExitWaitingRoom();
 	}
 
@@ -329,7 +330,7 @@ class WaitingRoomPageManager {
 
 	_getPlayerInfoHTML(mode, player, selectAbility) {
 		let abilityBtnInnerHTML;
-		const isMine = player.clientId === this.clientInfo.id;
+		const isMine = player.id === this.clientInfo.id;
 		if (selectAbility) {
 			abilityBtnInnerHTML = `
 				<div class="abilityImgFrame">
@@ -346,7 +347,7 @@ class WaitingRoomPageManager {
 
 		return `
 			<div class="nameContainer">
-				<div class="name">${player.clientNickname}</div>
+				<div class="name">${player.nickname}</div>
 			</div>
 			<div class="avatar">
 				${mode === "vampire" ? abilityBtnHTML : ""}
@@ -362,7 +363,7 @@ class WaitingRoomPageManager {
 		let listHTML = "";
 		playerList.forEach(player => {
 			listHTML += `
-				<div class="listItem ${player.clientId === this.clientInfo.id ? "me" : ""}">
+				<div class="listItem ${player.id === this.clientInfo.id ? "me" : ""}">
 					${this._getPlayerInfoItemHTML(player)}
 				</div>`;
 		});
@@ -379,7 +380,7 @@ class WaitingRoomPageManager {
 			<div class="avatarImgFrame">
 				<img class="avatarImg ${player.readyState === "READY" ? "on" : ""}" src="images/playerA.png">
 			</div>
-			<div class="listName">${player.clientNickname}</div>
+			<div class="listName">${player.nickname}</div>
 		`;
 	}
 	_getEmptyItemHTML() {
