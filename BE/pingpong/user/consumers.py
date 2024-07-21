@@ -535,3 +535,46 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             return
         self.read_receiver_id = None
         await self._send("stopReadingChatResponse", {"message": "OK"})
+        
+def make_word_by_game(round_info_list, my_team):
+    total_rounds = len(round_info_list)
+    my_wins = sum(1 for round_info in round_info_list.values() if round_info['win_team'] == my_team)
+    opponent_wins = total_rounds - my_wins
+    
+    # 패들 타입 정보 확인
+    paddle_hits_per_round = [sum(1 for hit in round_info['ball_hits'] if hit['type'] == 'PADDLE') 
+                             for round_info in round_info_list.values()]
+    
+    # 역전 여부 확인
+    was_losing = False
+    was_winning = False
+    comeback_win = False
+    comeback_lose = False
+    
+    for round_num, round_info in round_info_list.items():
+        if round_info['win_team'] == my_team:
+            if was_losing:
+                comeback_win = True
+                break
+            was_winning = True
+        else:
+            if was_winning:
+                comeback_lose = True
+                break
+            was_losing = True
+
+    # 결과 결정
+    if comeback_lose:
+        return "아쉬운 역전패"
+    elif comeback_win:
+        return "짜릿한 역전승"
+    elif my_wins > opponent_wins and opponent_wins == 0:
+        return "살살하셔야 겠어요~"
+    elif my_wins == 0:
+        return "그 실력에 잠이 오냐?"
+    elif any(hits >= 10 for hits in paddle_hits_per_round):
+        return "치혈했던 혈전"
+    elif my_wins > opponent_wins:
+        return "승리"
+    else:
+        return "패배"
