@@ -8,7 +8,7 @@ import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js"
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
-import TournamentAnimationPageManager from './TournamentPage/TournamentAnimationPageManager.js';
+import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -87,7 +87,7 @@ class PageRouter {
 				this._onEnterWaitingRoom.bind(this),
 				this._renderFriendManagementPage.bind(this),
 				this._renderEditProfilePage.bind(this),
-				this._joinTournamentWaitingPage.bind(this)
+				this._joinTournamentWaitingPage.bind(this),
 			);
 			await lobbyPageManager.initPage();
 		} else if (url === "waitingRoomCreation") {
@@ -115,14 +115,9 @@ class PageRouter {
 		} else if (url === "waitingTournament") {
 			this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
 			const waitingTournamentPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this._joinLobbyPage.bind(this), this._joinTournamentPage.bind(this));
-		} else if (url === 'tournamentAnimation') {
+		} else if (url === "tournamentAnimation") {
 			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
-			const tournamentAnimationPageManager = new TournamentAnimationPageManager(
-				this.app,
-				this.clientInfo,
-				this._onStartPingpongGame.bind(this),
-				this._renderTournamentPage.bind(this)
-			);
+			const tournamentAnimationPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._renderTournamentPage.bind(this), this._renderLobby.bind(this));
 		}
 	}
 
@@ -195,7 +190,7 @@ class PageRouter {
 		this.renderPage("tournamentAnimation");
 	}
 
-	_renderTournamentPage(){
+	_renderTournamentPage() {
 		this.renderPage("tournamentAnimation");
 	}
 }

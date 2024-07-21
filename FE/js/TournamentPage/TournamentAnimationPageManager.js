@@ -2,12 +2,14 @@ import windowObservable from "../../WindowObservable.js";
 
 import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
+import { _connectLobbySocket } from "../connect.js";
 
 class TournamentAnimationPageManager {
-	constructor(app, clientInfo, _onStartPingpongGame, renderTournamentPage) {
+	constructor(app, clientInfo, _onStartPingpongGame, renderTournamentPage, renderLobbyPage) {
 		this.app = app;
 		this._onStartPingpongGame = _onStartPingpongGame;
 		this.renderTournamentPage = renderTournamentPage;
+		this.renderLobbyPage = renderLobbyPage;
 		this.clientInfo = clientInfo;
 
 		//tournamentSocket의 리스너는 토너먼트 시작과 나가기때만 등록, 해제한다?
@@ -72,22 +74,28 @@ class TournamentAnimationPageManager {
 
 		// 정보 업데이트
 		// setTimeout(this._initAnimation.bind(this, "final"), 1000);
-		if (this.clientInfo.tournamentInfo.renderingMode === "normal") {
-			this._initPage();
-		} else if (this.clientInfo.tournamentInfo.renderingMode === "animation") {
-			this._initAnimation(this.clientInfo.tournamentInfo.stage);
-		}
+
+		this.commonInitPage();
 	}
 
-	async _initPage() {
+	async commonInitPage() {
 		if (!this.clientInfo.tournamentInfo.isInit) {
 			this._listenTournamentEvent();
 			this.clientInfo.tournamentInfo.isInit = true;
 		}
 		await this._getTournamentInfo();
 		this.app.innerHTML = this._getHTML();
+		this._setExitButton();
 		this._subscribeWindow();
 
+		if (this.clientInfo.tournamentInfo.renderingMode === "normal") {
+			this._initStaticPage();
+		} else if (this.clientInfo.tournamentInfo.renderingMode === "animation") {
+			this._initAnimation(this.clientInfo.tournamentInfo.stage);
+		}
+	}
+
+	async _initStaticPage() {
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
 				this.point = this._calculatePoints();
@@ -98,10 +106,6 @@ class TournamentAnimationPageManager {
 
 	async _initAnimation(stage) {
 		this.clientInfo.tournamentInfo.renderingMode === "normal"; //미래에 렌더링할때는 변경하지 않는 한 normal
-		await this._getTournamentInfo();
-		this.app.innerHTML = this._getHTML();
-		this._subscribeWindow();
-
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
 				this.point = this._calculatePoints();
@@ -326,6 +330,40 @@ class TournamentAnimationPageManager {
 	_unsubscribeWindow() {
 		// TODO : 페이지 나갈 시 호출
 		// windowObservable.unsubscribeResize(this._renderBracketRef);
+	}
+
+	_setExitButton() {
+		const isSemiFinalLoser = id => {
+			let winnerId;
+			if (this.tournamentInfo.semiFinal[0].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[0].winnerId;
+			else if (this.tournamentInfo.semiFinal[1].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[1].winnerId;
+			//아직 경기 전
+			if(winnerId === null || winnerId === undefined)
+				return false;
+			return id !== winnerId;
+		};
+		const isTournamentEnd = () => this.tournamentInfo.final[0].state === "finished";
+
+		const addExitButton = () => {
+			const buttonHTML = `
+				<button class="tournamentExitButton">
+					<div class="tournamentExitButtonImg"></div>
+					<span class="tournamentExitButtonText">토너먼트에서 나가기</span>
+				</button>
+				`;
+			this.app.insertAdjacentHTML("afterbegin", buttonHTML);
+			const tournamentExitButton = document.querySelector(".tournamentExitButton");
+			tournamentExitButton.addEventListener("click", async () => {
+				this.clientInfo.tournamentInfo.tournamentSocket.close();
+				this.clientInfo.tournamentInfo = null;
+				this._unsubscribeWindow();
+				this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
+				this.renderLobbyPage();
+			});
+		};
+		if (isSemiFinalLoser(this.clientInfo.id) || isTournamentEnd()) {
+			addExitButton();
+		}
 	}
 
 	_listenTournamentEvent() {
