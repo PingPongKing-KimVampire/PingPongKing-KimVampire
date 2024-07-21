@@ -1,5 +1,4 @@
 from lobby.models import User, Team, TeamUser, Game, Round, BallHit
-from lobby.models import User, Team, TeamUser, Game, Round, BallHit
 from asgiref.sync import sync_to_async
 from django.db.models import Prefetch
 
@@ -114,12 +113,82 @@ class GameReadRepository:
 				"error": "User not found"
 			}
 		return GameReadRepository.get_game_history_by_user_id()
+	
+	@staticmethod
+	@sync_to_async
+	def get_game_detail_by_user_id_and_game_id_async(self, user_id, game_id):
+		user = User.objects.get(id=user_id)
+		if user is None:
+			return {
+				"error": "User not found"
+			}
+		game = Game.objects.get(id=game_id)
+		if game is None:
+			return {
+				"error": "Game not found"
+			}
+		return GameReadRepository.get_game_detail_by_user_id_and_game_id(user, game)
+	
+	@staticmethod
+	def get_game_detail_by_user_id_and_game_id(user, game):
+		teams = Team.objects.filter(game=game).select_related('game').all()
+		team_users = TeamUser.objects.select_related('user', 'team').filter(team__in=teams).all()
+		rounds = Round.objects.filter(game=game).select_related('game', 'win_team').all()
+		ballhits = BallHit.objects.select_related('round').filter(round__in=rounds).all()
+		my_team_users = []
+		opponent_team_users = []
+		for team_user in team_users:
+			if team_user.user.id == user.id:
+				my_team = team_user.team
+				break
+		for team in teams:
+			if team.id != my_team.id:
+				opponent_team = team
+				break
+		for team_user in team_users:
+			if team_user.team.id == my_team.id:
+				my_team_users.append({
+					"clientId": team_user.user.id,
+					"nickname": team_user.user.nickname,
+					"imageUri": team_user.user.get_image_uri()
+				})
+			else:
+				opponent_team_users.append({
+					"clientId": team_user.user.id,
+					"nickname": team_user.user.nickname,
+					"imageUri": team_user.user.get_image_uri()
+				})
+		score_list = [None] * game.total_round
+		hit_map_list = {}
+		for round in rounds:
+			score_list[round.order] = round.is_win(my_team)
+			ball_hit_list = []
+			for ballhit in ballhits:
+				if ballhit.round.id != round.id:
+					continue
+				ball_hit_list.append({
+					"type": ballhit.kind,
+					"y": ballhit.y_coordinate,
+					"x": ballhit.x_coordinate
+				})
+			hit_map_list[round.order] = ball_hit_list 
+		data = {
+			"score": [my_team.score, opponent_team.score],
+			"mode": game.mode,
+			"ability": [my_team.effect, opponent_team.effect],
+			"myTeamClientInfoList": my_team_users,
+			"opponentTeamClientInfoList": opponent_team_users,
+			"word": GameReadRepository.make_vampire_word(rounds, my_team, opponent_team, game, hit_map_list),
+			"scoreList": score_list,
+			"hitMapList": hit_map_list
+		}
+		return data
+		
 
 	@staticmethod
 	def get_game_history_by_user_id(user):
 		if user is None:
 			return None
-		teams = []
 		game_prefetch = Prefetch('team__game', queryset=Game.objects.all())
 		team_users = TeamUser.objects.select_related('team__game').prefetch_related(game_prefetch).filter(user=user).all()
 		game_history = []
@@ -164,50 +233,36 @@ class GameReadRepository:
 		return data
 	
 	@staticmethod
-	def get_games_by_user(user):
-		game_prefetch = Prefetch('team__game', queryset=Game.objects.all())
-		team_prefetch = Prefetch('team_user__team', queryset=Team.objects.all())
-		
-		team_users = TeamUser.objects.select_related('team__game').prefetch_related(game_prefetch).filter(user=user).all()
-	
-	# @staticmethod
-	# def get_games_with_user_teams(user):
-	# 	if user is None:
-	# 		return None
+	def make_vampire_word(rounds, our_team, opponent_team, game, hit_map_list):
+		total_round = game.total_round
+		was_losing = False
+		was_winning = False
+		comeback_win = False
+		comeback_lose = False
+		paddle_hits_per_round = [sum(1 for hit in hits if hit["type"] == "PADDLE") for hits in hit_map_list.values()]
 
-	# 	# Fetch all TeamUser instances related to the user
-	# 	user_teams = TeamUser.objects.filter(user=user).select_related('team__game')
-
-	# 	# Create a dictionary to hold game-related data
-	# 	games_dict = {}
-
-	# 	# Initialize games_dict with game information and placeholders for team information
-	# 	for team_user in user_teams:
-	# 		game = team_user.team.game
-	# 		if game.id not in games_dict:
-	# 			games_dict[game.id] = {
-	# 				'game': game,
-	# 				'my_team': None,
-	# 				'my_team_users': [],
-	# 				'opponent_teams': [],
-	# 				'opponent_teams_users': []
-	# 			}
-
-	# 	# Populate games_dict with user's team and users
-	# 	for team_user in user_teams:
-	# 		game = team_user.team.game
-	# 		game_data = games_dict[game.id]
-	# 		game_data['my_team'] = team_user.team
-	# 		game_data['my_team_users'] = list(TeamUser.objects.filter(team=team_user.team).select_related('user'))
-
-	# 	# Fetch other teams and their users for each game
-	# 	for game_id, game_data in games_dict.items():
-	# 		other_teams = Team.objects.filter(game=game_data['game']).exclude(id=game_data['my_team'].id).prefetch_related(
-	# 			Prefetch('team_users', queryset=TeamUser.objects.select_related('user'))
-	# 		)
-	# 		game_data['opponent_teams'] = list(other_teams)
-	# 		for team in other_teams:
-	# 			opponent_team_users = list(team.team_users.all())
-	# 			game_data['opponent_teams_users'].extend(opponent_team_users)
-	# 	print(games_dict.values())
-	# 	return games_dict.values()
+		for round in rounds:
+			if round.win_team.id == our_team.id:
+				if was_losing:
+					comeback_win = True
+					break
+				was_winning = True
+			else:
+				if was_winning:
+					comeback_lose = True
+					break
+				was_losing = True
+		if comeback_lose:
+			return "아쉬운 역전패"
+		elif comeback_win:
+			return "짜릿한 역전승"
+		elif opponent_team.score == 0:
+			return "살살하셔야 겠어요~"
+		elif our_team.score  == 0:
+			return "그 실력에 잠이 오냐?"
+		elif any(hits >= 10 for hits in paddle_hits_per_round):
+			return "치혈했던 혈전"
+		elif our_team.score > opponent_team.score:
+			return "승리"
+		else:
+			return "패배"	

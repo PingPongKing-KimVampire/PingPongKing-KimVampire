@@ -125,11 +125,20 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         elif event == 'getClientProfiile':
             client_id = content['clientId']
             await self.get_client_profile(client_id)
+        elif event == 'getClientGameDetail':
+            client_id = content['clientId']
+            game_id = content['gameId']
+            await self.get_client_game_detail(client_id, game_id)
 
     async def get_client_profile(self, client_id):
         from pingpongRoom.repositories import GameReadRepository
         data = await GameReadRepository.get_game_history_by_user_id_async(client_id)
         await self._send("getClientProfileResponse", data)
+    
+    async def get_client_game_detail(self, client_id, game_id):
+        from pingpongRoom.repositories import GameReadRepository
+        data = await GameReadRepository.get_game_detail_by_user_id_and_game_id_async(client_id, game_id)
+        await self._send("getClientGameDetailResponse", data)
 
     async def init_client(self, access_token):
         from .serializers import CustomTokenObtainPairSerializer

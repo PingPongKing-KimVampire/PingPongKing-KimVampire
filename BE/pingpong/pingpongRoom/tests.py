@@ -8,6 +8,67 @@ import random
 
 class TestGameRepository(TestCase):
     @pytest.mark.django_db(transaction=True)
+    def test_get_game_detail(self):
+        # Create target and enemy users
+        target_user = User.objects.create(username='test_user', password='password', nickname='Test User', image_uri='test_uri')
+        enemy_user = User.objects.create(username='enemy_user', password='password', nickname='Enemy User', image_uri='enemy_uri')
+
+        # Create a game
+        game = Game.objects.create(mode="HUMAN_HUMAN", start_at=timezone.now(), end_at=timezone.now(), total_round=3)
+
+        # Create teams
+        my_team = Team.objects.create(game=game, kind="kind1", effect="effect1", score=3)
+        opponent_team = Team.objects.create(game=game, kind="kind2", effect="effect2", score=2)
+
+        # Create team users
+        TeamUser.objects.create(team=my_team, user=target_user)
+        TeamUser.objects.create(team=opponent_team, user=enemy_user)
+
+        # Create rounds and ball hits
+        for round_order in range(game.total_round):
+            round = Round.objects.create(game=game, order=round_order, win_team=my_team)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=10, x_coordinate=20)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=15, x_coordinate=25)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=10, x_coordinate=20)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=15, x_coordinate=25)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=10, x_coordinate=20)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=15, x_coordinate=25)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=10, x_coordinate=20)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=15, x_coordinate=25)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=10, x_coordinate=20)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=15, x_coordinate=25)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=10, x_coordinate=20)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=15, x_coordinate=25)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=10, x_coordinate=20)
+            BallHit.objects.create(round=round, kind="PADDLE", y_coordinate=15, x_coordinate=25)
+
+        # Call the function to get game details
+        game_details = GameReadRepository.get_game_detail_by_user_id_and_game_id(target_user, game)
+
+        # Validate the response
+        assert game_details['score'] == [my_team.score, opponent_team.score]
+        assert game_details['mode'] == game.mode
+        assert game_details['ability'] == [my_team.effect, opponent_team.effect]
+        assert game_details['myTeamClientInfoList'][0]['clientId'] == target_user.id
+        assert game_details['myTeamClientInfoList'][0]['nickname'] == target_user.nickname
+        assert game_details['myTeamClientInfoList'][0]['imageUri'] == target_user.image_uri
+        assert game_details['opponentTeamClientInfoList'][0]['clientId'] == enemy_user.id
+        assert game_details['opponentTeamClientInfoList'][0]['nickname'] == enemy_user.nickname
+        assert game_details['opponentTeamClientInfoList'][0]['imageUri'] == enemy_user.image_uri
+        assert game_details['word'] == "치혈했던 혈전"
+        assert len(game_details['scoreList']) == game.total_round
+        assert all(game_details['scoreList'])
+        for round_order in range(game.total_round):
+            ball_hit_list = game_details['hitMapList'][round_order]
+            assert len(ball_hit_list) == 14
+            assert ball_hit_list[0]['type'] == "PADDLE"
+            assert ball_hit_list[0]['y'] == 10
+            assert ball_hit_list[0]['x'] == 20
+            assert ball_hit_list[1]['type'] == "PADDLE"
+            assert ball_hit_list[1]['y'] == 15
+            assert ball_hit_list[1]['x'] == 25
+
+    @pytest.mark.django_db(transaction=True)
     def test_get_game_history_by_user_id(self):
         # Create target and enemy users
         target_user = User.objects.create(username='test_user', password='password', nickname='Test User', image_uri='test_uri')

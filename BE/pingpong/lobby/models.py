@@ -81,12 +81,18 @@ class Game(models.Model):
     mode = models.CharField(max_length=20, default="HUMAN", null=False)
     start_at = models.DateTimeField(null=True)
     end_at = models.DateTimeField(null=True)
+    total_round = models.IntegerField(default=5, null=False)
 
 class Round(models.Model):
     id = models.BigAutoField(primary_key=True)
     order = models.IntegerField(null=True)
     game = models.ForeignKey(Game, related_name='rounds', on_delete=models.CASCADE)
     win_team = models.ForeignKey(Team, related_name='wins', on_delete=models.CASCADE)
+
+    def is_win(self, team):
+        if self.win_team.id == team.id:
+            return "win"
+        return "lose"
 
 class BallHit(models.Model):
     id = models.BigAutoField(primary_key=True)
