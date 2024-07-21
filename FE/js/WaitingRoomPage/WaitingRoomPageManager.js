@@ -243,7 +243,7 @@ class WaitingRoomPageManager {
 	async _exitWaitingRoom() {
 		this.clientInfo.gameInfo.pingpongRoomSocket.close();
 		this.clientInfo.gameInfo = null;
-		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
+		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
 		this._onExitWaitingRoom();
 	}
 
