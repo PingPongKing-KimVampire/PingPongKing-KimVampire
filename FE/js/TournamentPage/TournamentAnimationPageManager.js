@@ -105,7 +105,7 @@ class TournamentAnimationPageManager {
 	}
 
 	async _initAnimation(stage) {
-		this.clientInfo.tournamentInfo.renderingMode === "normal"; //미래에 렌더링할때는 변경하지 않는 한 normal
+		this.clientInfo.tournamentInfo.renderingMode = "normal"; //미래에 렌더링할때는 변경하지 않는 한 normal
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
 				this.point = this._calculatePoints();
