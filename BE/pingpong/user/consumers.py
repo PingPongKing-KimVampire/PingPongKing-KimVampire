@@ -127,36 +127,8 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await self.get_client_profile(client_id)
 
     async def get_client_profile(self, client_id):
-        from pingpongRoom.repositories import GameRepository
-        from lobby.models import User
-        from asgiref.sync import sync_to_async
-        db_games = await GameRepository.get_games_by_user_id(client_id)
-        game_history_list = []
-
-        for game in db_games:
-            our_team = next(team for team in game.teams.all() if client_id in [user.id for user in team.members.all()])
-            opponent_team = next(team for team in game.teams.all() if team != our_team)
-
-            our_team_users = [{"clientId": user.id, "nickname": user.nickname} for user in our_team.members.all()]
-            opponent_team_users = [{"clientId": user.id, "nickname": user.nickname} for user in opponent_team.members.all()]
-
-            game_data = {
-                "gameId": game.id,
-                "score": [{our_team.score}, {opponent_team.score}],
-                "mode": game.mode,
-                "ability": [our_team.effect, opponent_team.effect],
-                "myTeamClientInfoList": our_team_users,
-                "opponentTeamClientInfoList": opponent_team_users,
-            }
-            game_history_list.append(game_data)
-
-        user = await sync_to_async(User.objects.get)(id=self.client_id)
-        data = {
-            "nickname": user.nickname,
-            "avatarUrl": user.get_image_uri(),
-            "gameHistoryList": game_history_list
-        }
-        print(data)
+        from pingpongRoom.repositories import GameReadRepository
+        data = await GameReadRepository.get_game_history_by_user_id_async(client_id)
         await self._send("getClientProfileResponse", data)
 
     async def init_client(self, access_token):

@@ -1,6 +1,12 @@
 from lobby.models import User, Team, TeamUser, Game, Round, BallHit
 from lobby.models import User, Team, TeamUser, Game, Round, BallHit
 from asgiref.sync import sync_to_async
+from django.db.models import Prefetch
+
+abilities = {"jiantBlocker", "ghostSmasher", "speedTwister", "illusionFaker", "none"}
+modes = {"HUMAN_HUMAN", "VAMPIRE_VAMPIRE", "VAMPIRE_HUMAN"}
+team_kinds = {"HUMAN", "VAMPIRE"}
+ball_kinds = {"PADDLE", "SCORE"}
 
 abilities = {"jiantBlocker", "ghostSmasher", "speedTwister", "illusionFaker", "none"}
 modes = {"HUMAN_HUMAN", "VAMPIRE_VAMPIRE", "VAMPIRE_HUMAN"}
@@ -12,7 +18,6 @@ class GameRepository:
 	@staticmethod
 	@sync_to_async
 	def save_game_async(meta_info):
-		print(meta_info)
 		mode = meta_info["mode"]
 		start_time = meta_info["start_time"]
 		end_time = meta_info["end_time"]
@@ -64,9 +69,7 @@ class GameRepository:
 		# 	return None
 		game = Game.objects.create(mode=mode, start_at=start_time, end_at=end_time)
 		our_team = TeamRepository.create_team(our_user_id_list, game, our_team_kind, our_team_ability, our_team_score)
-		print("our team", our_team.id)
 		opponent_team = TeamRepository.create_team(opponent_user_id_list, game, opponent_team_kind, opponent_team_ability, opponent_team_score)
-		print("opponent team", opponent_team.id)
 		for round_number in round_info_dict:
 			round_info = round_info_dict[round_number]
 			if round_info["win_team"] == "team1":
@@ -99,3 +102,112 @@ class TeamRepository:
 			user = User.objects.get(id=user_id)
 			TeamUser.objects.create(team=team, user=user)
 		return team
+	
+class GameReadRepository:
+
+	@staticmethod
+	@sync_to_async
+	def get_game_history_by_user_id_async(user_id):
+		user = User.objects.get(id=user_id)
+		if user is None:
+			return {
+				"error": "User not found"
+			}
+		return GameReadRepository.get_game_history_by_user_id()
+
+	@staticmethod
+	def get_game_history_by_user_id(user):
+		if user is None:
+			return None
+		teams = []
+		game_prefetch = Prefetch('team__game', queryset=Game.objects.all())
+		team_users = TeamUser.objects.select_related('team__game').prefetch_related(game_prefetch).filter(user=user).all()
+		game_history = []
+		for team_user in team_users:
+			target_game = team_user.team.game
+			my_team_list = []
+			opponent_team_list = []
+			all_teams = Team.objects.filter(game=target_game).all()
+			for target_team in all_teams:
+				team_users = TeamUser.objects.select_related('user').filter(team=target_team).all()
+				if target_team.id is team_user.team.id:
+					my_team_score = target_team.score
+					my_team_effect = target_team.effect
+					for team_user in team_users:
+						my_team_list.append({
+							"clientId": team_user.user.id,
+							"nickname": team_user.user.nickname,
+							"imageUri": team_user.user.get_image_uri()
+						})
+				else:
+					opponent_team_score = target_team.score
+					opponent_team_effect = target_team.effect
+					for team_user in team_users:
+						opponent_team_list.append({
+							"clientId": team_user.user.id,
+							"nickname": team_user.user.nickname,
+							"imageUri": team_user.user.get_image_uri()
+						})
+			game_history.append({
+				"gameId": target_game.id,
+				"score": [my_team_score, opponent_team_score],
+				"mode": target_game.mode,
+				"ability": [my_team_effect, opponent_team_effect],
+				"myTeamClientInfoList": my_team_list,
+				"opponentTeamClientInfoList": opponent_team_list
+			})
+		data = {
+			"nickname": user.nickname,
+			"imageUri": user.get_image_uri(),
+			"gameHistoryList": game_history
+		}
+		return data
+	
+	@staticmethod
+	def get_games_by_user(user):
+		game_prefetch = Prefetch('team__game', queryset=Game.objects.all())
+		team_prefetch = Prefetch('team_user__team', queryset=Team.objects.all())
+		
+		team_users = TeamUser.objects.select_related('team__game').prefetch_related(game_prefetch).filter(user=user).all()
+	
+	# @staticmethod
+	# def get_games_with_user_teams(user):
+	# 	if user is None:
+	# 		return None
+
+	# 	# Fetch all TeamUser instances related to the user
+	# 	user_teams = TeamUser.objects.filter(user=user).select_related('team__game')
+
+	# 	# Create a dictionary to hold game-related data
+	# 	games_dict = {}
+
+	# 	# Initialize games_dict with game information and placeholders for team information
+	# 	for team_user in user_teams:
+	# 		game = team_user.team.game
+	# 		if game.id not in games_dict:
+	# 			games_dict[game.id] = {
+	# 				'game': game,
+	# 				'my_team': None,
+	# 				'my_team_users': [],
+	# 				'opponent_teams': [],
+	# 				'opponent_teams_users': []
+	# 			}
+
+	# 	# Populate games_dict with user's team and users
+	# 	for team_user in user_teams:
+	# 		game = team_user.team.game
+	# 		game_data = games_dict[game.id]
+	# 		game_data['my_team'] = team_user.team
+	# 		game_data['my_team_users'] = list(TeamUser.objects.filter(team=team_user.team).select_related('user'))
+
+	# 	# Fetch other teams and their users for each game
+	# 	for game_id, game_data in games_dict.items():
+	# 		other_teams = Team.objects.filter(game=game_data['game']).exclude(id=game_data['my_team'].id).prefetch_related(
+	# 			Prefetch('team_users', queryset=TeamUser.objects.select_related('user'))
+	# 		)
+	# 		game_data['opponent_teams'] = list(other_teams)
+	# 		for team in other_teams:
+	# 			opponent_team_users = list(team.team_users.all())
+	# 			game_data['opponent_teams_users'].extend(opponent_team_users)
+	# 	print(games_dict.values())
+	# 	return games_dict.values()
