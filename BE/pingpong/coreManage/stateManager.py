@@ -27,6 +27,7 @@ class StateManager:
 
     def _initialize(self) -> None:
         self.channel_layer = None
+        self.lobby_clients = []
         self.rooms = {}
         self.match_making_loop_task = None
         self.match_queue = []
@@ -48,6 +49,28 @@ class StateManager:
         # print(consumer.client_id)
         # print(consumer.nickname)
         # print(consumer.avatar_url)
+
+    def add_lobby_client(self, client_id):
+        if client_id not in self.lobby_clients:
+            self.lobby_clients.append(client_id)
+            Printer.log(f"Client {client_id} added to lobby arrary")
+        else:
+            Printer.log(f"Client {client_id} already in lobby arrary", "red")
+
+    def remove_lobby_client(self, client_id):
+        if client_id in self.lobby_clients:
+            self.lobby_clients.remove(client_id)
+            Printer.log(f"Client {client_id} removed")
+        else:
+            Printer.log(f"Client {client_id} is not in lobby arrary", "red")
+    
+    def is_client_in_lobby(self, client_id):
+        if client_id in self.lobby_clients:
+            print(f"Client {client_id} is in the lobby.")
+            return True
+        else:
+            print(f"Client {client_id} is not in the lobby.")
+            return False
 
     # Matchmaking Management
     def add_to_match_queue(self, consumer) -> None:

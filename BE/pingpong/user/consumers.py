@@ -108,6 +108,10 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await self.stop_reading_chat(receiver_id)
         elif event == 'getClientListIBlocked':
             await self.get_client_list_blocked_by_user()
+        elif event == 'sendGameInviteRequest':
+            receiver_id = content['clientId']
+            room_id = content['roomId']
+            await self.send_game_invite_request(receiver_id, room_id)
 
     async def init_client(self):
         from .repositories import UserRepository
@@ -406,6 +410,13 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         from .repositories import UserRepository
         users = await UserRepository.search_user_by_nickname(keyword)
         await self._send("searchClientResponse", {"message": "OK", "clientList": users})
+
+    async def send_game_invite_request(self, client_id, room_id):
+        if stateManager.is_client_in_lobby(client_id):
+            await self._send("inviteGameInviteResponse", {"message": "OK"})
+        else:
+            await self._send("inviteGameInviteResponse", {"message": "NOOK"})
+            
     
     async def send_message(self, receiver_id, message):
         from .repositories import UserRepository
