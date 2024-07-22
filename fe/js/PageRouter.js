@@ -10,6 +10,7 @@ import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
 import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
 import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
+import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -96,7 +97,7 @@ class PageRouter {
 			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this._onEnterWaitingRoom.bind(this), this._renderLobby.bind(this));
 		} else if (url === "pingpong") {
 			this._loadCSS(["css/PingpongPage/pingpongPage.css"]);
-			const pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this._onExitPingpongGame.bind(this));
+			const pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this._onExitPingpongGame.bind(this), this._renderTournamentPage.bind(this));
 			await pingpongPageManager.initPage();
 		} else if (url === "waitingRoom") {
 			this._loadCSS(["css/WaitingRoomPage/waitingRoomPage.css", "css/WaitingRoomPage/abilitySelectionModal.css"]);
@@ -119,9 +120,9 @@ class PageRouter {
 		} else if (url === "waitingTournament") {
 			this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
 			const waitingTournamentPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this._joinLobbyPage.bind(this), this._joinTournamentPage.bind(this));
-		} else if (url === "tournament") {
+		} else if (url === "tournamentAnimation") {
 			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
-			const tournamentPageManager = new TournamentPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._joinLobbyPage.bind(this));
+			const tournamentAnimationPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._renderTournamentPage.bind(this), this._renderLobby.bind(this));
 		}
 	}
 
@@ -195,7 +196,11 @@ class PageRouter {
 	}
 
 	_joinTournamentPage() {
-		this.renderPage("tournament");
+		this.renderPage("tournamentAnimation");
+	}
+
+	_renderTournamentPage() {
+		this.renderPage("tournamentAnimation");
 	}
 }
 

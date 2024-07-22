@@ -47,11 +47,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'channels',
-    'lobby',
-    'pingpongRoom',
     'kimVampire',
     'user',
     'coreManage',
+    'lobby',
+    'pingpongRoom',
+    'tournamentRoom'
 ]
 
 APPEND_SLASH = False
@@ -192,8 +193,9 @@ LOGGING = {
     },
     'loggers': {
         'django.db.backends': {
-            'handlers': ['console'],
             'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         },
     },
 }

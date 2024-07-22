@@ -1,11 +1,20 @@
+import django
+django.setup()
+
 from typing import Dict, Any, Optional, List, Tuple
 import uuid
 from asyncio import sleep, create_task
 import asyncio
+from django.core.exceptions import ObjectDoesNotExist
+
 from .group import notify_group, add_group
 from pingpongRoom.gameManage.gameRoomManager import GameRoomManager
 from utils.printer import Printer
 from tournamentRoom.tournament.tournamentManager import TournamentManager
+
+from user.serializers import CustomTokenObtainPairSerializer
+from user.repositories import UserRepository
+
 
 class StateManager:
     _instance: Optional['StateManager'] = None
@@ -18,18 +27,30 @@ class StateManager:
 
     def _initialize(self) -> None:
         self.channel_layer = None
-        # self.clients: Dict[str, str] = {}
-        self.rooms: Dict[str, Dict[str, Any]] = {}
+        self.rooms = {}
         self.match_making_loop_task = None
         self.match_queue = []
         self.is_match_task_running = False
-        self.tournaments = {str, Any}
+        self.tournaments = {}
+        
+    def get_channel_layer(self):
+        return self.channel_layer
+
+    async def authorize_client(self, consumer, headers):
+        token = headers.get(b'sec-websocket-protocol', b'')
+        decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
+        consumer.client_id = decoded_token['user_id']
+        user =  await UserRepository.get_user_by_id(consumer.client_id)
+        if user is None:
+                raise ObjectDoesNotExist("user not found")
+        consumer.nickname = user.nickname
+        consumer.avatar_url = user.get_image_uri()
+        # print(consumer.client_id)
+        # print(consumer.nickname)
+        # print(consumer.avatar_url)
 
     # Matchmaking Management
     def add_to_match_queue(self, consumer) -> None:
-        if self.match_making_loop_task is None or self.match_making_loop_task.done():
-            self.is_match_task_running = True
-            self.match_making_loop_task = create_task(self.match_making_loop())
         self.match_queue.append(consumer)
         Printer.log(f"Client {consumer.client_id} added to match queue", "blue")
 
@@ -46,43 +67,27 @@ class StateManager:
                             'notifyMatchMakingComplete', {'tournamentId': tournament_id})
 
     async def match_making_loop(self) -> None:
-        while self.is_match_task_running:
+        while 1:
             if self.is_match_queue_full():
                 match_clients = self.match_queue[:4]
                 self.match_queue = self.match_queue[4:]
-                client_list = {consumer.client_id: consumer.nickname for consumer in match_clients}
-                tournament_id = self.create_tournament_manager(client_list)
+                tournament_id = self.create_tournament_manager(match_clients)
                 await self.group_match_clients(match_clients, tournament_id)
-            if not self.match_queue:
-                self.is_match_task_running = False
             await sleep(1)
-        self.match_making_loop_task = None
 
-    def create_tournament_manager(self, client_list) -> str:
+    def create_tournament_manager(self, match_clients) -> str:
         tournament_id = str(uuid.uuid4())
-        self.tournaments[tournament_id] = TournamentManager(self.channel_layer, tournament_id, client_list)
+        self.tournaments[tournament_id] = TournamentManager(self, self.channel_layer, tournament_id, match_clients)
         return tournament_id
 
     def get_tournament_manager(self, tournament_id: str) -> TournamentManager:
         return self.tournaments.get(tournament_id, None)
 
-    # Tournament Management
-
-    def get_tournament_room(self, tournament_id: str) -> Dict[str, Any]:
-        return self.tournaments.get(tournament_id, {})
-    
-    def get_tournament_client_list(self, tournament_id: str) -> List[Dict[str, str]]:
-        return self.tournaments.get(tournament_id, {}).get('clients', {})
-
     def add_channel_layer(self, channel_layer) -> None:
         if self.channel_layer is None:
             self.channel_layer = channel_layer
-
-    # def remove_client(self, client_id: str) -> None:
-    #     self.clients.pop(client_id, None)
-
-    # def get_client_nickname(self, client_id: str) -> str:
-    #     return self.clients.get(client_id, '')
+            self.make_test_rooms()
+            create_task(self.match_making_loop())
 
     # Room Management
     def create_room(self, content: Dict[str, Any]) -> str:
@@ -95,7 +100,7 @@ class StateManager:
         leftPlayerCount = content['leftPlayerCount']
         rightPlayerCount = content['rightPlayerCount']
         self.rooms[room_id] = GameRoomManager(self.channel_layer, room_id, title, 
-                            leftMode, rightMode, leftPlayerCount, rightPlayerCount)
+                            leftMode, rightMode, leftPlayerCount, rightPlayerCount, mode='normal')
         Printer.log(f"Room {room_id} created", "blue")
         return room_id
 
@@ -124,7 +129,8 @@ class StateManager:
     def get_waiting_room_list(self) -> List[Dict[str, Any]]:
         data = []
         for room in self.rooms.values():
-            data.append(room.get_room_data())
+            if room.mode == 'normal':
+                data.append(room.get_room_data())
         return data
 
     def get_waiting_room_player_list(self, room_id: str) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
@@ -155,8 +161,8 @@ class StateManager:
         return content
 
     # Asynchronous Methods
-    async def notify_room_enter(self, room_id: str, client_id: str, nickname: str, team: str) -> None:
-        enter_data = {'clientId': client_id, 'clientNickname': nickname, 'team': team}
+    async def notify_room_enter(self, room_id: str, client_id: str, avatar_url: str, nickname: str, team: str) -> None:
+        enter_data = {'id': client_id, 'nickname': nickname, 'avatarUrl' : avatar_url, 'team': team}
         await self.notify_room(room_id, event='notifyWaitingRoomEnter', content=enter_data)
 
     async def notify_leave_waiting_room(self, room_id: str, client_id: str) -> None:
@@ -189,7 +195,8 @@ class StateManager:
         room = self.rooms.get(room_id, None)
         game_manager = room
         if game_manager:
-            await self.notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo': {'roomId': room_id}})
+            if game_manager.mode == 'normal':
+                await self.notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo': {'roomId': room_id}})
             await game_manager.trigger_game()
 
     async def notify_lobby(self, event: str, content: Dict[str, Any]) -> None:
@@ -203,16 +210,34 @@ class StateManager:
             await notify_group(self.channel_layer, room_id, event, content)
 
     # Test Methods
-    def create_test_room(self) -> None:
-        self.rooms['human_human'] = {
-            'title': '인간 vs 인간',
-            'leftMode': 'human',
-            'rightMode': 'human',
-            'leftMaxPlayerCount': 1,
-            'rightMaxPlayerCount': 1,
-            'left': {},
-            'right': {},
-            'gameManager': GameRoomManager('testRoom', 'human', 'human', None),
-            'state': 'waiting'
-        }
-        Printer.log(f"Test Room created", "blue")
+    def make_test_rooms(self):
+        self.create_test_room('human_vs_human', '인간 vs 인간', 'human', 'human', 1, 1)
+        self.enter_test_client('human_vs_human', 'test1', '인간봇', None, 'human')
+        self.change_client_ready_state('human_vs_human', 'test1', 'READY')
+        
+        self.create_test_room('vam_vs_humans_jiantBlocker', '뱀파이어 : 자이언트블로커', 'vampire', 'human', 1, 1)
+        self.enter_test_client('vam_vs_humans_jiantBlocker', 'jiantBlocker', '자이언트블로커', None, 'jiantBlocker')
+        self.change_client_ready_state('vam_vs_humans_jiantBlocker', 'jiantBlocker', 'READY')
+
+        self.create_test_room('vam_vs_humans_illusionFaker', '뱀파이어 : 일루전페이커', 'vampire', 'human', 1, 1)
+        self.enter_test_client('vam_vs_humans_illusionFaker', 'illusionFaker', '일루전페이커', None, 'illusionFaker')
+        self.change_client_ready_state('vam_vs_humans_illusionFaker', 'illusionFaker', 'READY')
+
+        self.create_test_room('vam_vs_humans_speedTwister', '뱀파이어 : 스피드 트위스터', 'vampire', 'human', 1, 1)
+        self.enter_test_client('vam_vs_humans_speedTwister', 'speedTwister', '스피드트위스터', None, 'speedTwister')
+        self.change_client_ready_state('vam_vs_humans_speedTwister', 'speedTwister', 'READY')
+
+        self.create_test_room('vam_vs_humans_ghostSmasher', '뱀파이어 : 고스트 스매셔', 'vampire', 'human', 1, 1)
+        self.enter_test_client('vam_vs_humans_ghostSmasher', 'ghostSmasher', '고스트스매셔', None, 'ghostSmasher')
+        self.change_client_ready_state('vam_vs_humans_ghostSmasher', 'ghostSmasher', 'READY')
+
+
+    
+    def create_test_room(self, room_id, title, left_mode, right_mode, left_max_count, right_max_count):
+        self.rooms[room_id] = GameRoomManager(self.channel_layer, room_id, title, left_mode, right_mode, left_max_count, right_max_count, 'normal')
+
+    def enter_test_client(self, room_id, client_id, nickname, uri, ability):
+        game_manager = self.rooms.get(room_id, None)
+        game_manager.enter_room(client_id, nickname, uri)
+        game_manager.set_client_ability(client_id, ability)
+        

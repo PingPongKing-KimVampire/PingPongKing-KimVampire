@@ -99,7 +99,7 @@ class FriendManagementPageManager {
 		this.exitButton = document.querySelector(".exitButton");
 		this.exitButton.addEventListener("click", async () => {
 			this._unsubscribeWindow();
-			this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
+			this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
 			this.renderLobby();
 		});
 	}
