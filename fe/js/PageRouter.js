@@ -8,7 +8,6 @@ import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js"
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
-import TournamentPageManager from "./TournamentPage/TournamentPageManager.js";
 import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 

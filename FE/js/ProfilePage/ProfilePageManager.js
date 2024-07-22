@@ -16,46 +16,46 @@ class ProfilePageManager {
 	}
 
 	async _initPage() {
-		// const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
-		const { nickname, avatarUrl, gameHistoryList } = {
-			nickname: "김뱀파이어2다",
-			avatarUrl: "images/playerA.png",
-			gameHistoryList: [
-				{
-					gameId: 1234,
-					timestamp: "2024-07-02T14:30:00.123456Z",
-					score: [1, 100],
-					result: "LOSE",
-					mode: "HUMAN_VAMPIRE",
-					teamKind: ["HUMAN", "VAMPIRE"],
-					ability: ["jiantBlocker", "jiantBlocker"],
-					myTeamClientInfoList: [
-						{
-							id: 3,
-							nickname: "영우",
-							avatarUrl: "images/playerA.png",
-						},
-						{
-							id: 3,
-							nickname: "영우",
-							avatarUrl: "images/playerA.png",
-						},
-						{
-							id: 3,
-							nickname: "영우",
-							avatarUrl: "images/playerA.png",
-						},
-					],
-					opponnetTeamClientInfoList: [
-						{
-							id: 3,
-							nickname: "영우",
-							avatarUrl: "images/playerA.png",
-						},
-					],
-				},
-			],
-		};
+		const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
+		// const { nickname, avatarUrl, gameHistoryList } = {
+		// 	nickname: "김뱀파이어2다",
+		// 	avatarUrl: "images/playerA.png",
+		// 	gameHistoryList: [
+		// 		{
+		// 			gameId: 1234,
+		// 			timestamp: "2024-07-02T14:30:00.123456Z",
+		// 			score: [1, 100],
+		// 			result: "LOSE",
+		// 			mode: "HUMAN_VAMPIRE",
+		// 			teamKind: ["HUMAN", "VAMPIRE"],
+		// 			ability: ["jiantBlocker", "jiantBlocker"],
+		// 			myTeamClientInfoList: [
+		// 				{
+		// 					id: 3,
+		// 					nickname: "영우",
+		// 					avatarUrl: "images/playerA.png",
+		// 				},
+		// 				{
+		// 					id: 3,
+		// 					nickname: "영우",
+		// 					avatarUrl: "images/playerA.png",
+		// 				},
+		// 				{
+		// 					id: 3,
+		// 					nickname: "영우",
+		// 					avatarUrl: "images/playerA.png",
+		// 				},
+		// 			],
+		// 			opponnetTeamClientInfoList: [
+		// 				{
+		// 					id: 3,
+		// 					nickname: "영우",
+		// 					avatarUrl: "images/playerA.png",
+		// 				},
+		// 			],
+		// 		},
+		// 	],
+		// };
 		this.profileTarget.nickname = nickname;
 		this.profileTarget.avatarUrl = avatarUrl;
 		this.profileTarget.gameHistoryList = gameHistoryList;
@@ -94,16 +94,16 @@ class ProfilePageManager {
 
 	async getClientProfile(id) {
 		const getCLientProfileMessage = {
-			event: "getCLientProfile",
-			content: { clientInfo: { id } },
+			event: "getClientProfile",
+			content: { clientId: id },
 		};
 		this.clientInfo.socket.send(JSON.stringify(getCLientProfileMessage));
 		return await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === "getClientProfiileResponse") {
+				if (event === "getClientProfileResponse") {
 					this.clientInfo.socket.removeEventListener("message", listener);
-					resolve({ nickname: content.nickname, imageUrl: content.imageUrl, gameHistroryList: content.gameHistroryList });
+					resolve({ nickname: content.nickname, imageUrl: content.imageUrl, gameHistoryList: content.gameHistroryList });
 				}
 			};
 			this.clientInfo.socket.addEventListener("message", listener);
