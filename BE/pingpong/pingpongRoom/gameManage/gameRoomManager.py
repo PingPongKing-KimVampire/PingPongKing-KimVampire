@@ -56,12 +56,10 @@ class GameRoomManager:
         self.fake_ball = {}
         self.queue = Queue()
 
-        self.winner = None
-
         #statics
+        self.win_team = None
         self.start_time = None
         self.end_time = None
-        self.win_team = None
         self.round_hit_map = []
         self.game_data = {}
 
@@ -367,8 +365,8 @@ class GameRoomManager:
         self.save_data(round_win_team)
         await self._notify_score_update()
         if self._check_game_end():
-            self.winner = self._end_game_loop()
-            await self._notify_game_room('notifyGameEnd', {'winTeam': self.winner})
+            self.win_team = self._end_game_loop()
+            await self._notify_game_room('notifyGameEnd', {'winTeam': self.win_team})
         else:
             self._reset_round()
 
