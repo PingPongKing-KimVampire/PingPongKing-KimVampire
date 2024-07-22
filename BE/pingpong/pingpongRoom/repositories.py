@@ -35,6 +35,7 @@ class GameRepository:
 		our_team_score = meta_info["team1_score"]
 		opponent_team_score = meta_info["team2_score"]
 		round_info_dict = meta_info["round"]
+		win_team = meta_info["win_team"]
 		return GameRepository.save_game(mode, our_team_ability, opponent_team_ability, 
 			   our_user_id_list, opponent_user_id_list, 
 			   our_team_kind, opponent_team_kind,
@@ -42,7 +43,8 @@ class GameRepository:
 			   opponent_team_score,
 			   start_time,
 			   end_time, 
-			   round_info_dict)
+			   round_info_dict,
+			   win_team)
 	@staticmethod
 	def get_games_by_user_id(user_id):
 		user = User.objects.get(id=user_id)
@@ -61,14 +63,19 @@ class GameRepository:
 			   opponent_team_score,
 			   start_time,
 			   end_time, 
-			   round_info_dict):
+			   round_info_dict,
+			   win_team):
 		# if mode not in modes or our_team_ability not in abilities or \
 		# 	opponent_team_ability not in abilities or our_team_kind not in team_kinds \
 		# 	or opponent_team_kind not in team_kinds:
 		# 	return None
 		game = Game.objects.create(mode=mode, start_at=start_time, end_at=end_time)
-		our_team = TeamRepository.create_team(our_user_id_list, game, our_team_kind, our_team_ability, our_team_score)
-		opponent_team = TeamRepository.create_team(opponent_user_id_list, game, opponent_team_kind, opponent_team_ability, opponent_team_score)
+		if win_team == "team1":
+			is_win = True
+		else:
+			is_win = False
+		our_team = TeamRepository.create_team(our_user_id_list, game, our_team_kind, our_team_ability, our_team_score, is_win)
+		opponent_team = TeamRepository.create_team(opponent_user_id_list, game, opponent_team_kind, opponent_team_ability, opponent_team_score, not is_win)
 		for round_number in round_info_dict:
 			round_info = round_info_dict[round_number]
 			if round_info["win_team"] == "team1":
@@ -150,13 +157,13 @@ class GameReadRepository:
 				my_team_users.append({
 					"clientId": team_user.user.id,
 					"nickname": team_user.user.nickname,
-					"imageUri": team_user.user.get_image_uri()
+					"avatarUrl": team_user.user.get_image_uri()
 				})
 			else:
 				opponent_team_users.append({
 					"clientId": team_user.user.id,
 					"nickname": team_user.user.nickname,
-					"imageUri": team_user.user.get_image_uri()
+					"avatarUrl": team_user.user.get_image_uri()
 				})
 		score_list = [None] * game.total_round
 		hit_map_list = {}
@@ -175,6 +182,7 @@ class GameReadRepository:
 		data = {
 			"score": [my_team.score, opponent_team.score],
 			"mode": game.mode,
+			"teamKind": [my_team.kind, opponent_team.kind],
 			"ability": [my_team.effect, opponent_team.effect],
 			"myTeamClientInfoList": my_team_users,
 			"opponentTeamClientInfoList": opponent_team_users,
@@ -200,13 +208,14 @@ class GameReadRepository:
 			for target_team in all_teams:
 				team_users = TeamUser.objects.select_related('user').filter(team=target_team).all()
 				if target_team.id is team_user.team.id:
+					win_state = target_team.is_win_to_string()
 					my_team_score = target_team.score
 					my_team_effect = target_team.effect
 					for team_user in team_users:
 						my_team_list.append({
 							"clientId": team_user.user.id,
 							"nickname": team_user.user.nickname,
-							"imageUri": team_user.user.get_image_uri()
+							"avatarUrl": team_user.user.get_image_uri()
 						})
 				else:
 					opponent_team_score = target_team.score
@@ -215,11 +224,13 @@ class GameReadRepository:
 						opponent_team_list.append({
 							"clientId": team_user.user.id,
 							"nickname": team_user.user.nickname,
-							"imageUri": team_user.user.get_image_uri()
+							"avatarUrl": team_user.user.get_image_uri()
 						})
 			game_history.append({
 				"gameId": target_game.id,
+				"timestamp": target_game.start_at.isoformat(),
 				"score": [my_team_score, opponent_team_score],
+				"win": win_state,
 				"mode": target_game.mode,
 				"ability": [my_team_effect, opponent_team_effect],
 				"myTeamClientInfoList": my_team_list,
@@ -227,7 +238,7 @@ class GameReadRepository:
 			})
 		data = {
 			"nickname": user.nickname,
-			"imageUri": user.get_image_uri(),
+			"avatarUrl": user.get_image_uri(),
 			"gameHistoryList": game_history
 		}
 		return data
@@ -262,7 +273,7 @@ class GameReadRepository:
 			return "그 실력에 잠이 오냐?"
 		elif any(hits >= 10 for hits in paddle_hits_per_round):
 			return "치혈했던 혈전"
-		elif our_team.score > opponent_team.score:
+		elif our_team.score > opponent_team.score and our_team.is_win:
 			return "승리"
 		else:
 			return "패배"	

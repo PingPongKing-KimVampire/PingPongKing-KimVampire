@@ -33,17 +33,6 @@ class User(models.Model):
         if self.image_uri is None:
             return DEFAULT_IMAGE_URI
         return self.image_uri
-# class UserProfile(models.Model):
-#     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
-#     bio = models.TextField(blank=True, null=True)
-#     date_of_birth = models.DateField(blank=True, null=True)
-#     location = models.CharField(max_length=255, blank=True, null=True)
-#     join_date = models.DateTimeField(auto_now_add=True)
-
-# class UserStat(models.Model):
-#     user = models.OneToOneField(User, related_name='stats', on_delete=models.CASCADE)
-#     win = models.IntegerField(default=0)
-#     lose = models.IntegerField(default=0)
 
 class Friendship(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -70,6 +59,11 @@ class Team(models.Model):
     game = models.ForeignKey('Game', related_name='teams', on_delete=models.CASCADE)
     effect = models.CharField(max_length=20, null=False, default="none")
     score = models.IntegerField(default=0, null=False)
+    isWin = models.BooleanField(default=False, null=False)
+    def is_win_to_string(self):
+        if self.isWin:
+            return "WIN"
+        return "LOSE"
 
 class TeamUser(models.Model):
     id = models.BigAutoField(primary_key=True)
