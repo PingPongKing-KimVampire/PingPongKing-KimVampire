@@ -249,25 +249,16 @@ class GameRoomManager:
         print(game)
         # game None 처리 필요
 
-    # async def _input_loop(self):
-    #     while self.is_playing and not self.is_end:
-    #         while not self.queue.empty():
-    #             client_id, content = await self.queue.get()
-    #             self._update_paddle_position(client_id, content)
-    #         await asyncio.sleep(0.01)
-
     def update_target(self, client_id, x, y):
         self.clients[client_id].update_target(x, y)
 
     async def _paddle_update_loop(self):
-        debug_x, debug_y = 0, 0
         while self.is_playing and not self.is_end:
             for client_id, player in self.clients.items():
                 if player.needs_update():
                     pos_x, pos_y = player.move()
                     content = {'xPosition': pos_x, 'yPosition': pos_y}
                     await self._notify_paddle_location_update(client_id, content)
-                    debug_x, debug_y = player.pos_x, player.pos_y
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
     # Fake Ball - IllusionFaker
@@ -370,11 +361,8 @@ class GameRoomManager:
         return NOHIT
 
     def _is_ball_colliding_with_paddle(self, player):
-        if (self.ball.pos_y >= player.pos_y - player.paddle_height / 2 and
-                self.ball.pos_y <= player.pos_y + player.paddle_height / 2):
-            if (self.ball.dx > 0 and self.ball.get_right_x() >= player.pos_x - player.paddle_width / 2) or \
-               (self.ball.dx < 0 and self.ball.get_left_x() <= player.pos_x + player.paddle_width / 2):
-                return True
+        if player.is_moving_front() and player.is_colliding_with_ball(self.ball):
+            return True
         return False
     
     ### Game control methods

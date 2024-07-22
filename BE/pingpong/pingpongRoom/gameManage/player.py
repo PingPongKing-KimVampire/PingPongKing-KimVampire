@@ -46,6 +46,25 @@ class Player:
         self.target_x = x
         self.target_y = y
 
+    def is_moving_front(self):
+        if self.team == 'left':
+            return self.dx > 0
+        else:
+            return self.dx < 0
+
+    def is_colliding_with_ball(self, ball):
+        if self.is_ball_in_paddle_y_range(ball):
+            if self.is_ball_in_paddle_x_range(ball):
+                return True
+
+    def is_ball_in_paddle_y_range(self, ball):
+        return ball.pos_y >= self.pos_y - self.paddle_height / 2 \
+                and ball.pos_y <= self.pos_y + self.paddle_height / 2
+
+    def is_ball_in_paddle_x_range(self, ball):
+        return (ball.dx > 0 and ball.get_right_x() >= self.pos_x - self.paddle_width / 2) \
+            or (ball.dx < 0 and ball.get_left_x() <= self.pos_x + self.paddle_width / 2)
+
     def _calculate_distance(self):
         return ((self.target_x - self.pos_x) ** 2 + (self.target_y - self.pos_y) ** 2) ** 0.5
 
