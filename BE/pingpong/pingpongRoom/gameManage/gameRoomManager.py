@@ -21,7 +21,7 @@ NORMALIZE = 6
 
 NORMAL_SPEED = 10
 
-END_SCORE = 2
+END_SCORE = 100
 
 
 class GameRoomManager:
