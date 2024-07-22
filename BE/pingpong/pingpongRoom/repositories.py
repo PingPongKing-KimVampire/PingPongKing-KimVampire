@@ -119,7 +119,7 @@ class GameReadRepository:
 			return {
 				"error": "User not found"
 			}
-		return GameReadRepository.get_game_history_by_user_id()
+		return GameReadRepository.get_game_history_by_user_id(user)
 	
 	@staticmethod
 	@sync_to_async
