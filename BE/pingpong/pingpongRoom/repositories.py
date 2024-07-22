@@ -17,6 +17,7 @@ class GameRepository:
 	@staticmethod
 	@sync_to_async
 	def save_game_async(meta_info):
+		print(meta_info)
 		mode = meta_info["mode"]
 		start_time = meta_info["start_time"]
 		end_time = meta_info["end_time"]
@@ -102,8 +103,8 @@ class GameRepository:
 
 class TeamRepository:
 	@staticmethod
-	def create_team(user_id_list, game, kind, effect, score):
-		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score)
+	def create_team(user_id_list, game, kind, effect, score, is_win):
+		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score, is_win=is_win)
 		for user_id in user_id_list:
 			user = User.objects.get(id=user_id)
 			TeamUser.objects.create(team=team, user=user)
