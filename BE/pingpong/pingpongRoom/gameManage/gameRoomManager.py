@@ -4,6 +4,8 @@ from .player import Player
 from asyncio import Queue
 import uuid
 import random
+import copy
+from django.utils import timezone
 
 FRAME_PER_SECOND = 60
 LEFT = 'left'
@@ -49,25 +51,19 @@ class GameRoomManager:
         self.is_playing = False
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
+        self.round = 0
         self.serve_turn = LEFT
         self.fake_ball = {}
         self.queue = Queue()
 
-        self.winner = None
+        #statics
+        self.win_team = None
+        self.start_time = None
+        self.end_time = None
+        self.round_hit_map = []
+        self.game_data = {}
 
     # getter
-
-    def get_client_team_in_room(self, id):
-        for client_id, player in self.team_left.items():
-            if id == client_id:
-                return 'left'
-        for client_id, player in self.team_right.items():
-            if id == client_id:
-                return 'right'
-        return None
-
-    def get_score(self):
-        return self.score
     
     def get_room_client_count(self):
         return len(self.clients)
@@ -200,6 +196,7 @@ class GameRoomManager:
 
     async def _game_loop(self):
         await asyncio.sleep(1.5)
+        self.start_time = timezone.now()
         await self._notify_all_paddle_positions()
         while self.is_playing and not self.is_end:
             is_ghost = self.ball.move()
@@ -208,7 +205,37 @@ class GameRoomManager:
             ball_state = self._detect_collisions(self.ball)
             await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-        return self.winner
+        self.end_time = timezone.now()
+        await self.save_data_to_db()
+
+    async def save_data_to_db(self):
+        data = {
+            "start_time" : self.start_time,
+            "end_time" : self.end_time,
+            "mode": self.get_game_mode(),
+            "team1_users": self.get_client_id_list('left'),
+            "team1_kind": self.left_mode,
+            "team2_users": self.get_client_id_list('right'),
+            "team2_kind": self.right_mode,
+            "team1_ability": self.left_ability,
+            "team2_ability": self.right_ability,
+            "win_team" : self.win_team,
+            "team1_score" : self.score[LEFT],
+            "team2_score" : self.score[RIGHT],
+            "round": self.game_data
+        }
+        from pingpongRoom.repositories import GameRepository
+        game = await GameRepository.save_game_async(data)
+        game = await GameRepository.get_games_by_user_id(self.clients[0])
+        print(game)
+        # game None 처리 필요
+
+    # async def _input_loop(self):
+    #     while self.is_playing and not self.is_end:
+    #         while not self.queue.empty():
+    #             client_id, content = await self.queue.get()
+    #             self._update_paddle_position(client_id, content)
+    #         await asyncio.sleep(0.01)
 
     def update_target(self, client_id, x, y):
         self.clients[client_id].update_target(x, y)
@@ -285,8 +312,10 @@ class GameRoomManager:
         state = NOHIT
         if ball.get_right_x() >= self.board_width:
             self.serve_turn = LEFT
+            self.save_hit_map('SCORE', ball.pos_y, ball.pos_x)
             return SCORE
         elif ball.get_left_x() <= 0:
+            self.save_hit_map('SCORE', ball.pos_y, ball.pos_x)
             self.serve_turn = RIGHT
             return SCORE
         elif ball.get_top_y() <= 0 or ball.get_bottom_y() >= self.board_height:
@@ -304,6 +333,7 @@ class GameRoomManager:
         angle = 0
         for player in players_to_check:
             if self._is_ball_colliding_with_paddle(player):
+                self.save_hit_map('PADDLE', ball.pos_y, ball.pos_x)
                 state = PADDLE
                 if player.ability == 'speedTwister':
                     speed = ball.speed * 2
@@ -331,22 +361,31 @@ class GameRoomManager:
     ### Game control methods
 
     async def _round_end_with_score(self):
-        self._add_score()
+        round_win_team = self._add_score()
+        self.save_data(round_win_team)
         await self._notify_score_update()
         if self._check_game_end():
-            self.winner = self._end_game_loop()
-            await self._notify_game_room('notifyGameEnd', {'winTeam': self.winner})
+            self.win_team = self._end_game_loop()
+            await self._notify_game_room('notifyGameEnd', {'winTeam': self.win_team})
         else:
             self._reset_round()
 
     def _add_score(self):
         if self.ball.dx > 0:
             self.score[LEFT] += 1
+            return 'left'
         else:
             self.score[RIGHT] += 1
+            return 'right'
         
     def _check_game_end(self):
-        return self.score[LEFT] >= END_SCORE or self.score[RIGHT] >= END_SCORE
+        if self.score[LEFT] >= END_SCORE:
+            self.win_team = 'left'
+            return True
+        elif self.score[RIGHT] >= END_SCORE:
+            self.win_team = 'right'
+            return True
+        return False
 
     def _end_game_loop(self):
         team = 'left' if self.score[LEFT] >= END_SCORE else 'right'
@@ -354,11 +393,28 @@ class GameRoomManager:
         return team
 
     def _reset_round(self):
+        self.round = self.round + 1
         serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
         self.ball.reset_ball(serve_position, self.board_height / 2, 0)
         for player in self.clients.values():
             player.reset_pos()
         asyncio.create_task(self._notify_all_paddle_positions())
+
+    def save_data(self, round_win_team):
+        data = {
+            'win_team' : round_win_team,
+            'ball_hits' : copy.deepcopy(self.round_hit_map)
+        }
+        self.game_data[self.round] = data
+        self.round_hit_map = []
+
+    def save_hit_map(self, type, y, x):
+        data = {
+            'y' : y,
+            'x' : x,
+            'type' : type
+        }
+        self.round_hit_map.append(data)
 
     def _end_game(self):
         self.is_playing = False
