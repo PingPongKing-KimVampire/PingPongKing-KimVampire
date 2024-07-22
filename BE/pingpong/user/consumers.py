@@ -432,7 +432,11 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if stateManager.is_client_in_lobby(reciever_id):
             await self._send("sendGameInviteResponse", {"message": "OK"})
             reciever_channel_name = channel_name_map[reciever_id]
-            await notify_client_event(self.channel_layer, reciever_channel_name, "notify_game_invite_arrive", {"room_id" : room_id})
+            from .repositories import UserRepository
+            user = await UserRepository.get_user_by_id(reciever_id)
+            await notify_client_event(self.channel_layer, reciever_channel_name, 
+                                      "notify_game_invite_arrive", 
+                                      {"client_nickname" : user.nickname, "room_id" : room_id})
         else:
             await self._send("sendGameInviteResponse", {"message": "NotFoundUserInLobby"})
             
