@@ -51,10 +51,10 @@ class TestGameRepository(TestCase):
         assert game_details['ability'] == [my_team.effect, opponent_team.effect]
         assert game_details['myTeamClientInfoList'][0]['clientId'] == target_user.id
         assert game_details['myTeamClientInfoList'][0]['nickname'] == target_user.nickname
-        assert game_details['myTeamClientInfoList'][0]['imageUri'] == target_user.image_uri
+        assert game_details['myTeamClientInfoList'][0]['avatarUrl'] == target_user.image_uri
         assert game_details['opponentTeamClientInfoList'][0]['clientId'] == enemy_user.id
         assert game_details['opponentTeamClientInfoList'][0]['nickname'] == enemy_user.nickname
-        assert game_details['opponentTeamClientInfoList'][0]['imageUri'] == enemy_user.image_uri
+        assert game_details['opponentTeamClientInfoList'][0]['avatarUrl'] == enemy_user.image_uri
         assert game_details['word'] == "치혈했던 혈전"
         assert len(game_details['scoreList']) == game.total_round
         assert all(game_details['scoreList'])
@@ -88,7 +88,7 @@ class TestGameRepository(TestCase):
 
         # Validate the response
         assert game_history['nickname'] == target_user.nickname
-        assert game_history['imageUri'] == target_user.image_uri
+        assert game_history['avatarUrl'] == target_user.image_uri
         assert len(game_history['gameHistoryList']) == len(expected_games)
 
         for i, (team1, team2) in enumerate(expected_games):
@@ -104,12 +104,12 @@ class TestGameRepository(TestCase):
             assert len(my_team_clients) == 1
             assert my_team_clients[0]['clientId'] == target_user.id
             assert my_team_clients[0]['nickname'] == target_user.nickname
-            assert my_team_clients[0]['imageUri'] == target_user.image_uri
+            assert my_team_clients[0]['avatarUrl'] == target_user.image_uri
 
             assert len(opponent_team_clients) == 1
             assert opponent_team_clients[0]['clientId'] == enemy_user.id
             assert opponent_team_clients[0]['nickname'] == enemy_user.nickname
-            assert opponent_team_clients[0]['imageUri'] == enemy_user.image_uri
+            assert opponent_team_clients[0]['avatarUrl'] == enemy_user.image_uri
 
 #     # @pytest.mark.django_db(transaction=True)
 #     # def test_get_games_by_user_id(self):
