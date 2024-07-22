@@ -4,7 +4,7 @@ import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 
 class LobbyPageManager {
-	constructor(app, clientInfo, onClickWatingRoomCreationButton, onCLickWaitingRoomButton, renderFriendManagementPage, renderEditProfilePage, joinWaitingTournamentPage) {
+	constructor(app, clientInfo, onClickWatingRoomCreationButton, onCLickWaitingRoomButton, renderFriendManagementPage, renderProfilePage, joinWaitingTournamentPage) {
 		console.log("Lobby Page!");
 		app.innerHTML = this._getHTML();
 
@@ -29,7 +29,7 @@ class LobbyPageManager {
 		this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
 		this.onCLickWaitingRoomButton = onCLickWaitingRoomButton;
 		this.renderFriendManagementPage = renderFriendManagementPage;
-		this.renderEditProfilePage = renderEditProfilePage;
+		this.renderProfilePage = renderProfilePage;
 		this.joinWaitingTournamentPage = joinWaitingTournamentPage;
 		this._setTournamentJoinButton();
 		this._setCreateWaitingRoomButton();
@@ -66,9 +66,11 @@ class LobbyPageManager {
 	_setProfileButton() {
 		this.profileButton = document.querySelector("#profileButton");
 		this.profileButton.addEventListener("click", () => {
+
 			this.clientInfo.lobbySocket.close();
 			this.clientInfo.lobbySocket = null;
-			this.renderEditProfilePage();
+			this.clientInfo.profileTarget = { id: this.clientInfo.id };
+			this.renderProfilePage();
 		});
 	}
 
@@ -135,7 +137,7 @@ class LobbyPageManager {
 		windowObservable.unsubscribeResize(this._autoSetScollTrackColorRef);
 	}
 
-	_setTournamentJoinButton(){
+	_setTournamentJoinButton() {
 		const tournamentJoinButton = document.querySelector(".tournamentJoinButton");
 		tournamentJoinButton.addEventListener("click", async () => {
 			// const startMatchMakingMessage = {
@@ -158,7 +160,6 @@ class LobbyPageManager {
 			this.joinWaitingTournamentPage();
 		});
 	}
-
 
 	_setCreateWaitingRoomButton() {
 		const createWaitingRoomButton = document.querySelector(".createWaitingRoomButton");
@@ -339,7 +340,7 @@ class LobbyPageManager {
   `;
 	}
 
-	_getTournamentJoinButtonHtml(){
+	_getTournamentJoinButtonHtml() {
 		return `<button class="tournamentJoinButton">토너먼트 참가하기</button>`;
 	}
 

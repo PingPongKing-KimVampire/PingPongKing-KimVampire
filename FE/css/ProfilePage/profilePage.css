@@ -58,6 +58,10 @@
     font-weight: 700;
 }
 
+.editProfileButton:hover {
+	cursor: pointer;
+}
+
 #matchLogContainer {
     width: 45%;
     height: 88%;
@@ -93,6 +97,11 @@
     position: relative;
     padding-right: 3%;
     box-sizing: border-box;
+}
+
+.matchLog:hover {
+	cursor: pointer;
+    background-color: rgba(213, 112, 255, 0.1);
 }
 
 .matchDate{

@@ -1,19 +1,15 @@
+import { _connectLobbySocket } from "../connect.js";
+
 class ProfilePageManager {
-	constructor(app, clientInfo, renderLobbyPage) {
+	constructor(app, clientInfo, renderLobbyPage, renderEditProfilePage) {
 		console.log("ProfilePage!!!");
 		this.clientInfo = clientInfo;
 		this.app = app;
 		this.renderLobbyPage = renderLobbyPage;
+		this.renderEditProfilePage = renderEditProfilePage;
 
-		this.clientInfo = {
-			id: 1,
-			nickname: "김뱀파이어",
-			avatarUrl: "images/playerA.png",
-		};
-
-		//하드코딩
-		this.clientInfo.profileTarget = { id: 3 };
-
+		// this.clientInfo = { profileTarget: {id: 3} };
+		//this.client.profileTarget.id가 설정되어 있어야함
 		this.profileTarget = { id: this.clientInfo.profileTarget.id };
 		this.clientInfo.profileTarget = null;
 		this._initPage();
@@ -66,6 +62,34 @@ class ProfilePageManager {
 		this.profileTarget.winCount = this.profileTarget.gameHistoryList.filter(gameHistory => gameHistory.result === "WIN").length;
 		this.profileTarget.loseCount = this.profileTarget.gameHistoryList.filter(gameHistory => gameHistory.result === "LOSE").length;
 		this.app.innerHTML = this._getHTML();
+		this._setMatchLogClickListener();
+		this._setExitButton();
+		this._setEditProfileButton();
+	}
+
+	_setMatchLogClickListener() {
+		document.querySelectorAll(".matchLog").forEach(matchLog => {
+			matchLog.addEventListener("click", event => {
+				const id = parseInt(matchLog.dataset.id);
+				alert(id);
+			});
+		});
+	}
+
+	_setEditProfileButton() {
+		document.querySelector(".editProfileButton").addEventListener("click", async () => {
+			if (this.profileTarget.id === this.clientInfo.id) this.renderEditProfilePage();
+			else {
+				alert("친구 추가/삭제/요청/요청 취소는 미구현입니다.");
+			}
+		});
+	}
+
+	_setExitButton() {
+		document.querySelector(".exitButton").addEventListener("click", async () => {
+			this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
+			this.renderLobbyPage();
+		});
 	}
 
 	async getClientProfile(id) {
@@ -119,7 +143,7 @@ class ProfilePageManager {
 		const month = String(date.getMonth() + 1).padStart(2, "0");
 		const day = String(date.getDate()).padStart(2, "0");
 		return `
-        <div class="matchLog data-id="${gameHistory.gameId}"">
+        <div class="matchLog" data-id="${gameHistory.gameId}">
             <div class="matchDate">
                 ${year}.${month}.${day}
             </div>

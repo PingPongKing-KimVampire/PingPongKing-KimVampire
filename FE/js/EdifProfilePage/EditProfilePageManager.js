@@ -3,12 +3,12 @@ import { SERVER_PORT } from "./../PageRouter.js";
 import { _connectLobbySocket } from "../connect.js";
 
 class EditProfilePageManager {
-	constructor(app, clientInfo, renderLobbyPage) {
+	constructor(app, clientInfo, renderProfilePage) {
 		this.clientInfo = clientInfo;
 
 		this._setDefaultAvatars();
 		app.innerHTML = this._getHTML();
-		this.renderLobbyPage = renderLobbyPage;
+		this.renderProfilePage = renderProfilePage;
 		this._initPage();
 	}
 
@@ -134,6 +134,7 @@ class EditProfilePageManager {
 			this.clientInfo.socket.addEventListener("message", listener);
 		});
 		// TODO : 이후 마이페이지 렌더링하기
+		this._exitEditProfilePage();
 	};
 
 	_initAvatarSelectionModal() {
@@ -198,9 +199,9 @@ class EditProfilePageManager {
 	_renderExitModal = () => {
 		this.exitModal.style.display = "flex";
 	};
-	_exitEditProfilePage = async  () => {
-		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
-		this.renderLobbyPage();
+	_exitEditProfilePage = () => {
+		this.clientInfo.profileTarget = { id: this.clientInfo.id };
+		this.renderProfilePage();
 	};
 	_hideExitModal = () => {
 		this.exitModal.style.display = "none";
