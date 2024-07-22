@@ -76,13 +76,12 @@ class Player:
     def needs_update(self):
         distance = self._calculate_distance()
         if distance < 1:
+            self.dx = 0
+            self.dy = 0
             return False
         speed = min(self.max_speed, distance)
         self.dx = (self.target_x - self.pos_x) / distance * speed
         self.dy = (self.target_y - self.pos_y) / distance * speed
-        # if ( self.dx ** 2 + self.dy ** 2 ) ** 0.5 > self.max_speed:
-        #     Printer.log(f"Player {self.nickname} speed is too fast", "yellow")
-        #     return False
         return True
             
     def update_target(self, x, y):
