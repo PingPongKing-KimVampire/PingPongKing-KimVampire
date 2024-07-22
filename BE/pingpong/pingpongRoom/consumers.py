@@ -45,13 +45,13 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         else: # normal mode
             self.team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.avatar_uri)
             await self.send_enter_pingpongroom_response(self.room_id, self.team, is_you_create)
+
         if self.team == None:
-            # 실패시 처리 추가해야 할 것.
-            await self._send(event='enterWaitingRoomFailed', content={'roomId': self.room_id})
-            Printer.log(f"Client {self.client_id} failed to enter room {self.room_id}", "yellow")
+            await self._send(event='enterWaitingRoomResponse', content={'message': 'RoomIsFull'})
             await self.close()
-        Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
-        Printer.log(f"team : {self.team}", "blue")
+        else:
+            Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
+            Printer.log(f"team : {self.team}", "blue")
             
     async def disconnect(self, close_code):
         if self.client_id:
