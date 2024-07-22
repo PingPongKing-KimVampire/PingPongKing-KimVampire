@@ -108,7 +108,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await self.stop_reading_chat(receiver_id)
         elif event == 'getClientListIBlocked':
             await self.get_client_list_blocked_by_user()
-        elif event == 'getClientProfiile':
+        elif event == 'getClientProfile':
             client_id = content['clientId']
             await self.get_client_profile(client_id)
         elif event == 'getClientGameDetail':
