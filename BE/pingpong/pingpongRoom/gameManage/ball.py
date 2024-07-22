@@ -28,12 +28,17 @@ class Ball:
             self.is_vanish = False
             return False
         return True
-            
+
     def _calculate_ball_direction(self):
         angle_radians = (self.angle * math.pi) / 180
         dx = math.cos(angle_radians) * self.speed
         dy = math.sin(angle_radians) * self.speed
         return {'dx': dx, 'dy': dy}
+
+    def pause(self):
+        self.dx = 0
+        self.dy = 0
+        self.angle = 0
 
     def reversal_random(self, speed=5, angle=None):
         self.speed = speed
@@ -60,3 +65,11 @@ class Ball:
 
     def get_bottom_y(self):
         return self.pos_y + self.radius
+            
+    def set_ball_to_serve(self, serve_team, board_width, board_height):
+        if serve_team == 'left':
+            serve_position = board_width / 4
+        else:
+            serve_position = 3 * board_width / 4
+        self.reset_ball(serve_position, board_height / 2, 0)
+        self.pause()

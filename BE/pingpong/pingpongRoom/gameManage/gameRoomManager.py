@@ -21,7 +21,7 @@ NORMALIZE = 6
 
 NORMAL_SPEED = 10
 
-END_SCORE = 2
+END_SCORE = 100
 
 
 class GameRoomManager:
@@ -240,7 +240,6 @@ class GameRoomManager:
             count = self.team_right.__len__()
         else:
             count = self.team_left.__len__()
-        from utils.printer import Printer
         await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
         for i in range(count - 1):
             id = str(uuid.uuid4())
@@ -268,7 +267,7 @@ class GameRoomManager:
         return state
 
     def _detect_paddle_collision(self, ball):
-        players_to_check = self.team_right.values() if ball.dx > 0 else self.team_left.values()
+        players_to_check = self.team_left.values() if ball.dx <= 0 else self.team_right.values()
         speed = NORMAL_SPEED
         angle = 0
         for player in players_to_check:
@@ -337,8 +336,7 @@ class GameRoomManager:
 
     def _reset_round(self):
         self.round = self.round + 1
-        serve_position = self.board_width / 4 if self.serve_turn == LEFT else 3 * self.board_width / 4
-        self.ball.reset_ball(serve_position, self.board_height / 2, 0)
+        self.ball.set_ball_to_serve(self.serve_turn, self.board_width, self.board_height)
         for player in self.clients.values():
             player.reset_pos()
         asyncio.create_task(self._notify_all_paddle_positions())
@@ -347,15 +345,6 @@ class GameRoomManager:
         self.is_playing = False
         self.is_end = True
         
-    def _reset_game(self):
-        self.score = {LEFT: 0, RIGHT: 0}
-        self.serve_turn = LEFT
-        self.is_playing = False
-        self.is_end = False
-        self.team_left = {}
-        self.team_right = {}
-        self._reset_round()
-
     ### DB
 
     async def save_data_to_db(self):

@@ -3,19 +3,25 @@ from utils.printer import Printer
 class Player:
     def __init__(self, nickname, ability, team, image_uri):
         self.nickname = nickname
-        self.team = team
         self.image_uri = image_uri
         self.ready_state = 'NOTREADY'
+
+        self.team = team
+        self.ability = ability
+        
         self.pos_x = 0
         self.pos_y = 0
         self.dx = 0
         self.dy = 0
         self.target_x = 0
         self.target_y = 0
-        self.max_speed = 15
         self.paddle_width = 10
         self.paddle_height = 150
-        self.ability = ability
+
+        self.max_speed = 30
+        self.current_speed = 0
+        self.acceleration = 1.6
+        self.deceleration = 15
 
     def set_state(self, state):
         self.ready_state = state
@@ -37,9 +43,9 @@ class Player:
 
     def reset_pos(self):
         if self.team == 'left':
-            x = 1550 / 4
+            x = 1550 / 6
         else:
-            x = 1550 / 4 * 3
+            x = 1550 / 6 * 5
         y = 1000 / 2
         self.pos_x = x
         self.pos_y = y
@@ -62,8 +68,11 @@ class Player:
                 and ball.pos_y <= self.pos_y + self.paddle_height / 2
 
     def is_ball_in_paddle_x_range(self, ball):
-        return (ball.dx > 0 and ball.get_right_x() >= self.pos_x - self.paddle_width / 2) \
-            or (ball.dx < 0 and ball.get_left_x() <= self.pos_x + self.paddle_width / 2)
+        if self.team == 'left' and ball.dx <= 0 and ball.get_left_x() <= self.pos_x + self.paddle_width / 2:
+            return True
+        elif self.team == 'right' and ball.dx >= 0 and ball.get_right_x() >= self.pos_x - self.paddle_width / 2:
+            return True
+        return False
 
     def _calculate_distance(self):
         return ((self.target_x - self.pos_x) ** 2 + (self.target_y - self.pos_y) ** 2) ** 0.5
@@ -78,11 +87,31 @@ class Player:
         if distance < 1:
             self.dx = 0
             self.dy = 0
+            self.current_speed = 0
             return False
-        speed = min(self.max_speed, distance)
-        self.dx = (self.target_x - self.pos_x) / distance * speed
-        self.dy = (self.target_y - self.pos_y) / distance * speed
+
+        target_speed = min(self.max_speed, distance)
+        
+        if self.current_speed < target_speed:
+            self.accelerate()
+        else:
+            self.decelerate()
+
+        direction_x = (self.target_x - self.pos_x) / distance
+        direction_y = (self.target_y - self.pos_y) / distance
+
+        self.dx = direction_x * self.current_speed
+        self.dy = direction_y * self.current_speed
+        # print(f"dx : {self.dx}, dy : {self.dy}")
+
         return True
+    
+    def accelerate(self):
+        self.current_speed = min(self.max_speed, self.current_speed + self.acceleration)
+
+    def decelerate(self):
+        self.current_speed = max(0, self.current_speed - self.deceleration)
+
             
     def update_target(self, x, y):
         self.target_x = x
