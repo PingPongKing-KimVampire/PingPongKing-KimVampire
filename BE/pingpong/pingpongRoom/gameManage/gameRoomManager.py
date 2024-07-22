@@ -64,6 +64,25 @@ class GameRoomManager:
         self.game_data = {}
 
     # getter
+
+    def get_game_mode(self):
+        if self.left_mode == 'human' and self.right_mode == 'human':
+            mode = 'HUMAN_HUMAN'
+        elif self.left_mode == 'vampire' and self.right_mode == 'human':
+            mode = 'VAMPIRE_HUMAN'
+        else:
+            mode = 'VAMPIRE_VAMPIRE'
+        return mode
+    
+    def get_client_id_list(self, team):
+        if team == 'left':
+            team = self.team_left
+        else:
+            team = self.team_right
+        data = []
+        for client_id, player in team.items():
+            data.append(client_id)
+        return data
     
     def get_room_client_count(self):
         return len(self.clients)
