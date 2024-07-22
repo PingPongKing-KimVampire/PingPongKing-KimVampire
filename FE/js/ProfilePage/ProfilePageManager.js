@@ -17,6 +17,7 @@ class ProfilePageManager {
 
 	async _initPage() {
 		const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
+        console.log(nickname, avatarUrl, gameHistoryList);
 		// const { nickname, avatarUrl, gameHistoryList } = {
 		// 	nickname: "김뱀파이어2다",
 		// 	avatarUrl: "images/playerA.png",
@@ -103,7 +104,7 @@ class ProfilePageManager {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === "getClientProfileResponse") {
 					this.clientInfo.socket.removeEventListener("message", listener);
-					resolve({ nickname: content.nickname, imageUrl: content.imageUrl, gameHistoryList: content.gameHistroryList });
+					resolve({ nickname: content.nickname, avatarUrl: content.avatarUrl, gameHistoryList: content.gameHistoryList });
 				}
 			};
 			this.clientInfo.socket.addEventListener("message", listener);
