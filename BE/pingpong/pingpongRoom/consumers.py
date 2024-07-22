@@ -26,12 +26,12 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         try:
             await stateManager.authorize_client(self, dict(self.scope['headers']))
             await self.accept(subprotocol="authorization")
-            self.set_pingpong_room_consumer(self.scope['url_route']['kwargs']['room_id'])
-            await self.send_pingpongroom_accept_response()
-            await add_group(self, self.room_id)
             Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
         except:
             await self.close()
+        self.set_pingpong_room_consumer(self.scope['url_route']['kwargs']['room_id'])
+        await self.send_pingpongroom_accept_response()
+        await add_group(self, self.room_id)
 
     def set_pingpong_room_consumer(self, room_id):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -44,7 +44,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             self.team = self.game_manager.get_client_team_in_room(self.client_id)
         else: # normal mode
             self.team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.avatar_uri)
-            await self.send_enter_pingpongroom_response(self.room_id, self.team, is_you_create)
+            await self.send_enter_pingpongroom_response(self.room_id, is_you_create)
 
         if self.team == None:
             await self._send(event='enterWaitingRoomResponse', content={'message': 'RoomIsFull'})
