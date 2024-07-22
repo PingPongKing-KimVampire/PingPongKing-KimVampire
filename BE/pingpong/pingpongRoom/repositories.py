@@ -66,12 +66,8 @@ class GameRepository:
 			   end_time, 
 			   round_info_dict,
 			   win_team):
-		# if mode not in modes or our_team_ability not in abilities or \
-		# 	opponent_team_ability not in abilities or our_team_kind not in team_kinds \
-		# 	or opponent_team_kind not in team_kinds:
-		# 	return None
-		game = Game.objects.create(mode=mode, start_at=start_time, end_at=end_time)
-		if win_team == "team1":
+		game = Game.objects.create(mode=mode, start_at=start_time, end_at=end_time,  total_round=len(round_info_dict))
+		if win_team == "left":
 			is_win = True
 		else:
 			is_win = False
@@ -79,7 +75,7 @@ class GameRepository:
 		opponent_team = TeamRepository.create_team(opponent_user_id_list, game, opponent_team_kind, opponent_team_ability, opponent_team_score, not is_win)
 		for round_number in round_info_dict:
 			round_info = round_info_dict[round_number]
-			if round_info["win_team"] == "team1":
+			if round_info["win_team"] == "left":
 				target_team = our_team
 			else:
 				target_team = opponent_team
@@ -210,6 +206,7 @@ class GameReadRepository:
 				team_users = TeamUser.objects.select_related('user').filter(team=target_team).all()
 				if target_team.id is team_user.team.id:
 					win_state = target_team.is_win_to_string()
+					my_team = target_team
 					my_team_score = target_team.score
 					my_team_effect = target_team.effect
 					for team_user in team_users:
@@ -221,6 +218,7 @@ class GameReadRepository:
 				else:
 					opponent_team_score = target_team.score
 					opponent_team_effect = target_team.effect
+					opponent_team = target_team
 					for team_user in team_users:
 						opponent_team_list.append({
 							"clientId": team_user.user.id,
@@ -231,6 +229,7 @@ class GameReadRepository:
 				"gameId": target_game.id,
 				"timestamp": target_game.start_at.isoformat(),
 				"score": [my_team_score, opponent_team_score],
+				"teamKind": [my_team.kind, opponent_team.kind],
 				"win": win_state,
 				"mode": target_game.mode,
 				"ability": [my_team_effect, opponent_team_effect],
