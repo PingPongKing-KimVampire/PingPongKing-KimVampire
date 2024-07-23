@@ -197,7 +197,7 @@ class GameReadRepository:
 			return None
 		game_prefetch = Prefetch('team__game', queryset=Game.objects.all())
 		team_users = TeamUser.objects.select_related('team__game').prefetch_related(game_prefetch).filter(user=user).all()
-		game_history = []
+		game_history = []		
 		for team_user in team_users:
 			target_game = team_user.team.game
 			my_team_list = []
@@ -205,35 +205,30 @@ class GameReadRepository:
 			all_teams = Team.objects.filter(game=target_game).all()
 			for target_team in all_teams:
 				team_users = TeamUser.objects.select_related('user').filter(team=target_team).all()
-				if target_team.id is team_user.team.id:
-					win_state = target_team.is_win_to_string()
+				if target_team.id == team_user.team.id:
 					my_team = target_team
-					my_team_score = target_team.score
-					my_team_effect = target_team.effect
-					for team_user in team_users:
+					for element in team_users:
 						my_team_list.append({
-							"clientId": team_user.user.id,
-							"nickname": team_user.user.nickname,
-							"avatarUrl": team_user.user.get_image_uri()
+							"clientId": element.user.id,
+							"nickname": element.user.nickname,
+							"avatarUrl": element.user.get_image_uri()
 						})
 				else:
-					opponent_team_score = target_team.score
-					opponent_team_effect = target_team.effect
 					opponent_team = target_team
-					for team_user in team_users:
+					for element in team_users:
 						opponent_team_list.append({
-							"clientId": team_user.user.id,
-							"nickname": team_user.user.nickname,
-							"avatarUrl": team_user.user.get_image_uri()
+							"clientId": element.user.id,
+							"nickname": element.user.nickname,
+							"avatarUrl": element.user.get_image_uri()
 						})
 			game_history.append({
 				"gameId": target_game.id,
 				"timestamp": target_game.start_at.isoformat(),
-				"score": [my_team_score, opponent_team_score],
+				"score": [my_team.score, opponent_team.score],
 				"teamKind": [my_team.kind, opponent_team.kind],
 				"result": my_team.is_win_to_string(),
 				"mode": target_game.mode,
-				"ability": [my_team_effect, opponent_team_effect],
+				"ability": [my_team.effect, opponent_team.effect],
 				"myTeamClientInfoList": my_team_list,
 				"opponentTeamClientInfoList": opponent_team_list
 			})

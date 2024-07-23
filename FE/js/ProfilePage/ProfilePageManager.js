@@ -17,7 +17,7 @@ class ProfilePageManager {
 
 	async _initPage() {
 		const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
-        console.log(nickname, avatarUrl, gameHistoryList);
+		console.log(nickname, avatarUrl, gameHistoryList);
 		// const { nickname, avatarUrl, gameHistoryList } = {
 		// 	nickname: "김뱀파이어2다",
 		// 	avatarUrl: "images/playerA.png",
@@ -47,7 +47,7 @@ class ProfilePageManager {
 		// 					avatarUrl: "images/playerA.png",
 		// 				},
 		// 			],
-		// 			opponnetTeamClientInfoList: [
+		// 			opponentTeamClientInfoList: [
 		// 				{
 		// 					id: 3,
 		// 					nickname: "영우",
@@ -165,25 +165,25 @@ class ProfilePageManager {
                     ${gameHistory.ability[1] !== "none" ? "<img class='vampireAbilityImage' src='images/ability/" + gameHistory.ability[1] + ".png'>" : "<div></div>"}
                 </div>
             </div>
-            ${this.getMatchPlayerListContainerDiv(gameHistory.myTeamClientInfoList, gameHistory.opponnetTeamClientInfoList)}
+            ${this.getMatchPlayerListContainerDiv(gameHistory.myTeamClientInfoList, gameHistory.opponentTeamClientInfoList)}
         </div>       
         `;
 	}
 
-	getMatchPlayerListContainerDiv(myTeamClientInfoList, opponnetTeamClientInfoList) {
+	getMatchPlayerListContainerDiv(myTeamClientInfoList, opponentTeamClientInfoList) {
 		return `
         <div class="matchPlayerListContainer">
             <div class="teamPlayerListContainer">
                 ${myTeamClientInfoList.map(player => this.getPlayerContainerDiv(player, "red")).join("")}
                 ${Array.from({ length: 5 - myTeamClientInfoList.length })
-									.map(() => this.getEmptyPlayerContainerDiv("red"))
-									.join("")}
+				.map(() => this.getEmptyPlayerContainerDiv("red"))
+				.join("")}
             </div>
             <div class="teamPlayerListContainer">
-                ${opponnetTeamClientInfoList.map(player => this.getPlayerContainerDiv(player, "blue")).join("")}
-                ${Array.from({ length: 5 - opponnetTeamClientInfoList.length })
-									.map(() => this.getEmptyPlayerContainerDiv("blue"))
-									.join("")}
+                ${opponentTeamClientInfoList.map(player => this.getPlayerContainerDiv(player, "blue")).join("")}
+                ${Array.from({ length: 5 - opponentTeamClientInfoList.length })
+				.map(() => this.getEmptyPlayerContainerDiv("blue"))
+				.join("")}
             </div>
         </div>
         `;
