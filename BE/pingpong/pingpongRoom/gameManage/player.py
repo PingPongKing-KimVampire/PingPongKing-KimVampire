@@ -66,9 +66,13 @@ class Player:
                 and ball.pos_y <= self.pos_y + self.paddle_height / 2
 
     def is_ball_in_paddle_x_range(self, ball):
-        if self.team == 'left' and ball.dx <= 0 and ball.get_left_x() <= self.pos_x + self.paddle_width / 2:
+        if self.team == 'left' and ball.dx <= 0 and \
+            ball.get_left_x() <= self.pos_x + self.paddle_width and \
+            ball.get_left_x() >= self.pos_x - self.paddle_width:
             return True
-        elif self.team == 'right' and ball.dx >= 0 and ball.get_right_x() >= self.pos_x - self.paddle_width / 2:
+        elif self.team == 'right' and ball.dx >= 0 and \
+            ball.get_right_x() >= self.pos_x - self.paddle_width and \
+            ball.get_right_x() <= self.pos_x + self.paddle_width:
             return True
         return False
 

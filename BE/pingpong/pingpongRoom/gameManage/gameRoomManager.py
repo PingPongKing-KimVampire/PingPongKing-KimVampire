@@ -246,7 +246,8 @@ class GameRoomManager:
             id = str(uuid.uuid4())
             self.fake_ball[id] = Ball(NORMAL_SPEED, self.ball_radius)
             rand = random.randint(-15, 15)
-            self.fake_ball[id].reset_ball(self.ball.pos_x, self.ball.pos_y, self.ball.angle + rand)
+            self.fake_ball[id].reset_ball(self.ball.pos_x, self.ball.pos_y)
+            self.fake_ball[id].change_direction(self.ball.angle + rand)
             asyncio.create_task(self._fake_ball_loop(id))
 
     # Playing Methods
@@ -263,20 +264,23 @@ class GameRoomManager:
             return SCORE
         elif ball.get_top_y() <= 0 or ball.get_bottom_y() >= self.board_height:
             ball.dy = -ball.dy
-        else:
             state = self._detect_paddle_collision(ball)
         return state
 
     def _detect_paddle_collision(self, ball):
-        players_to_check = self.team_left.values() if ball.dx <= 0 else self.team_right.values()
+        if self.ball.speed == 0:
+            players_to_check = self.team_left.values() if self.serve_turn == LEFT else self.team_right.values()
+        else:
+            players_to_check = self.team_left.values() if ball.dx <= 0 else self.team_right.values()
         speed = NORMAL_SPEED
         angle = 0
         for player in players_to_check:
+            # print(player.nickname)
             if self._is_ball_colliding_with_paddle(player):
                 self.save_hit_map('PADDLE', ball.pos_y, ball.pos_x)
                 state = PADDLE
                 if player.ability == 'speedTwister':
-                    speed = ball.speed * 2
+                    speed = speed * 2
                     angle = 30
                     state = SPEEDTWIST
                 elif player.ability == 'illusionFaker':
@@ -284,9 +288,12 @@ class GameRoomManager:
                 elif player.ability == 'ghostSmasher':
                     ball.is_vanish = True
                     state = GHOST
-                elif player.ability == None and ball.speed != speed:
+                elif player.ability == None and speed != NORMAL_SPEED:
                     state = NORMALIZE
-                ball.reversal_random(speed, angle)
+                if ball.speed == 0:
+                    ball.start_move(speed, self.serve_turn)
+                else:
+                    ball.reversal_random(speed, angle)
                 return state
         return NOHIT
 
