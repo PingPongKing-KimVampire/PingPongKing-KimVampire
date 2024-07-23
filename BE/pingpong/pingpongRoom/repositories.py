@@ -179,6 +179,7 @@ class GameReadRepository:
 		data = {
 			"score": [my_team.score, opponent_team.score],
 			"mode": game.mode,
+			"result": my_team.is_win_to_string(),
 			"teamKind": [my_team.kind, opponent_team.kind],
 			"ability": [my_team.effect, opponent_team.effect],
 			"myTeamClientInfoList": my_team_users,
@@ -230,7 +231,7 @@ class GameReadRepository:
 				"timestamp": target_game.start_at.isoformat(),
 				"score": [my_team_score, opponent_team_score],
 				"teamKind": [my_team.kind, opponent_team.kind],
-				"win": win_state,
+				"result": my_team.is_win_to_string(),
 				"mode": target_game.mode,
 				"ability": [my_team_effect, opponent_team_effect],
 				"myTeamClientInfoList": my_team_list,
