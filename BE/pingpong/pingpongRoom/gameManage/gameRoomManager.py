@@ -207,6 +207,7 @@ class GameRoomManager:
             await asyncio.sleep(1 / FRAME_PER_SECOND)
         self.end_time = timezone.now()
         await self.save_data_to_db()
+        await self._notify_game_room('notifyGameEnd', {'winTeam': self.win_team})
 
     async def _paddle_update_loop(self):
         while self.is_playing and not self.is_end:
@@ -308,7 +309,6 @@ class GameRoomManager:
         await self._notify_score_update()
         if self._check_game_end():
             self.win_team = self._end_game_loop()
-            await self._notify_game_room('notifyGameEnd', {'winTeam': self.win_team})
         else:
             self._reset_round()
 
@@ -434,6 +434,7 @@ class GameRoomManager:
     async def give_up_game(self, consumer):
         self._change_game_state()
         client_id = consumer.client_id
+        self.win_team = 'left' if client_id in self.team_left else  'right'
         if self.is_playing:
             await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
 

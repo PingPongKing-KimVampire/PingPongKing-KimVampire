@@ -1,5 +1,8 @@
 from utils.printer import Printer
 
+MAX_SPEED = 50
+SENSITIVE_FACTOR = 10
+
 class Player:
     def __init__(self, nickname, ability, team, image_uri):
         self.nickname = nickname
@@ -17,11 +20,6 @@ class Player:
         self.target_y = 0
         self.paddle_width = 10
         self.paddle_height = 150
-
-        self.max_speed = 30
-        self.current_speed = 0
-        self.acceleration = 1.6
-        self.deceleration = 15
 
     def set_state(self, state):
         self.ready_state = state
@@ -84,35 +82,18 @@ class Player:
 
     def needs_update(self):
         distance = self._calculate_distance()
-        if distance < 1:
-            self.dx = 0
-            self.dy = 0
-            self.current_speed = 0
-            return False
-
-        target_speed = min(self.max_speed, distance)
         
-        if self.current_speed < target_speed:
-            self.accelerate()
+        if distance > 0:
+            speed = min(MAX_SPEED, distance / SENSITIVE_FACTOR)
+            self.dx = (self.target_x - self.pos_x) / distance * speed
+            self.dy = (self.target_y - self.pos_y) / distance * speed
+            return True
         else:
-            self.decelerate()
-
-        direction_x = (self.target_x - self.pos_x) / distance
-        direction_y = (self.target_y - self.pos_y) / distance
-
-        self.dx = direction_x * self.current_speed
-        self.dy = direction_y * self.current_speed
-        # print(f"dx : {self.dx}, dy : {self.dy}")
-
-        return True
-    
-    def accelerate(self):
-        self.current_speed = min(self.max_speed, self.current_speed + self.acceleration)
-
-    def decelerate(self):
-        self.current_speed = max(0, self.current_speed - self.deceleration)
-
-            
+            speed = 0
+            self.dx = 0 
+            self.dy = 0
+            return False
+        
     def update_target(self, x, y):
         self.target_x = x
         self.target_y = y
