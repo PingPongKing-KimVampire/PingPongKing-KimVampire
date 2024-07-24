@@ -23,6 +23,7 @@ class PageRouter {
 			nickname: null,
 			avatarUrl: null,
 			lobbySocket: null,
+			currentPage: null,
 			gameInfo: {
 				pingpongRoomSocket: null,
 				roomId: null,
@@ -75,6 +76,7 @@ class PageRouter {
 	}
 
 	async renderPage(url) {
+		this.clientInfo.currentPage = url;
 		if (url === "login") {
 			this._loadCSS(["css/LoginPage/LoginPage.css"]);
 			const loginPageManager = new LoginPageManager(this.app, this.clientInfo, this._onLoginSuccess.bind(this), this._onEnterSignup.bind(this));

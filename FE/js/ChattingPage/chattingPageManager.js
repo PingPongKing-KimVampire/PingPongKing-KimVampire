@@ -247,8 +247,8 @@ class ChattingPageManager {
 		});
 	}
 
-	// TODO : 대기실 페이지일 때만 초대 버튼 표시하기
 	_setSelectedFriendItem(friendItem) {
+		//기존에 선택된게 있다면 선택되었을때의 CSS를 해제한다.
 		if (this.selectedFriendItem) {
 			this.selectedFriendItem.classList.remove("selectedFriendItem");
 			this.selectedInviteButton.classList.add("invisible");
@@ -256,7 +256,8 @@ class ChattingPageManager {
 		this.selectedFriendItem = friendItem;
 		this.selectedInviteButton = friendItem.querySelector(".inviteButton");
 		this.selectedFriendItem.classList.add("selectedFriendItem");
-		this.selectedInviteButton.classList.remove("invisible");
+		if(this.clientInfo.currentPage === "waitingRoom")
+			this.selectedInviteButton.classList.remove("invisible");
 	}
 
 	_renderFriendList() {
