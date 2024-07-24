@@ -470,7 +470,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
 
     async def notify_game_invite_arrive(self, content):
         content = content['content']
-        await self._send(json.dumps({'event' : 'notifyGameInviteArrive', 'content' : content }))
+        await self._send('notifyGameInviteArrive', content)
     
     async def get_total_chat_data(self, receiver_id):
         from .repositories import UserRepository
