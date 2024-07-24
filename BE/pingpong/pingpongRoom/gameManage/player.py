@@ -1,21 +1,25 @@
 from utils.printer import Printer
 
+MAX_SPEED = 50
+SENSITIVE_FACTOR = 10
+
 class Player:
     def __init__(self, nickname, ability, team, image_uri):
         self.nickname = nickname
-        self.team = team
         self.image_uri = image_uri
         self.ready_state = 'NOTREADY'
+
+        self.team = team
+        self.ability = ability
+        
         self.pos_x = 0
         self.pos_y = 0
         self.dx = 0
         self.dy = 0
         self.target_x = 0
         self.target_y = 0
-        self.max_speed = 15
         self.paddle_width = 10
         self.paddle_height = 150
-        self.ability = ability
 
     def set_state(self, state):
         self.ready_state = state
@@ -37,14 +41,40 @@ class Player:
 
     def reset_pos(self):
         if self.team == 'left':
-            x = 1550 / 4
+            x = 1550 / 6
         else:
-            x = 1550 / 4 * 3
+            x = 1550 / 6 * 5
         y = 1000 / 2
         self.pos_x = x
         self.pos_y = y
         self.target_x = x
         self.target_y = y
+
+    def is_moving_front(self):
+        if self.team == 'left':
+            return self.dx > 0
+        else:
+            return self.dx < 0
+
+    def is_colliding_with_ball(self, ball):
+        if self.is_ball_in_paddle_y_range(ball):
+            if self.is_ball_in_paddle_x_range(ball):
+                return True
+
+    def is_ball_in_paddle_y_range(self, ball):
+        return ball.pos_y >= self.pos_y - self.paddle_height / 2 \
+                and ball.pos_y <= self.pos_y + self.paddle_height / 2
+
+    def is_ball_in_paddle_x_range(self, ball):
+        if self.team == 'left' and ball.dx <= 0 and \
+            ball.get_left_x() <= self.pos_x + self.paddle_width and \
+            ball.get_left_x() >= self.pos_x - self.paddle_width:
+            return True
+        elif self.team == 'right' and ball.dx >= 0 and \
+            ball.get_right_x() >= self.pos_x - self.paddle_width and \
+            ball.get_right_x() <= self.pos_x + self.paddle_width:
+            return True
+        return False
 
     def _calculate_distance(self):
         return ((self.target_x - self.pos_x) ** 2 + (self.target_y - self.pos_y) ** 2) ** 0.5
@@ -56,16 +86,18 @@ class Player:
 
     def needs_update(self):
         distance = self._calculate_distance()
-        if distance < 1:
+        
+        if distance > 0:
+            speed = min(MAX_SPEED, distance / SENSITIVE_FACTOR)
+            self.dx = (self.target_x - self.pos_x) / distance * speed
+            self.dy = (self.target_y - self.pos_y) / distance * speed
+            return True
+        else:
+            speed = 0
+            self.dx = 0 
+            self.dy = 0
             return False
-        speed = min(self.max_speed, distance)
-        self.dx = (self.target_x - self.pos_x) / distance * speed
-        self.dy = (self.target_y - self.pos_y) / distance * speed
-        # if ( self.dx ** 2 + self.dy ** 2 ) ** 0.5 > self.max_speed:
-        #     Printer.log(f"Player {self.nickname} speed is too fast", "yellow")
-        #     return False
-        return True
-            
+        
     def update_target(self, x, y):
         self.target_x = x
         self.target_y = y
