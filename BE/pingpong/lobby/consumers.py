@@ -15,21 +15,22 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         self.nickname = None
         self.avatar_url = None
         
-        # try:
-        await stateManager.authorize_client(self, dict(self.scope['headers']))
-        await self.accept(subprotocol="authorization")
+        try:  
+            await stateManager.authorize_client(self, dict(self.scope['headers']))
+            await self.accept(subprotocol="authorization")
+        except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
+            Printer.log("Authorize Failed, disconnect.", "red")
+            await self.close()
         await add_group(self, 'lobby')
+        stateManager.add_lobby_client(self.client_id)
         Printer.log("Lobby WebSocket connection established", "green")      
         Printer.log(f"Client {self.client_id} entered lobby : {self.nickname} (id : {self.client_id})", "green")
-        # except (InvalidTokenError, ExpiredSignatureError, ObjectDoesNotExist, KeyError, AttributeError):
-        #     Printer.log("Authorize Failed, disconnect.", "red")
-        #     await self.close()
 
     async def disconnect(self, close_code):
-        if self.client_id:
-            Printer.log(f"Client {self.client_id} disconnected", "red")
-            Printer.log(f"Close code: {close_code}", "red")
-            await discard_group(self, 'lobby')
+        Printer.log(f"Client {self.client_id} disconnected", "red")
+        Printer.log(f"Close code: {close_code}", "red")
+        await discard_group(self, 'lobby')
+        stateManager.remove_lobby_client(self.client_id)
 
     async def _send(self, event, content):
         Printer.log(f">>>>> LOBBY sent >>>>>", "bright_cyan")
