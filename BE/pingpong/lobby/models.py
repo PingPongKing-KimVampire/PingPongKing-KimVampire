@@ -59,9 +59,9 @@ class Team(models.Model):
     game = models.ForeignKey('Game', related_name='teams', on_delete=models.CASCADE)
     effect = models.CharField(max_length=20, null=False, default="none")
     score = models.IntegerField(default=0, null=False)
-    isWin = models.BooleanField(default=False, null=False)
+    is_win = models.BooleanField(default=False, null=False)
     def is_win_to_string(self):
-        if self.isWin:
+        if self.is_win:
             return "WIN"
         return "LOSE"
 

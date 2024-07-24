@@ -97,10 +97,12 @@ class GameRoomManager:
             player = Player(nickname, ability=None, team='left', image_uri=image_uri)
             self.team_left[client_id] = player
             team = 'left'
+            # print(self.team_left[client_id])
         elif len(self.team_right) < self.right_max_count:
             player = Player(nickname, ability=None, team='right', image_uri=image_uri)
             self.team_right[client_id] = player
             team = 'right'
+            # print(self.team_right[client_id])
         if player:
             self.clients[client_id] = player
         return team
@@ -224,8 +226,8 @@ class GameRoomManager:
             ball_state = self._detect_collisions(self.ball)
             await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-        self.end_time = timezone.now()
         await self.save_data_to_db()
+        await self._notify_game_room('notifyGameEnd', {'winTeam': self.win_team})
 
     async def save_data_to_db(self):
         data = {
@@ -245,7 +247,6 @@ class GameRoomManager:
         }
         from pingpongRoom.repositories import GameRepository
         game = await GameRepository.save_game_async(data)
-        game = await GameRepository.get_games_by_user_id(self.clients[0])
         print(game)
         # game None 처리 필요
 
@@ -385,7 +386,6 @@ class GameRoomManager:
         await self._notify_score_update()
         if self._check_game_end():
             self.win_team = self._end_game_loop()
-            await self._notify_game_room('notifyGameEnd', {'winTeam': self.win_team})
         else:
             self._reset_round()
 
@@ -408,6 +408,7 @@ class GameRoomManager:
 
     def _end_game_loop(self):
         team = 'left' if self.score[LEFT] >= END_SCORE else 'right'
+        self.end_time = timezone.now()
         self._end_game()
         return team
 
@@ -450,9 +451,9 @@ class GameRoomManager:
 
     async def give_up_game(self, consumer):
         client_id = consumer.client_id
+        self.win_team = self._end_game_loop()
         if self.is_playing:
             await self._notify_game_room('notifyGameGiveUp', {'clientId': client_id})
-        self._end_game()
     
     ### Notify methods
 

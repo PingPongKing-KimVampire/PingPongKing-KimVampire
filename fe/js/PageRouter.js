@@ -8,6 +8,7 @@ import EditProfilePageManager from "./EdifProfilePage/EditProfilePageManager.js"
 import FriendManagementPageManager from "./FriendManagementPage/FriendManagementPageManager.js";
 import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
+import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
@@ -86,7 +87,7 @@ class PageRouter {
 				this._onClickWatingRoomCreationButton.bind(this),
 				this._onEnterWaitingRoom.bind(this),
 				this._renderFriendManagementPage.bind(this),
-				this._renderEditProfilePage.bind(this),
+				this._renderProfilePage.bind(this),
 				this._joinTournamentWaitingPage.bind(this),
 			);
 			await lobbyPageManager.initPage();
@@ -103,9 +104,12 @@ class PageRouter {
 		} else if (url === "signup") {
 			this._loadCSS(["css/SignupPage/signupPage.css"]);
 			const signupPageManager = new SignupPageManager(this.app, this.clientInfo, this._onSignupSuccess.bind(this));
+		} else if (url === "profile") {
+			this._loadCSS(["css/ProfilePage/profilePage.css"]);
+			const profilePageManager = new ProfilePageManager(this.app, this.clientInfo, this._renderLobby.bind(this), this._renderEditProfilePage.bind(this));
 		} else if (url === "editProfile") {
 			this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
-			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
+			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo, this._renderProfilePage.bind(this));
 		} else if (url === "friendManagement") {
 			this._loadCSS(["css/FriendManagementPage/friendManagementPage.css"]);
 			const friendManagementPageManager = new FriendManagementPageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
@@ -156,6 +160,10 @@ class PageRouter {
 
 	_renderFriendManagementPage() {
 		this.renderPage("friendManagement");
+	}
+
+	_renderProfilePage() {
+		this.renderPage("profile");
 	}
 
 	_renderEditProfilePage() {

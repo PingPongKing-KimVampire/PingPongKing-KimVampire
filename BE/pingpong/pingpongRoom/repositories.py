@@ -17,6 +17,7 @@ class GameRepository:
 	@staticmethod
 	@sync_to_async
 	def save_game_async(meta_info):
+		print(meta_info)
 		mode = meta_info["mode"]
 		start_time = meta_info["start_time"]
 		end_time = meta_info["end_time"]
@@ -65,12 +66,8 @@ class GameRepository:
 			   end_time, 
 			   round_info_dict,
 			   win_team):
-		# if mode not in modes or our_team_ability not in abilities or \
-		# 	opponent_team_ability not in abilities or our_team_kind not in team_kinds \
-		# 	or opponent_team_kind not in team_kinds:
-		# 	return None
-		game = Game.objects.create(mode=mode, start_at=start_time, end_at=end_time)
-		if win_team == "team1":
+		game = Game.objects.create(mode=mode, start_at=start_time, end_at=end_time,  total_round=len(round_info_dict))
+		if win_team == "left":
 			is_win = True
 		else:
 			is_win = False
@@ -78,7 +75,7 @@ class GameRepository:
 		opponent_team = TeamRepository.create_team(opponent_user_id_list, game, opponent_team_kind, opponent_team_ability, opponent_team_score, not is_win)
 		for round_number in round_info_dict:
 			round_info = round_info_dict[round_number]
-			if round_info["win_team"] == "team1":
+			if round_info["win_team"] == "left":
 				target_team = our_team
 			else:
 				target_team = opponent_team
@@ -102,8 +99,8 @@ class GameRepository:
 
 class TeamRepository:
 	@staticmethod
-	def create_team(user_id_list, game, kind, effect, score):
-		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score)
+	def create_team(user_id_list, game, kind, effect, score, is_win):
+		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score, is_win=is_win)
 		for user_id in user_id_list:
 			user = User.objects.get(id=user_id)
 			TeamUser.objects.create(team=team, user=user)
@@ -119,7 +116,7 @@ class GameReadRepository:
 			return {
 				"error": "User not found"
 			}
-		return GameReadRepository.get_game_history_by_user_id()
+		return GameReadRepository.get_game_history_by_user_id(user)
 	
 	@staticmethod
 	@sync_to_async
@@ -182,6 +179,7 @@ class GameReadRepository:
 		data = {
 			"score": [my_team.score, opponent_team.score],
 			"mode": game.mode,
+			"result": my_team.is_win_to_string(),
 			"teamKind": [my_team.kind, opponent_team.kind],
 			"ability": [my_team.effect, opponent_team.effect],
 			"myTeamClientInfoList": my_team_users,
@@ -199,7 +197,7 @@ class GameReadRepository:
 			return None
 		game_prefetch = Prefetch('team__game', queryset=Game.objects.all())
 		team_users = TeamUser.objects.select_related('team__game').prefetch_related(game_prefetch).filter(user=user).all()
-		game_history = []
+		game_history = []		
 		for team_user in team_users:
 			target_game = team_user.team.game
 			my_team_list = []
@@ -207,32 +205,30 @@ class GameReadRepository:
 			all_teams = Team.objects.filter(game=target_game).all()
 			for target_team in all_teams:
 				team_users = TeamUser.objects.select_related('user').filter(team=target_team).all()
-				if target_team.id is team_user.team.id:
-					win_state = target_team.is_win_to_string()
-					my_team_score = target_team.score
-					my_team_effect = target_team.effect
-					for team_user in team_users:
+				if target_team.id == team_user.team.id:
+					my_team = target_team
+					for element in team_users:
 						my_team_list.append({
-							"clientId": team_user.user.id,
-							"nickname": team_user.user.nickname,
-							"avatarUrl": team_user.user.get_image_uri()
+							"clientId": element.user.id,
+							"nickname": element.user.nickname,
+							"avatarUrl": element.user.get_image_uri()
 						})
 				else:
-					opponent_team_score = target_team.score
-					opponent_team_effect = target_team.effect
-					for team_user in team_users:
+					opponent_team = target_team
+					for element in team_users:
 						opponent_team_list.append({
-							"clientId": team_user.user.id,
-							"nickname": team_user.user.nickname,
-							"avatarUrl": team_user.user.get_image_uri()
+							"clientId": element.user.id,
+							"nickname": element.user.nickname,
+							"avatarUrl": element.user.get_image_uri()
 						})
 			game_history.append({
 				"gameId": target_game.id,
 				"timestamp": target_game.start_at.isoformat(),
-				"score": [my_team_score, opponent_team_score],
-				"win": win_state,
+				"score": [my_team.score, opponent_team.score],
+				"teamKind": [my_team.kind, opponent_team.kind],
+				"result": my_team.is_win_to_string(),
 				"mode": target_game.mode,
-				"ability": [my_team_effect, opponent_team_effect],
+				"ability": [my_team.effect, opponent_team.effect],
 				"myTeamClientInfoList": my_team_list,
 				"opponentTeamClientInfoList": opponent_team_list
 			})
