@@ -32,6 +32,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.set_pingpong_room_consumer(self.scope['url_route']['kwargs']['room_id'])
         await self.send_pingpongroom_accept_response()
         await add_group(self, self.room_id)
+        stateManager.add_consumer_to_map(self.client_id, self)
 
     def set_pingpong_room_consumer(self, room_id):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
@@ -62,6 +63,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
             await discard_group(self, self.room_id)
             await discard_group(self, room_id_team)
+            stateManager.remove_consumer_from_map(self.client_id, self)
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):

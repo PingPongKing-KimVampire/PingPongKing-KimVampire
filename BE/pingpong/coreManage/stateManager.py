@@ -27,7 +27,7 @@ class StateManager:
 
     def _initialize(self) -> None:
         self.channel_layer = None
-        self.lobby_clients = []
+        self.clients_consumer_map = {}
         self.rooms = {}
         self.match_making_loop_task = None
         self.match_queue = []
@@ -36,6 +36,27 @@ class StateManager:
         
     def get_channel_layer(self):
         return self.channel_layer
+
+    async def disconnect_previous_connect(self, client_id):
+        if client_id in self.clients_consumer_map:
+            for consumer in self.clients_consumer_map[client_id]:
+                await consumer.close()
+            del self.clients_consumer_map[client_id]
+            
+    def add_consumer_to_map(self, client_id, consumer):
+        if client_id not in self.clients_consumer_map:
+            self.clients_consumer_map[client_id] = []
+        self.clients_consumer_map[client_id].append(consumer)
+    
+    def remove_consumer_from_map(self, client_id, consumer):
+        if client_id in self.clients_consumer_map:
+            try:
+                self.clients_consumer_map[client_id].remove(consumer)
+                if not self.clients_consumer_map[client_id]:
+                    del self.clients_consumer_map[client_id]
+            except ValueError:
+                Printer.log(f"{client_id} is not in MAP", "red")
+                pass        
 
     async def authorize_client(self, consumer, headers):
         token = headers.get(b'sec-websocket-protocol', b'')
@@ -50,20 +71,6 @@ class StateManager:
         # print(consumer.nickname)
         # print(consumer.avatar_url)
 
-    def add_lobby_client(self, client_id):
-        if client_id not in self.lobby_clients:
-            self.lobby_clients.append(client_id)
-            Printer.log(f"Client {client_id} added to lobby arrary")
-        else:
-            Printer.log(f"Client {client_id} already in lobby arrary", "red")
-
-    def remove_lobby_client(self, client_id):
-        if client_id in self.lobby_clients:
-            self.lobby_clients.remove(client_id)
-            Printer.log(f"Client {client_id} removed")
-        else:
-            Printer.log(f"Client {client_id} is not in lobby arrary", "red")
-    
     def is_client_in_lobby(self, client_id):
         if client_id in self.lobby_clients:
             print(f"Client {client_id} is in the lobby.")
@@ -219,6 +226,7 @@ class StateManager:
         game_manager = room
         if game_manager:
             if game_manager.mode == 'normal':
+                del self.rooms[room_id]
                 await self.notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo': {'roomId': room_id}})
             await game_manager.trigger_game()
 

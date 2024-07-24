@@ -143,8 +143,11 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         #     await self.close()
         stateManager.add_channel_layer(self.channel_layer)
         client_id = self.decoded_token['user_id']
-        
         self.client_id = client_id
+
+        await stateManager.disconnect_previous_connect(self.client_id)
+        stateManager.add_consumer_to_map(self.client_id, self)
+        
         self.client_nickname = self.decoded_token['nickname']
         # add user 회원가입에서 이루어짐, 추후에 알림 기능 적용을 위해서 채널 만들고 관리할 필요 있음
         # stateManager.add_user(client_id, decoded_token['nickname'])

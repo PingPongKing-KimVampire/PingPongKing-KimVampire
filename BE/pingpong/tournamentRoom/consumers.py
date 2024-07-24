@@ -32,6 +32,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         await self.send_tournament_room_accept_response()
         await add_group(self, self.tournament_id)
         self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
+        stateManager.add_consumer_to_map(self.client_id, self)
         asyncio.create_task(self.start_semi_final_room(self.gameroom_id_now, self.tournament_state))
         Printer.log(f"Client connected to tournament room {self.tournament_id}", "green")
 
@@ -55,9 +56,9 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             
     async def disconnect(self, close_code):
         if self.client_id:
-            # await self.game_manager.give_up_game(self)
+            stateManager.remove_consumer_from_map(self.client_id, self)
             await discard_group(self, self.tournament_id)
-            # Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
+            # 기권 처리 추가해야함
 
     async def _send(self, event=str, content=str):
         Printer.log(f">>>>> Tournament {self.tournament_id} sent >>>>>", "bright_cyan")

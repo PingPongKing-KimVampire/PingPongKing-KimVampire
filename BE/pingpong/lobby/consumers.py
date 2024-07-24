@@ -22,6 +22,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             Printer.log("Authorize Failed, disconnect.", "red")
             await self.close()
         await add_group(self, 'lobby')
+        stateManager.add_consumer_to_map(self.client_id, self)
         Printer.log("Lobby WebSocket connection established", "green")      
         Printer.log(f"Client {self.client_id} entered lobby : {self.nickname} (id : {self.client_id})", "green")
 
@@ -29,6 +30,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Client {self.client_id} disconnected", "red")
         Printer.log(f"Close code: {close_code}", "red")
         await discard_group(self, 'lobby')
+        stateManager.remove_consumer_from_map(self.client_id, self)
 
     async def _send(self, event, content):
         Printer.log(f">>>>> LOBBY sent >>>>>", "bright_cyan")
