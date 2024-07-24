@@ -429,17 +429,13 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         await self._send("searchClientResponse", {"message": "OK", "clientList": users})
 
     async def send_game_invite_request(self, reciever_id, room_id):
-        if stateManager.is_client_in_lobby(reciever_id):
-            await self._send("sendGameInviteResponse", {"message": "OK"})
-            reciever_channel_name = channel_name_map[reciever_id]
-            from .repositories import UserRepository
-            user = await UserRepository.get_user_by_id(reciever_id)
-            await notify_client_event(self.channel_layer, reciever_channel_name, 
-                                      "notify_game_invite_arrive", 
-                                      {"client_nickname" : user.nickname, "room_id" : room_id})
-        else:
-            await self._send("sendGameInviteResponse", {"message": "NotFoundUserInLobby"})
-            
+        await self._send("sendGameInviteResponse", {"message": "OK"})
+        reciever_channel_name = channel_name_map[reciever_id]
+        from .repositories import UserRepository
+        user = await UserRepository.get_user_by_id(reciever_id)
+        await notify_client_event(self.channel_layer, reciever_channel_name, 
+                                    "notify_game_invite_arrive", 
+                                    {"clientNickname" : user.nickname, "roomId" : room_id})
     
     async def send_message(self, receiver_id, message):
         from .repositories import UserRepository
@@ -474,7 +470,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
 
     async def notify_game_invite_arrive(self, content):
         content = content['content']
-        await self._send(json.dumps({'event' : 'notifyGameInviteArrive', 'content' : content }))
+        await self._send('notifyGameInviteArrive', content)
     
     async def get_total_chat_data(self, receiver_id):
         from .repositories import UserRepository

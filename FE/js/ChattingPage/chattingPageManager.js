@@ -115,7 +115,7 @@ class ChattingPageManager {
 		this.noFriendContainer = null;
 	}
 
-	_openChatContainer() {
+	async _openChatContainer() {
 		this.isOpened = true;
 		this.chatContainer = document.createElement("div");
 		this.chatContainer.className = "chatContainer";
@@ -125,7 +125,7 @@ class ChattingPageManager {
 		const firstFriendId = this._getSortedFriendList()[0].id;
 
 		this.messageListContainer = document.querySelector(".messageListContainer");
-		this._renderEntireMessage(firstFriendId);
+		await this._renderEntireMessage(firstFriendId);
 		this._setInputButton();
 
 		this._renderFriendList(); // TODO : FriendListContainer div 비워주기, 정렬된 데이터를 가지고 렌더링
@@ -191,17 +191,38 @@ class ChattingPageManager {
 		document.querySelectorAll(".friendItem").forEach(item => {
 			item.addEventListener("click", async event => {
 				event.stopPropagation();
-				if (event.target.classList.contains("inviteButton")) {
-					console.log("초대 버튼 클릭");
-					// TODO : 초대 버튼 클릭 시 구현
+				if (event.target.classList.contains("inviteButton") && !event.target.classList.contains("disabledInviteButton")) {
+					this._inviteGame(parseInt(item.dataset.id));
 					return;
 				}
 				if (this.readingFriendId) {
 					await this._sendStopReadingMessage();
 				}
-				// this._setSelectedFriendItem(item);
+				this._setSelectedFriendItem(item);
 				this._renderEntireMessage(parseInt(item.dataset.id));
 			});
+		});
+	}
+
+	async _inviteGame(clientId) {
+		const roomId = this.clientInfo.gameInfo.roomId;
+		const sendGameInviteRequestMessage = {
+			event: "sendGameInviteRequest",
+			content: {
+				clientId,
+				roomId,
+			},
+		};
+		this.clientInfo.socket.send(JSON.stringify(sendGameInviteRequestMessage));
+		await new Promise(resolve => {
+			const listener = messageEvent => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === "sendGameInviteResponse" && content.message === "OK") {
+					this.clientInfo.socket.removeEventListener("message", listener);
+					resolve();
+				}
+			};
+			this.clientInfo.socket.addEventListener("message", listener);
 		});
 	}
 
@@ -226,17 +247,18 @@ class ChattingPageManager {
 		});
 	}
 
-	// TODO : 대기실 페이지일 때만 초대 버튼 표시하기
-	// _setSelectedFriendItem(friendItem) {
-	// 	if (this.selectedFriendItem) {
-	// 		this.selectedFriendItem.classList.remove("selectedFriendItem");
-	// 		this.selectedInviteButton.classList.add("invisible");
-	// 	}
-	// 	this.selectedFriendItem = friendItem;
-	// 	this.selectedInviteButton = friendItem.querySelector(".inviteButton");
-	// 	this.selectedFriendItem.classList.add("selectedFriendItem");
-	// 	this.selectedInviteButton.classList.remove("invisible");
-	// }
+	_setSelectedFriendItem(friendItem) {
+		//기존에 선택된게 있다면 선택되었을때의 CSS를 해제한다.
+		if (this.selectedFriendItem) {
+			this.selectedFriendItem.classList.remove("selectedFriendItem");
+			this.selectedInviteButton.classList.add("invisible");
+		}
+		this.selectedFriendItem = friendItem;
+		this.selectedInviteButton = friendItem.querySelector(".inviteButton");
+		this.selectedFriendItem.classList.add("selectedFriendItem");
+		if(this.clientInfo.currentPage === "waitingRoom")
+			this.selectedInviteButton.classList.remove("invisible");
+	}
 
 	_renderFriendList() {
 		const friendListContainer = document.querySelector(".FriendListContainer");
@@ -246,13 +268,15 @@ class ChattingPageManager {
 			friendItem.querySelector(".avatarImg").addEventListener("click", e => {
 				e.stopPropagation();
 				alert(`ID는 ${id}다`);
+				//프로필 페이지로 이동
+				//채팅 인터페이스 닫음
 			});
 		});
 		const friendItems = Array.from(document.querySelectorAll(".friendItem"));
 		const readingItem = friendItems.find(item => {
 			return parseInt(item.dataset.id) === this.readingFriendId;
 		});
-		// this._setSelectedFriendItem(readingItem);
+		this._setSelectedFriendItem(readingItem);
 		this._setFriendItems();
 	}
 
