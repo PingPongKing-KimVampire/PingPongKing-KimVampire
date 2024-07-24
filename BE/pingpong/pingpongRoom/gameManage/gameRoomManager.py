@@ -209,29 +209,9 @@ class GameRoomManager:
             await self._send_ball_update(ball_state, self.ball)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
         print('루프 끝')
+        self.end_time = timezone.now()
         await self.save_data_to_db()
         await self._notify_game_room('notifyGameEnd', {'winTeam': self.win_team})
-
-    async def save_data_to_db(self):
-        data = {
-            "start_time" : self.start_time,
-            "end_time" : self.end_time,
-            "mode": self.get_game_mode(),
-            "team1_users": self.get_client_id_list('left'),
-            "team1_kind": self.left_mode,
-            "team2_users": self.get_client_id_list('right'),
-            "team2_kind": self.right_mode,
-            "team1_ability": self.left_ability,
-            "team2_ability": self.right_ability,
-            "win_team" : self.win_team,
-            "team1_score" : self.score[LEFT],
-            "team2_score" : self.score[RIGHT],
-            "round": self.game_data
-        }
-        from pingpongRoom.repositories import GameRepository
-        game = await GameRepository.save_game_async(data)
-        print(game)
-        # game None 처리 필요
 
     # async def _input_loop(self):
     #     while self.is_playing and not self.is_end:
