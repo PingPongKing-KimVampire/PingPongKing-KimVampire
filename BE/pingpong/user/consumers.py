@@ -435,7 +435,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         user = await UserRepository.get_user_by_id(reciever_id)
         await notify_client_event(self.channel_layer, reciever_channel_name, 
                                     "notify_game_invite_arrive", 
-                                    {"client_nickname" : user.nickname, "room_id" : room_id})
+                                    {"clientNickname" : user.nickname, "roomId" : room_id})
     
     async def send_message(self, receiver_id, message):
         from .repositories import UserRepository
