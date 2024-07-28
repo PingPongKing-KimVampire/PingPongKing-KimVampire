@@ -4,19 +4,78 @@ class StatisticsPageManager {
 	constructor(app, clientInfo) {
 		this.app = app;
 		this.clientInfo = clientInfo;
-
-		this.points1 = [1, 2, 2, 2, 2, 3, 3, 3]; // TODO : 임시 하드코딩
-		this.points2 = [0, 0, 1, 2, 3, 3, 4, 5];
-		this.winningScore = 5;
-		this.round = this.points1.length;
-
 		this._initPage();
 	}
 
-	_initPage() {
+	async _initPage() {
+		// TODO : timestamp ~ opponnetTeamClientInfoList 까지는 이전에 받았던 거 재활용할 수 없을까?
+		// TODO : profileTarget.id랑 gameId는 어떻게 얻어올 수 있을까?
+		// const { timestamp, 
+		// 		score, 
+		// 		mode, 
+		// 		teamKind, 
+		// 		ability, 
+		// 		myTeamClientInfoList, 
+		// 		opponnetTeamClientInfoList, 
+		// 		word, 
+		// 		scoreList, 
+		// 		hitMapList } = await this._getClientGameDetail(profileTarget.id, gameId);
+
+		// TODO : 임시 하드 코딩
+		this.word = "그 실력에 잠이 오냐?";
+		this.hitMap = {
+			1 : [{"type" : "SCORE", "y" : 1000, "x" : 1550}, 
+				{"type" : "PADDLE", "y" : 0, "x" : 0}],
+	 		2 : [{"type" : "SCORE", "y" : 1000, "x" : 0},
+				{"type" : "PADDLE", "y" : 0, "x" : 1550}],
+			3 : [{"type" : "SCORE", "y" : 500, "x" : 775},
+				{"type" : "PADDLE", "y" : 800, "x" : 300}],	
+		}
+		const scoreList = ["win", "lose", "win", "win", "win", "win"];
+		const { myPoints, opponentPoints } = this._getPoints(scoreList);
+		this.myPoints = myPoints;
+		this.opponentPoints = opponentPoints;
+		this.round = scoreList.length;
+		this.winningScore = 5;
+		
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
 		requestAnimationFrame(this._renderScoreGraph.bind(this));
+	}
+
+	_getPoints(scoreList) {
+		let myPoint = 0;
+		let opponentPoint = 0;
+		const myPoints = [];
+		const opponentPoints = [];
+		scoreList.forEach((score) => {
+			if (score === 'win') {
+				myPoint++;
+			} else if (score === 'lose') {
+				opponentPoint++;
+			}
+			myPoints.push(myPoint);
+			opponentPoints.push(opponentPoint);
+		});
+		return { myPoints, opponentPoints };
+	}
+
+	async _getClientGameDetail(clientId, gameId) {
+		const getClientGameDetailMessage = {
+			event: "getClientGameDetail",
+			content: { clientId, gameId }
+		};
+		this.clientInfo.socket.send(JSON.stringify(getClientGameDetailMessage));
+		return await new Promise(resolve => {
+			const listener = messageEvent => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				if (event === "getClientGameDetailResponse") {
+					this.clientInfo.socket.removeEventListener("message", listener);
+					resolve(content);
+				}
+			};
+			this.clientInfo.socket.addEventListener("message", listener);
+		});
 	}
 
 	_subscribeWindow() {
@@ -68,8 +127,8 @@ class StatisticsPageManager {
 			});
 		}
 
-		renderLine(this.points1, '#BEBEBE');
-		renderLine(this.points2, '#D570FF');
+		renderLine(this.myPoints, '#BEBEBE');
+		renderLine(this.opponentPoints, '#D570FF');
 	}
 
 	_getHTML() {
@@ -87,7 +146,7 @@ class StatisticsPageManager {
 		return `
 			<div id="mainInfoContainer">
 				${this._getMainPanelHTML()}
-				${this._getWordPanelHTML()}
+				${this._getWordPanelHTML(this.word)}
 			</div>
 		`;
 	}
@@ -96,11 +155,11 @@ class StatisticsPageManager {
 			<div id="mainPanel"></div>
 		`;
 	}
-	_getWordPanelHTML() {
+	_getWordPanelHTML(word) {
 		return `
 			<div id="wordPanel">
 				<div id="wordTitle">탁구왕 김뱀파이어의 한 마디</div>
-				<div id="word">"그 실력에 잠이 오냐?"</div>
+				<div id="word">${word}</div>
 			</div>
 		`;
 	}
