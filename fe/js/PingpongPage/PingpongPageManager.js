@@ -1,113 +1,70 @@
-import Player from './Player.js';
-import PingpongRenderer from './PingpongRenderer.js';
+import Player from "./Player.js";
+import PingpongRenderer from "./PingpongRenderer.js";
 
 class PingpongPageManager {
-	constructor(app, clientInfo, onExitPingpong, renderTournament) {
+	constructor(app, clientInfo, renderPage) {
 		this.app = app;
-		this.clientInfo = {
-			socket: null,
-			id: null,
-			nickname: null,
-			lobbySocket: null,
-			gameInfo: {
-				pingpongRoomSocket: null,
-				roomId: null,
-				title: null,
-				teamLeftList: null,
-				teamRightList: null,
-				teamLeftMode: null,
-				teamRightMode: null,
-				sizeInfo: {
-					boardWidth: null,
-					boardHeight: null,
-					// paddleWidth: null,
-					// paddleHeight: null,
-					ballRadius: null,
-				},
-			},
-		};
-		//playerList 정보
-		// clientId;
-		// clientNickname;
-		// readyState;
-		// ability;
-		// paddleHeight;
-		// paddleWidth;
-
 		this.clientInfo = clientInfo;
-		this.onExitPingpong = onExitPingpong;
-		this.renderTournament = renderTournament;
-		this.playerList = [];
+		this.renderPage = renderPage;
+	}
+
+	connectPage() {}
+
+	clearPage() {
+		this.clientInfo.gameInfo = null;
 	}
 
 	async initPage() {
 		//하드코딩
-		this.clientInfo.gameInfo.sizeInfo.paddleWidth = 15;
-		this.clientInfo.gameInfo.sizeInfo.paddleHeight = 150;
+		this.playerList = [];
 		this.app.innerHTML = this._getPingpongHTML();
 
 		this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
-		if(this.clientInfo.gameInfo.role !== "observer")
-			this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
+		if (this.clientInfo.gameInfo.role !== "observer") this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 
 		this._manageExitRoom(); // 탁구장 나가기 처리
 
 		// 탁구장 폐쇄 감지
 		// TODO : 현재 테스트 불가능
 		const closeListener = () => {
-			this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener('close', closeListener);
+			this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("close", closeListener);
 			this._cleanupPingpongInteraction();
 			this._displayGameOverModal();
-		}
-		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener('close', closeListener);
+		};
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("close", closeListener);
 
 		// TODO : 탁구장 폐쇄 감지가 불가능해서 임시로 notifyGameEnd API 활용
-		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener('message', (messageEvent) => {
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", messageEvent => {
 			const { event } = JSON.parse(messageEvent.data);
-			if (event === 'notifyGameEnd') {
-				console.log('notify game end!');
+			if (event === "notifyGameEnd") {
+				console.log("notify game end!");
 				this.clientInfo.gameInfo.pingpongRoomSocket.close();
 			}
-		})
+		});
 	}
 
 	_manageExitRoom() {
-		const exitButton = document.querySelector('.exitButton');
-		const exitYesButton = document.querySelector(
-			'.questionModal .activatedButton:nth-of-type(1)'
-		);
-		const exitNoButton = document.querySelector(
-			'.questionModal .activatedButton:nth-of-type(2)'
-		);
-		const questionModal = document.querySelector('.questionModal');
-		exitButton.addEventListener(
-			'click',
-			this._exitButtonClicked.bind(this, questionModal)
-		);
-		exitYesButton.addEventListener(
-			'click',
-			this._exitYesButtonClicked.bind(this)
-		);
-		exitNoButton.addEventListener(
-			'click',
-			this._exitNoButtonClicked.bind(this, questionModal)
-		);
+		const exitButton = document.querySelector(".exitButton");
+		const exitYesButton = document.querySelector(".questionModal .activatedButton:nth-of-type(1)");
+		const exitNoButton = document.querySelector(".questionModal .activatedButton:nth-of-type(2)");
+		const questionModal = document.querySelector(".questionModal");
+		exitButton.addEventListener("click", this._exitButtonClicked.bind(this, questionModal));
+		exitYesButton.addEventListener("click", this._exitYesButtonClicked.bind(this));
+		exitNoButton.addEventListener("click", this._exitNoButtonClicked.bind(this, questionModal));
 	}
 	_exitButtonClicked(questionModal) {
-		questionModal.style.display = 'flex';
+		questionModal.style.display = "flex";
 	}
 	_exitYesButtonClicked() {
-		this.clientInfo.socket.close();
 		this._cleanupPingpongInteraction();
-		if(this.clientInfo.tournamentInfo)
-		{
-			this.renderTournament();
+		if (this.clientInfo.tournamentInfo) {
+			this.renderPage("tournament");
 			return;
 		}
-		this.onExitPingpong();
+		this.renderPage("lobby");
 	}
 	_exitNoButtonClicked(questionModal) {
-		questionModal.style.display = 'none';
+		questionModal.style.display = "none";
 	}
 
 	_cleanupPingpongInteraction() {
@@ -119,15 +76,14 @@ class PingpongPageManager {
 	}
 
 	_displayGameOverModal() {
-		const gameOverModal = document.querySelector('#gameOverModal');
-		gameOverModal.style.display = 'flex';
-		document.querySelector('#gameOverModal button').addEventListener('click', () => {
-			if(this.clientInfo.tournamentInfo)
-			{
-				this.renderTournament();
+		const gameOverModal = document.querySelector("#gameOverModal");
+		gameOverModal.style.display = "flex";
+		document.querySelector("#gameOverModal button").addEventListener("click", () => {
+			if (this.clientInfo.tournamentInfo) {
+				this.renderPage("tournament");
 				return;
 			}
-			this.onExitPingpong();
+			this.renderPage("lobby");
 		});
 	}
 
@@ -148,7 +104,7 @@ class PingpongPageManager {
 				<div id="leftDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamLeftScore?0:this.clientInfo.gameInfo.teamLeftScore}</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamLeftScore ? 0 : this.clientInfo.gameInfo.teamLeftScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>
@@ -158,7 +114,7 @@ class PingpongPageManager {
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamRightScore?0:this.clientInfo.gameInfo.teamRightScore}</div></div>
+						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamRightScore ? 0 : this.clientInfo.gameInfo.teamRightScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>

@@ -5,85 +5,56 @@ import { SERVER_PORT } from "./../PageRouter.js";
 import { _connectLobbySocket } from "../connect.js";
 
 class TournamentAnimationPageManager {
-	constructor(app, clientInfo, _onStartPingpongGame, renderTournamentPage, renderLobbyPage) {
+	constructor(app, clientInfo, renderPage) {
 		this.app = app;
-		this._onStartPingpongGame = _onStartPingpongGame;
-		this.renderTournamentPage = renderTournamentPage;
-		this.renderLobbyPage = renderLobbyPage;
+		this.renderPage = renderPage;
 		this.clientInfo = clientInfo;
-
-		//tournamentSocket의 리스너는 토너먼트 시작과 나가기때만 등록, 해제한다?
-
-		// this.clientInfo.tournamentInfo.tournamentSocket
-		// this.clientInfo.tournamentInfo.tournamentClientList
-
-		// this.clientInfo = {
-		// 	tournamentInfo: {
-		// 		tournamentClientList: {},
-		// 	},
-		// };
-
-		// this.clientInfo.tournamentInfo.tournamentClientList = [
-		// 	// TODO : 토너먼트 입장 시 받은 정보로 갈아끼우기
-		// 	{
-		// 		id: "1",
-		// 		nickname: "김뱀파이어어어어어어어어엉어어어어어",
-		// 		avatarUrl: "images/playerA.png",
-		// 	},
-		// 	{
-		// 		id: "2",
-		// 		nickname: "김뱀파이어",
-		// 		avatarUrl: "images/playerB.png",
-		// 	},
-		// 	{
-		// 		id: "3",
-		// 		nickname: "김뱀파",
-		// 		avatarUrl: "images/playerC.svg",
-		// 	},
-		// 	{
-		// 		id: "4",
-		// 		nickname: "김뱀",
-		// 		avatarUrl: "images/noFriendVampire3.webp",
-		// 	},
-		// ];
-
-		// this.tournamentInfo = {
-		// 	semiFinal: [
-		// 		{
-		// 			clientIdList: ["1", "2"],
-		// 			score: [0, 10],
-		// 			roomId: "123456",
-		// 			state: "finished", //notStarted|isPlaying|finished
-		// 		},
-		// 		{
-		// 			clientIdList: ["3", "4"],
-		// 			score: [10, 0],
-		// 			roomId: "1234",
-		// 			state: "isPlaying",
-		// 		},
-		// 	],
-		// 	final: [
-		// 		{
-		// 			clientIdList: ["2", "3"],
-		// 			score: [10, 0],
-		// 			roomId: "123456",
-		// 			state: "finished",
-		// 		},
-		// 	],
-		// };
-
-		// 정보 업데이트
-		// setTimeout(this._initAnimation.bind(this, "final"), 1000);
-
-		this.commonInitPage();
 	}
 
-	async commonInitPage() {
+	async connectPage() {
+		async function _connectTournamentSocket(id) {
+			const tournamentSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`, ["authorization", this.clientInfo.accessToken]);
+			await new Promise(resolve => {
+				tournamentSocket.addEventListener("open", () => {
+					resolve();
+				});
+			});
+			const tournamentClientList = await new Promise(resolve => {
+				const listener = messageEvent => {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === "enterTournamentRoomResponse") {
+						tournamentSocket.removeEventListener("message", listener);
+						resolve(content.tournamentClientList);
+					}
+				};
+				tournamentSocket.addEventListener("message", listener);
+			});
+			return { tournamentSocket, tournamentClientList };
+		}
 		if (!this.clientInfo.tournamentInfo.isInit) {
+			const { tournamentSocket, tournamentClientList } = await _connectTournamentSocket.call(this, this.clientInfo.tournamentInfo.tournamentId);
+			this.clientInfo.tournamentInfo.tournamentSocket = tournamentSocket;
+			this.clientInfo.tournamentInfo.tournamentClientList = tournamentClientList;
+			this.clientInfo.tournamentInfo.renderingMode = "normal";
+			this.clientInfo.tournamentInfo.stage = "semiFinal";
 			this._listenTournamentEvent();
 			this.clientInfo.tournamentInfo.isInit = true;
 		}
+
 		await this._getTournamentInfo();
+	}
+
+	async clearPage() {
+		this._unsubscribeWindow();
+		if (this.clientInfo.nextPage === "lobby") {
+			this.clientInfo.tournamentInfo.tournamentSocket.close();
+			this.clientInfo.tournamentInfo = null;
+		} else if (this.clientInfo.nextPage === "tournament") {
+		} else if (this.clientInfo.nextPage === "pingpong") {
+		}
+	}
+
+	async initPage() {
 		this.app.innerHTML = this._getHTML();
 		this._setExitButton();
 		this._subscribeWindow();
@@ -338,8 +309,7 @@ class TournamentAnimationPageManager {
 			if (this.tournamentInfo.semiFinal[0].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[0].winnerId;
 			else if (this.tournamentInfo.semiFinal[1].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[1].winnerId;
 			//아직 경기 전
-			if(winnerId === null || winnerId === undefined)
-				return false;
+			if (winnerId === null || winnerId === undefined) return false;
 			return id !== winnerId;
 		};
 		const isTournamentEnd = () => this.tournamentInfo.final[0].state === "finished";
@@ -354,11 +324,7 @@ class TournamentAnimationPageManager {
 			this.app.insertAdjacentHTML("afterbegin", buttonHTML);
 			const tournamentExitButton = document.querySelector(".tournamentExitButton");
 			tournamentExitButton.addEventListener("click", async () => {
-				this.clientInfo.tournamentInfo.tournamentSocket.close();
-				this.clientInfo.tournamentInfo = null;
-				this._unsubscribeWindow();
-				this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
-				this.renderLobbyPage();
+				this.renderPage("lobby");
 			});
 		};
 		if (isSemiFinalLoser(this.clientInfo.id) || isTournamentEnd()) {
@@ -402,7 +368,7 @@ class TournamentAnimationPageManager {
 		await _renderTournamentWarning.call(this);
 		this.clientInfo.tournamentInfo.renderingMode = "animation";
 		this.clientInfo.tournamentInfo.stage = stage;
-		this.renderTournamentPage();
+		this.renderPage("tournament");
 	}
 
 	async _enterWaitingRoom(roomId) {
@@ -483,7 +449,7 @@ class TournamentAnimationPageManager {
 		});
 		this.clientInfo.gameInfo.sizeInfo = boardInfo;
 		this._unsubscribeWindow();
-		this._onStartPingpongGame();
+		this.renderPage("pingpong");
 	}
 
 	_calculatePoints() {

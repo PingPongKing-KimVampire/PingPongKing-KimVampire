@@ -2,17 +2,20 @@ const SERVER = "127.0.0.1";
 const PORT = 3001;
 
 class SignupPageManager {
-	constructor(app, clientInfo, onSignupSuccess) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("Sign up Page!");
 
 		this.clientInfo = clientInfo;
-		this.onSignupSuccess = onSignupSuccess;
-		app.innerHTML = this._getHTML();
-
-		this._initPage();
+		this.app = app;
+		this.renderPage = renderPage;
 	}
 
-	_initPage() {
+	connectPage() {}
+
+	clearPage() {}
+
+	initPage() {
+		this.app.innerHTML = this._getHTML();
 		this.idValidState = false;
 		this.pwValidState = false;
 		this.rePwValidState = false;
@@ -240,7 +243,7 @@ class SignupPageManager {
 		// const data = await response.json();
 		// console.log('회원가입 성공:', data);
 		// 회원가입 성공 후 추가 작업 (예: 리디렉션)
-		this.onSignupSuccess();
+		this.renderPage("login");
 	};
 	_displaySignupFailureNotiWindow(infomation) {
 		const notiWindow = document.querySelector('.notiWindow');

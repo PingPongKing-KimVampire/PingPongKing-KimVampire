@@ -1,18 +1,23 @@
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
 
 class LoginPageManager {
-	constructor(app, clientInfo, onLoginSuccess, onEnterSignupPage) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("Login Page!");
 
 		this.clientInfo = clientInfo;
-		this.onLoginSuccess = onLoginSuccess;
-		this.onEnterSignupPage = onEnterSignupPage;
-		app.innerHTML = this._getHTML();
+		this.renderPage = renderPage;
+		this.app = app;
 	}
 
+	connectPage() {
+		// 이미 웹소켓에 연결되어 있는 사용자는 어떻게 처리할 것인가? 로비페이지로 라우팅?
+	}
+
+	clearPage() {}
+
 	initPage() {
+		this.app.innerHTML = this._getHTML();
 		this.idInput = document.querySelector("#idInput");
 		this.pwInput = document.querySelector("#pwInput");
 		this.idInput.addEventListener("input", this._updateLoginButton.bind(this));
@@ -24,7 +29,7 @@ class LoginPageManager {
 		this.loginButton.disabled = true;
 		this.loginButton.addEventListener("click", this._loginListener.bind(this));
 
-		document.querySelector("#signupButton").addEventListener("click", this.onEnterSignupPage);
+		document.querySelector("#signupButton").addEventListener("click", this.renderPage.bind(this, "signup"));
 	}
 
 	_updateLoginButton() {
@@ -46,18 +51,17 @@ class LoginPageManager {
 		try {
 			await this._loginRequest(id, pw);
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			const lobbySocket = await _connectLobbySocket(this.accessToken);
 
 			this.clientInfo.id = userData.id;
 			this.clientInfo.nickname = userData.nickname;
 			this.clientInfo.avatarUrl = userData.avatarUrl;
 			this.clientInfo.socket = socket;
-			this.clientInfo.lobbySocket = lobbySocket;
 			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
 			this.clientInfo.accessToken = this.accessToken;
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
 
-			this.onLoginSuccess();
+			this.renderPage("chatting");
+			this.renderPage("lobby");
 		} catch (error) {
 			this.warning.textContent = error.message;
 		}
@@ -95,7 +99,7 @@ class LoginPageManager {
 	}
 
 	async _connectGlobalSocket(id) {
-		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws`, ['authorization', this.accessToken]);
+		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws`, ["authorization", this.accessToken]);
 		await new Promise(resolve => {
 			socket.addEventListener("open", () => {
 				resolve();
