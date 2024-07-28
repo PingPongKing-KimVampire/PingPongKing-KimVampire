@@ -10,6 +10,7 @@ import ChattingPageManager from "./ChattingPage/chattingPageManager.js";
 import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPageManager.js";
 import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
+import ErrorPageManager from "./ErrorPage/ErrorPageManager.js";
 
 export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_PORT = "3001";
@@ -17,6 +18,7 @@ export const SERVER_PORT = "3001";
 class PageRouter {
 	constructor() {
 		this.app = document.querySelector("#app");
+		this.chatButton = document.querySelector(".chatButton");
 		this.clientInfo = {
 			socket: null,
 			id: null,
@@ -74,9 +76,17 @@ class PageRouter {
 				],
 			},
 		};
+
+		window.addEventListener("popstate", event => {
+			const allPath = window.location.pathname;
+			const match = allPath.match(/\/([^\/]+)$/);
+			const path = match ? match[1] : null;
+			this.renderPage(path, false);
+		});
 	}
 
-	async renderPage(url) {
+	async renderPage(url, isUpdateHistory = true) {
+		//채팅은 따로 렌더링 -> 추후 변경해야할듯?
 		if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
 			const chattingPageManager = new ChattingPageManager(this.clientInfo);
@@ -84,54 +94,83 @@ class PageRouter {
 		}
 		try {
 			this.clientInfo.nextPage = url;
+			if (this.currentPageManager) await this.currentPageManager.clearPage();
 			if (url === "login") {
 				this._loadCSS(["css/LoginPage/LoginPage.css"]);
+				this._inVisibleChatButton();
 				this.nextPageManager = new LoginPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "signup") {
 				this._loadCSS(["css/SignupPage/signupPage.css"]);
+				this._inVisibleChatButton();
 				this.nextPageManager = new SignupPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "lobby") {
 				this._loadCSS(["css/LobbyPage/lobbyPage.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new NewLobbyPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "waitingRoomCreation") {
 				this._loadCSS(["css/LobbyPage/waitingRoomCreationPage.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "waitingRoom") {
 				this._loadCSS(["css/WaitingRoomPage/waitingRoomPage.css", "css/WaitingRoomPage/abilitySelectionModal.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new WaitingRoomPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "pingpong") {
 				this._loadCSS(["css/PingpongPage/pingpongPage.css"]);
+				this._inVisibleChatButton();
 				this.nextPageManager = new PingpongPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "profile") {
 				this._loadCSS(["css/ProfilePage/profilePage.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new ProfilePageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "editProfile") {
 				this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new EditProfilePageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "friendManagement") {
 				this._loadCSS(["css/FriendManagementPage/friendManagementPage.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new FriendManagementPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "waitingTournament") {
 				this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "tournament") {
 				this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
+				this._visibleChatButton();
 				this.nextPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			}
 			await this.nextPageManager.connectPage();
-			if (this.currentPageManager) await this.currentPageManager.clearPage();
 
 			this.clientInfo.currentPage = url;
+			if(isUpdateHistory)
+				history.pushState({}, "", url);
 			this.currentPageManager = this.nextPageManager;
 			this.nextPageManager = null;
 			await this.currentPageManager.initPage();
 		} catch (e) {
 			console.log(e);
 			this.clientInfo.nextPage = null;
+			this.nextPageManager = null;
 			// 실패했을경우 nextPageManager에 대한 clearPage를 해야할까?
+			// 실패하면 알아서 해야하지 않을까?
 			// this.nextPageManager.clearPage();
-			this.nextPage = null;
+
+			this.clientInfo.currentPage = "error";
+			//replace URL Path
+			this.currentPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			await this.currentPageManager.initPage();
 		}
+	}
+
+	_visibleChatButton(){
+		this.chatButton.classList.add("visible");
+		this.chatButton.classList.remove("inVisible");
+	}
+
+	_inVisibleChatButton(){
+		this.chatButton.classList.add("inVisible");
+		this.chatButton.classList.remove("visible");
 	}
 
 	_loadCSS(filenames) {

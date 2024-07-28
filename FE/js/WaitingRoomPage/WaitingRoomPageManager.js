@@ -43,7 +43,6 @@ class WaitingRoomPageManager {
 	}
 
 	async clearPage() {
-		console.log(this.clientInfo.nextPage);
 		if (this.clientInfo.nextPage === "pingpong") {
 			this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", this.listener);
 			return;
@@ -260,7 +259,7 @@ class WaitingRoomPageManager {
 			questionModal.style.display = "flex";
 		});
 		exitYesButton.addEventListener("click", () => {
-			this.renderPage("lobby");
+			history.back();
 		});
 		exitNoButton.addEventListener("click", () => {
 			questionModal.style.display = "none";

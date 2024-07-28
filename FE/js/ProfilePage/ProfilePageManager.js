@@ -48,7 +48,7 @@ class ProfilePageManager {
 
 	_setExitButton() {
 		document.querySelector(".exitButton").addEventListener("click", async () => {
-			this.renderPage("lobby");
+			history.back();
 		});
 	}
 

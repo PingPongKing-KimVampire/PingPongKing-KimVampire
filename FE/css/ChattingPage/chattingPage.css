@@ -5,6 +5,15 @@
 	bottom: 1.5vw;
 	left: 1.5vw;
 	background: url('../../images/chattingIcon.png') center/cover;
+	z-index: 100;
+}
+
+.visible{
+	visibility: visible;	
+}
+
+.inVisible{
+	visibility: hidden;	
 }
 
 .chatButton:hover {

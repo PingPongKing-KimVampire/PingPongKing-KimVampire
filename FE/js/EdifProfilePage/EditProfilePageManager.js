@@ -202,7 +202,7 @@ class EditProfilePageManager {
 	};
 	_exitEditProfilePage = () => {
 		this.clientInfo.profileTarget = { id: this.clientInfo.id };
-		this.renderPage("profile");
+		history.back();
 	};
 	_hideExitModal = () => {
 		this.exitModal.style.display = "none";

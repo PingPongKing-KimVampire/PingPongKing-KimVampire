@@ -1,6 +1,4 @@
 import windowObservable from "../../WindowObservable.js";
-import { SERVER_ADDRESS } from "./../PageRouter.js";
-import { SERVER_PORT } from "./../PageRouter.js";
 
 class WaitingTournamentPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -68,7 +66,7 @@ class WaitingTournamentPageManager {
 				};
 				this.clientInfo.lobbySocket.addEventListener("message", listener);
 			});
-			this.renderPage("lobby");
+			history.back();
 		});
 	}
 
