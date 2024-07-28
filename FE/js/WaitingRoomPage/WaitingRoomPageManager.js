@@ -1,45 +1,85 @@
 import windowObservable from "../../WindowObservable.js";
+import { _connectLobbySocket } from "../connect.js";
 
 import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
 
 class WaitingRoomPageManager {
-	constructor(app, clientInfo, _onStartPingpongGame, _onExitWaitingRoom) {
-		this.app = app;
-		this._onStartPingpongGame = _onStartPingpongGame;
-		this._onExitWaitingRoom = _onExitWaitingRoom;
+	constructor(app, clientInfo, renderPage) {
 		console.log("Waiting Room Page!");
-		this.clientInfo = {
-			socket: null,
-			id: null,
-			nickname: null,
-			lobbySocket: null,
-			gameInfo: {
-				pingpongRoomSocket: null,
-				roomId: null,
-				title: null,
-				teamLeftList: null,
-				teamRightList: null,
-				teamLeftMode: null,
-				teamRightMode: null,
-				teamLeftTotalPlayerCount: null,
-				teamRightTotalPlayerCount: null,
-				teamLeftAbility: null,
-				teamRightAbility: null,
-			},
-		};
-
-		// const playerInfo = {
-		// 	id: null,
-		// 	nickname: null,
-		// 	readyState: null
-		// }
+		this.app = app;
 		this.clientInfo = clientInfo;
+		this.renderPage = renderPage;
+	}
 
+	async connectPage() {
+		//로비에서 얻을 수 있는 gameInfo가 세팅되지 않은 상태에서 이 페이지에 접근하면 문제생김
+		//gameInfo가 세팅되어 있는지 체크해야 할 것 같다.
+		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${this.clientInfo.gameInfo.roomId}`, ["authorization", this.clientInfo.accessToken]);
+		await new Promise(resolve => {
+			pingpongRoomSocket.addEventListener("open", () => {
+				resolve();
+			});
+		});
+
+		const { teamLeftList, teamRightList, teamLeftAbility, teamRightAbility } = await new Promise(resolve => {
+			pingpongRoomSocket.addEventListener(
+				"message",
+				function listener(messageEvent) {
+					const { event, content } = JSON.parse(messageEvent.data);
+					if (event === "enterWaitingRoomResponse") {
+						pingpongRoomSocket.removeEventListener("message", listener);
+						resolve(content);
+					}
+				}.bind(this),
+			);
+		});
+
+		this.clientInfo.gameInfo.pingpongRoomSocket = pingpongRoomSocket;
+		this.clientInfo.gameInfo.teamLeftList = teamLeftList;
+		this.clientInfo.gameInfo.teamRightList = teamRightList;
+		this.clientInfo.gameInfo.teamLeftAbility = teamLeftAbility;
+		this.clientInfo.gameInfo.teamRightAbility = teamRightAbility;
+	}
+
+	async clearPage() {
+		console.log(this.clientInfo.nextPage);
+		if (this.clientInfo.nextPage === "pingpong") {
+			this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", this.listener);
+			return;
+		}
+		//게임이면 gameInfo null 초기화 안함
+		this.clientInfo.gameInfo.pingpongRoomSocket.close();
+		this.clientInfo.gameInfo = null;
+	}
+
+	initPage() {
 		this._setMeInfo();
-		this._initPage();
+		this.app.innerHTML = this._getHTML();
+
+		this.leftReadyText = document.querySelector(".teamPanel:first-of-type .readyText");
+		this.rightReadyText = document.querySelector(".teamPanel:last-of-type .readyText");
+		this._subscribeWindow();
+		document.querySelector("#readyButton").addEventListener("click", event => {
+			this._sendMyReadyStateChangeMessage.call(this);
+		});
+		this._manageExitRoom();
+		this._setAbilityButtons();
 		this._listenWaitingRoomEvent();
+	}
+
+	_rerenderPage() {
+		this.app.innerHTML = this._getHTML();
+		this.leftReadyText = document.querySelector(".teamPanel:first-of-type .readyText");
+		this.rightReadyText = document.querySelector(".teamPanel:last-of-type .readyText");
+		const orientation = windowObservable.getOrientation();
+		this._toggleReadyTextVisible(orientation);
+		this._subscribeWindow();
+		document.querySelector("#readyButton").addEventListener("click", event => {
+			this._sendMyReadyStateChangeMessage.call(this);
+		});
+		this._manageExitRoom();
+		this._setAbilityButtons();
 	}
 
 	_setMeInfo() {
@@ -61,21 +101,6 @@ class WaitingRoomPageManager {
 		}
 		this.me.mode = this.me.team === "left" ? this.clientInfo.gameInfo.teamLeftMode : this.clientInfo.gameInfo.teamRightMode;
 	}
-	_initPage() {
-		this.app.innerHTML = this._getHTML();
-
-		this.leftReadyText = document.querySelector(".teamPanel:first-of-type .readyText");
-		this.rightReadyText = document.querySelector(".teamPanel:last-of-type .readyText");
-
-		const orientation = windowObservable.getOrientation();
-		this._toggleReadyTextVisible(orientation);
-		this._subscribeWindow();
-		document.querySelector("#readyButton").addEventListener("click", event => {
-			this._sendMyReadyStateChangeMessage.call(this);
-		});
-		this._manageExitRoom();
-		this._setAbilityButtons();
-	}
 
 	_setAbilityButtons() {
 		this.abilityModal = document.querySelector(".abilitySelectionModal");
@@ -94,25 +119,27 @@ class WaitingRoomPageManager {
 	}
 
 	_listenWaitingRoomEvent() {
-		const listener = messageEvent => {
+		this.listener = messageEvent => {
 			const message = JSON.parse(messageEvent.data);
 			const { event, content } = message;
 			if (event === "notifyWaitingRoomEnter") {
 				const { id, nickname, team, avatarUrl } = content;
 				this._pushNewPlayer(id, nickname, team, avatarUrl);
-				this._initPage();
+				this._rerenderPage();
 			} else if (event === "notifyWaitingRoomExit") {
 				const clientId = content.clientId;
 				this._popPlayer(clientId);
-				this._initPage();
+				this._rerenderPage();
 			} else if (event === "notifyReadyStateChange") {
 				const { clientId, state } = content;
 				this._updateReadyState(clientId, state);
 				if (clientId === this.clientInfo.id) this.me.readyState = state;
-				this._initPage();
+				this._rerenderPage();
 			} else if (event === "notifyGameReady") {
 				//3, 2, 1 추후 구현
 			} else if (event === "notifyGameStart") {
+				console.log("NOTIFY GAME START!!!");
+
 				content.playerInfo.forEach(player => {
 					let targetPlayer = this.clientInfo.gameInfo.teamLeftList.find(leftPlayer => leftPlayer.id === player.clientId);
 					if (!targetPlayer) targetPlayer = this.clientInfo.gameInfo.teamRightList.find(rightPlayer => rightPlayer.id === player.clientId);
@@ -121,8 +148,7 @@ class WaitingRoomPageManager {
 					targetPlayer.paddleWidth = player.paddleWidth;
 				});
 				this.clientInfo.gameInfo.sizeInfo = content.boardInfo;
-				this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", listener);
-				this._onStartPingpongGame();
+				this.renderPage("pingpong");
 			} else if (event === "notifySelectAbility") {
 				if (content.team === "left") {
 					this.clientInfo.gameInfo.teamLeftAbility = content.ability;
@@ -135,7 +161,7 @@ class WaitingRoomPageManager {
 				this._initPage();
 			}
 		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", listener);
+		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", this.listener);
 	}
 
 	_pushNewPlayer(id, nickname, team, avatarUrl) {
@@ -234,17 +260,11 @@ class WaitingRoomPageManager {
 			questionModal.style.display = "flex";
 		});
 		exitYesButton.addEventListener("click", () => {
-			this._exitWaitingRoom();
+			this.renderPage("lobby");
 		});
 		exitNoButton.addEventListener("click", () => {
 			questionModal.style.display = "none";
 		});
-	}
-	async _exitWaitingRoom() {
-		this.clientInfo.gameInfo.pingpongRoomSocket.close();
-		this.clientInfo.gameInfo = null;
-		this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
-		this._onExitWaitingRoom();
 	}
 
 	_getHTML() {

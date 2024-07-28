@@ -24,6 +24,7 @@ class PageRouter {
 			avatarUrl: null,
 			lobbySocket: null,
 			currentPage: null,
+			nextPage: null,
 			gameInfo: {
 				pingpongRoomSocket: null,
 				roomId: null,
@@ -35,7 +36,7 @@ class PageRouter {
 				teamLeftTotalPlayerCount: null,
 				teamRightTotalPlayerCount: null,
 			},
-			tournamentInfo: null, // TODO : 토너먼트에서 나왔을 때 다시 null로 세팅
+			tournamentInfo: null,
 			friendInfo: {
 				friendList: [
 					{
@@ -76,100 +77,61 @@ class PageRouter {
 	}
 
 	async renderPage(url) {
-		this.clientInfo.currentPage = url;
-		if (url === "login") {
-			this._loadCSS(["css/LoginPage/LoginPage.css"]);
-			const loginPageManager = new LoginPageManager(this.app, this.clientInfo, this._onLoginSuccess.bind(this), this._onEnterSignup.bind(this));
-			await loginPageManager.initPage();
-		} else if (url === "lobby") {
-			this._loadCSS(["css/LobbyPage/lobbyPage.css"]);
-			const lobbyPageManager = new NewLobbyPageManager(
-				this.app,
-				this.clientInfo,
-				this._onClickWatingRoomCreationButton.bind(this),
-				this._onEnterWaitingRoom.bind(this),
-				this._renderFriendManagementPage.bind(this),
-				this._renderProfilePage.bind(this),
-				this._joinTournamentWaitingPage.bind(this),
-			);
-			await lobbyPageManager.initPage();
-		} else if (url === "waitingRoomCreation") {
-			this._loadCSS(["css/LobbyPage/waitingRoomCreationPage.css"]);
-			const waitingRoomCreationPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this._onEnterWaitingRoom.bind(this), this._renderLobby.bind(this));
-		} else if (url === "pingpong") {
-			this._loadCSS(["css/PingpongPage/pingpongPage.css"]);
-			const pingpongPageManager = new PingpongPageManager(this.app, this.clientInfo, this._onExitPingpongGame.bind(this), this._renderTournamentPage.bind(this));
-			await pingpongPageManager.initPage();
-		} else if (url === "waitingRoom") {
-			this._loadCSS(["css/WaitingRoomPage/waitingRoomPage.css", "css/WaitingRoomPage/abilitySelectionModal.css"]);
-			const waitingRoomPageManager = new WaitingRoomPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._onExitPingpongGame.bind(this));
-		} else if (url === "signup") {
-			this._loadCSS(["css/SignupPage/signupPage.css"]);
-			const signupPageManager = new SignupPageManager(this.app, this.clientInfo, this._onSignupSuccess.bind(this));
-		} else if (url === "profile") {
-			this._loadCSS(["css/ProfilePage/profilePage.css"]);
-			const profilePageManager = new ProfilePageManager(this.app, this.clientInfo, this._renderLobby.bind(this), this._renderEditProfilePage.bind(this));
-		} else if (url === "editProfile") {
-			this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
-			const editProfilePageManager = new EditProfilePageManager(this.app, this.clientInfo, this._renderProfilePage.bind(this));
-		} else if (url === "friendManagement") {
-			this._loadCSS(["css/FriendManagementPage/friendManagementPage.css"]);
-			const friendManagementPageManager = new FriendManagementPageManager(this.app, this.clientInfo, this._renderLobby.bind(this));
-		} else if (url === "chatting") {
+		if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
 			const chattingPageManager = new ChattingPageManager(this.clientInfo);
-		} else if (url === "waitingTournament") {
-			this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
-			const waitingTournamentPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this._joinLobbyPage.bind(this), this._joinTournamentPage.bind(this));
-		} else if (url === "tournamentAnimation") {
-			this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
-			const tournamentAnimationPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this._onStartPingpongGame.bind(this), this._renderTournamentPage.bind(this), this._renderLobby.bind(this));
+			return;
 		}
-	}
+		try {
+			this.clientInfo.nextPage = url;
+			if (url === "login") {
+				this._loadCSS(["css/LoginPage/LoginPage.css"]);
+				this.nextPageManager = new LoginPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "signup") {
+				this._loadCSS(["css/SignupPage/signupPage.css"]);
+				this.nextPageManager = new SignupPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "lobby") {
+				this._loadCSS(["css/LobbyPage/lobbyPage.css"]);
+				this.nextPageManager = new NewLobbyPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "waitingRoomCreation") {
+				this._loadCSS(["css/LobbyPage/waitingRoomCreationPage.css"]);
+				this.nextPageManager = new WaitingRoomCreationPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "waitingRoom") {
+				this._loadCSS(["css/WaitingRoomPage/waitingRoomPage.css", "css/WaitingRoomPage/abilitySelectionModal.css"]);
+				this.nextPageManager = new WaitingRoomPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "pingpong") {
+				this._loadCSS(["css/PingpongPage/pingpongPage.css"]);
+				this.nextPageManager = new PingpongPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "profile") {
+				this._loadCSS(["css/ProfilePage/profilePage.css"]);
+				this.nextPageManager = new ProfilePageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "editProfile") {
+				this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
+				this.nextPageManager = new EditProfilePageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "friendManagement") {
+				this._loadCSS(["css/FriendManagementPage/friendManagementPage.css"]);
+				this.nextPageManager = new FriendManagementPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "waitingTournament") {
+				this._loadCSS(["css/WaitingTournamentPage/waitingTournamentPage.css"]);
+				this.nextPageManager = new WaitingTournamentPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "tournament") {
+				this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
+				this.nextPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			}
+			await this.nextPageManager.connectPage();
+			if (this.currentPageManager) await this.currentPageManager.clearPage();
 
-	_onLoginSuccess() {
-		this.renderPage("chatting");
-		this.renderPage("lobby");
-	}
-
-	_renderLobby() {
-		this.renderPage("lobby");
-	}
-
-	_onEnterSignup() {
-		this.renderPage("signup");
-	}
-
-	_onClickWatingRoomCreationButton() {
-		this.renderPage("waitingRoomCreation");
-	}
-
-	_onEnterWaitingRoom() {
-		this.renderPage("waitingRoom");
-	}
-
-	_onStartPingpongGame() {
-		this.renderPage("pingpong");
-	}
-
-	_onExitPingpongGame() {
-		this.renderPage("lobby");
-	}
-
-	_onSignupSuccess() {
-		this.renderPage("login");
-	}
-
-	_renderFriendManagementPage() {
-		this.renderPage("friendManagement");
-	}
-
-	_renderProfilePage() {
-		this.renderPage("profile");
-	}
-
-	_renderEditProfilePage() {
-		this.renderPage("editProfile");
+			this.clientInfo.currentPage = url;
+			this.currentPageManager = this.nextPageManager;
+			this.nextPageManager = null;
+			await this.currentPageManager.initPage();
+		} catch (e) {
+			console.log(e);
+			this.clientInfo.nextPage = null;
+			// 실패했을경우 nextPageManager에 대한 clearPage를 해야할까?
+			// this.nextPageManager.clearPage();
+			this.nextPage = null;
+		}
 	}
 
 	_loadCSS(filenames) {
@@ -186,22 +148,6 @@ class PageRouter {
 			newLink.setAttribute("data-dynamic", "true");
 			document.head.appendChild(newLink);
 		});
-	}
-
-	_joinTournamentWaitingPage() {
-		this.renderPage("waitingTournament");
-	}
-
-	_joinLobbyPage() {
-		this.renderPage("lobby");
-	}
-
-	_joinTournamentPage() {
-		this.renderPage("tournamentAnimation");
-	}
-
-	_renderTournamentPage() {
-		this.renderPage("tournamentAnimation");
 	}
 }
 

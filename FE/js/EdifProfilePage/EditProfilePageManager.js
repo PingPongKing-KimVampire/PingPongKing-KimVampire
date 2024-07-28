@@ -1,15 +1,12 @@
-import { SERVER_ADDRESS } from "./../PageRouter.js";
-import { SERVER_PORT } from "./../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
 
 class EditProfilePageManager {
-	constructor(app, clientInfo, renderProfilePage) {
+	constructor(app, clientInfo, renderPage) {
 		this.clientInfo = clientInfo;
-
 		this._setDefaultAvatars();
 		app.innerHTML = this._getHTML();
-		this.renderProfilePage = renderProfilePage;
-		this._initPage();
+		this.renderPage = renderPage;
 	}
 
 	_setDefaultAvatars() {
@@ -24,7 +21,11 @@ class EditProfilePageManager {
 		this._defaultAvatarPathList.push(avatarPath);
 	}
 
-	_initPage() {
+	async connectPage() {}
+
+	clearPage() {}
+
+	initPage() {
 		this.isNicknameUpdated = false;
 		this.isAvatarUpdated = false;
 		this.isDefaultAvatar;
@@ -201,7 +202,7 @@ class EditProfilePageManager {
 	};
 	_exitEditProfilePage = () => {
 		this.clientInfo.profileTarget = { id: this.clientInfo.id };
-		this.renderProfilePage();
+		this.renderPage("profile");
 	};
 	_hideExitModal = () => {
 		this.exitModal.style.display = "none";
