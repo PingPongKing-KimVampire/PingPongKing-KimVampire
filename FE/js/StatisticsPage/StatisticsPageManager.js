@@ -30,6 +30,12 @@ class StatisticsPageManager {
 				{"type" : "PADDLE", "y" : 0, "x" : 1550}],
 			3 : [{"type" : "SCORE", "y" : 500, "x" : 775},
 				{"type" : "PADDLE", "y" : 800, "x" : 300}],	
+			4 : [{"type" : "SCORE", "y" : 1000, "x" : 750},
+				{"type" : "PADDLE", "y" : 400, "x" : 1550}],	
+			5 : [{"type" : "SCORE", "y" : 123, "x" : 259},
+				{"type" : "PADDLE", "y" : 876, "x" : 1200}],	
+			6 : [{"type" : "SCORE", "y" : 500, "x" : 1400},
+				{"type" : "PADDLE", "y" : 800, "x" : 300}],	
 		}
 		const scoreList = ["win", "lose", "win", "win", "win", "win"];
 		const { myPoints, opponentPoints } = this._getPoints(scoreList);
@@ -40,24 +46,9 @@ class StatisticsPageManager {
 		
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
+		this._setHitMap();
 		requestAnimationFrame(this._renderScoreGraph.bind(this));
-	}
-
-	_getPoints(scoreList) {
-		let myPoint = 0;
-		let opponentPoint = 0;
-		const myPoints = [];
-		const opponentPoints = [];
-		scoreList.forEach((score) => {
-			if (score === 'win') {
-				myPoint++;
-			} else if (score === 'lose') {
-				opponentPoint++;
-			}
-			myPoints.push(myPoint);
-			opponentPoints.push(opponentPoint);
-		});
-		return { myPoints, opponentPoints };
+		requestAnimationFrame(this._renderHitMap.bind(this, 1));
 	}
 
 	async _getClientGameDetail(clientId, gameId) {
@@ -76,6 +67,23 @@ class StatisticsPageManager {
 			};
 			this.clientInfo.socket.addEventListener("message", listener);
 		});
+	}
+
+	_getPoints(scoreList) {
+		let myPoint = 0;
+		let opponentPoint = 0;
+		const myPoints = [];
+		const opponentPoints = [];
+		scoreList.forEach((score) => {
+			if (score === 'win') {
+				myPoint++;
+			} else if (score === 'lose') {
+				opponentPoint++;
+			}
+			myPoints.push(myPoint);
+			opponentPoints.push(opponentPoint);
+		});
+		return { myPoints, opponentPoints };
 	}
 
 	_subscribeWindow() {
@@ -129,6 +137,65 @@ class StatisticsPageManager {
 
 		renderLine(this.myPoints, '#BEBEBE');
 		renderLine(this.opponentPoints, '#D570FF');
+	}
+
+	_setHitMap() {
+		this.hitMapLabel = document.querySelector("#hitMapContainer .label");
+		this.hitMapPanel = document.querySelector('#hitMapPanel');
+		this.currentRound = 1;
+		const interval = 1.5; // 초 단위
+		this.renderHitMapIntervalID = setInterval(() => {
+			this.currentRound++;
+			if (this.round < this.currentRound) this.currentRound = 1;
+			this._renderHitMap(this.currentRound);
+		}, interval * 1000);
+	}
+
+	_renderHitMap(round) {
+		this.hitMapLabel.textContent = `${round} 라운드 타점 지도`;
+
+		const removeBalls = () => {
+			const children = Array.from(this.hitMapPanel.children);
+			children.forEach((child) => {
+				if (child.classList.contains('scoreBall') ||
+					child.classList.contains('paddleBall')) {
+					this.hitMapPanel.removeChild(child);
+				}
+			});
+		}
+		removeBalls();
+
+		// TODO : 이것도 서버로부터 받아야 할까..?
+		const boardHeight = 1000;
+		const boardWidth = 1550;
+		const ballRadius = 25;
+		const ballSizePercent = ((ballRadius * 2) / boardWidth) * 100;
+		const yTotalPercent = ((boardHeight - (ballRadius * 2)) / boardHeight) * 100;
+		const xTotalPercent = ((boardWidth - (ballRadius * 2)) / boardWidth)  * 100;
+
+		// TODO : 내가 right 팀이었는지, left 팀이었는지 기억해야 할 것 같다..!
+		// 그래야 x 위치를 뒤집을지 안 뒤집을지 결정할 수 있을 듯..
+		const renderBall = (type, x, y) => {
+			const ball = document.createElement("div");
+			if (type === 'SCORE') {
+				ball.classList.add('scoreBall');
+			} else if (type === 'PADDLE') {
+				ball.classList.add('paddleBall');
+			}
+			ball.style.width = `${ballSizePercent}%`;
+			ball.style.height = 'auto';
+			ball.style.aspectRatio = '1/1';
+			const yPercent = (y / boardHeight) * yTotalPercent;
+			const xPercent = (x / boardWidth) * xTotalPercent;
+			ball.style.top = `${yPercent}%`;
+			ball.style.left = `${xPercent}%`;
+			// ball.style.transform = `translate(-50%, -50%)`;
+			this.hitMapPanel.append(ball);
+		}
+
+		this.hitMap[round].forEach(({type, x, y}) => {
+			renderBall(type, x, y);
+		});
 	}
 
 	_getHTML() {
@@ -200,7 +267,11 @@ class StatisticsPageManager {
 	}
 	_getHitMapPanelHTML() {
 		return `
-			<div id="hitMapPanel"></div>
+			<div id="hitMapPanel">
+				<div class="subBoard"></div>
+				<div class="subBoard"></div>
+				<div class="ball"></div>
+			</div>
 		`;
 	}
 }

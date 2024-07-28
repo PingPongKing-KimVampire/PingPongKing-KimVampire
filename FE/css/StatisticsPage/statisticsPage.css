@@ -99,6 +99,13 @@
 	border-radius: 2rem;
 }
 
+#hitMapPanel {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+}
+
 #scorePanel {
 	display: flex;
 	justify-content: center;
@@ -143,6 +150,37 @@
 	transform: translate(-50%, -50%);
 	border-radius: 3rem;
 	background-color: white;
+}
+
+.subBoard {
+	width: 50%;
+	height: 100%;
+}
+
+.subBoard:nth-of-type(1) {
+	border-right: 0.05rem solid white;
+}
+
+.subBoard:nth-of-type(2) {
+	border-left: 0.05rem solid white;
+}
+
+#hitMapPanel .paddleBall {
+	height: auto;
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: white;
+}
+
+#hitMapPanel .scoreBall {
+	height: auto;
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: rgb(213, 112, 255);
 }
 
 @media (orientation: portrait) {
@@ -206,6 +244,17 @@
 	.circleButton {
 		width: 1.7%;
 	}
+
+	#hitMapPanel .paddleBall {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
+	#hitMapPanel .scoreBall {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
 }
 
 @media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
@@ -231,6 +280,21 @@
 	.circleButton {
 		width: 1.1%;
 	}
+	/* #hitMapPanel {
+		flex-direction: column;
+	}
+	.subBoard {
+		width: 100%;
+		height: 50%;
+	}
+	.subBoard:nth-of-type(1) {
+		border-right: none;
+		border-bottom: 0.05rem solid white;
+	}
+	.subBoard:nth-of-type(2) {
+		border-left: none;
+		border-top: 0.05rem solid white;
+	} */
 }
 
 @media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
