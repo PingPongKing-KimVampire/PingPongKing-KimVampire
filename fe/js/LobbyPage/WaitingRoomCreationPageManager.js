@@ -67,7 +67,7 @@ class WaitingRoomCreationPageManager {
 
 	_setExitButton() {
 		document.querySelector(".exitButton").addEventListener("click", () => {
-			this.renderPage("lobby");
+			history.back();
 		});
 	}
 

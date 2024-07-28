@@ -12,6 +12,7 @@ class LoginPageManager {
 
 	connectPage() {
 		// 이미 웹소켓에 연결되어 있는 사용자는 어떻게 처리할 것인가? 로비페이지로 라우팅?
+		// 네이버는 그냥 내비둔다. 네이버를 따라하자.
 	}
 
 	clearPage() {}

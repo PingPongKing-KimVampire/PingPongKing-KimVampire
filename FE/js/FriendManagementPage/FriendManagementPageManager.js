@@ -51,7 +51,7 @@ class FriendManagementPageManager {
 	_setExitButton() {
 		this.exitButton = document.querySelector(".exitButton");
 		this.exitButton.addEventListener("click", async () => {
-			this.renderPage("lobby");
+			history.back();
 		});
 	}
 

@@ -22,8 +22,10 @@ class LobbyPageManager {
 			});
 			return lobbySocket;
 		}
-		const lobbySocket = await connectLobbySocket(this.clientInfo.accessToken);
-		this.clientInfo.lobbySocket = lobbySocket;
+		// //이미 로비 페이지에 연결되어 있는 경우
+		if (!this.clientInfo.lobbySocket || this.clientInfo.lobbySocket.readyState !== 1) {
+			this.clientInfo.lobbySocket = await connectLobbySocket(this.clientInfo.accessToken);
+		}
 		this.waitingRoomInfoList = await this._getWaitingRoomList();
 	}
 
