@@ -305,6 +305,7 @@ class GameRoomManager:
                     state = GHOST
                 elif player.ability == None and speed != NORMAL_SPEED:
                     state = NORMALIZE
+
                 if ball.speed == 0:
                     ball.start_move(speed, self.serve_turn)
                 else:
