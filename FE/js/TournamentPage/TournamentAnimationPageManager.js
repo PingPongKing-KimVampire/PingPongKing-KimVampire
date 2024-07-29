@@ -3,6 +3,7 @@ import windowObservable from "../../WindowObservable.js";
 import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
 import { _connectLobbySocket } from "../connect.js";
+import { TournamentInfodNotSettingError } from "../Error/Error.js";
 
 class TournamentAnimationPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -12,6 +13,9 @@ class TournamentAnimationPageManager {
 	}
 
 	async connectPage() {
+		if (!this.clientInfo?.tournamentInfo) {
+			throw new TournamentInfodNotSettingError();
+		}
 		async function _connectTournamentSocket(id) {
 			const tournamentSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`, ["authorization", this.clientInfo.accessToken]);
 			await new Promise(resolve => {

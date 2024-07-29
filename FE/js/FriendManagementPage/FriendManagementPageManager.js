@@ -1,4 +1,5 @@
 import windowObservable from "../../WindowObservable.js";
+import { GlobalConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class FriendManagementPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -8,7 +9,9 @@ class FriendManagementPageManager {
 		this.renderPage = renderPage;
 	}
 
-	async connectPage() {}
+	async connectPage() {
+		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+	}
 
 	clearPage() {
 		this._unsubscribeWindow();

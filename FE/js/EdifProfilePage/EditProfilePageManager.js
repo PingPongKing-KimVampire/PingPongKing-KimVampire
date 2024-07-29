@@ -1,5 +1,6 @@
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
+import { GlobalConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class EditProfilePageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -21,7 +22,9 @@ class EditProfilePageManager {
 		this._defaultAvatarPathList.push(avatarPath);
 	}
 
-	async connectPage() {}
+	async connectPage() {
+		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+	}
 
 	clearPage() {}
 

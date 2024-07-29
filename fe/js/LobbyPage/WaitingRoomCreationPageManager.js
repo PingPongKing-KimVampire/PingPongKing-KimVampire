@@ -1,3 +1,5 @@
+import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
+
 class WaitingRoomCreationPageManager {
 	constructor(app, clientInfo, renderPage) {
 		console.log("Create Waiting Room Page!");
@@ -7,7 +9,7 @@ class WaitingRoomCreationPageManager {
 	}
 
 	connectPage() {
-		//로비와 연결되어 있지 않으면?
+		if (isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
 	}
 
 	clearPage() {

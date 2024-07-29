@@ -1,4 +1,5 @@
 import windowObservable from "../../WindowObservable.js";
+import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class WaitingTournamentPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -8,7 +9,9 @@ class WaitingTournamentPageManager {
 		this.renderPage = renderPage;
 	}
 
-	async connectPage() {}
+	async connectPage() {
+		if (isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
+	}
 
 	clearPage() {
 		this._unsubscribeWindow();

@@ -1,4 +1,5 @@
 import windowObservable from "../../WindowObservable.js";
+import { GameInfoNotSettingError } from "../Error/Error.js";
 import { _connectLobbySocket } from "../connect.js";
 
 import { SERVER_ADDRESS } from "./../PageRouter.js";
@@ -13,8 +14,9 @@ class WaitingRoomPageManager {
 	}
 
 	async connectPage() {
-		//로비에서 얻을 수 있는 gameInfo가 세팅되지 않은 상태에서 이 페이지에 접근하면 문제생김
-		//gameInfo가 세팅되어 있는지 체크해야 할 것 같다.
+		if (!this.clientInfo?.gameInfo) {
+			throw new GameInfoNotSettingError();
+		}
 		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${this.clientInfo.gameInfo.roomId}`, ["authorization", this.clientInfo.accessToken]);
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {
