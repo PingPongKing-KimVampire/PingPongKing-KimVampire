@@ -1,4 +1,4 @@
-DATA_DIR = ./data_db
+DATA_DIR = ./BE/data_db
 ENV = DATA_PATH=${DATA_DIR}
 
 up: down clean create-dir

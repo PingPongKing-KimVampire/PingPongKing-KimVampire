@@ -11,8 +11,8 @@ import WaitingTournamentPageManager from "./TournamentPage/WaitingTournamentPage
 import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 
-export const SERVER_ADDRESS = "127.0.0.1";
-export const SERVER_PORT = "3001";
+export const SERVER_ADDRESS = window.location.hostname;
+export const SERVER_PORT = "80";
 
 class PageRouter {
 	constructor() {
@@ -78,7 +78,7 @@ class PageRouter {
 	async renderPage(url) {
 		this.clientInfo.currentPage = url;
 		if (url === "login") {
-			this._loadCSS(["css/LoginPage/LoginPage.css"]);
+			this._loadCSS(["css/LoginPage/loginPage.css"]);
 			const loginPageManager = new LoginPageManager(this.app, this.clientInfo, this._onLoginSuccess.bind(this), this._onEnterSignup.bind(this));
 			await loginPageManager.initPage();
 		} else if (url === "lobby") {
