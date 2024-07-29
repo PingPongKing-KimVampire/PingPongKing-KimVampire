@@ -42,7 +42,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def send_pingpongroom_accept_response(self):
         if self.game_mode == 'tournament':
-            self.team = self.game_manager.get_client_team_in_room(self.client_id)
+            self.team = self.game_manager.get_client_team(self.client_id)
         else: # normal mode
             self.team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.avatar_uri)
             await self.send_enter_pingpongroom_response(self.room_id, is_you_create)

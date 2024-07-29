@@ -95,6 +95,13 @@ class GameRoomManager:
             del self.team_left[client_id]
         elif client_id in self.team_right:
             del self.team_right[client_id]
+            
+    def get_client_team(self, client_id):
+        if client_id in self.team_left:
+            return 'left'
+        elif client_id in self.team_right:
+            return 'right'
+        return None
 
     def get_room_data(self):
         return {

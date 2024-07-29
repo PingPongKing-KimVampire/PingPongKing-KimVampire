@@ -14,6 +14,8 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         self.client_id = None
         self.nickname = None
         self.avatar_url = None
+
+        self.is_matchmaking = False
         
         try:  
             await stateManager.authorize_client(self, dict(self.scope['headers']))
@@ -30,6 +32,8 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Client {self.client_id} disconnected", "red")
         Printer.log(f"Close code: {close_code}", "red")
         await discard_group(self, 'lobby')
+        if self.is_matchmaking:
+            stateManager.remove_from_match_queue(self)
         stateManager.remove_consumer_from_map(self.client_id, self)
 
     async def _send(self, event, content):
@@ -74,11 +78,13 @@ class LobbyConsumer(AsyncWebsocketConsumer):
     # Match Making
     
     async def match_making_start(self, consumer):
+        self.is_matchmaking = True
         await discard_group(self, 'lobby')
         stateManager.add_to_match_queue(consumer)
         await self._send(event='startMatchMakingResponse', content={'message': 'OK'})
 
     async def match_making_cancel(self, consumer):
+        self.is_matchmaking = False
         stateManager.remove_from_match_queue(consumer)
         await add_group(self, 'lobby')
         await self._send(event='cancelMatchMakingResponse', content={'message': 'OK'})
@@ -97,5 +103,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyWaitingRoomClosed', content=content)
     
     async def notifyMatchMakingComplete(self, content):
+        self.is_matchmaking == False
         content = content['content']
         await self._send(event='notifyMatchMakingComplete', content=content)
