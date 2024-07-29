@@ -1,31 +1,25 @@
-import { SERVER_ADDRESS } from "./../PageRouter.js";
-import { SERVER_PORT } from "./../PageRouter.js";
+import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class WaitingRoomCreationPageManager {
-	constructor(app, clientInfo, onEnterWaitingRoom, renderLobby) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("Create Waiting Room Page!");
-		app.innerHTML = this._getHTML();
-		this.clientInfo = {
-			socket: null,
-			id: null,
-			nickname: null,
-			lobbySocket: null,
-			gameInfo: {
-				pingpongRoomSocket: null,
-				roomId: null,
-				title: null,
-				teamLeftList: null,
-				teamRightList: null,
-				teamLeftMode: null,
-				teamRightMode: null,
-				teamLeftTotalPlayerCount: null,
-				teamRightTotalPlayerCount: null,
-			},
-		};
+		this.app = app;
 		this.clientInfo = clientInfo;
-		this.onEnterWaitingRoom = onEnterWaitingRoom;
-		this.renderLobby = renderLobby;
+		this.renderPage = renderPage;
+	}
 
+	connectPage() {
+		if (isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
+	}
+
+	clearPage() {
+		if (this.clientInfo.nextPage === "lobby") return;
+		this.clientInfo.lobbySocket.close();
+		this.clientInfo.lobbySocket = null;
+	}
+
+	initPage() {
+		app.innerHTML = this._getHTML();
 		this.titleInput = document.querySelector("#titleInput");
 		this.modeSelection = document.querySelector(".selectionContainer:nth-of-type(2)");
 		this.modeButtons = [...document.getElementsByName("mode")];
@@ -75,7 +69,7 @@ class WaitingRoomCreationPageManager {
 
 	_setExitButton() {
 		document.querySelector(".exitButton").addEventListener("click", () => {
-			this.renderLobby();
+			history.back();
 		});
 	}
 
@@ -162,44 +156,17 @@ class WaitingRoomCreationPageManager {
 		await this._enterWaitingRoom(roomId, title, leftMode, rightMode, leftPlayerCount, rightPlayerCount);
 	}
 
-	async _enterWaitingRoom(roomId, gameTitle, teamLeftMode, teamRightMode, teamLeftTotalPlayerCount, teamRightTotalPlayerCount) {
-		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ['authorization', this.clientInfo.accessToken]);
-
-		await new Promise(resolve => {
-			pingpongRoomSocket.addEventListener("open", () => {
-				resolve();
-			});
-		});
-
-		const { teamLeftList, teamRightList } = await new Promise(resolve => {
-			pingpongRoomSocket.addEventListener(
-				"message",
-				function listener(messageEvent) {
-					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === "enterWaitingRoomResponse") {
-						pingpongRoomSocket.removeEventListener("message", listener);
-						resolve(content);
-					}
-				}.bind(this),
-			);
-		});
-
+	async _enterWaitingRoom(roomId, title, teamLeftMode, teamRightMode, teamLeftTotalPlayerCount, teamRightTotalPlayerCount) {
 		const gameInfo = {
-			pingpongRoomSocket,
 			roomId,
-			title: gameTitle,
-			teamLeftList,
-			teamRightList,
+			title,
 			teamLeftMode,
 			teamRightMode,
 			teamLeftTotalPlayerCount,
 			teamRightTotalPlayerCount,
 		};
 		this.clientInfo.gameInfo = gameInfo;
-		this.clientInfo.lobbySocket.close();
-		this.clientInfo.lobbySocket = null;
-
-		this.onEnterWaitingRoom();
+		this.renderPage("waitingRoom");
 	}
 
 	_sendCreateRoomMsg(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount) {

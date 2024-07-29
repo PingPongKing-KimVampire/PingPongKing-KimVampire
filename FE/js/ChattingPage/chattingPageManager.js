@@ -9,14 +9,7 @@ class ChattingPageManager {
 	}
 
 	_appendChatButton() {
-		const button = document.createElement("button");
-		button.className = "chatButton";
-
-		this.totalUnreadCount = document.createElement("div");
-		this.totalUnreadCount.className = "totalUnreadCount";
-		button.append(this.totalUnreadCount);
-
-		document.body.appendChild(button);
+		this.totalUnreadCount = document.querySelector(".totalUnreadCount");
 		this._renderTotalUnreadMessageCount();
 		this.clientInfo.socket.addEventListener("message", messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);

@@ -1,36 +1,47 @@
 import windowObservable from "../../WindowObservable.js";
 
-import { SERVER_ADDRESS } from "./../PageRouter.js";
-import { SERVER_PORT } from "./../PageRouter.js";
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
+import { AccessTokenNotFoundError } from "../Error/Error.js";
 
 class LobbyPageManager {
-	constructor(app, clientInfo, onClickWatingRoomCreationButton, onCLickWaitingRoomButton, renderFriendManagementPage, renderProfilePage, joinWaitingTournamentPage) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("Lobby Page!");
-		app.innerHTML = this._getHTML();
 
-		this.clientInfo = {
-			socket: null,
-			id: null,
-			nickname: null,
-			lobbySocket: null,
-			gameInfo: {
-				pingpongRoomSocket: null,
-				roomId: null,
-				title: null,
-				teamLeftList: null,
-				teamRightList: null,
-				teamLeftMode: null,
-				teamRightMode: null,
-				teamLeftTotalPlayerCount: null,
-				teamRightTotalPlayerCount: null,
-			},
-		};
 		this.clientInfo = clientInfo;
-		this.onClickWatingRoomCreationButton = onClickWatingRoomCreationButton;
-		this.onCLickWaitingRoomButton = onCLickWaitingRoomButton;
-		this.renderFriendManagementPage = renderFriendManagementPage;
-		this.renderProfilePage = renderProfilePage;
-		this.joinWaitingTournamentPage = joinWaitingTournamentPage;
+		this.renderPage = renderPage;
+		this.app = app;
+	}
+
+	async connectPage() {
+		async function connectLobbySocket(accessToken) {
+			if (!accessToken) {
+				throw new AccessTokenNotFoundError();
+			}
+			const lobbySocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`, ["authorization", accessToken]);
+			await new Promise(resolve => {
+				lobbySocket.addEventListener("open", () => {
+					resolve();
+				});
+			});
+			return lobbySocket;
+		}
+		// //이미 로비 페이지에 연결되어 있는 경우
+		if (!this.clientInfo.lobbySocket || this.clientInfo.lobbySocket.readyState !== 1) {
+			this.clientInfo.lobbySocket = await connectLobbySocket(this.clientInfo.accessToken);
+		}
+		this.waitingRoomInfoList = await this._getWaitingRoomList();
+	}
+
+	async clearPage() {
+		this._unsubscribeWindow();
+		if (this.clientInfo.nextPage === "waitingRoomCreation" || this.clientInfo.nextPage === "waitingTournament") return;
+		this.clientInfo.lobbySocket.close();
+		this.clientInfo.lobbySocket = null;
+	}
+
+	initPage() {
+		app.innerHTML = this._getHTML();
 		this._setTournamentJoinButton();
 		this._setCreateWaitingRoomButton();
 
@@ -39,12 +50,9 @@ class LobbyPageManager {
 		this.enterNoButton = document.querySelector(".questionModal .activatedButton:nth-of-type(2)");
 		this.enterModalTitle = document.querySelector(".questionModal .title");
 		this.waitingRoomListContainer = document.querySelector(".waitingRoomListContainer");
-		this.allWaitingRoomElement = {};
-	}
 
-	async initPage() {
-		const waitingRoomInfoList = await this._getWaitingRoomList();
-		this._renderWaitingRoom(waitingRoomInfoList);
+		this.allWaitingRoomElement = {};
+		this._renderWaitingRoom(this.waitingRoomInfoList);
 		this._listenWaitingRoomUpdate();
 
 		this._autoSetScollTrackColor();
@@ -57,20 +65,15 @@ class LobbyPageManager {
 	_setFriendManagementButton() {
 		this.friendManagementButton = document.querySelector("#friendManagementButton");
 		this.friendManagementButton.addEventListener("click", () => {
-			this.clientInfo.lobbySocket.close();
-			this.clientInfo.lobbySocket = null;
-			this.renderFriendManagementPage();
+			this.renderPage("friendManagement");
 		});
 	}
 
 	_setProfileButton() {
 		this.profileButton = document.querySelector("#profileButton");
 		this.profileButton.addEventListener("click", () => {
-
-			this.clientInfo.lobbySocket.close();
-			this.clientInfo.lobbySocket = null;
 			this.clientInfo.profileTarget = { id: this.clientInfo.id };
-			this.renderProfilePage();
+			this.renderPage("profile");
 		});
 	}
 
@@ -155,17 +158,14 @@ class LobbyPageManager {
 				};
 				this.clientInfo.lobbySocket.addEventListener("message", listener);
 			});
-
-			this._unsubscribeWindow();
-			this.joinWaitingTournamentPage();
+			this.renderPage("waitingTournament");
 		});
 	}
 
 	_setCreateWaitingRoomButton() {
 		const createWaitingRoomButton = document.querySelector(".createWaitingRoomButton");
 		createWaitingRoomButton.addEventListener("click", () => {
-			this._unsubscribeWindow();
-			this.onClickWatingRoomCreationButton();
+			this.renderPage("waitingRoomCreation");
 		});
 	}
 
@@ -271,45 +271,16 @@ class LobbyPageManager {
 	}
 
 	async _enterWaitingRoom(roomId, title, teamLeftMode, teamRightMode, teamLeftTotalPlayerCount, teamRightTotalPlayerCount) {
-		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ['authorization', this.clientInfo.accessToken]);
-
-		await new Promise(resolve => {
-			pingpongRoomSocket.addEventListener("open", () => {
-				resolve();
-			});
-		});
-
-		const { teamLeftList, teamRightList, teamLeftAbility, teamRightAbility } = await new Promise(resolve => {
-			pingpongRoomSocket.addEventListener(
-				"message",
-				function listener(messageEvent) {
-					const { event, content } = JSON.parse(messageEvent.data);
-					if (event === "enterWaitingRoomResponse") {
-						pingpongRoomSocket.removeEventListener("message", listener);
-						resolve(content);
-					}
-				}.bind(this),
-			);
-		});
-
 		const gameInfo = {
-			pingpongRoomSocket,
 			roomId,
 			title,
-			teamLeftList,
-			teamRightList,
 			teamLeftMode,
 			teamRightMode,
 			teamLeftTotalPlayerCount,
 			teamRightTotalPlayerCount,
-			teamLeftAbility,
-			teamRightAbility,
 		};
-		this._unsubscribeWindow();
-		this.clientInfo.lobbySocket.close();
-		this.clientInfo.lobbySocket = null;
 		this.clientInfo.gameInfo = gameInfo;
-		this.onCLickWaitingRoomButton(gameInfo);
+		this.renderPage("waitingRoom");
 	}
 
 	_getHTML() {

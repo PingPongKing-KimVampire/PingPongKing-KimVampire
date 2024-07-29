@@ -1,15 +1,26 @@
-import windowObservable from '../../WindowObservable.js';
-import { SERVER_ADDRESS } from './../PageRouter.js';
-import { SERVER_PORT } from './../PageRouter.js';
+import windowObservable from "../../WindowObservable.js";
+import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class WaitingTournamentPageManager {
-	constructor(app, clientInfo, joinLobbyPage, joinTournamentPage) {
-		console.log('WaitingTournament Page!');
+	constructor(app, clientInfo, renderPage) {
+		console.log("WaitingTournament Page!");
 		app.innerHTML = this._getHTML();
 		this.clientInfo = clientInfo;
-		this.joinLobbyPage = joinLobbyPage;
-		this.joinTournamentPage = joinTournamentPage;
-		this.initPage();
+		this.renderPage = renderPage;
+	}
+
+	async connectPage() {
+		if (isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
+	}
+
+	clearPage() {
+		this._unsubscribeWindow();
+		if (this.clientInfo.nextPage === "lobby") {
+			this._removePageListener();
+			return;
+		}
+		this.clientInfo.lobbySocket.close();
+		this.clientInfo.lobbySocket = null;
 	}
 
 	async initPage() {
@@ -20,64 +31,29 @@ class WaitingTournamentPageManager {
 
 	//어떠한 경우에도 listener를 remove하는 메서드 필요(페이지 이동 시 호출)
 	_removePageListener() {
-		this.clientInfo.lobbySocket.removeEventListener(
-			'click',
-			this.NotifyMatchMakingCompleteListener
-		);
-	}
-
-	async _connectTournamentSocket(id) {
-		const tournamentSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`,['authorization', this.clientInfo.accessToken]);
-		await new Promise((resolve) => {
-			tournamentSocket.addEventListener('open', () => {
-				resolve();
-			});
-		});
-		const tournamentClientList = await new Promise((resolve) => {
-			const listener = (messageEvent) => {
-				const { event, content } = JSON.parse(messageEvent.data);
-				if (event === 'enterTournamentRoomResponse') {
-					tournamentSocket.removeEventListener('message', listener);
-					resolve(content.tournamentClientList);
-				}
-			};
-			tournamentSocket.addEventListener('message', listener);
-		});
-		return { tournamentSocket, tournamentClientList };
+		this.clientInfo.lobbySocket.removeEventListener("click", this.NotifyMatchMakingCompleteListener);
 	}
 
 	_listenNotifyMatchMakingComplete() {
 		const lobbySocket = this.clientInfo.lobbySocket;
-		this.NotifyMatchMakingCompleteListener = async (messageEvent) => {
+		this.NotifyMatchMakingCompleteListener = async messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
-			if (event === 'notifyMatchMakingComplete') {
+			if (event === "notifyMatchMakingComplete") {
 				console.log("매치매이킹 성공!");
-				this._unsubscribeWindow();
 				const tournamentId = content.tournamentId;
-				const { tournamentSocket, tournamentClientList } =
-					await this._connectTournamentSocket(tournamentId);
 				this.clientInfo.tournamentInfo = {
-					tournamentSocket,
-					tournamentClientList,
 					isInit: false,
-					renderingMode: "normal", //normal or animation
-					stage: "semiFinal"
+					tournamentId,
 				};
-				this.clientInfo.lobbySocket.close();
-				this.joinTournamentPage();
+				this.renderPage("tournament");
 			}
 		};
-		lobbySocket.addEventListener(
-			'message',
-			this.NotifyMatchMakingCompleteListener
-		);
+		lobbySocket.addEventListener("message", this.NotifyMatchMakingCompleteListener);
 	}
 
 	_setLeaveWaitingTournamentButton() {
-		const leaveWaitingTournamentButton = document.querySelector(
-			'.leaveWaitingTournamentButton'
-		);
-		leaveWaitingTournamentButton.addEventListener('click', async () => {
+		const leaveWaitingTournamentButton = document.querySelector(".leaveWaitingTournamentButton");
+		leaveWaitingTournamentButton.addEventListener("click", async () => {
 			const cancelMatchMakingMessage = {
 				event: "cancelMatchMaking",
 				content: {},
@@ -93,10 +69,7 @@ class WaitingTournamentPageManager {
 				};
 				this.clientInfo.lobbySocket.addEventListener("message", listener);
 			});
-
-			this._removePageListener();
-			this._unsubscribeWindow();
-			this.joinLobbyPage();
+			history.back();
 		});
 	}
 
@@ -110,18 +83,16 @@ class WaitingTournamentPageManager {
 	}
 
 	_adjustButtonSize() {
-		const leaveWaitingTournamentButton = document.querySelector(
-			'.leaveWaitingTournamentButton'
-		);
+		const leaveWaitingTournamentButton = document.querySelector(".leaveWaitingTournamentButton");
 		const viewWidth = window.innerWidth;
 		const viewHeight = window.innerHeight;
 
 		if (viewWidth < viewHeight) {
-			leaveWaitingTournamentButton.style.height = '4vh';
-			leaveWaitingTournamentButton.style.width = 'calc(4vh * 5 / 1)';
+			leaveWaitingTournamentButton.style.height = "4vh";
+			leaveWaitingTournamentButton.style.width = "calc(4vh * 5 / 1)";
 		} else {
-			leaveWaitingTournamentButton.style.width = '20vw';
-			leaveWaitingTournamentButton.style.height = 'calc(20vw * 1 / 4)';
+			leaveWaitingTournamentButton.style.width = "20vw";
+			leaveWaitingTournamentButton.style.height = "calc(20vw * 1 / 4)";
 		}
 	}
 
