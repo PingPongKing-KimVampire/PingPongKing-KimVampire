@@ -73,7 +73,7 @@ class LoginPageManager {
 			username: id,
 			password: pw,
 		};
-		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/login`;
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/login`;
 		let response;
 		try {
 			response = await fetch(url, {
@@ -100,7 +100,7 @@ class LoginPageManager {
 	}
 
 	async _connectGlobalSocket(id) {
-		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws`, ["authorization", this.accessToken]);
+		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/`, ['authorization', this.accessToken]);
 		await new Promise(resolve => {
 			socket.addEventListener("open", () => {
 				resolve();

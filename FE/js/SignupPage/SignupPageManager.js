@@ -1,5 +1,5 @@
-const SERVER = "127.0.0.1";
-const PORT = 3001;
+const SERVER = window.location.hostname;
+const PORT = 80;
 
 class SignupPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -144,7 +144,7 @@ class SignupPageManager {
 
 	async _validateDuplicateId(id) {
 		const query = new URLSearchParams({ username: id }).toString();
-		const url = `http://${SERVER}:${PORT}/check-username?${query}`;
+		const url = `http://${SERVER}:${PORT}/api/check-username?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -160,7 +160,7 @@ class SignupPageManager {
 
 	async _validateDuplicateNickName(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
-		const url = `http://${SERVER}:${PORT}/check-nickname?${query}`;
+		const url = `http://${SERVER}:${PORT}/api/check-nickname?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -204,7 +204,7 @@ class SignupPageManager {
 			password: password,
 		};
 
-		const url = `http://${SERVER}:${PORT}/signup`;
+		const url = `http://${SERVER}:${PORT}/api/signup`;
 
 		try {
 			const response = await fetch(url, {

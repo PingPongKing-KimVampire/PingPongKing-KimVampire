@@ -80,7 +80,7 @@ class EditProfilePageManager {
 	}
 	async _validateDuplicateNickname(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
-		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/check-nickname?${query}`;
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-nickname?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
