@@ -12,8 +12,8 @@ import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 import ErrorPageManager from "./ErrorPage/ErrorPageManager.js";
 
-export const SERVER_ADDRESS = "127.0.0.1";
-export const SERVER_PORT = "3001";
+export const SERVER_ADDRESS = window.location.hostname;
+export const SERVER_PORT = "80";
 
 class PageRouter {
 	constructor() {
@@ -96,7 +96,7 @@ class PageRouter {
 			this.clientInfo.nextPage = url;
 			if (this.currentPageManager) await this.currentPageManager.clearPage();
 			if (url === "login") {
-				this._loadCSS(["css/LoginPage/LoginPage.css"]);
+				this._loadCSS(["css/LoginPage/loginPage.css"]);
 				this._inVisibleChatButton();
 				this.nextPageManager = new LoginPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "signup") {
