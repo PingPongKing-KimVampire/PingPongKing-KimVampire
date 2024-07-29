@@ -1,5 +1,6 @@
 import Player from "./Player.js";
 import PingpongRenderer from "./PingpongRenderer.js";
+import { GlobalConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class PingpongPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -8,7 +9,9 @@ class PingpongPageManager {
 		this.renderPage = renderPage;
 	}
 
-	connectPage() {}
+	connectPage() {
+		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+	}
 
 	clearPage() {
 		this.clientInfo.gameInfo = null;

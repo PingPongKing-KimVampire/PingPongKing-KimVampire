@@ -2,6 +2,7 @@ import windowObservable from "../../WindowObservable.js";
 
 import { SERVER_ADDRESS } from "./../PageRouter.js";
 import { SERVER_PORT } from "./../PageRouter.js";
+import { AccessTokenNotFoundError } from "../Error/Error.js";
 
 class LobbyPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -14,6 +15,9 @@ class LobbyPageManager {
 
 	async connectPage() {
 		async function connectLobbySocket(accessToken) {
+			if (!accessToken) {
+				throw new AccessTokenNotFoundError();
+			}
 			const lobbySocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`, ["authorization", accessToken]);
 			await new Promise(resolve => {
 				lobbySocket.addEventListener("open", () => {

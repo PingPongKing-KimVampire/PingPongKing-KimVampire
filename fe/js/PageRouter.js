@@ -139,12 +139,15 @@ class PageRouter {
 				this._loadCSS(["css/TournamentPage/tournamentPage.css"]);
 				this._visibleChatButton();
 				this.nextPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+			} else if (url === "error") {
+				this._inVisibleChatButton();
+				this.nextPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			}
 			await this.nextPageManager.connectPage();
-
 			this.clientInfo.currentPage = url;
-			if(isUpdateHistory)
-				history.pushState({}, "", url);
+
+			//앞으로가기, 뒤로가기로 renderPage를 호출한 경우
+			if (isUpdateHistory) history.pushState({}, "", url);
 			this.currentPageManager = this.nextPageManager;
 			this.nextPageManager = null;
 			await this.currentPageManager.initPage();
@@ -152,23 +155,21 @@ class PageRouter {
 			console.log(e);
 			this.clientInfo.nextPage = null;
 			this.nextPageManager = null;
-			// 실패했을경우 nextPageManager에 대한 clearPage를 해야할까?
-			// 실패하면 알아서 해야하지 않을까?
-			// this.nextPageManager.clearPage();
-
+			if (isUpdateHistory) history.pushState({}, "", "error");
+			else history.replaceState({}, "", "error");
 			this.clientInfo.currentPage = "error";
-			//replace URL Path
+			this._inVisibleChatButton();
 			this.currentPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			await this.currentPageManager.initPage();
 		}
 	}
 
-	_visibleChatButton(){
+	_visibleChatButton() {
 		this.chatButton.classList.add("visible");
 		this.chatButton.classList.remove("inVisible");
 	}
 
-	_inVisibleChatButton(){
+	_inVisibleChatButton() {
 		this.chatButton.classList.add("inVisible");
 		this.chatButton.classList.remove("visible");
 	}
