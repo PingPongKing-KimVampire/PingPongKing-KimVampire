@@ -1,7 +1,7 @@
 DATA_DIR = ./BE/data_db
 ENV = DATA_PATH=${DATA_DIR}
 
-up: down clean create-dir
+up: down create-dir
 	$(ENV) docker-compose up --build
 
 down:
