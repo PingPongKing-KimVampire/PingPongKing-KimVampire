@@ -1,0 +1,259 @@
+#gameContainer {
+	height: 90vh;
+	aspect-ratio: 155 / 100;
+}
+
+#displayBoard {
+	width: 100%;
+	height: 15%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#leftDisplayBoard,
+#rightDisplayBoard {
+	width: 40%;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+}
+
+#leftDisplayBoard {
+	padding-left: 1%;
+}
+
+#rightDisplayBoard {
+	flex-direction: row-reverse;
+	padding-right: 1%;
+}
+
+.playerInfo {
+	width: 25%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#leftDisplayBoard .playerInfo {
+	margin-right: 2%;
+}
+
+#rightDisplayBoard .playerInfo {
+	margin-left: 2%;
+}
+
+.playerInfo .playerName {
+	font-size: 2rem;
+	font-weight: 700;
+}
+
+.playerInfo .playerScore {
+	position: relative;
+	font-size: 5.3rem;
+	font-weight: 900;
+	color: rgb(213, 112, 255);
+	z-index: 0; /* TODO : 왜 이게 있어야만 테두리가 보일까? */
+}
+
+.playerInfo .playerScore .playerScoreStroke {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: -1;
+	-webkit-text-stroke: 0.6rem white;
+}
+
+.playerAvatar {
+	width: 75%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+}
+
+#rightDisplayBoard .playerAvatar {
+	flex-direction: row-reverse;
+}
+
+.playerAvatar img {
+	max-height: 100%;
+	max-width: 100%; /* 팀전이라 여러 이미지가 들어가는 경우, js에서 이 부분 조정*/
+}
+
+.timeInfo {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: center;
+	padding: 0 1% 2%;
+}
+
+.timeInfo #timeText {
+	font-size: 2rem;
+	font-weight: 500;
+}
+
+#playBoard {
+	width: 100%;
+	height: 85%;
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	border: 0.25rem solid white;
+	box-sizing: border-box;
+}
+
+.subPlayBoard {
+	width: 50%;
+	height: 100%;
+	position: relative;
+}
+
+.subPlayBoard:nth-of-type(1) {
+	border-right: 0.125rem solid white;
+}
+
+.subPlayBoard:nth-of-type(2) {
+	border-left: 0.125rem solid white;
+}
+
+.paddle {
+	width: 2.5%;
+	height: 15%;
+	position: absolute;
+	background-color: rgb(213, 112, 255);
+}
+
+#playBoard .ball {
+	height: auto;
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: white;
+	transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+.pop {
+	transform: scale(3);
+	opacity: 0;
+}
+
+.questionModal {
+	display: none;
+	/* display: flex; */
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.questionModal .questionBox {
+	width: 80%;
+	height: 20%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 3rem;
+	font-weight: 900;
+}
+
+.questionModal .question {
+	padding-bottom: 1.5%;
+	text-align: center;
+	line-height: 1.5;
+}
+
+.questionModal .title {
+	padding-bottom: 1%;
+	text-align: center;
+	font-weight: 400;
+	font-size: 2rem;
+}
+
+.pop {
+	transform: scale(3);
+	opacity: 0;
+}
+
+
+/* TODO 임시 게임 종료 화면. 나중에 지우기 */
+#gameOverModal {
+	display: none;
+	/* display: flex; */
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	z-index: 1;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.7);
+}
+#gameOverModal #contentBox {
+	height: 15%;
+	width: 30%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 2rem;
+}
+#gameOverModal button {
+	padding: 2% 10%;
+}
+
+@media (orientation: portrait) {
+	html {
+		font-size: 1.6vw;
+	}
+	#gameContainer {
+		width: 80%;
+	}
+	#displayBoard {
+		height: 10%;
+	}
+	#leftDisplayBoard,
+	#rightDisplayBoard {
+		padding: 0;
+	}
+	#leftDisplayBoard .playerInfo,
+	#rightDisplayBoard .playerInfo {
+		margin: 0;
+	}
+	.playerInfo {
+		width: 35%;
+	}
+	.playerAvatar {
+		width: 65%;
+	}
+	#playBoard {
+		height: 90%;
+		flex-direction: column;
+	}
+	.subPlayBoard {
+		width: 100%;
+		height: 50%;
+	}
+	.subPlayBoard:nth-child(1) {
+		border-right: none;
+		border-bottom: 0.125rem solid white;
+	}
+	.subPlayBoard:nth-child(2) {
+		border-left: none;
+		border-top: 0.125rem solid white;
+	}
+	.subPlayBoard:nth-of-type(2) .paddle {
+		width: 15%;
+		height: 2.5%;
+	}
+	#playBoard .ball {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
+}

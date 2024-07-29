@@ -2,8 +2,8 @@ import windowObservable from "../../WindowObservable.js";
 import { GameInfoNotSettingError } from "../Error/Error.js";
 import { _connectLobbySocket } from "../connect.js";
 
-import { SERVER_ADDRESS } from "./../PageRouter.js";
-import { SERVER_PORT } from "./../PageRouter.js";
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
 
 class WaitingRoomPageManager {
 	constructor(app, clientInfo, renderPage) {
