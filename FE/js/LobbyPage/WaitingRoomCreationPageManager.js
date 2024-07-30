@@ -253,7 +253,7 @@ class WaitingRoomCreationPageManager {
 				<div id="vsText">VS</div>
 				<div class="countBox">
 					<div class="teamText">인간</div>
-					<div id="humanCountBox" value="1">
+					<div id="humanCountBox" value="3">
 						<div>1명</div>
 						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
 						<ul id="humanCountOptionBox" class="invisible">

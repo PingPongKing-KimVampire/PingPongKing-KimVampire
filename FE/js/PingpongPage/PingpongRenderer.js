@@ -132,13 +132,16 @@ class PingpongRenderer {
 		} else if (event === "notifyUnghostBall") {
 			this._makeBallOpaque();
 		} else if (event === "notifyFakeBallCreate") {
-			this._createFakeBall(content.count);
+			this._createFakeBall(content.idList);
 			this.fakeBallList.forEach(fakeBall => {
 				this._renderBall({ xPosition: fakeBall.xPos, yPosition: fakeBall.yPos }, fakeBall.element);
 			});
 		} else if (event === "notifyFakeBallLocationUpdate") {
 			const ballId = content.ballId;
+			console.log(this.fakeBallList);
+			console.log(ballId);
 			const targetFakeBall = this.fakeBallList.find(fakeBall => fakeBall.id === ballId);
+			console.log(targetFakeBall);
 			this._renderBall(content, targetFakeBall.element);
 		} else if (event === "notifyFakeBallRemove") {
 			this._removeFakeBall(content.ballId);
@@ -166,18 +169,18 @@ class PingpongRenderer {
 		this.ball.element.style.opacity = "0";
 	}
 
-	_createFakeBall(count) {
+	_createFakeBall(idList) {
 		if (!this.fakeBallList) this.fakeBallList = [];
 		const playBoardDiv = document.querySelector("#playBoard");
-		for (let i = 0; i < count; i++) {
+		for (let i = 0; i < idList.length; i++) {
 			const element = document.createElement("div");
 			element.className = "ball";
 			//임시
 			element.style.backgroundColor = "pink";
-			// if (this._isVampire(this.me)) element.style.opacity = 0.5;
+			if (this._isVampire(this.me)) element.style.opacity = 0.5;
 			playBoardDiv.append(element);
 			this.fakeBallList.push({
-				id: i,
+				id: idList[i],
 				element,
 				xPos: this.ball.xPos,
 				yPos: this.ball.yPos,
