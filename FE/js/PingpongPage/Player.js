@@ -59,6 +59,12 @@ class Player {
 		windowObservable.subscribeOrientationChange(this.updateOrientationRef);
 		this.sendPaddlePositionRef = this.sendPaddlePosition.bind(this);
 		windowObservable.subscribeMousemove(this.sendPaddlePositionRef);
+		document.addEventListener("touchmove", event => {
+			this.sendPaddlePositionRef(event.touches[0]);
+		});
+		document.addEventListener("touchstart", event => {
+			this.sendPaddlePositionRef(event.touches[0]);
+		});
 	}
 
 	unsubscribeWindow() {
