@@ -60,6 +60,7 @@ class LoginPageManager {
 			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
 			this.clientInfo.accessToken = this.accessToken;
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
+			this._setInviteListener(this.clientInfo.socket);
 
 			this.renderPage("chatting");
 			this.renderPage("lobby");
@@ -100,7 +101,7 @@ class LoginPageManager {
 	}
 
 	async _connectGlobalSocket(id) {
-		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/`, ['authorization', this.accessToken]);
+		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/`, ["authorization", this.accessToken]);
 		await new Promise(resolve => {
 			socket.addEventListener("open", () => {
 				resolve();
@@ -261,14 +262,24 @@ class LoginPageManager {
 		});
 	}
 
-	// _getAccessTocken() {
-	// 	const cookieString = `; ${document.cookie}`;
-	// 	const parts = cookieString.split(`; accessToken=`);
-	// 	if (parts.length === 2) {
-	// 		return parts.pop().split(';').shift();
-	// 	}
-	// 	return null;
-	// }
+	_setInviteListener(socket) {
+		socket.addEventListener("message", messageEvent => {
+			const { event, content } = JSON.parse(messageEvent.data);
+			if (event === "notifyGameInviteArrive") {
+				const disableInvitePageList = ["waitingRoom", "pingpong", "waitingTournament", "tournament", "login", "signup"];
+				if (disableInvitePageList.includes(this.clientInfo.currentPage)) return;
+				this.clientInfo.gameInfo = {
+					roomId: content.waitingRoomInfo.roomId,
+					title: content.waitingRoomInfo.title,
+					teamLeftMode: content.waitingRoomInfo.leftMode,
+					teamRightMode: content.waitingRoomInfo.rightMode,
+					teamLeftTotalPlayerCount: 1,
+					teamRightTotalPlayerCount: content.waitingRoomInfo.maxPlayerCount - 1,
+				};
+				this.renderPage("waitingRoom");
+			}
+		});
+	}
 
 	_getHTML() {
 		return `
