@@ -174,7 +174,7 @@ class PingpongRenderer {
 			const element = document.createElement("div");
 			element.className = "ball";
 			//임시
-			element.style.backgroundColor = "pink";
+			element.style.backgroundColor = "white";
 			if (this._isVampire(this.me)) element.style.opacity = 0.5;
 			playBoardDiv.append(element);
 			this.fakeBallList.push({
