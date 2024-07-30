@@ -175,7 +175,7 @@ class PingpongRenderer {
 			element.className = "ball";
 			//임시
 			element.style.backgroundColor = "white";
-			if (this._isVampire(this.me)) element.style.opacity = 0.5;
+			if (this._isVampire(this.me)) element.classList.add("opaqueOpacity");
 			playBoardDiv.append(element);
 			this.fakeBallList.push({
 				id: idList[i],
@@ -190,11 +190,12 @@ class PingpongRenderer {
 		const targetFakeBall = this.fakeBallList.find(fakeBall => fakeBall.id === ballId);
 		console.log(ballId, targetFakeBall);
 		// console.log(targetFakeBall);
-		// targetFakeBall.element.classList.add("pop");
-		// targetFakeBall.element.addEventListener("transitionend", ()=>{
+		targetFakeBall.element.classList.remove("opaqueOpacity");
+		targetFakeBall.element.classList.add("pop");
+		targetFakeBall.element.addEventListener("transitionend", () => {
+			targetFakeBall.element.remove();
+		});
 		// targetFakeBall.element.remove();
-		// })
-		targetFakeBall.element.remove();
 		this.fakeBallList = this.fakeBallList.filter(fakeBall => fakeBall.id !== ballId);
 	}
 
