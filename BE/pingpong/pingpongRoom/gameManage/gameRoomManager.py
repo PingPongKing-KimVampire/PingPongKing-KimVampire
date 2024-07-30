@@ -251,10 +251,10 @@ class GameRoomManager:
             ball_state = self._detect_collisions(fake_ball)
             if ball_state != NOHIT:
                 Printer.log("hit reason: " + str(ball_state), "yellow")
-                await self._notify_game_room('notifyFakeBallRemove', {'ballId': index})
                 break
             await self._send_fake_ball_update(index)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
+        await self._notify_game_room('notifyFakeBallRemove', {'ballId': index})
         self.fake_ball[index] = None
 
     async def _create_fake_ball(self, team_illusion):
@@ -262,13 +262,16 @@ class GameRoomManager:
             count = self.team_right.__len__()
         else:
             count = self.team_left.__len__()
-        await self._notify_game_room('notifyFakeBallCreate', {'count' : count})
-        for i in range(count - 1):
+        id_list = []
+        for i in range(count):
             id = str(uuid.uuid4())
+            id_list.append(id)
             self.fake_ball[id] = Ball(NORMAL_SPEED, self.ball_radius)
             rand = random.randint(-15, 15)
             self.fake_ball[id].reset_ball(self.ball.pos_x, self.ball.pos_y)
             self.fake_ball[id].change_direction(self.ball.angle + rand)
+        await self._notify_game_room('notifyFakeBallCreate', {'idList' : id_list})
+        for id in id_list:
             asyncio.create_task(self._fake_ball_loop(id))
 
     # Playing Methods
