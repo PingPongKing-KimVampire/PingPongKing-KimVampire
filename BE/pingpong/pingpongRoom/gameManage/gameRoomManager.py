@@ -55,6 +55,7 @@ class GameRoomManager:
         self.serve_turn = LEFT
         self.fake_ball = {}
         self.queue = Queue()
+        self.is_scored = False
 
         #statics
         self.win_team = None
@@ -246,7 +247,7 @@ class GameRoomManager:
         Printer.log(f"Fake ball {index} created", "yellow")
         fake_ball = self.fake_ball[index]
         Printer.log(f"Fake ball {index} angle:" + str(fake_ball.angle), "yellow")
-        while self.is_playing and not self.is_end:
+        while self.is_playing and not self.is_end and not self.is_scored:
             fake_ball.move()
             ball_state = self._detect_collisions(fake_ball)
             if ball_state != NOHIT:
@@ -280,10 +281,8 @@ class GameRoomManager:
         state = NOHIT
         if ball.get_right_x() >= self.board_width:
             self.serve_turn = LEFT
-            self.save_hit_map('SCORE', ball.pos_y, ball.pos_x)
             return SCORE
         elif ball.get_left_x() <= 0:
-            self.save_hit_map('SCORE', ball.pos_y, ball.pos_x)
             self.serve_turn = RIGHT
             return SCORE
         elif ball.get_top_y() <= 0 or ball.get_bottom_y() >= self.board_height:
@@ -294,6 +293,7 @@ class GameRoomManager:
 
     def _detect_paddle_collision(self, ball):
         if self.ball.speed == 0:
+            self.is_scored = False
             players_to_check = self.team_left.values() if self.serve_turn == LEFT else self.team_right.values()
         else:
             players_to_check = self.team_left.values() if ball.dx <= 0 else self.team_right.values()
@@ -301,8 +301,7 @@ class GameRoomManager:
         angle = 0
         for player in players_to_check:
             # print(player.nickname)
-            if self._is_ball_colliding_with_paddle(player):
-                self.save_hit_map('PADDLE', ball.pos_y, ball.pos_x)
+            if self._is_ball_colliding_with_paddle(player, ball):
                 state = PADDLE
                 if player.ability == 'speedTwister':
                     speed = speed * 2
@@ -323,8 +322,8 @@ class GameRoomManager:
                 return state
         return NOHIT
 
-    def _is_ball_colliding_with_paddle(self, player):
-        if player.is_moving_front() and player.is_colliding_with_ball(self.ball):
+    def _is_ball_colliding_with_paddle(self, player, ball):
+        if player.is_moving_front() and player.is_colliding_with_ball(ball):
             return True
         return False
     
@@ -364,7 +363,6 @@ class GameRoomManager:
 
     def _end_game_loop(self):
         team = 'left' if self.score[LEFT] >= END_SCORE else 'right'
-        self._end_game()
         return team
 
     def _reset_round(self):
@@ -442,6 +440,8 @@ class GameRoomManager:
     async def _send_ball_update(self, ball_state, ball):
         team = 'left' if ball.dx > 0 else 'right'
         if ball_state == SCORE:
+            self.is_scored = True
+            self.save_hit_map('SCORE', ball.pos_y, ball.pos_x)
             await self._round_end_with_score()
         elif ball_state == GHOST:
             await self._notify_game_room('notifyGhostBall', {})
@@ -451,6 +451,8 @@ class GameRoomManager:
             await self._notify_game_room('notifyUnspeedTwistBall', {})
         elif ball_state == FAKE:
             asyncio.create_task(self._create_fake_ball(team))
+        elif ball_state == PADDLE:
+            self.save_hit_map('PADDLE', ball.pos_y, ball.pos_x)
         if self.ball.is_vanish:
             if self.ball.dx < 0:
                 room_id_team = f"{self.room_id}-right"

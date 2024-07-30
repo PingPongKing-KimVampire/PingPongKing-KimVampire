@@ -67,10 +67,10 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content=str):
-        if not (event == "notifyPaddleLocationUpdate" or event == "notifyBallLocationUpdate"):
-            Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
-            Printer.log(f"event : {event}", "white")
-            Printer.log(f"content : {content}\n", "white")
+        # if not (event == "notifyPaddleLocationUpdate" or event == "notifyBallLocationUpdate" or event == "notifyFakeBallLocationUpdate"):
+        #     Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
+        #     Printer.log(f"event : {event}", "white")
+        #     Printer.log(f"content : {content}\n", "white")
         data = { 'event': event, 'content': content }
         await self.send(json.dumps(data))
     
