@@ -138,10 +138,7 @@ class PingpongRenderer {
 			});
 		} else if (event === "notifyFakeBallLocationUpdate") {
 			const ballId = content.ballId;
-			console.log(this.fakeBallList);
-			console.log(ballId);
 			const targetFakeBall = this.fakeBallList.find(fakeBall => fakeBall.id === ballId);
-			console.log(targetFakeBall);
 			this._renderBall(content, targetFakeBall.element);
 		} else if (event === "notifyFakeBallRemove") {
 			this._removeFakeBall(content.ballId);
@@ -173,6 +170,7 @@ class PingpongRenderer {
 		if (!this.fakeBallList) this.fakeBallList = [];
 		const playBoardDiv = document.querySelector("#playBoard");
 		for (let i = 0; i < idList.length; i++) {
+			console.log(idList);
 			const element = document.createElement("div");
 			element.className = "ball";
 			//임시
@@ -190,15 +188,14 @@ class PingpongRenderer {
 
 	_removeFakeBall(ballId) {
 		const targetFakeBall = this.fakeBallList.find(fakeBall => fakeBall.id === ballId);
+		console.log(ballId, targetFakeBall);
 		// console.log(targetFakeBall);
 		// targetFakeBall.element.classList.add("pop");
 		// targetFakeBall.element.addEventListener("transitionend", ()=>{
 		// targetFakeBall.element.remove();
 		// })
 		targetFakeBall.element.remove();
-		this.fakeBallList = this.fakeBallList.filter(fakeBall => {
-			fakeBall.id !== ballId;
-		});
+		this.fakeBallList = this.fakeBallList.filter(fakeBall => fakeBall.id !== ballId);
 	}
 
 	_isVampire(player) {
