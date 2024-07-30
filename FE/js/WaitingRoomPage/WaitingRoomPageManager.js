@@ -159,7 +159,7 @@ class WaitingRoomPageManager {
 				if (content.team === this.me.team && this.myAbilityButton) {
 					this.me.selectAbility = true;
 				}
-				this._initPage();
+				this._rerenderPage();
 			}
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", this.listener);

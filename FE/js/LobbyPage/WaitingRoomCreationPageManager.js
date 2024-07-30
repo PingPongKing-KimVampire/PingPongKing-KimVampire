@@ -143,7 +143,7 @@ class WaitingRoomCreationPageManager {
 			leftPlayerCount = 1;
 			rightPlayerCount = 1;
 		} else if (mode === "vampireVsHuman") {
-			const humanCount = parseInt(this.humanCountButton.value);
+			const humanCount = parseInt(this.humanCountButton.getAttribute("value"));
 			if (isNaN(humanCount)) return;
 			leftMode = "vampire";
 			rightMode = "human";
@@ -253,8 +253,8 @@ class WaitingRoomCreationPageManager {
 				<div id="vsText">VS</div>
 				<div class="countBox">
 					<div class="teamText">인간</div>
-					<div id="humanCountBox" data-count="3">
-						<div>3명</div>
+					<div id="humanCountBox" value="3">
+						<div>1명</div>
 						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
 						<ul id="humanCountOptionBox" class="invisible">
 							<li><button class="humanCountOptionButton" value="2">2명</button></li>
