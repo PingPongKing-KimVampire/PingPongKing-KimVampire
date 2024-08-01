@@ -30,6 +30,31 @@ class WaitingRoomPageManager {
 				function listener(messageEvent) {
 					const { event, content } = JSON.parse(messageEvent.data);
 					if (event === "enterWaitingRoomResponse") {
+						if (content.message === "RoomIsFull") {
+							this.app.innerHTML = "";
+							const questionModalElement = document.createElement("div");
+							questionModalElement.classList.add("questionModal");
+							questionModalElement.style.display = "flex";
+							questionModalElement.innerHTML = `
+														<div class="questionBox">
+															<div class="title"></div>
+															<div class="question"> 방이 꽉 찼습니다! </div>
+															<div class="buttonGroup">
+																<button class="activatedButton">돌아가기</button>
+															</div>
+														</div>
+														`;
+							const buttonGroupElement = questionModalElement.querySelector(".buttonGroup");
+							buttonGroupElement.classList.add("center");
+							const buttonElement = questionModalElement.querySelector(".activatedButton");
+							buttonElement.addEventListener("click", e => {
+								e.stopPropagation();
+								buttonGroupElement.remove();
+								history.back();
+							});
+							this.app.append(questionModalElement);
+							return;
+						}
 						pingpongRoomSocket.removeEventListener("message", listener);
 						resolve(content);
 					}

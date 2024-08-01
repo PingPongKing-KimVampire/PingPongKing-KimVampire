@@ -263,20 +263,49 @@ class LoginPageManager {
 	}
 
 	_setInviteListener(socket) {
+		let isModalActive = false;
 		socket.addEventListener("message", messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
 			if (event === "notifyGameInviteArrive") {
 				const disableInvitePageList = ["waitingRoom", "pingpong", "waitingTournament", "tournament", "login", "signup"];
 				if (disableInvitePageList.includes(this.clientInfo.currentPage)) return;
-				this.clientInfo.gameInfo = {
-					roomId: content.waitingRoomInfo.roomId,
-					title: content.waitingRoomInfo.title,
-					teamLeftMode: content.waitingRoomInfo.leftMode,
-					teamRightMode: content.waitingRoomInfo.rightMode,
-					teamLeftTotalPlayerCount: 1,
-					teamRightTotalPlayerCount: content.waitingRoomInfo.maxPlayerCount - 1,
-				};
-				this.renderPage("waitingRoom");
+				if (isModalActive) return;
+				isModalActive = true;
+				const questionModalElement = document.createElement("div");
+				questionModalElement.classList.add("questionModal");
+				questionModalElement.style.display = "flex";
+				questionModalElement.innerHTML = `
+				<div class="questionBox">
+					<div class="title"></div>
+					<div class="question"> 당신의 친구 ${content.clientNickname}님이 초대하셨습니다.<br>도전을 받아들일까용?</div>
+					<div class="buttonGroup">
+						<button class="activatedButton">네</button>
+						<button class="activatedButton">아니오</button>
+					</div>
+	  			</div>
+				`;
+				const yesButtonElement = questionModalElement.querySelector(".activatedButton:nth-of-type(1)");
+				const noButtonElement = questionModalElement.querySelector(".activatedButton:nth-of-type(2)");
+				yesButtonElement.addEventListener("click", e => {
+					e.stopPropagation();
+					this.clientInfo.gameInfo = {
+						roomId: content.waitingRoomInfo.roomId,
+						title: content.waitingRoomInfo.title,
+						teamLeftMode: content.waitingRoomInfo.leftMode,
+						teamRightMode: content.waitingRoomInfo.rightMode,
+						teamLeftTotalPlayerCount: 1,
+						teamRightTotalPlayerCount: content.waitingRoomInfo.maxPlayerCount - 1,
+					};
+					isModalActive = false;
+					questionModalElement.remove();
+					this.renderPage("waitingRoom");
+				});
+				noButtonElement.addEventListener("click", e => {
+					e.stopPropagation();
+					isModalActive = false;
+					questionModalElement.remove();
+				});
+				this.app.append(questionModalElement);
 			}
 		});
 	}

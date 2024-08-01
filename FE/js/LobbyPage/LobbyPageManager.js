@@ -257,8 +257,13 @@ class LobbyPageManager {
 		waitingRoomContainer.addEventListener("click", async () => {
 			this.enterModalTitle.innerText = `"${title}"`;
 			this.enterRoomModal.style.display = "flex";
-			const enterRoomListenerRef = this._enterWaitingRoom.bind(this, roomId, title, leftMode, rightMode, 1, maxPlayerCount - 1);
-			const hideModalLisenerRef = () => {
+			const enterRoomListenerRef = e => {
+				e.stopPropagation();
+				this.enterRoomModal.style.display = "none";
+				this._enterWaitingRoom(roomId, title, leftMode, rightMode, 1, maxPlayerCount - 1);
+			};
+			const hideModalLisenerRef = e => {
+				e.stopPropagation();
 				this.enterRoomModal.style.display = "none";
 				this.enterYesButton.removeEventListener("click", enterRoomListenerRef);
 				this.enterNoButton.removeEventListener("click", hideModalLisenerRef);
@@ -324,7 +329,7 @@ class LobbyPageManager {
 		return `
 			<div class="questionModal">
 				<div class="questionBox">
-          <div class="title"></div>
+          			<div class="title"></div>
 					<div class="question">입장 하시겠습니까?</div>
 					<div class="buttonGroup">
 						<button class="activatedButton">네</button>

@@ -189,6 +189,10 @@ body {
 	padding-top: 1.5%;
 }
 
+.questionModal .buttonGroup.center {
+	justify-content: center;
+}
+
 .questionModal .buttonGroup button {
 	width: 45%;
 	padding: 2.5% 2.5%;
