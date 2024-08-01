@@ -12,10 +12,9 @@ import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 import ErrorPageManager from "./ErrorPage/ErrorPageManager.js";
 
-
 // export const SERVER_ADDRESS = "127.0.0.1";
-// export const SERVER_ADDRESS = window.location.hostname;
-export const SERVER_ADDRESS = "10.18.236.23";
+export const SERVER_ADDRESS = window.location.hostname;
+// export const SERVER_ADDRESS = "10.18.236.23";
 export const SERVER_PORT = "80";
 
 class PageRouter {
