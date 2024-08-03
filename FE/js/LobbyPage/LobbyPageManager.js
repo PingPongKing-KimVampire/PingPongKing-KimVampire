@@ -41,10 +41,10 @@ class LobbyPageManager {
 	}
 
 	initPage() {
-		//새로고침 방지
-		window.addEventListener("beforeunload", event => {
-			event.returnValue = `나가지마,,`;
-		});
+		//새로고침 방지 -> 추후 활성화
+		// window.addEventListener("beforeunload", event => {
+		// 	event.returnValue = `나가지마,,`;
+		// });
 		app.innerHTML = this._getHTML();
 		this._setTournamentJoinButton();
 		this._setCreateWaitingRoomButton();
