@@ -4,10 +4,15 @@ class StatisticsPageManager {
 	constructor(app, clientInfo) {
 		this.app = app;
 		this.clientInfo = clientInfo;
-		this._initPage();
 	}
 
-	async _initPage() {
+	connectPage() {}
+
+	clearPage() {
+		this._unsubscribeWindow();
+	}
+
+	async initPage() {
 		// TODO : timestamp ~ opponnetTeamClientInfoList 까지는 이전에 받았던 거 재활용할 수 없을까?
 		// TODO : profileTarget.id랑 gameId는 어떻게 얻어올 수 있을까?
 		// const { timestamp, 
@@ -23,7 +28,7 @@ class StatisticsPageManager {
 
 		// TODO : 임시 하드 코딩
 		this.word = "그 실력에 잠이 오냐?";
-		this.hitMap = {
+		this.hitMapList = {
 			1 : [{"type" : "SCORE", "y" : 1000, "x" : 1550}, 
 				{"type" : "PADDLE", "y" : 0, "x" : 0}],
 	 		2 : [{"type" : "SCORE", "y" : 1000, "x" : 0},
@@ -193,7 +198,7 @@ class StatisticsPageManager {
 			this.hitMapPanel.append(ball);
 		}
 
-		this.hitMap[round].forEach(({type, x, y}) => {
+		this.hitMapList[round].forEach(({type, x, y}) => {
 			renderBall(type, x, y);
 		});
 	}

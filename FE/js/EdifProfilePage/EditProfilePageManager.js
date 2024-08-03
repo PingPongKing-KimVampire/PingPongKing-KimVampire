@@ -1,15 +1,13 @@
-import { SERVER_ADDRESS } from "./../PageRouter.js";
-import { SERVER_PORT } from "./../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
+import { GlobalConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class EditProfilePageManager {
-	constructor(app, clientInfo, renderProfilePage) {
+	constructor(app, clientInfo, renderPage) {
 		this.clientInfo = clientInfo;
-
 		this._setDefaultAvatars();
 		app.innerHTML = this._getHTML();
-		this.renderProfilePage = renderProfilePage;
-		this._initPage();
+		this.renderPage = renderPage;
 	}
 
 	_setDefaultAvatars() {
@@ -24,7 +22,13 @@ class EditProfilePageManager {
 		this._defaultAvatarPathList.push(avatarPath);
 	}
 
-	_initPage() {
+	async connectPage() {
+		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+	}
+
+	clearPage() {}
+
+	initPage() {
 		this.isNicknameUpdated = false;
 		this.isAvatarUpdated = false;
 		this.isDefaultAvatar;
@@ -76,7 +80,7 @@ class EditProfilePageManager {
 	}
 	async _validateDuplicateNickname(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
-		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/check-nickname?${query}`;
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-nickname?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -201,7 +205,7 @@ class EditProfilePageManager {
 	};
 	_exitEditProfilePage = () => {
 		this.clientInfo.profileTarget = { id: this.clientInfo.id };
-		this.renderProfilePage();
+		history.back();
 	};
 	_hideExitModal = () => {
 		this.exitModal.style.display = "none";

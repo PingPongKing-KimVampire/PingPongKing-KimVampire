@@ -1,18 +1,21 @@
-const SERVER = "127.0.0.1";
-const PORT = 3001;
+const SERVER = window.location.hostname;
+const PORT = 80;
 
 class SignupPageManager {
-	constructor(app, clientInfo, onSignupSuccess) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("Sign up Page!");
 
 		this.clientInfo = clientInfo;
-		this.onSignupSuccess = onSignupSuccess;
-		app.innerHTML = this._getHTML();
-
-		this._initPage();
+		this.app = app;
+		this.renderPage = renderPage;
 	}
 
-	_initPage() {
+	connectPage() {}
+
+	clearPage() {}
+
+	initPage() {
+		this.app.innerHTML = this._getHTML();
 		this.idValidState = false;
 		this.pwValidState = false;
 		this.rePwValidState = false;
@@ -141,7 +144,7 @@ class SignupPageManager {
 
 	async _validateDuplicateId(id) {
 		const query = new URLSearchParams({ username: id }).toString();
-		const url = `http://${SERVER}:${PORT}/check-username?${query}`;
+		const url = `http://${SERVER}:${PORT}/api/check-username?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -157,7 +160,7 @@ class SignupPageManager {
 
 	async _validateDuplicateNickName(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
-		const url = `http://${SERVER}:${PORT}/check-nickname?${query}`;
+		const url = `http://${SERVER}:${PORT}/api/check-nickname?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -201,7 +204,7 @@ class SignupPageManager {
 			password: password,
 		};
 
-		const url = `http://${SERVER}:${PORT}/signup`;
+		const url = `http://${SERVER}:${PORT}/api/signup`;
 
 		try {
 			const response = await fetch(url, {
@@ -240,7 +243,7 @@ class SignupPageManager {
 		// const data = await response.json();
 		// console.log('회원가입 성공:', data);
 		// 회원가입 성공 후 추가 작업 (예: 리디렉션)
-		this.onSignupSuccess();
+		this.renderPage("login");
 	};
 	_displaySignupFailureNotiWindow(infomation) {
 		const notiWindow = document.querySelector('.notiWindow');

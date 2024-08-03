@@ -1,68 +1,24 @@
-import { SERVER_ADDRESS } from "../PageRouter.js";
-import { SERVER_PORT } from "../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
-
 import windowObservable from "../../WindowObservable.js";
+import { GlobalConnectionError, isSocketConnected } from "../Error/Error.js";
 
 class FriendManagementPageManager {
-	constructor(app, clientInfo, renderLobby) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("Friend Management Page!");
-
-		// TODO : 임시 하드 코딩
-		// this.clientInfo = {
-		// 	friendInfo: {
-		// 		friendList: [
-		// 			{ id: 1, nickname: '조뱀파이어', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 2, nickname: '박뱀파이어', avatarUrl: 'images/humanIcon.png' },
-		// 			{ id: 3, nickname: '이뱀파이어', avatarUrl: 'images/playerB.png' },
-		// 			{ id: 4, nickname: '김뱀파이어', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 5, nickname: '최뱀파이어', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 6, nickname: '정뱀파이어', avatarUrl: 'images/playerA.png' },
-		// 		],
-		// 		clientListWhoFriendRequestedMe: [
-		// 			{ id: 7, nickname: '이사람', avatarUrl: 'images/humanIcon.png' },
-		// 			{ id: 8, nickname: '그사람', avatarUrl: 'images/humanIcon.png' },
-		// 			{ id: 9, nickname: '저사람', avatarUrl: 'images/humanIcon.png' },
-		// 			{ id: 10, nickname: '다른사람', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 11, nickname: '이웃사람', avatarUrl: 'images/playerB.png' },
-		// 			{ id: 12, nickname: '친구사람', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 31, nickname: '차단한 사람1', avatarUrl: 'images/playerA.png' },
-		// 		],
-		// 		clientListIFriendRequested: [
-		// 			{ id: 13, nickname: '마지막사람', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 14, nickname: '새로운사람', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 15, nickname: '처음사람', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 16, nickname: '또다른사람', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 17, nickname: '모르는사람', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 18, nickname: '알고있는사람', avatarUrl: 'images/playerA.png' },
-		// 		],
-		// 		clientListIBlocked: [
-		// 			{ id: 31, nickname: '차단한 사람1', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 32, nickname: '차단한 사람2', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 33, nickname: '차단한 사람3', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 34, nickname: '차단한 사람4', avatarUrl: 'images/playerA.png' },
-		// 			{ id: 35, nickname: '차단한 사람5', avatarUrl: 'images/playerA.png' },
-		// 		],
-		// 	},
-		// };
-
-		// this.clientList = [
-		// 	// TODO : 임시 하드코딩
-		// 	...this.clientInfo.friendInfo.friendList,
-		// 	...this.clientInfo.friendInfo.clientListWhoFriendRequestedMe,
-		// 	...this.clientInfo.friendInfo.clientListIFriendRequested,
-		// 	...this.clientInfo.friendInfo.clientListIBlocked,
-		// 	{ id: 19, nickname: '기타1', avatarUrl: 'images/humanIcon.png' },
-		// ];
-
-		app.innerHTML = this._getHTML();
+		this.app = app;
 		this.clientInfo = clientInfo;
-		this.renderLobby = renderLobby;
-
-		this._initPage();
+		this.renderPage = renderPage;
 	}
 
-	_initPage() {
+	async connectPage() {
+		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+	}
+
+	clearPage() {
+		this._unsubscribeWindow();
+	}
+
+	initPage() {
+		app.innerHTML = this._getHTML();
 		this.searchKeyword = "";
 		this._setTabButtons();
 		this._setExitButton();
@@ -98,9 +54,7 @@ class FriendManagementPageManager {
 	_setExitButton() {
 		this.exitButton = document.querySelector(".exitButton");
 		this.exitButton.addEventListener("click", async () => {
-			this._unsubscribeWindow();
-			this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.accessToken);
-			this.renderLobby();
+			history.back();
 		});
 	}
 
@@ -418,7 +372,6 @@ class FriendManagementPageManager {
 		windowObservable.subscribeResize(this._autoSetScrollTrackColor);
 	}
 	_unsubscribeWindow() {
-		// TODO : 페이지 나갈 시 호출
 		windowObservable.unsubscribeResize(this._autoSetScrollTrackColorRef);
 	}
 

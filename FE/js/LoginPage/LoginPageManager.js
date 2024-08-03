@@ -1,18 +1,24 @@
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
 
 class LoginPageManager {
-	constructor(app, clientInfo, onLoginSuccess, onEnterSignupPage) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("Login Page!");
 
 		this.clientInfo = clientInfo;
-		this.onLoginSuccess = onLoginSuccess;
-		this.onEnterSignupPage = onEnterSignupPage;
-		app.innerHTML = this._getHTML();
+		this.renderPage = renderPage;
+		this.app = app;
 	}
 
+	connectPage() {
+		// 이미 웹소켓에 연결되어 있는 사용자는 어떻게 처리할 것인가? 로비페이지로 라우팅?
+		// 네이버는 그냥 내비둔다. 네이버를 따라하자.
+	}
+
+	clearPage() {}
+
 	initPage() {
+		this.app.innerHTML = this._getHTML();
 		this.idInput = document.querySelector("#idInput");
 		this.pwInput = document.querySelector("#pwInput");
 		this.idInput.addEventListener("input", this._updateLoginButton.bind(this));
@@ -24,7 +30,7 @@ class LoginPageManager {
 		this.loginButton.disabled = true;
 		this.loginButton.addEventListener("click", this._loginListener.bind(this));
 
-		document.querySelector("#signupButton").addEventListener("click", this.onEnterSignupPage);
+		document.querySelector("#signupButton").addEventListener("click", this.renderPage.bind(this, "signup"));
 	}
 
 	_updateLoginButton() {
@@ -46,18 +52,18 @@ class LoginPageManager {
 		try {
 			await this._loginRequest(id, pw);
 			const { socket, userData } = await this._connectGlobalSocket(id, pw);
-			const lobbySocket = await _connectLobbySocket(this.accessToken);
 
 			this.clientInfo.id = userData.id;
 			this.clientInfo.nickname = userData.nickname;
 			this.clientInfo.avatarUrl = userData.avatarUrl;
 			this.clientInfo.socket = socket;
-			this.clientInfo.lobbySocket = lobbySocket;
 			this.clientInfo.friendInfo = await this._getFriendInfo(this.clientInfo.socket);
 			this.clientInfo.accessToken = this.accessToken;
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
+			this._setInviteListener(this.clientInfo.socket);
 
-			this.onLoginSuccess();
+			this.renderPage("chatting");
+			this.renderPage("lobby");
 		} catch (error) {
 			this.warning.textContent = error.message;
 		}
@@ -68,7 +74,7 @@ class LoginPageManager {
 			username: id,
 			password: pw,
 		};
-		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/login`;
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/login`;
 		let response;
 		try {
 			response = await fetch(url, {
@@ -95,7 +101,7 @@ class LoginPageManager {
 	}
 
 	async _connectGlobalSocket(id) {
-		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:3001/ws`, ['authorization', this.accessToken]);
+		const socket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/`, ["authorization", this.accessToken]);
 		await new Promise(resolve => {
 			socket.addEventListener("open", () => {
 				resolve();
@@ -256,14 +262,53 @@ class LoginPageManager {
 		});
 	}
 
-	// _getAccessTocken() {
-	// 	const cookieString = `; ${document.cookie}`;
-	// 	const parts = cookieString.split(`; accessToken=`);
-	// 	if (parts.length === 2) {
-	// 		return parts.pop().split(';').shift();
-	// 	}
-	// 	return null;
-	// }
+	_setInviteListener(socket) {
+		let isModalActive = false;
+		socket.addEventListener("message", messageEvent => {
+			const { event, content } = JSON.parse(messageEvent.data);
+			if (event === "notifyGameInviteArrive") {
+				const disableInvitePageList = ["waitingRoom", "pingpong", "waitingTournament", "tournament", "login", "signup"];
+				if (disableInvitePageList.includes(this.clientInfo.currentPage)) return;
+				if (isModalActive) return;
+				isModalActive = true;
+				const questionModalElement = document.createElement("div");
+				questionModalElement.classList.add("questionModal");
+				questionModalElement.style.display = "flex";
+				questionModalElement.innerHTML = `
+				<div class="questionBox">
+					<div class="title"></div>
+					<div class="question"> 당신의 친구 ${content.clientNickname}님이 초대하셨습니다.<br>도전을 받아들일까용?</div>
+					<div class="buttonGroup">
+						<button class="activatedButton">네</button>
+						<button class="activatedButton">아니오</button>
+					</div>
+	  			</div>
+				`;
+				const yesButtonElement = questionModalElement.querySelector(".activatedButton:nth-of-type(1)");
+				const noButtonElement = questionModalElement.querySelector(".activatedButton:nth-of-type(2)");
+				yesButtonElement.addEventListener("click", e => {
+					e.stopPropagation();
+					this.clientInfo.gameInfo = {
+						roomId: content.waitingRoomInfo.roomId,
+						title: content.waitingRoomInfo.title,
+						teamLeftMode: content.waitingRoomInfo.leftMode,
+						teamRightMode: content.waitingRoomInfo.rightMode,
+						teamLeftTotalPlayerCount: 1,
+						teamRightTotalPlayerCount: content.waitingRoomInfo.maxPlayerCount - 1,
+					};
+					isModalActive = false;
+					questionModalElement.remove();
+					this.renderPage("waitingRoom");
+				});
+				noButtonElement.addEventListener("click", e => {
+					e.stopPropagation();
+					isModalActive = false;
+					questionModalElement.remove();
+				});
+				this.app.append(questionModalElement);
+			}
+		});
+	}
 
 	_getHTML() {
 		return `

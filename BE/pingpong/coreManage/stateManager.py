@@ -156,6 +156,12 @@ class StateManager:
         room = self.rooms.get(room_id, None)
         room.remove_client(client_id) if room else None
 
+    def get_waiting_room_info(self, room_id) -> List[Dict[str, Any]]:
+        for room in self.rooms.values():
+            if room.room_id == room_id:
+                return room.get_room_data()
+        return None
+
     def get_waiting_room_list(self) -> List[Dict[str, Any]]:
         data = []
         for room in self.rooms.values():

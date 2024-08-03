@@ -1,67 +1,33 @@
-import { _connectLobbySocket } from "../connect.js";
+import { GlobalConnectionError, ProfileTargetNotFound, isSocketConnected } from "../Error/Error.js";
 
 class ProfilePageManager {
-	constructor(app, clientInfo, renderLobbyPage, renderEditProfilePage) {
+	constructor(app, clientInfo, renderPage) {
 		console.log("ProfilePage!!!");
 		this.clientInfo = clientInfo;
 		this.app = app;
-		this.renderLobbyPage = renderLobbyPage;
-		this.renderEditProfilePage = renderEditProfilePage;
-
-		// this.clientInfo = { profileTarget: {id: 3} };
-		//this.client.profileTarget.id가 설정되어 있어야함
-		this.profileTarget = { id: this.clientInfo.profileTarget.id };
-		this.clientInfo.profileTarget = null;
-		this._initPage();
+		this.renderPage = renderPage;
 	}
 
-	async _initPage() {
+	async connectPage() {
+		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+		if (!this.clientInfo?.profileTarget?.id | (this.clientInfo?.profileTarget?.id === 0)) {
+			throw new ProfileTargetNotFound();
+		}
+		//this.client.profileTarget.id가 설정되어 있어야함
+		//target이 설정되어 있지 않으면 throw, 추후 URL에 target을 넣을 생각 하자.
+		this.profileTarget = { id: this.clientInfo.profileTarget.id };
+		this.clientInfo.profileTarget = null;
 		const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
-		console.log(nickname, avatarUrl, gameHistoryList);
-		// const { nickname, avatarUrl, gameHistoryList } = {
-		// 	nickname: "김뱀파이어2다",
-		// 	avatarUrl: "images/playerA.png",
-		// 	gameHistoryList: [
-		// 		{
-		// 			gameId: 1234,
-		// 			timestamp: "2024-07-02T14:30:00.123456Z",
-		// 			score: [1, 100],
-		// 			result: "LOSE",
-		// 			mode: "HUMAN_VAMPIRE",
-		// 			teamKind: ["HUMAN", "VAMPIRE"],
-		// 			ability: ["jiantBlocker", "jiantBlocker"],
-		// 			myTeamClientInfoList: [
-		// 				{
-		// 					id: 3,
-		// 					nickname: "영우",
-		// 					avatarUrl: "images/playerA.png",
-		// 				},
-		// 				{
-		// 					id: 3,
-		// 					nickname: "영우",
-		// 					avatarUrl: "images/playerA.png",
-		// 				},
-		// 				{
-		// 					id: 3,
-		// 					nickname: "영우",
-		// 					avatarUrl: "images/playerA.png",
-		// 				},
-		// 			],
-		// 			opponentTeamClientInfoList: [
-		// 				{
-		// 					id: 3,
-		// 					nickname: "영우",
-		// 					avatarUrl: "images/playerA.png",
-		// 				},
-		// 			],
-		// 		},
-		// 	],
-		// };
 		this.profileTarget.nickname = nickname;
 		this.profileTarget.avatarUrl = avatarUrl;
 		this.profileTarget.gameHistoryList = gameHistoryList;
 		this.profileTarget.winCount = this.profileTarget.gameHistoryList.filter(gameHistory => gameHistory.result === "WIN").length;
 		this.profileTarget.loseCount = this.profileTarget.gameHistoryList.filter(gameHistory => gameHistory.result === "LOSE").length;
+	}
+
+	clearPage() {}
+
+	initPage() {
 		this.app.innerHTML = this._getHTML();
 		this._setMatchLogClickListener();
 		this._setExitButton();
@@ -79,7 +45,7 @@ class ProfilePageManager {
 
 	_setEditProfileButton() {
 		document.querySelector(".editProfileButton").addEventListener("click", async () => {
-			if (this.profileTarget.id === this.clientInfo.id) this.renderEditProfilePage();
+			if (this.profileTarget.id === this.clientInfo.id) this.renderPage("editProfile");
 			else {
 				alert("친구 추가/삭제/요청/요청 취소는 미구현입니다.");
 			}
@@ -88,8 +54,7 @@ class ProfilePageManager {
 
 	_setExitButton() {
 		document.querySelector(".exitButton").addEventListener("click", async () => {
-			this.clientInfo.lobbySocket = await _connectLobbySocket(this.clientInfo.id);
-			this.renderLobbyPage();
+			history.back();
 		});
 	}
 
@@ -176,14 +141,14 @@ class ProfilePageManager {
             <div class="teamPlayerListContainer">
                 ${myTeamClientInfoList.map(player => this.getPlayerContainerDiv(player, "red")).join("")}
                 ${Array.from({ length: 5 - myTeamClientInfoList.length })
-				.map(() => this.getEmptyPlayerContainerDiv("red"))
-				.join("")}
+									.map(() => this.getEmptyPlayerContainerDiv("red"))
+									.join("")}
             </div>
             <div class="teamPlayerListContainer">
                 ${opponentTeamClientInfoList.map(player => this.getPlayerContainerDiv(player, "blue")).join("")}
                 ${Array.from({ length: 5 - opponentTeamClientInfoList.length })
-				.map(() => this.getEmptyPlayerContainerDiv("blue"))
-				.join("")}
+									.map(() => this.getEmptyPlayerContainerDiv("blue"))
+									.join("")}
             </div>
         </div>
         `;

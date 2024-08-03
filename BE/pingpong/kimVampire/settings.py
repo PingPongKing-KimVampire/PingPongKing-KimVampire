@@ -35,7 +35,7 @@ SECRET_KEY = "django-insecure-is(^1gr$nbc@qc&w9ws30n+8h0l^4f+7ix+n!hd45_whqz92ij
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '*']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -71,14 +71,15 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
+# 나중에 제거할 것
 CORS_ORIGIN_WHITELIST = [
+    'http://localhost',
     'http://localhost:5500',
+    'http://127.0.0.1',
     'http://127.0.0.1:5500',
-    'http://localhost:3001',
-    'http://127.0.0.1:3001',
+    'http://kimvampire.com'
 ]
 CORS_ALLOW_CREDENTIALS = True
-
 
 ROOT_URLCONF = "kimVampire.urls"
 
@@ -100,16 +101,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "kimVampire.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
 
 POSTGRES_DB = os.environ.get('POSTGRES_DB')
 POSTGRES_USER = os.environ.get('POSTGRES_USER')

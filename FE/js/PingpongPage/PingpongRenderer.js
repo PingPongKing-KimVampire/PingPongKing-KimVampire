@@ -132,7 +132,7 @@ class PingpongRenderer {
 		} else if (event === "notifyUnghostBall") {
 			this._makeBallOpaque();
 		} else if (event === "notifyFakeBallCreate") {
-			this._createFakeBall(content.count);
+			this._createFakeBall(content.idList);
 			this.fakeBallList.forEach(fakeBall => {
 				this._renderBall({ xPosition: fakeBall.xPos, yPosition: fakeBall.yPos }, fakeBall.element);
 			});
@@ -166,18 +166,19 @@ class PingpongRenderer {
 		this.ball.element.style.opacity = "0";
 	}
 
-	_createFakeBall(count) {
+	_createFakeBall(idList) {
 		if (!this.fakeBallList) this.fakeBallList = [];
 		const playBoardDiv = document.querySelector("#playBoard");
-		for (let i = 0; i < count; i++) {
+		for (let i = 0; i < idList.length; i++) {
+			console.log(idList);
 			const element = document.createElement("div");
 			element.className = "ball";
 			//임시
-			element.style.backgroundColor = "pink";
-			// if (this._isVampire(this.me)) element.style.opacity = 0.5;
+			element.style.backgroundColor = "white";
+			if (this._isVampire(this.me)) element.classList.add("opaqueOpacity");
 			playBoardDiv.append(element);
 			this.fakeBallList.push({
-				id: i,
+				id: idList[i],
 				element,
 				xPos: this.ball.xPos,
 				yPos: this.ball.yPos,
@@ -187,15 +188,15 @@ class PingpongRenderer {
 
 	_removeFakeBall(ballId) {
 		const targetFakeBall = this.fakeBallList.find(fakeBall => fakeBall.id === ballId);
+		console.log(ballId, targetFakeBall);
 		// console.log(targetFakeBall);
-		// targetFakeBall.element.classList.add("pop");
-		// targetFakeBall.element.addEventListener("transitionend", ()=>{
-		// targetFakeBall.element.remove();
-		// })
-		targetFakeBall.element.remove();
-		this.fakeBallList = this.fakeBallList.filter(fakeBall => {
-			fakeBall.id !== ballId;
+		targetFakeBall.element.classList.remove("opaqueOpacity");
+		targetFakeBall.element.classList.add("pop");
+		targetFakeBall.element.addEventListener("transitionend", () => {
+			targetFakeBall.element.remove();
 		});
+		// targetFakeBall.element.remove();
+		this.fakeBallList = this.fakeBallList.filter(fakeBall => fakeBall.id !== ballId);
 	}
 
 	_isVampire(player) {
