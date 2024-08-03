@@ -27,7 +27,7 @@ class WaitingRoomCreationPageManager {
 		this.humanCountButton = document.querySelector("#humanCountBox");
 		this.humanCountButtonText = this.humanCountButton ? this.humanCountButton.querySelector("div") : null;
 		this.humanCountArrowImg = this.humanCountButton ? this.humanCountButton.querySelector("img") : null;
-		this.humanCountOptionBox = document.querySelector("humanCountOptionBox");
+		this.humanCountOptionBox = document.querySelector("#humanCountOptionBox");
 		this.humanCountOptionButtons = [...document.getElementsByClassName("humanCountOptionButton")];
 		this.completeButton = document.querySelector("#completeButton");
 		this.completeButton.disabled = true;
@@ -112,7 +112,7 @@ class WaitingRoomCreationPageManager {
 		this._toggleHumanCountOptionBox();
 		const clickedValue = event.target.value;
 		if (this.humanCountButton && this.humanCountButtonText) {
-			this.humanCountButton.value = clickedValue;
+			this.humanCountButton.dataset.count = clickedValue;
 			this.humanCountButtonText.innerText = `${clickedValue}명`;
 		}
 		let count = 2;
@@ -143,7 +143,7 @@ class WaitingRoomCreationPageManager {
 			leftPlayerCount = 1;
 			rightPlayerCount = 1;
 		} else if (mode === "vampireVsHuman") {
-			const humanCount = parseInt(this.humanCountButton.getAttribute("value"));
+			const humanCount = parseInt(this.humanCountButton.dataset.count);
 			if (isNaN(humanCount)) return;
 			leftMode = "vampire";
 			rightMode = "human";
@@ -253,8 +253,8 @@ class WaitingRoomCreationPageManager {
 				<div id="vsText">VS</div>
 				<div class="countBox">
 					<div class="teamText">인간</div>
-					<div id="humanCountBox" value="1">
-						<div>1명</div>
+					<div id="humanCountBox" data-count="3">
+						<div>3명</div>
 						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
 						<ul id="humanCountOptionBox" class="invisible">
 							<li><button class="humanCountOptionButton" value="2">2명</button></li>
