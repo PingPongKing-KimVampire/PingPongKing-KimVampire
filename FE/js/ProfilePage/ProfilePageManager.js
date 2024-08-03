@@ -9,7 +9,7 @@ class ProfilePageManager {
 	}
 
 	async connectPage() {
-		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+		if (!isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
 		if (!this.clientInfo?.profileTarget?.id | (this.clientInfo?.profileTarget?.id === 0)) {
 			throw new ProfileTargetNotFound();
 		}

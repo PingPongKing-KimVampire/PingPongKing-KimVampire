@@ -29,18 +29,31 @@ class PageRouter {
 			lobbySocket: null,
 			currentPage: null,
 			nextPage: null,
-			gameInfo: {
-				pingpongRoomSocket: null,
-				roomId: null,
-				title: null,
-				teamLeftList: null,
-				teamRightList: null,
-				teamLeftMode: null,
-				teamRightMode: null,
-				teamLeftTotalPlayerCount: null,
-				teamRightTotalPlayerCount: null,
-			},
+			gameInfo: null,
+			errorInfo: {},
+			// errorInfo: {
+			// 	message: null,
+			// },
+			// gameInfo: {
+			// 	pingpongRoomSocket: null,
+			// 	roomId: null,
+			// 	title: null,
+			// 	teamLeftList: null,
+			// 	teamRightList: null,
+			// 	teamLeftMode: null,
+			// 	teamRightMode: null,
+			// 	teamLeftTotalPlayerCount: null,
+			// 	teamRightTotalPlayerCount: null,
+			// },
 			tournamentInfo: null,
+			// tournamentInfo: {
+			// 	isInit: null,
+			// 	tournamentId: null,
+			// 	tournamentSocket: null,
+			// 	tournamentClientList: null,
+			// 	renderingMode: null,
+			// 	stage: null,
+			// },
 			friendInfo: {
 				friendList: [
 					{
@@ -142,6 +155,7 @@ class PageRouter {
 				this._visibleChatButton();
 				this.nextPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "error") {
+				this._loadCSS(["css/ErrorPage/errorPage.css"]);
 				this._inVisibleChatButton();
 				this.nextPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			}
@@ -160,6 +174,7 @@ class PageRouter {
 			if (isUpdateHistory) history.pushState({}, "", "error");
 			else history.replaceState({}, "", "error");
 			this.clientInfo.currentPage = "error";
+			this._loadCSS(["css/ErrorPage/errorPage.css"]);
 			this._inVisibleChatButton();
 			this.currentPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			await this.currentPageManager.initPage();
