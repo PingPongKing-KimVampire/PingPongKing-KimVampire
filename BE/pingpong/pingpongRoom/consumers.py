@@ -32,6 +32,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.set_pingpong_room_consumer(self.scope['url_route']['kwargs']['room_id'])
         await self.send_pingpongroom_accept_response()
         await add_group(self, self.room_id)
+        await add_group(self, f"{self.room_id}-{self.team}")
         stateManager.add_consumer_to_map(self.client_id, self)
 
     def set_pingpong_room_consumer(self, room_id):
@@ -58,9 +59,10 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         if self.client_id:
             await self.game_manager.give_up_game(self)
             room_id_team = f"{self.room_id}-{self.team}"
-            stateManager.remove_client_from_room(self.room_id, self.client_id)
-            await stateManager.notify_room_change(self.room_id)
-            await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
+            if self.game_state == 'waiting':
+                stateManager.remove_client_from_room(self.room_id, self.client_id)
+                await stateManager.notify_room_change(self.room_id)
+                await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
             await discard_group(self, self.room_id)
             await discard_group(self, room_id_team)
             stateManager.remove_consumer_from_map(self.client_id, self)
@@ -165,7 +167,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyGameStart', content=content['content'])
 
     async def notifyGameGiveUp(self, content):
-        self.game_state = 'waiting'
         await self._send(event='notifyGameGiveUp', content=content['content'])
         
     async def notifyGameEnd(self, content):

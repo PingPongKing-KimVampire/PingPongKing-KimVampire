@@ -59,7 +59,7 @@ class Player:
             return self.dx < 0
 
     def is_colliding_with_ball(self, ball):
-        steps = 10
+        steps = 100 # 성능 문제 생기면 조절 할 것
         for i in range(steps):
             t = i / steps
             interpolated_x = self.previous_x + (self.pos_x - self.previous_x) * t
@@ -86,6 +86,7 @@ class Player:
         self.previous_x, self.previous_y = self.pos_x, self.pos_y
         self.pos_x += self.dx
         self.pos_y += self.dy
+        # self.dx, self.dy = 0, 0
         return self.pos_x, self.pos_y
 
     def needs_update(self):
@@ -98,7 +99,7 @@ class Player:
             return True
         else:
             speed = 0
-            self.dx = 0 
+            self.dx = 0
             self.dy = 0
             return False
         

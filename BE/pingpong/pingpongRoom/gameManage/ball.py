@@ -1,9 +1,15 @@
 import math
 import random
 
+NORMAL_SPEED = 15
+
+NORMAL_ANGLE = 40
+SPEEDTWIST_ANGLE = 70
+
 class Ball:
-    def __init__(self, speed, radius):
+    def __init__(self, speed=NORMAL_SPEED, radius=25, hit_count = 0):
         self.speed = speed
+        self.hit_count = 0
         self.radius = radius
         self.pos_x = 0
         self.pos_y = 0
@@ -11,7 +17,7 @@ class Ball:
         self.dx = 0
         self.dy = 0
         self.is_vanish = False
-        self.state = 0 
+        self.is_speedtwist = False
 
     def reset_ball(self, x, y):
         self.pos_x = x
@@ -19,7 +25,8 @@ class Ball:
         self.dx = 0
         self.dy = 0
 
-    def start_move(self, speed, serve_team):
+    def start_move(self, serve_team):
+        speed = NORMAL_SPEED if not self.is_speedtwist else NORMAL_SPEED * 2
         self.speed = speed
         if serve_team == 'left':
             self.angle = 0
@@ -32,6 +39,8 @@ class Ball:
     def move(self):
         self.pos_x += self.dx
         self.pos_y += self.dy
+    
+    def check_unghost(self):
         if self.is_vanish and self.dx < 0 and self.pos_x < 517 or self.is_vanish and self.dx > 0 and self.pos_x > 1033:
             self.is_vanish = False
             return False
@@ -46,9 +55,13 @@ class Ball:
     def pause(self):
         self.speed = 0
 
-    def reversal_random(self, speed=5, angle=None):
+    def reversal_random(self):
+        if not self.is_speedtwist:
+            speed, angle = NORMAL_SPEED + self.hit_count, NORMAL_ANGLE
+        else: 
+            speed, angle = (self.speed + self.hit_count) * 2, SPEEDTWIST_ANGLE
         self.speed = speed
-        rand = random.randint(-40 - angle, 40 + angle)
+        rand = random.randint(-angle, angle)
         self.angle = max(0, min(45, self.angle + rand))
         dir = self._calculate_ball_direction()
         self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
@@ -79,3 +92,7 @@ class Ball:
             serve_position = 3 * board_width / 4
         self.reset_ball(serve_position, board_height / 2)
         self.pause()
+        
+    def set_ball_speed_twist(self):
+        self.speed = self.speed * 2
+        
