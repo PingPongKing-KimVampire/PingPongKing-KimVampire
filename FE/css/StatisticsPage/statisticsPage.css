@@ -151,6 +151,10 @@
 	border-radius: 3rem;
 	background-color: white;
 }
+.circleButton:hover {
+	background-color: rgb(213, 112, 255);
+	transition: background-color 0.1s;
+}
 
 .subBoard {
 	width: 50%;
@@ -345,16 +349,15 @@
 }
 
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+	#app {
+		height: 100%;
+	}
 	.circleButton {
 		width: 2.3%;
 	}
 }
 
 @media (orientation: portrait) and (max-aspect-ratio: 1/2) {
-	#app {
-		height: 100%;
-	}
-
 	#wordTitle {
 		height: 35%;
 		font-size: 0.9rem ;
@@ -368,6 +371,5 @@
 	}
 	.circleButton {
 		width: 2.6%;
-		background-color: red;
 	}
 }

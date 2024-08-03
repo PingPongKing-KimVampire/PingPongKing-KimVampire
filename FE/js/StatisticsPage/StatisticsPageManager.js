@@ -2,19 +2,22 @@ import windowObservable from "../../WindowObservable.js";
 
 class StatisticsPageManager {
 	constructor(app, clientInfo) {
+		console.log('Statistics Page!');
 		this.app = app;
 		this.clientInfo = clientInfo;
 	}
 
-	connectPage() {}
+	connectPage() {
+		// const { profileId, gameId } = this.clientInfo.statisticsInfo;
+		// this.profileId = profileId;
+		// this.gameId = gameId;
+	}
 
 	clearPage() {
 		this._unsubscribeWindow();
 	}
 
 	async initPage() {
-		// TODO : timestamp ~ opponnetTeamClientInfoList 까지는 이전에 받았던 거 재활용할 수 없을까?
-		// TODO : profileTarget.id랑 gameId는 어떻게 얻어올 수 있을까?
 		// const { timestamp, 
 		// 		score, 
 		// 		mode, 
@@ -24,7 +27,9 @@ class StatisticsPageManager {
 		// 		opponnetTeamClientInfoList, 
 		// 		word, 
 		// 		scoreList, 
-		// 		hitMapList } = await this._getClientGameDetail(profileTarget.id, gameId);
+		// 		myTeam,
+		// 		hitMapList,
+		// 		boardInfo } = await this._getClientGameDetail(this.profileId, this.gameId);
 
 		// TODO : 임시 하드 코딩
 		this.word = "그 실력에 잠이 오냐?";
@@ -47,7 +52,15 @@ class StatisticsPageManager {
 		this.myPoints = myPoints;
 		this.opponentPoints = opponentPoints;
 		this.round = scoreList.length;
-		this.winningScore = 5;
+		this.winningScore = Math.max(...myPoints, ...opponentPoints);
+		// this.myTeam = myTeam;
+		this.myTeam = 'left';
+		// this.boardInfo = boardInfo;
+		this.boardInfo = {
+			boardHeight: 1000,
+			boardWidth: 1550,
+			ballRadius: 25
+		}
 		
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
@@ -108,7 +121,7 @@ class StatisticsPageManager {
 		const scale = { x: graphRect.width / this.round, y: graphRect.height / this.winningScore };
 
 		const renderLine = (points, color) => {
-			function createLine(pos1, pos2, color) {
+			const createLine = (pos1, pos2, color) => {
 				const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
 				line.setAttribute('x1', pos1.x);
 				line.setAttribute('y1', pos1.y);
@@ -118,11 +131,15 @@ class StatisticsPageManager {
 				line.setAttribute('stroke-width', '0.3rem');
 				lineCanvas.append(line);
 			}
-			function createCircle(pos) {
+			const createCircle = (pos, round) => {
 				const circleButton = document.createElement('button');
 				circleButton.classList.add('circleButton');
 				circleButton.style.left = `${pos.x}px`;
 				circleButton.style.top = `${pos.y}px`;
+				circleButton.addEventListener('click', () => {
+					clearInterval(this.renderHitMapIntervalID);
+					this._renderHitMap(round);
+				});
 				circleCanvas.append(circleButton);
 			}
 			let prevPoint = { 
@@ -135,7 +152,7 @@ class StatisticsPageManager {
 					y: window.scrollY + graphRect.bottom - (point * scale.y)
 				}
 				createLine(prevPoint, currentPoint, color);
-				createCircle(currentPoint);
+				createCircle(currentPoint, index + 1);
 				prevPoint = currentPoint;
 			});
 		}
@@ -170,16 +187,11 @@ class StatisticsPageManager {
 		}
 		removeBalls();
 
-		// TODO : 이것도 서버로부터 받아야 할까..?
-		const boardHeight = 1000;
-		const boardWidth = 1550;
-		const ballRadius = 25;
+		const { boardHeight, boardWidth, ballRadius } = this.boardInfo;
 		const ballSizePercent = ((ballRadius * 2) / boardWidth) * 100;
 		const yTotalPercent = ((boardHeight - (ballRadius * 2)) / boardHeight) * 100;
 		const xTotalPercent = ((boardWidth - (ballRadius * 2)) / boardWidth)  * 100;
 
-		// TODO : 내가 right 팀이었는지, left 팀이었는지 기억해야 할 것 같다..!
-		// 그래야 x 위치를 뒤집을지 안 뒤집을지 결정할 수 있을 듯..
 		const renderBall = (type, x, y) => {
 			const ball = document.createElement("div");
 			if (type === 'SCORE') {
@@ -193,8 +205,7 @@ class StatisticsPageManager {
 			const yPercent = (y / boardHeight) * yTotalPercent;
 			const xPercent = (x / boardWidth) * xTotalPercent;
 			ball.style.top = `${yPercent}%`;
-			ball.style.left = `${xPercent}%`;
-			// ball.style.transform = `translate(-50%, -50%)`;
+			ball.style.left = this.myTeam === "right" ? `${xPercent}%` : `${xTotalPercent - xPercent}%`;
 			this.hitMapPanel.append(ball);
 		}
 

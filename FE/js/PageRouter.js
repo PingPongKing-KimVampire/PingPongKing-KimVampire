@@ -89,7 +89,6 @@ class PageRouter {
 	}
 
 	async renderPage(url, isUpdateHistory = true) {
-		console.log('renderPage', url);
 		//채팅은 따로 렌더링 -> 추후 변경해야할듯?
 		if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
