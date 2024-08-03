@@ -2,7 +2,7 @@ import windowObservable from "../../WindowObservable.js";
 
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
-import { AccessTokenNotFoundError } from "../Error/Error.js";
+import { AccessTokenNotFoundError, isSocketConnected } from "../Error/Error.js";
 
 class LobbyPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -27,7 +27,7 @@ class LobbyPageManager {
 			return lobbySocket;
 		}
 		// //이미 로비 페이지에 연결되어 있는 경우
-		if (!this.clientInfo.lobbySocket || this.clientInfo.lobbySocket.readyState !== 1) {
+		if (!isSocketConnected(this.clientInfo?.lobbySocket)) {
 			this.clientInfo.lobbySocket = await connectLobbySocket(this.clientInfo.accessToken);
 		}
 		this.waitingRoomInfoList = await this._getWaitingRoomList();
@@ -41,6 +41,10 @@ class LobbyPageManager {
 	}
 
 	initPage() {
+		//새로고침 방지
+		window.addEventListener("beforeunload", event => {
+			event.returnValue = `나가지마,,`;
+		});
 		app.innerHTML = this._getHTML();
 		this._setTournamentJoinButton();
 		this._setCreateWaitingRoomButton();
@@ -72,8 +76,7 @@ class LobbyPageManager {
 	_setProfileButton() {
 		this.profileButton = document.querySelector("#profileButton");
 		this.profileButton.addEventListener("click", () => {
-			this.clientInfo.profileTarget = { id: this.clientInfo.id };
-			this.renderPage("profile");
+			this.renderPage("profile", { id: this.clientInfo.id });
 		});
 	}
 

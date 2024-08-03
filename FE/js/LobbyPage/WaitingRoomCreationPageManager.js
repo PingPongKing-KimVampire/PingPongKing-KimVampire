@@ -1,5 +1,8 @@
 import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
 
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
+
 class WaitingRoomCreationPageManager {
 	constructor(app, clientInfo, renderPage) {
 		console.log("Create Waiting Room Page!");
@@ -8,8 +11,22 @@ class WaitingRoomCreationPageManager {
 		this.renderPage = renderPage;
 	}
 
-	connectPage() {
-		if (isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
+	async connectPage() {
+		async function connectLobbySocket(accessToken) {
+			if (!accessToken) {
+				throw new AccessTokenNotFoundError();
+			}
+			const lobbySocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`, ["authorization", accessToken]);
+			await new Promise(resolve => {
+				lobbySocket.addEventListener("open", () => {
+					resolve();
+				});
+			});
+			return lobbySocket;
+		}
+		if (!this.clientInfo.lobbySocket || this.clientInfo.lobbySocket.readyState !== 1) {
+			this.clientInfo.lobbySocket = await connectLobbySocket(this.clientInfo.accessToken);
+		}
 	}
 
 	clearPage() {

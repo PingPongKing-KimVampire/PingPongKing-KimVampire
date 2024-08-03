@@ -1,21 +1,19 @@
 import { GlobalConnectionError, ProfileTargetNotFound, isSocketConnected } from "../Error/Error.js";
 
 class ProfilePageManager {
-	constructor(app, clientInfo, renderPage) {
+	constructor(app, clientInfo, renderPage, queryParam) {
 		console.log("ProfilePage!!!");
 		this.clientInfo = clientInfo;
 		this.app = app;
 		this.renderPage = renderPage;
+		this.queryParam = queryParam;
 	}
 
 	async connectPage() {
 		if (!isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
-		if (!this.clientInfo?.profileTarget?.id | (this.clientInfo?.profileTarget?.id === 0)) {
-			throw new ProfileTargetNotFound();
-		}
-		//this.client.profileTarget.id가 설정되어 있어야함
-		//target이 설정되어 있지 않으면 throw, 추후 URL에 target을 넣을 생각 하자.
-		this.profileTarget = { id: this.clientInfo.profileTarget.id };
+		if (!this.queryParam | (this.queryParam["id"] === undefined)) throw new ProfileTargetNotFound();
+
+		this.profileTarget = { id: this.queryParam["id"] };
 		this.clientInfo.profileTarget = null;
 		const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
 		this.profileTarget.nickname = nickname;
