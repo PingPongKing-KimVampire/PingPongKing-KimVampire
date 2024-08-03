@@ -1,8 +1,9 @@
 class ChattingPageManager {
-	constructor(clientInfo) {
+	constructor(clientInfo, renderPage) {
 		console.log("Chatting Page!");
 
 		this.clientInfo = clientInfo;
+		this.renderPage = renderPage;
 		this._appendChatButton();
 
 		this._initPage();
@@ -249,8 +250,7 @@ class ChattingPageManager {
 		this.selectedFriendItem = friendItem;
 		this.selectedInviteButton = friendItem.querySelector(".inviteButton");
 		this.selectedFriendItem.classList.add("selectedFriendItem");
-		if(this.clientInfo.currentPage === "waitingRoom")
-			this.selectedInviteButton.classList.remove("invisible");
+		if (this.clientInfo.currentPage === "waitingRoom") this.selectedInviteButton.classList.remove("invisible");
 	}
 
 	_renderFriendList() {
@@ -260,9 +260,11 @@ class ChattingPageManager {
 			const id = friendItem.dataset.id;
 			friendItem.querySelector(".avatarImg").addEventListener("click", e => {
 				e.stopPropagation();
-				alert(`ID는 ${id}다`);
+				this.renderPage("profile", { id });
 				//프로필 페이지로 이동
 				//채팅 인터페이스 닫음
+				// this.renderPage()
+				this._closeChatContainer();
 			});
 		});
 		const friendItems = Array.from(document.querySelectorAll(".friendItem"));

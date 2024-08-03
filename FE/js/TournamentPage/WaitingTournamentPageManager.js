@@ -10,7 +10,7 @@ class WaitingTournamentPageManager {
 	}
 
 	async connectPage() {
-		if (isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
+		if (!isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
 	}
 
 	clearPage() {

@@ -10,7 +10,7 @@ class FriendManagementPageManager {
 	}
 
 	async connectPage() {
-		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+		if (!isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
 	}
 
 	clearPage() {

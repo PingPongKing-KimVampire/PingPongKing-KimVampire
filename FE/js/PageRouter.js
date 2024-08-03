@@ -15,6 +15,7 @@ import ErrorPageManager from "./ErrorPage/ErrorPageManager.js";
 // export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_ADDRESS = window.location.hostname;
 // export const SERVER_ADDRESS = "10.18.236.23";
+
 export const SERVER_PORT = "80";
 
 class PageRouter {
@@ -29,18 +30,31 @@ class PageRouter {
 			lobbySocket: null,
 			currentPage: null,
 			nextPage: null,
-			gameInfo: {
-				pingpongRoomSocket: null,
-				roomId: null,
-				title: null,
-				teamLeftList: null,
-				teamRightList: null,
-				teamLeftMode: null,
-				teamRightMode: null,
-				teamLeftTotalPlayerCount: null,
-				teamRightTotalPlayerCount: null,
-			},
+			gameInfo: null,
+			errorInfo: {},
+			// errorInfo: {
+			// 	message: null,
+			// },
+			// gameInfo: {
+			// 	pingpongRoomSocket: null,
+			// 	roomId: null,
+			// 	title: null,
+			// 	teamLeftList: null,
+			// 	teamRightList: null,
+			// 	teamLeftMode: null,
+			// 	teamRightMode: null,
+			// 	teamLeftTotalPlayerCount: null,
+			// 	teamRightTotalPlayerCount: null,
+			// },
 			tournamentInfo: null,
+			// tournamentInfo: {
+			// 	isInit: null,
+			// 	tournamentId: null,
+			// 	tournamentSocket: null,
+			// 	tournamentClientList: null,
+			// 	renderingMode: null,
+			// 	stage: null,
+			// },
 			friendInfo: {
 				friendList: [
 					{
@@ -80,18 +94,40 @@ class PageRouter {
 		};
 
 		window.addEventListener("popstate", event => {
-			const allPath = window.location.pathname;
-			const match = allPath.match(/\/([^\/]+)$/);
-			const path = match ? match[1] : null;
-			this.renderPage(path, false);
+			const url = window.location.href;
+			const { path, queryParam } = this.parsePath(url);
+			this.renderPage(path[0], queryParam, false);
 		});
 	}
 
-	async renderPage(url, isUpdateHistory = true) {
-		//채팅은 따로 렌더링 -> 추후 변경해야할듯?
+	parsePath(url) {
+		const urlObj = new URL(url, window.location.origin);
+		const path = urlObj.pathname.split("/").filter(part => part);
+
+		const searchParams = new URLSearchParams(urlObj.search);
+		const queryParam = {};
+		for (const [key, value] of searchParams.entries()) {
+			queryParam[key] = value;
+		}
+
+		return { path, queryParam };
+	}
+
+	buildUrl(path, queryParams) {
+		const url = new URL(window.location.origin + "/" + path);
+		if (!queryParams) return path;
+		for (const key in queryParams) {
+			if (queryParams.hasOwnProperty(key)) {
+				url.searchParams.append(key, queryParams[key]);
+			}
+		}
+		return url.toString();
+	}
+
+	async renderPage(url, queryParam, isUpdateHistory = true) {
 		if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
-			const chattingPageManager = new ChattingPageManager(this.clientInfo);
+			const chattingPageManager = new ChattingPageManager(this.clientInfo, this.renderPage.bind(this));
 			return;
 		}
 		try {
@@ -124,7 +160,7 @@ class PageRouter {
 			} else if (url === "profile") {
 				this._loadCSS(["css/ProfilePage/profilePage.css"]);
 				this._visibleChatButton();
-				this.nextPageManager = new ProfilePageManager(this.app, this.clientInfo, this.renderPage.bind(this));
+				this.nextPageManager = new ProfilePageManager(this.app, this.clientInfo, this.renderPage.bind(this), queryParam);
 			} else if (url === "editProfile") {
 				this._loadCSS(["css/EditProfilePage/editProfilePage.css"]);
 				this._visibleChatButton();
@@ -142,6 +178,7 @@ class PageRouter {
 				this._visibleChatButton();
 				this.nextPageManager = new TournamentAnimationPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "error") {
+				this._loadCSS(["css/ErrorPage/errorPage.css"]);
 				this._inVisibleChatButton();
 				this.nextPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			}
@@ -149,7 +186,7 @@ class PageRouter {
 			this.clientInfo.currentPage = url;
 
 			//앞으로가기, 뒤로가기로 renderPage를 호출한 경우
-			if (isUpdateHistory) history.pushState({}, "", url);
+			if (isUpdateHistory) history.pushState({}, "", this.buildUrl(url, queryParam));
 			this.currentPageManager = this.nextPageManager;
 			this.nextPageManager = null;
 			await this.currentPageManager.initPage();
@@ -160,6 +197,7 @@ class PageRouter {
 			if (isUpdateHistory) history.pushState({}, "", "error");
 			else history.replaceState({}, "", "error");
 			this.clientInfo.currentPage = "error";
+			this._loadCSS(["css/ErrorPage/errorPage.css"]);
 			this._inVisibleChatButton();
 			this.currentPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			await this.currentPageManager.initPage();
