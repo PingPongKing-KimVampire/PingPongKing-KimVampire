@@ -10,7 +10,7 @@ class PingpongPageManager {
 	}
 
 	connectPage() {
-		if (isSocketConnected(this.clientInfo?.gameInfo?.pingpongRoomSocket)) throw new PingpongConnectionError();
+		if (!isSocketConnected(this.clientInfo?.gameInfo?.pingpongRoomSocket)) throw new PingpongConnectionError();
 	}
 
 	clearPage() {

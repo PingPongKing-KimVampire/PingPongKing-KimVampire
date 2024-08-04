@@ -48,5 +48,6 @@ export class PingpongConnectionError extends Error {
 }
 
 export function isSocketConnected(socket) {
-	return !socket | (socket?.readyState !== 1);
+	if (!socket) return false;
+	return socket?.readyState === 1;
 }

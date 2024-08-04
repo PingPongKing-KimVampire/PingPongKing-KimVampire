@@ -1,5 +1,8 @@
 import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
 
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
+
 class WaitingRoomCreationPageManager {
 	constructor(app, clientInfo, renderPage) {
 		console.log("Create Waiting Room Page!");
@@ -8,8 +11,22 @@ class WaitingRoomCreationPageManager {
 		this.renderPage = renderPage;
 	}
 
-	connectPage() {
-		if (isSocketConnected(this.clientInfo?.lobbySocket)) throw new LobbyConnectionError();
+	async connectPage() {
+		async function connectLobbySocket(accessToken) {
+			if (!accessToken) {
+				throw new AccessTokenNotFoundError();
+			}
+			const lobbySocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`, ["authorization", accessToken]);
+			await new Promise(resolve => {
+				lobbySocket.addEventListener("open", () => {
+					resolve();
+				});
+			});
+			return lobbySocket;
+		}
+		if (!this.clientInfo.lobbySocket || this.clientInfo.lobbySocket.readyState !== 1) {
+			this.clientInfo.lobbySocket = await connectLobbySocket(this.clientInfo.accessToken);
+		}
 	}
 
 	clearPage() {
@@ -27,7 +44,7 @@ class WaitingRoomCreationPageManager {
 		this.humanCountButton = document.querySelector("#humanCountBox");
 		this.humanCountButtonText = this.humanCountButton ? this.humanCountButton.querySelector("div") : null;
 		this.humanCountArrowImg = this.humanCountButton ? this.humanCountButton.querySelector("img") : null;
-		this.humanCountOptionBox = document.querySelector("#humanCountBox:last-of-type");
+		this.humanCountOptionBox = document.querySelector("#humanCountOptionBox");
 		this.humanCountOptionButtons = [...document.getElementsByClassName("humanCountOptionButton")];
 		this.completeButton = document.querySelector("#completeButton");
 		this.completeButton.disabled = true;
@@ -53,11 +70,14 @@ class WaitingRoomCreationPageManager {
 	_setHumanCountSelection() {
 		// humanCount 버튼 or humanCountOption 버튼 클릭 시 반응
 		if (this.humanCountButton) {
-			this.humanCountButton.addEventListener("click", this._humanCountButtonClicked.bind(this));
+			this.humanCountButton.addEventListener("click", this._toggleHumanCountOptionBox.bind(this));
 		}
 		if (this.humanCountOptionButtons.length > 0) {
 			this.humanCountOptionButtons.forEach(button => {
-				button.addEventListener("click", this._humanCountOptionButtonClicked.bind(this));
+				button.addEventListener("click", (event) => {
+					event.stopPropagation();
+					this._humanCountOptionButtonClicked(event);
+				});
 			});
 		}
 	}
@@ -81,10 +101,10 @@ class WaitingRoomCreationPageManager {
 		if (isSelectedMode) {
 			if (selectedModeButton.value === "vampireVsHuman") {
 				this.countSelection.classList.replace("invisible", "visible");
-				this.modeSelection.classList.add("selectionGroupBottomMargin");
+				this.modeSelection.classList.add("marginBottom");
 			} else {
 				this.countSelection.classList.replace("visible", "invisible");
-				this.modeSelection.classList.remove("selectionGroupBottomMargin");
+				this.modeSelection.classList.remove("marginBottom");
 			}
 		}
 		if (isSelectedTitle && isSelectedMode) {
@@ -96,7 +116,7 @@ class WaitingRoomCreationPageManager {
 		}
 	}
 
-	_humanCountButtonClicked() {
+	_toggleHumanCountOptionBox() {
 		if (this.humanCountArrowImg && this.humanCountOptionBox) {
 			this.humanCountArrowImg.classList.toggle("nonSelectedArrowImg");
 			this.humanCountArrowImg.classList.toggle("selectedArrowImg");
@@ -106,16 +126,13 @@ class WaitingRoomCreationPageManager {
 	}
 
 	_humanCountOptionButtonClicked(event) {
-		this._humanCountButtonClicked();
+		this._toggleHumanCountOptionBox();
 		const clickedValue = event.target.value;
 		if (this.humanCountButton && this.humanCountButtonText) {
-			this.humanCountButton.value = clickedValue;
+			this.humanCountButton.dataset.count = clickedValue;
 			this.humanCountButtonText.innerText = `${clickedValue}명`;
 		}
-		// const clickedValue = event.target.value;
-		// this.humanCountButton.value = clickedValue;
-		// this.humanCountButtonText.innerText = `${clickedValue}명`;
-		// let count = 2;
+		let count = 2;
 		for (const button of this.humanCountOptionButtons) {
 			if (count === parseInt(clickedValue)) count++;
 			button.innerText = `${count}명`;
@@ -143,7 +160,7 @@ class WaitingRoomCreationPageManager {
 			leftPlayerCount = 1;
 			rightPlayerCount = 1;
 		} else if (mode === "vampireVsHuman") {
-			const humanCount = parseInt(this.humanCountButton.getAttribute("value"));
+			const humanCount = parseInt(this.humanCountButton.dataset.count);
 			if (isNaN(humanCount)) return;
 			leftMode = "vampire";
 			rightMode = "human";
@@ -221,7 +238,7 @@ class WaitingRoomCreationPageManager {
 
 	_getTitleSelectionHTML() {
 		return `
-			<label class="selectionLabel" for="titleInput">방 제목</label>
+			<label class="label" for="titleInput">방 제목</label>
 			<div class="selectionBox">
 				<input type="text" id="titleInput">
 			</div>
@@ -230,7 +247,7 @@ class WaitingRoomCreationPageManager {
 
 	_getModeSelectionHTML() {
 		return `
-			<label class="selectionLabel">모드</label>
+			<label class="label">모드</label>
 			<div class="selectionBox">
 				<input type="radio" name="mode" id="humanVsHuman" value="humanVsHuman">
 				<label for=humanVsHuman class="modeButton">인간 VS 인간</label>
@@ -253,8 +270,8 @@ class WaitingRoomCreationPageManager {
 				<div id="vsText">VS</div>
 				<div class="countBox">
 					<div class="teamText">인간</div>
-					<div id="humanCountBox" value="1">
-						<div>1명</div>
+					<div id="humanCountBox" data-count="3">
+						<div>3명</div>
 						<img src="images/arrowImg.png" class="nonSelectedArrowImg">
 						<ul id="humanCountOptionBox" class="invisible">
 							<li><button class="humanCountOptionButton" value="2">2명</button></li>

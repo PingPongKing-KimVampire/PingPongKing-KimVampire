@@ -61,6 +61,7 @@ class LoginPageManager {
 			this.clientInfo.accessToken = this.accessToken;
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
 			this._setInviteListener(this.clientInfo.socket);
+			this.handleSocketDisconnection(this.clientInfo.socket);
 
 			this.renderPage("chatting");
 			this.renderPage("lobby");
@@ -307,6 +308,12 @@ class LoginPageManager {
 				});
 				this.app.append(questionModalElement);
 			}
+		});
+	}
+
+	handleSocketDisconnection(socket) {
+		socket.addEventListener("close", () => {
+			this.renderPage("error");
 		});
 	}
 
