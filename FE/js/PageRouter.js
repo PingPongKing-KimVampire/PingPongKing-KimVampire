@@ -132,6 +132,7 @@ class PageRouter {
 		}
 		try {
 			this.clientInfo.nextPage = url;
+			await this._renderLoadingPage();
 			if (this.currentPageManager) await this.currentPageManager.clearPage();
 			if (url === "login") {
 				this._loadCSS(["css/LoginPage/loginPage.css"]);
@@ -202,6 +203,21 @@ class PageRouter {
 			this.currentPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			await this.currentPageManager.initPage();
 		}
+	}
+
+	async _renderLoadingPage() {
+		this._inVisibleChatButton();
+		this.app.innerHTML = `
+			<div id="loadingAnimation" class="loading">
+				<div class="vampireSpinner"></div>
+				<div id="pageMoveText">페이지 이동 중...</div>
+			</div>
+			`;
+		// await new Promise(res => {
+		// 	setTimeout(() => {
+		// 		res();
+		// 	}, 100000000);
+		// });
 	}
 
 	_visibleChatButton() {
