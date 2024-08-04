@@ -125,6 +125,19 @@ form {
 	.input {
 		font-size: 1.5rem;
 	}
+	#signupButton {
+		font-size: 1.3rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.3) {
+	#loginButton {
+		width: 42%;
+		height: 40%;
+		font-size: 1.6rem;
+	}
+	#signupButton {
+		font-size: 1.3rem;
+	}
 }
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
 	#container {
@@ -136,14 +149,6 @@ form {
 	}
 	.warning {
 		height: 9%;
-	}
-	#loginButton {
-		width: 42%;
-		height: 40%;
-		font-size: 1.6rem;
-	}
-	#signupButton {
-		font-size: 1.3rem;
 	}
 }
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {

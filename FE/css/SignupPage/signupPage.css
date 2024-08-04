@@ -54,7 +54,7 @@
 #signupButton {
 	position: absolute;
 	bottom: 8%;
-	padding: 1% 3.5%;
+	padding: 0.8% 3.5%;
 }
 #signupButton.generalButton:hover {
 	background-color: rgb(213, 112, 255);
@@ -64,7 +64,7 @@
 
 @media (orientation: portrait) {
 	#container {
-		height: 60%;
+		height: 62%;
 		width: 55%;
 	}
 	.inputContainer  {
@@ -72,33 +72,72 @@
 	}
 	.label {
 		right: 0%;
-		bottom: 100%;
+		bottom: 105%;
 		justify-content: center;
 		width: 100%;
 	}
+	.input {
+		padding: 0 7%;
+	}
 	#signupButton {
-		padding: 2% 5%;
+		bottom: 5%;
+		padding: 1.3% 5%;
 	}
 	.warning {
 		top: 130%;
 	}
 }
 
-@media (orientation: landscape) and (min-aspect-ratio: 1/1) and (max-aspect-ratio: 1.5/1) {
+@media (orientation: landscape) and (max-aspect-ratio: 2/1) {
+	#container {
+		width: 45%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
 	#container {
 		height: 50%;
-		margin-left: 2%;
+		width: 50%;
+		margin-left: 3%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	#container {
+		width: 55%;
+		margin-left: 15%;
 	}
 }
 
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
 	#container {
-		height: 55%;
+		height: 60%;
 		width: 65%;
+	}
+	.inputContainer {
+		height: 10.5%;
+	}
+	.label {
+		font-size: 1.8rem;
+		bottom: 110%;
+	}
+	#signupButton {
+		font-size: 1.8rem;
 	}
 }
 @media (orientation: portrait) and (max-aspect-ratio: 1/2) {
 	#container {
+		height: 55%;
 		width: 70%;
+	}
+	.inputContainer {
+		height: 10%;
+	}
+	.input {
+		padding: 0 10%;
+	}
+	#signupButton {
+		font-size: 1.6rem;
+		padding: 2% 6%;
 	}
 }
