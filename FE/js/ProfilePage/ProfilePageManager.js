@@ -38,7 +38,6 @@ class ProfilePageManager {
 		document.querySelectorAll(".matchLog").forEach(matchLog => {
 			matchLog.addEventListener("click", event => {
 				const id = parseInt(matchLog.dataset.id);
-				alert(id);
 				this.clientInfo.statisticsInfo = {
 					profileId: this.profileTarget.id,
 					gameId: id

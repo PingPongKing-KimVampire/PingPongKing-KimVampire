@@ -8,9 +8,9 @@ class StatisticsPageManager {
 	}
 
 	connectPage() {
-		// const { profileId, gameId } = this.clientInfo.statisticsInfo;
-		// this.profileId = profileId;
-		// this.gameId = gameId;
+		const { profileId, gameId } = this.clientInfo.statisticsInfo;
+		this.profileId = profileId;
+		this.gameId = gameId;
 	}
 
 	clearPage() {
@@ -18,50 +18,29 @@ class StatisticsPageManager {
 	}
 
 	async initPage() {
-		// const { timestamp, 
-		// 		score, 
-		// 		mode, 
-		// 		teamKind, 
-		// 		ability, 
-		// 		myTeamClientInfoList, 
-		// 		opponnetTeamClientInfoList, 
-		// 		word, 
-		// 		scoreList, 
-		// 		myTeam,
-		// 		hitMapList,
-		// 		boardInfo } = await this._getClientGameDetail(this.profileId, this.gameId);
+		const { timestamp,
+			score,
+			mode,
+			teamKind,
+			ability,
+			myTeamClientInfoList,
+			opponnetTeamClientInfoList,
+			word,
+			scoreList,
+			myTeam,
+			hitMapList,
+			boardInfo } = await this._getClientGameDetail(this.profileId, this.gameId);
 
-		// TODO : 임시 하드 코딩
-		this.word = "그 실력에 잠이 오냐?";
-		this.hitMapList = {
-			1 : [{"type" : "SCORE", "y" : 1000, "x" : 1550}, 
-				{"type" : "PADDLE", "y" : 0, "x" : 0}],
-	 		2 : [{"type" : "SCORE", "y" : 1000, "x" : 0},
-				{"type" : "PADDLE", "y" : 0, "x" : 1550}],
-			3 : [{"type" : "SCORE", "y" : 500, "x" : 775},
-				{"type" : "PADDLE", "y" : 800, "x" : 300}],	
-			4 : [{"type" : "SCORE", "y" : 1000, "x" : 750},
-				{"type" : "PADDLE", "y" : 400, "x" : 1550}],	
-			5 : [{"type" : "SCORE", "y" : 123, "x" : 259},
-				{"type" : "PADDLE", "y" : 876, "x" : 1200}],	
-			6 : [{"type" : "SCORE", "y" : 500, "x" : 1400},
-				{"type" : "PADDLE", "y" : 800, "x" : 300}],	
-		}
-		const scoreList = ["win", "lose", "win", "win", "win", "win"];
+		this.word = word;
+		this.hitMapList = hitMapList;
 		const { myPoints, opponentPoints } = this._getPoints(scoreList);
 		this.myPoints = myPoints;
 		this.opponentPoints = opponentPoints;
 		this.round = scoreList.length;
 		this.winningScore = Math.max(...myPoints, ...opponentPoints);
-		// this.myTeam = myTeam;
-		this.myTeam = 'left';
-		// this.boardInfo = boardInfo;
-		this.boardInfo = {
-			boardHeight: 1000,
-			boardWidth: 1550,
-			ballRadius: 25
-		}
-		
+		this.boardInfo = boardInfo;
+		this.myTeam = myTeam;
+
 		this.app.innerHTML = this._getHTML();
 		this._subscribeWindow();
 		this._setHitMap();
@@ -190,7 +169,7 @@ class StatisticsPageManager {
 		const { boardHeight, boardWidth, ballRadius } = this.boardInfo;
 		const ballSizePercent = ((ballRadius * 2) / boardWidth) * 100;
 		const yTotalPercent = ((boardHeight - (ballRadius * 2)) / boardHeight) * 100;
-		const xTotalPercent = ((boardWidth - (ballRadius * 2)) / boardWidth)  * 100;
+		const xTotalPercent = ((boardWidth - (ballRadius * 2)) / boardWidth) * 100;
 
 		const renderBall = (type, x, y) => {
 			const ball = document.createElement("div");
@@ -209,7 +188,7 @@ class StatisticsPageManager {
 			this.hitMapPanel.append(ball);
 		}
 
-		this.hitMapList[round].forEach(({type, x, y}) => {
+		this.hitMapList[round].forEach(({ type, x, y }) => {
 			renderBall(type, x, y);
 		});
 	}
