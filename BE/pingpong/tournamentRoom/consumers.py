@@ -2,11 +2,11 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from django.core.exceptions import ObjectDoesNotExist
 import json
+import asyncio
 
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
 from coreManage.group import add_group, discard_group, notify_group
-import asyncio
 
 stateManager = StateManager()
 
@@ -92,6 +92,10 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
     async def notifyGameEnd(self, content):
         content = content['content']
         winner_id = content['winner_id']
+        todo_make_db = content['todoMakeDb']
+        if todo_make_db == 'true':
+            await self.tournament_manager.make_game_db(self.tournament_state, self.gameroom_id_now, winner_id)
+
         Printer.log(f"winner id : {winner_id}")
         self.tournament_manager.change_tournamanet_info_game_state(self.tournament_state, self.gameroom_id_now, winner_id, 'finished')
         await discard_group(self, f"tournament_{self.gameroom_id_now}")

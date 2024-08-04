@@ -2,6 +2,7 @@ import asyncio
 import uuid
 import random
 from pingpongRoom.gameManage.gameRoomManager import GameRoomManager
+from pingpongRoom.gameManage.gameDataManager import GameDataManager
 from coreManage.group import add_group, discard_group, notify_group
 
 import json
@@ -164,6 +165,20 @@ class TournamentManager:
         }
         await notify_group(self.channel_layer, f"tournament_{room_id}", 
                            "notifyYourGameRoomReady", data)
+        
+    async def make_game_db(self, tournament_state, room_id, winner_id):
+        for gameroom_info in self.tournament_info_list[tournament_state]:
+            if gameroom_info['roomId'] == room_id:
+                if winner_id == gameroom_info['clientIdList'][0]:
+                    win_team = 'left'
+                else:
+                    win_team = 'right'
+                db_manager = GameDataManager()
+                db_manager.set_teams_info({gameroom_info['clientIdList'][0] : None}, 
+                                          {gameroom_info['clientIdList'][1] : None})
+                db_manager.set_start_time()
+                db_manager.set_end_time()
+                db_manager.save_data_to_db({'left' : 0, 'right' : 0}, win_team)
     
     async def notify_tournament_room(self, event, content):
         await self.channel_layer.group_send(
