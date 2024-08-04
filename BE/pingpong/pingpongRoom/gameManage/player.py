@@ -1,7 +1,7 @@
 from utils.printer import Printer
 
-MAX_SPEED = 50
-SENSITIVE_FACTOR = 10
+MAX_SPEED = 70
+SENSITIVE_FACTOR = 7
 
 class Player:
     def __init__(self, nickname, ability, team, image_uri):
@@ -29,7 +29,7 @@ class Player:
     def get_state(self):
         return self.ready_state
         
-    def set_paddle_size(self, player_count):
+    def set_paddle_size(self, player_count): # 필요한지 체크
         if player_count == 1:
             return 10, 150
         elif player_count == 2:
@@ -59,7 +59,7 @@ class Player:
             return self.dx < 0
 
     def is_colliding_with_ball(self, ball):
-        steps = 100 # 성능 문제 생기면 조절 할 것
+        steps = 50 # 성능 문제 생기면 조절 할 것
         for i in range(steps):
             t = i / steps
             interpolated_x = self.previous_x + (self.pos_x - self.previous_x) * t
@@ -86,13 +86,12 @@ class Player:
         self.previous_x, self.previous_y = self.pos_x, self.pos_y
         self.pos_x += self.dx
         self.pos_y += self.dy
-        # self.dx, self.dy = 0, 0
         return self.pos_x, self.pos_y
 
     def needs_update(self):
         distance = self._calculate_distance()
         
-        if distance > 0:
+        if distance > 1:
             speed = min(MAX_SPEED, distance / SENSITIVE_FACTOR)
             self.dx = (self.target_x - self.pos_x) / distance * speed
             self.dy = (self.target_y - self.pos_y) / distance * speed

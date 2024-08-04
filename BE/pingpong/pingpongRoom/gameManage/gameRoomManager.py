@@ -226,7 +226,8 @@ class GameRoomManager:
                 if player.needs_update():
                     pos_x, pos_y = player.move()
                     data = {'clientId' : client_id, 'xPosition': pos_x, 'yPosition': pos_y}
-                    await self.notifier.broadcast('notifyPaddleLocationUpdate', data)
+                    if self.is_playing:
+                        await self.notifier.broadcast('notifyPaddleLocationUpdate', data)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
 
     # Fake Ball - IllusionFaker
@@ -240,7 +241,8 @@ class GameRoomManager:
                 break
             await self._send_fake_ball_location_update(index)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-        await self.notifier.broadcast('notifyFakeBallRemove', {'ballId': index})
+        if self.is_playing:
+            await self.notifier.broadcast('notifyFakeBallRemove', {'ballId': index})
         self.fake_ball[index] = None
 
     async def _create_fake_ball(self):
@@ -257,7 +259,8 @@ class GameRoomManager:
             rand = random.randint(-15, 15)
             self.fake_ball[id].reset_ball(self.ball.pos_x, self.ball.pos_y)
             self.fake_ball[id].change_direction(self.ball.angle + rand)
-        await self.notifier.broadcast('notifyFakeBallCreate', {'idList' : id_list})
+        if self.is_playing:
+            await self.notifier.broadcast('notifyFakeBallCreate', {'idList' : id_list})
         for id in id_list:
             asyncio.create_task(self._fake_ball_loop(id))
             
@@ -267,7 +270,8 @@ class GameRoomManager:
             'xPosition': self.fake_ball[index].pos_x, 
             'yPosition': self.fake_ball[index].pos_y
         }
-        await self.notifier.broadcast('notifyFakeBallLocationUpdate', data)
+        if self.is_playing:
+            await self.notifier.broadcast('notifyFakeBallLocationUpdate', data)
 
     # Playing Methods
 
@@ -486,4 +490,5 @@ class GameRoomManager:
     async def _send_all_paddle_location(self):
         for client_id, player in self.clients.items():
             data = {'clientId': client_id, 'xPosition': player.pos_x, 'yPosition': player.pos_y}
-            await self.notifier.broadcast('notifyPaddleLocationUpdate', data)
+            if self.is_playing:
+                await self.notifier.broadcast('notifyPaddleLocationUpdate', data)
