@@ -9,11 +9,11 @@
 }
 
 .visible{
-	visibility: visible;	
+	visibility: visible;
 }
 
 .inVisible{
-	visibility: hidden;	
+	visibility: hidden;
 }
 
 .chatButton:hover {
@@ -45,19 +45,10 @@
 	padding: 0 2%;
 }
 
-/* @media (orientation: portrait) {
-	.chatButton {
-		bottom: 2%;
-		left: 3%;
-        width: 4vh;
-        height: 4vh;
-	}
-} */
-
 .chatContainer {
 	position: absolute;
 	width: 36vw;
-	height: 26vw;
+	aspect-ratio: 1.4/1;
 	bottom: 7vw;
 	left: 6vw;
 	display: flex;
@@ -250,6 +241,10 @@
 		bottom: 2vw;
 		left: 2vw;
 	}
+	.chatContainer {
+		width: 45vw;
+		left: 6.5vw;
+	}
 }
 
 @media (max-aspect-ratio: 1.5/1) {
@@ -257,6 +252,11 @@
 		width: 6vw;
 		bottom: 2.5vw;
 		left: 2.5vw;
+	}
+	.chatContainer {
+		width: 50vw;
+		bottom: 8.5vw;
+		left: 7.5vw;
 	}
 }
 
@@ -266,11 +266,25 @@
 		bottom: 3vw;
 		left: 3vw;
 	}
+	.chatContainer {
+		width: 55vw;
+		bottom: 9vw;
+		left: 8vw;
+	}
 }
 
 @media (max-aspect-ratio: 1/1) {
 	.chatButton {
 		width: 8vw;
+	}
+	.chatContainer {
+		width: 90vw;
+		aspect-ratio: 1.3/1;
+		bottom: 12vw;
+		left: 3vw;
+	}
+	.FriendListContainer, .messageBoxContainer {
+		width: 48.5%;
 	}
 }
 
@@ -278,6 +292,12 @@
 	.chatButton {
 		width: 9vw;
 		bottom: 3.5vw;
+		left: 3.5vw;
+	}
+	.chatContainer {
+		width: 93vw;
+		aspect-ratio: 1.25/1;
+		bottom: 13.5vw;
 		left: 3.5vw;
 	}
 }
@@ -288,10 +308,18 @@
 		bottom: 4vw;
 		left: 4vw;
 	}
+	.chatContainer {
+		width: 92vw;
+		bottom: 15.5vw;
+		left: 4vw;
+	}
 }
 
 @media (max-aspect-ratio: 1/1.7) {
 	.chatButton {
 		width: 12vw;
+	}
+	.chatContainer {
+		bottom: 18vw;
 	}
 }
