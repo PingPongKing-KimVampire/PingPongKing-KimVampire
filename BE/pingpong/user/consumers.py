@@ -32,7 +32,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             Printer.log("Invalid Authorization header, closing connection", "red")
             await self.close()
 
-    async def disconnect(self, close_code):
+    async def disconnect(self):
         if self.is_init:
             self.is_init = False
         if hasattr(self, 'client_id') and self.client_id in channel_name_map:
@@ -63,7 +63,9 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         if event == 'initClient':
             await self.init_client()
             return
-        if event == 'updateClientInfo':
+        if event == 'disconnectClient':
+            await self.disconnect_client()
+        elif event == 'updateClientInfo':
             waiting_room_info = content['waitingRoomInfo']
             await self.updateClientInfo(waiting_room_info)
         elif event == 'getFriendList':
@@ -165,7 +167,15 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         }
         await self.notify_all_group_activation("notify_friend_active_state_change", content)
         await self._send('initClientResponse', response)
+    
+    async def disconnect_client(self):
+        self.disconnect()
+        response = {
+            "message": "OK"
+        }
+        await self._send('disconnectClientResponse', response)
 
+    
     async def updateClientInfo(self, waiting_room_info):
         from .repositories import UserRepository
         if 'nickname' not in waiting_room_info and 'avatarImage' not in waiting_room_info:
