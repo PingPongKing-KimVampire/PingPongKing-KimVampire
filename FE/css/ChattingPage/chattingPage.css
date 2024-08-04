@@ -1,6 +1,6 @@
 .chatButton {
 	width: 5vw;
-	height: 5vw;
+	aspect-ratio: 1/1;
 	position: absolute;
 	bottom: 1.5vw;
 	left: 1.5vw;
@@ -236,4 +236,62 @@
     align-items: center;
     text-align: center;
 	line-height: 1.3;
+}
+
+@media (min-aspect-ratio: 2.5/1) {
+	.chatButton {
+		width: 3.5vw;
+	}
+}
+
+@media (max-aspect-ratio: 1.7/1) {
+	.chatButton {
+		width: 5vw;
+		bottom: 2vw;
+		left: 2vw;
+	}
+}
+
+@media (max-aspect-ratio: 1.5/1) {
+	.chatButton {
+		width: 6vw;
+		bottom: 2.5vw;
+		left: 2.5vw;
+	}
+}
+
+@media (max-aspect-ratio: 1.2/1) {
+	.chatButton {
+		width: 6.5vw;
+		bottom: 3vw;
+		left: 3vw;
+	}
+}
+
+@media (max-aspect-ratio: 1/1) {
+	.chatButton {
+		width: 8vw;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.3) {
+	.chatButton {
+		width: 9vw;
+		bottom: 3.5vw;
+		left: 3.5vw;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.5) {
+	.chatButton {
+		width: 10vw;
+		bottom: 4vw;
+		left: 4vw;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.7) {
+	.chatButton {
+		width: 12vw;
+	}
 }
