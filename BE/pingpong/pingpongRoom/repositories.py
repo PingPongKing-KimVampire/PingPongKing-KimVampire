@@ -2,6 +2,10 @@ from lobby.models import User, Team, TeamUser, Game, Round, BallHit
 from asgiref.sync import sync_to_async
 from django.db.models import Prefetch
 
+BOARD_HEIGHT = 1000
+BOARD_WIDTH = 1600
+BALL_RADIUS = 25
+
 abilities = {"jiantBlocker", "ghostSmasher", "speedTwister", "illusionFaker", "none"}
 modes = {"HUMAN_HUMAN", "VAMPIRE_VAMPIRE", "VAMPIRE_HUMAN"}
 team_kinds = {"HUMAN", "VAMPIRE"}
@@ -71,8 +75,8 @@ class GameRepository:
 			is_win = True
 		else:
 			is_win = False
-		our_team = TeamRepository.create_team(our_user_id_list, game, our_team_kind, our_team_ability, our_team_score, is_win)
-		opponent_team = TeamRepository.create_team(opponent_user_id_list, game, opponent_team_kind, opponent_team_ability, opponent_team_score, not is_win)
+		our_team = TeamRepository.create_team(our_user_id_list, game, our_team_kind, our_team_ability, our_team_score, is_win, "left")
+		opponent_team = TeamRepository.create_team(opponent_user_id_list, game, opponent_team_kind, opponent_team_ability, opponent_team_score, not is_win, "right")
 		for round_number in round_info_dict:
 			round_info = round_info_dict[round_number]
 			if round_info["win_team"] == "left":
@@ -99,8 +103,8 @@ class GameRepository:
 
 class TeamRepository:
 	@staticmethod
-	def create_team(user_id_list, game, kind, effect, score, is_win):
-		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score, is_win=is_win)
+	def create_team(user_id_list, game, kind, effect, score, is_win, name):
+		team = Team.objects.create(game=game, kind=kind, effect=effect, score=score, is_win=is_win, name=name)
 		for user_id in user_id_list:
 			user = User.objects.get(id=user_id)
 			TeamUser.objects.create(team=team, user=user)
@@ -120,7 +124,7 @@ class GameReadRepository:
 	
 	@staticmethod
 	@sync_to_async
-	def get_game_detail_by_user_id_and_game_id_async(self, user_id, game_id):
+	def get_game_detail_by_user_id_and_game_id_async(user_id, game_id):
 		user = User.objects.get(id=user_id)
 		if user is None:
 			return {
@@ -162,18 +166,18 @@ class GameReadRepository:
 					"nickname": team_user.user.nickname,
 					"avatarUrl": team_user.user.get_image_uri()
 				})
-		score_list = [None] * game.total_round
+		score_list = [None] * len(rounds)
 		hit_map_list = {}
 		for round in rounds:
-			score_list[round.order] = round.is_win(my_team)
+			score_list[round.order - 1] = round.is_win(my_team)
 			ball_hit_list = []
 			for ballhit in ballhits:
 				if ballhit.round.id != round.id:
 					continue
 				ball_hit_list.append({
 					"type": ballhit.kind,
-					"y": ballhit.y_coordinate,
-					"x": ballhit.x_coordinate
+					"y": float(ballhit.y_coordinate),
+					"x": float(ballhit.x_coordinate)
 				})
 			hit_map_list[round.order] = ball_hit_list 
 		data = {
@@ -185,8 +189,14 @@ class GameReadRepository:
 			"myTeamClientInfoList": my_team_users,
 			"opponentTeamClientInfoList": opponent_team_users,
 			"word": GameReadRepository.make_vampire_word(rounds, my_team, opponent_team, game, hit_map_list),
+			"myTeam": my_team.name,
 			"scoreList": score_list,
-			"hitMapList": hit_map_list
+			"hitMapList": hit_map_list,
+			"boardInfo": {
+				"boardWidth": BOARD_WIDTH,
+				"boardHeight": BOARD_HEIGHT,
+				"ballRadius": BALL_RADIUS
+			}
 		}
 		return data
 		
