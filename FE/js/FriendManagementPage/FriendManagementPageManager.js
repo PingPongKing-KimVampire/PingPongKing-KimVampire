@@ -369,8 +369,9 @@ class FriendManagementPageManager {
 
 	_subscribeWindow() {
 		this._autoSetScrollTrackColorRef = this._autoSetScrollTrackColor.bind(this);
-		windowObservable.subscribeResize(this._autoSetScrollTrackColor);
+		windowObservable.subscribeResize(this._autoSetScrollTrackColorRef);
 	}
+
 	_unsubscribeWindow() {
 		windowObservable.unsubscribeResize(this._autoSetScrollTrackColorRef);
 	}
