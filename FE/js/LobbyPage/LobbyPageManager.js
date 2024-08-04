@@ -56,7 +56,6 @@ class LobbyPageManager {
 		this._listenWaitingRoomUpdate();
 
 		this._autoSetScollTrackColor();
-		this._adjustButtonSize();
 
 		this._setFriendManagementButton();
 		this._setProfileButton();
@@ -128,15 +127,11 @@ class LobbyPageManager {
 	}
 
 	_subscribeWindow() {
-		this._adjustButtonSizeRef = this._adjustButtonSize.bind(this);
-		// TODO : _adjustButtonSizeRef에 this가 안 붙음. 잘 안 되고 있을 듯?
-		windowObservable.subscribeResize(_adjustButtonSizeRef);
 		this._autoSetScollTrackColorRef = this._autoSetScollTrackColor.bind(this);
 		windowObservable.subscribeResize(_autoSetScollTrackColorRef);
 	}
 
 	_unsubscribeWindow() {
-		windowObservable.unsubscribeResize(this._adjustButtonSizeRef);
 		windowObservable.unsubscribeResize(this._autoSetScollTrackColorRef);
 	}
 
@@ -180,25 +175,6 @@ class LobbyPageManager {
 			this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
 			this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
 		});
-	}
-
-	_adjustButtonSize() {
-		const createWaitingRoomButton = document.querySelector(".createWaitingRoomButton");
-		const createTournamentJoinButton = document.querySelector(".tournamentJoinButton");
-		const viewWidth = window.innerWidth;
-		const viewHeight = window.innerHeight;
-
-		if (viewWidth < viewHeight) {
-			createWaitingRoomButton.style.height = "4vh";
-			createWaitingRoomButton.style.width = "calc(4vh * 4 / 1)";
-			createTournamentJoinButton.style.height = "4vh";
-			createTournamentJoinButton.style.width = "calc(4vh * 4 / 1)";
-		} else {
-			createWaitingRoomButton.style.width = "16vw";
-			createWaitingRoomButton.style.height = "calc(16vw * 1 / 4)";
-			createTournamentJoinButton.style.width = "16vw";
-			createTournamentJoinButton.style.height = "calc(16vw * 1 / 4)";
-		}
 	}
 
 	_autoSetScollTrackColor() {
@@ -309,11 +285,11 @@ class LobbyPageManager {
 	}
 
 	_getTournamentJoinButtonHtml() {
-		return `<button class="tournamentJoinButton">토너먼트 참가하기</button>`;
+		return `<button class="tournamentJoinButton">토너먼트 참가</button>`;
 	}
 
 	_getWaitingRoomCreationButtonHtml() {
-		return `<button class="createWaitingRoomButton">탁구장 생성하기</button>`;
+		return `<button class="createWaitingRoomButton">탁구장 생성</button>`;
 	}
 
 	_getWaitingRoomListContainerHtml() {
