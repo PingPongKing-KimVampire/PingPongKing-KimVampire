@@ -32,7 +32,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             Printer.log("Invalid Authorization header, closing connection", "red")
             await self.close()
 
-    async def disconnect(self):
+    async def disconnect(self, close_code): # close_code 추가함. 문제시 수정해야함
         if self.is_init:
             self.is_init = False
         if hasattr(self, 'client_id') and self.client_id in channel_name_map:
