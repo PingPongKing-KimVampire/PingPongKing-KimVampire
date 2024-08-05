@@ -20,6 +20,6 @@ jobs:
         SSH_DEVELOPER_PASSWORD: ${{ secrets.SSH_DEVELOPER_PASSWORD }}
       run: |
         sshpass -p $SSH_DEVELOPER_PASSWORD \
-        ssh -o "StrictHostKeyChecking=no" developer@dev.lesser-project.site \
+        ssh -o "StrictHostKeyChecking=no" developer@3.34.164.158 \
         "cd /home/developer/PingPongKing-KimVampire && git pull && \
         make"
