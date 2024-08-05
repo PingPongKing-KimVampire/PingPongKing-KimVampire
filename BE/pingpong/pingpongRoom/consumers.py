@@ -1,7 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
-from django.core.exceptions import ObjectDoesNotExist
 import json
+import asyncio
 
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
@@ -38,37 +37,52 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     def set_pingpong_room_consumer(self, room_id):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.game_state = 'waiting'
-        self.game_manager = stateManager.rooms[self.room_id]
-        self.game_mode = self.game_manager.mode
+        self.game_manager = stateManager.get_pingpongroom_manager(room_id)
 
     async def send_pingpongroom_accept_response(self):
-        if self.game_mode == 'tournament':
-            self.team = self.game_manager.get_client_team(self.client_id)
-        else: # normal mode
-            self.team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.avatar_uri)
-            await self.send_enter_pingpongroom_response(self.room_id, is_you_create)
-
-        if self.team == None:
-            await self._send(event='enterWaitingRoomResponse', content={'message': 'RoomIsFull'})
+        try:
+            if self.game_manager == None:
+                raise Exception('NoRoom')
+            self.game_mode = self.game_manager.mode
+            if self.game_manager.is_playing:
+                raise Exception('Playing')
+            if self.game_mode == 'tournament':
+                if self.game_state == 'playing':
+                    raise Exception('Timeout')
+                self.team = self.game_manager.get_client_team(self.client_id)
+                if self.team:
+                    asyncio.create_task(self.timeout_tournament_start())
+                else:
+                    raise Exception('NotIdentified')
+            else:  # normal mode
+                self.team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.avatar_uri)
+                if self.team:
+                    await self.send_enter_pingpongroom_response(self.room_id, is_you_create)
+                    Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
+                    Printer.log(f"team : {self.team}", "blue")
+                else:
+                    raise Exception('RoomIsFull')
+        except Exception as e:
+            error_message = str(e)
+            await self._send(event='enterWaitingRoomResponse', content={'message': error_message})
             await self.close()
-        else:
-            Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
-            Printer.log(f"team : {self.team}", "blue")
+
             
     async def disconnect(self, close_code):
         if self.client_id:
-            await self.game_manager.give_up_game(self)
             room_id_team = f"{self.room_id}-{self.team}"
-            if self.game_state == 'waiting':
-                stateManager.remove_client_from_room(self.room_id, self.client_id)
-                await stateManager.notify_room_change(self.room_id)
-                await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
             await discard_group(self, self.room_id)
             await discard_group(self, room_id_team)
             stateManager.remove_consumer_from_map(self.client_id, self)
+            if self.game_state == 'playing':
+                await self.game_manager.give_up_game(self)
+            elif self.game_state == 'waiting' and self.game_manager:
+                stateManager.remove_client_from_room(self.room_id, self.client_id)
+                await stateManager.notify_room_change(self.room_id)
+                await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
             Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
-    async def _send(self, event=str, content=str):
+    async def _send(self, event=str, content={}):
         # if not (event == "notifyPaddleLocationUpdate" or event == "notifyBallLocationUpdate" or event == "notifyFakeBallLocationUpdate"):
         #     Printer.log(f">>>>> ROOM {self.room_id} sent >>>>>", "magenta")
         #     Printer.log(f"event : {event}", "white")
@@ -108,7 +122,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         is_ready = content['state']
         stateManager.change_client_ready_state(self.room_id, self.client_id, is_ready)
         await stateManager.notify_ready_state_change(self.room_id, self.client_id, is_ready)
-            
 
     async def select_ability(self, content):
         ability = content['ability']
@@ -126,6 +139,16 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
         content = stateManager.get_entering_room_info(room_id)
         await self._send(event='enterWaitingRoomResponse', content=content)
+
+    async def timeout_tournament_start(self):
+        for _ in range(10):
+            if self.game_state == 'playing':
+                return
+            await asyncio.sleep(1)
+        await self._send('notifyGameGiveUp', {})
+        await notify_group(self.channel_layer, f"tournament_{self.room_id}", 
+                               "notifyGameEnd", {'winner_id' : self.client_id})
+        await self.close()
 
     """
     Notify methods
@@ -171,10 +194,11 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
     async def notifyGameEnd(self, content):
         content = content['content']
-        self.game_state = 'waiting'
+        self.game_state = 'finished'
         win_team = content['winTeam']
         if self.game_mode == 'tournament' and self.team == win_team:
-            await notify_group(self.channel_layer, f"tournament_{self.room_id}", "notifyGameEnd", {'winner_id' : self.client_id})
+            await notify_group(self.channel_layer, f"tournament_{self.room_id}", 
+                               "notifyGameEnd", {'winner_id' : self.client_id})
         await self._send(event='notifyGameEnd', content=content)
         await self.close()
 

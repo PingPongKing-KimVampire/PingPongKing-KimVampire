@@ -33,6 +33,9 @@ class StateManager:
         self.match_queue = []
         self.is_match_task_running = False
         self.tournaments = {}
+
+    def get_pingpongroom_manager(self, room_id):
+        return self.rooms.get(room_id, None)
         
     def get_channel_layer(self):
         return self.channel_layer
