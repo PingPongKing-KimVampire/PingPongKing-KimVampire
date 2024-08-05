@@ -37,11 +37,15 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     def set_pingpong_room_consumer(self, room_id):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.game_state = 'waiting'
-        self.game_manager = stateManager.rooms[self.room_id]
-        self.game_mode = self.game_manager.mode
+        self.game_manager = stateManager.get_pingpongroom_manager(room_id)
 
     async def send_pingpongroom_accept_response(self):
         try:
+            if self.game_manager == None:
+                raise Exception('NoRoom')
+            self.game_mode = self.game_manager.mode
+            if self.game_manager.is_playing:
+                raise Exception('Playing')
             if self.game_mode == 'tournament':
                 if self.game_state == 'playing':
                     raise Exception('Timeout')
@@ -68,7 +72,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         if self.client_id:
             if self.game_state == 'playing':
                 await self.game_manager.give_up_game(self)
-            elif self.game_state == 'waiting':
+            elif self.game_state == 'waiting' and self.game_manager:
                 stateManager.remove_client_from_room(self.room_id, self.client_id)
                 await stateManager.notify_room_change(self.room_id)
                 await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
