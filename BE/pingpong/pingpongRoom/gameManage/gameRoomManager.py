@@ -408,11 +408,10 @@ class GameRoomManager:
             await self.notifier.broadcast_ball_location_update()
 
     async def give_up_game(self, consumer):
-        self._change_game_state()
         client_id = consumer.client_id
         self.win_team = 'left' if client_id in self.team_left else  'right'
-        if self.is_playing:
-            await self.notifier.broadcast('notifyGameGiveUp', {'clientId': client_id})
+        await self.notifier.broadcast('notifyGameGiveUp', {'clientId': client_id})
+        self._change_game_state()
 
     async def _game_ready_and_start(self):
         board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height , 'ballRadius': self.ball_radius}
