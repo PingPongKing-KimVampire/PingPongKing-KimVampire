@@ -21,6 +21,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.game_mode = None
         self.team = None
         self.game_state = None
+
+        self.is_observer = False
         
         try:
             await stateManager.authorize_client(self, dict(self.scope['headers']))
@@ -29,21 +31,28 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         except:
             await self.close()
         self.set_pingpong_room_consumer(self.scope['url_route']['kwargs']['room_id'])
-        await self.send_pingpongroom_accept_response()
         await add_group(self, self.room_id)
-        await add_group(self, f"{self.room_id}-{self.team}")
+        await self.send_pingpongroom_accept_response()
         stateManager.add_consumer_to_map(self.client_id, self)
 
     def set_pingpong_room_consumer(self, room_id):
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        self.room_id = room_id
         self.game_state = 'waiting'
         self.game_manager = stateManager.get_pingpongroom_manager(room_id)
+        self.is_observer = self.scope['url_route']['kwargs'].get('observe') == 'observe'
 
     async def send_pingpongroom_accept_response(self):
         try:
+            if self.is_observer:
+                if self.game_manager == None:
+                    self.close()
+                else:
+                    await self.send_enter_observe_mode_response()
+                return
+            await add_group(self, f"{self.room_id}-{self.team}")
+            self.game_mode = self.game_manager.mode
             if self.game_manager == None:
                 raise Exception('NoRoom')
-            self.game_mode = self.game_manager.mode
             if self.game_manager.is_playing:
                 raise Exception('Playing')
             if self.game_mode == 'tournament':
@@ -66,7 +75,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             error_message = str(e)
             await self._send(event='enterWaitingRoomResponse', content={'message': error_message})
             await self.close()
-
             
     async def disconnect(self, close_code):
         if self.client_id:
@@ -149,6 +157,10 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await notify_group(self.channel_layer, f"tournament_{self.room_id}", 
                                "notifyGameEnd", {'winner_id' : self.client_id})
         await self.close()
+        
+    async def send_enter_observe_mode_response(self):
+        data = self.game_manager.get_game_info()
+        self._send(event="enterObserveModeResponse", content=data)
 
     """
     Notify methods
