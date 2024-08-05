@@ -142,7 +142,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
                 return
             await asyncio.sleep(1)
         await self._send('notifyGameGiveUp', {})
-        await self.notifyGameEnd({'content' : {'winTeam' : self.team, 'todoMakeDb' : 'true'}})
+        await notify_group(self.channel_layer, f"tournament_{self.room_id}", 
+                               "notifyGameEnd", {'winner_id' : self.client_id})
+        await self.close()
 
     """
     Notify methods
@@ -190,10 +192,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         content = content['content']
         self.game_state = 'finished'
         win_team = content['winTeam']
-        todo_make_db = content['todoMakeDb']
         if self.game_mode == 'tournament' and self.team == win_team:
             await notify_group(self.channel_layer, f"tournament_{self.room_id}", 
-                               "notifyGameEnd", {'winner_id' : self.client_id, 'todoMakeDb' : todo_make_db})
+                               "notifyGameEnd", {'winner_id' : self.client_id})
         await self._send(event='notifyGameEnd', content=content)
         await self.close()
 
