@@ -4,8 +4,11 @@ class WindowObserverble extends Observerble {
 	constructor() {
 		super();
 		this._setupWindowEventListener("resize");
-		this._setupWindowEventListener("mousedown");
 		this._setupWindowEventListener("mousemove");
+		this._setupWindowEventListener("touchmove");
+		this._setupWindowEventListener("touchstart");
+		this._setupWindowEventListener("keydown");
+		this._setupWindowEventListener("keyup");
 		this._setupPortraitChangeQueryListener();
 	}
 
@@ -26,18 +29,26 @@ class WindowObserverble extends Observerble {
 		});
 	}
 
-	//subscribeResizeEvent로 이름 변경하기
 	subscribeResize(observer) {
 		this._subscribe("resize", observer);
-	}
-	subscribeMousedown(observer) {
-		this._subscribe("mousedown", observer);
 	}
 	subscribeMousemove(observer) {
 		this._subscribe("mousemove", observer);
 	}
 	subscribeOrientationChange(observer) {
 		this._subscribe("orientationChange", observer);
+	}
+	subscribeTouchmove(observer) {
+		this._subscribe("touchmove", observer);
+	}
+	subscribeTouchstart(observer) {
+		this._subscribe("touchstart", observer);
+	}
+	subscribeKeyup(observer) {
+		this._subscribe("keyup", observer);
+	}
+	subscribeKeydown(observer) {
+		this._subscribe("keydown", observer);
 	}
 	unsubscribeResize(observer) {
 		this._unsubscibe("resize", observer);
@@ -47,6 +58,18 @@ class WindowObserverble extends Observerble {
 	}
 	unsubscribeOrientationChange(observer) {
 		this._unsubscibe("orientationChange", observer);
+	}
+	unsubscribeTouchmove(observer) {
+		this._unsubscibe("touchmove", observer);
+	}
+	unsubscribeTouchstart(observer) {
+		this._unsubscibe("touchstart", observer);
+	}
+	unsubscribeKeyup(observer) {
+		this._unsubscibe("keyup", observer);
+	}
+	unsubscribeKeydown(observer) {
+		this._unsubscibe("keydown", observer);
 	}
 }
 

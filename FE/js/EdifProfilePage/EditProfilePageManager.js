@@ -204,7 +204,6 @@ class EditProfilePageManager {
 		this.exitModal.style.display = "flex";
 	};
 	_exitEditProfilePage = () => {
-		this.clientInfo.profileTarget = { id: this.clientInfo.id };
 		history.back();
 	};
 	_hideExitModal = () => {

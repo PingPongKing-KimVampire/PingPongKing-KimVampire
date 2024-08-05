@@ -1,6 +1,7 @@
 import Player from "./Player.js";
 import PingpongRenderer from "./PingpongRenderer.js";
 import { PingpongConnectionError, isSocketConnected } from "../Error/Error.js";
+import windowObservable from "../../WindowObservable.js";
 
 class PingpongPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -14,7 +15,9 @@ class PingpongPageManager {
 	}
 
 	clearPage() {
+		if (this.player) this.player._clearPlayer();
 		this.clientInfo.gameInfo = null;
+		this._unsubscribeWindow();
 	}
 
 	async initPage() {
@@ -44,6 +47,7 @@ class PingpongPageManager {
 				this.clientInfo.gameInfo.pingpongRoomSocket.close();
 			}
 		});
+		this._subscribeWindow();
 	}
 
 	_manageExitRoom() {
@@ -54,8 +58,39 @@ class PingpongPageManager {
 		exitButton.addEventListener("click", this._exitButtonClicked.bind(this, questionModal));
 		exitYesButton.addEventListener("click", this._exitYesButtonClicked.bind(this));
 		exitNoButton.addEventListener("click", this._exitNoButtonClicked.bind(this, questionModal));
+		this.exitModalState = "INACTIVE";
 	}
+
+	_subscribeWindow() {
+		this.toggleExitModalByKeyDownRef = this._toggleExitModalByKeyDown.bind(this);
+		windowObservable.subscribeKeydown(this.toggleExitModalByKeyDownRef);
+		this.exitGameByKeyDownRef = this._exitGameByKeyDown.bind(this);
+		windowObservable.subscribeKeydown(this.exitGameByKeyDownRef);
+	}
+
+	_unsubscribeWindow() {
+		windowObservable.unsubscribeKeydown(this.toggleExitModalByKeyDownRef);
+		windowObservable.unsubscribeKeydown(this.exitGameByKeyDownRef);
+	}
+
+	_toggleExitModalByKeyDown(e) {
+		if (e.code !== "Escape") return;
+		const questionModal = document.querySelector(".questionModal");
+		if (this.exitModalState === "INACTIVE") {
+			this._exitButtonClicked(questionModal);
+		} else if (this.exitModalState === "ACTIVE") {
+			this._exitNoButtonClicked(questionModal);
+		}
+	}
+
+	_exitGameByKeyDown(e) {
+		if (e.code !== "Enter") return;
+		if (this.exitModalState !== "ACTIVE") return;
+		this._exitYesButtonClicked();
+	}
+
 	_exitButtonClicked(questionModal) {
+		this.exitModalState = "ACTIVE";
 		questionModal.style.display = "flex";
 	}
 	_exitYesButtonClicked() {
@@ -67,6 +102,7 @@ class PingpongPageManager {
 		this.renderPage("lobby");
 	}
 	_exitNoButtonClicked(questionModal) {
+		this.exitModalState = "INACTIVE";
 		questionModal.style.display = "none";
 	}
 
