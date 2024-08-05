@@ -186,7 +186,7 @@ class PageRouter {
 			} else if (url === "statistics") {
 				this._loadCSS(["css/StatisticsPage/statisticsPage.css"]);
 				this._visibleChatButton();
-				this.nextPageManager = new StatisticsPageManager(this.app, this.clientInfo);
+				this.nextPageManager = new StatisticsPageManager(this.app, this.clientInfo, this.renderPage.bind(this), queryParam);
 			}
 			await this.nextPageManager.connectPage();
 			this.clientInfo.currentPage = url;

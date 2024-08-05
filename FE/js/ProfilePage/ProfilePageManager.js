@@ -38,9 +38,12 @@ class ProfilePageManager {
 				const id = parseInt(matchLog.dataset.id);
 				this.clientInfo.statisticsInfo = {
 					profileId: this.profileTarget.id,
-					gameId: id
-				}
-				this.renderPage("statistics");
+					gameId: id,
+				};
+				this.renderPage("statistics", {
+					profileId: this.profileTarget.id,
+					gameId: id,
+				});
 			});
 		});
 	}

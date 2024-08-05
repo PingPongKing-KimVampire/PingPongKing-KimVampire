@@ -187,6 +187,10 @@
 	background-color: rgb(213, 112, 255);
 }
 
+.exitButton {
+	z-index: 100;
+}
+
 @media (orientation: portrait) {
 	body {
 		overflow-x: hidden;

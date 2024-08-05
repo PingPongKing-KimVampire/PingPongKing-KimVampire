@@ -12,6 +12,13 @@ export class ProfileTargetNotFound extends Error {
 	}
 }
 
+export class StatisticsInfoNotFound extends Error {
+	constructor() {
+		super("statistics info is not found");
+		this.name = "StatisticsInfoNotFound";
+	}
+}
+
 export class GameInfoNotSettingError extends Error {
 	constructor() {
 		super("gameInfo is not setting");

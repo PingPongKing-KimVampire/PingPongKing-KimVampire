@@ -1,16 +1,21 @@
 import windowObservable from "../../WindowObservable.js";
+import { StatisticsInfoNotFound } from "../Error/Error.js";
 
 class StatisticsPageManager {
-	constructor(app, clientInfo) {
-		console.log('Statistics Page!');
+	constructor(app, clientInfo, renderPage, queryParam) {
+		console.log("Statistics Page!");
 		this.app = app;
 		this.clientInfo = clientInfo;
+		this.renderPage = renderPage;
+		this.queryParam = queryParam;
 	}
 
 	connectPage() {
-		const { profileId, gameId } = this.clientInfo.statisticsInfo;
-		this.profileId = profileId;
-		this.gameId = gameId;
+		if (this.queryParam | (this.queryParam["profileId"] === undefined) | (this.queryParam["gameId"] === undefined)) {
+			throw new StatisticsInfoNotFound();
+		}
+		this.profileId = this.queryParam["profileId"];
+		this.gameId = this.queryParam["gameId"];
 	}
 
 	clearPage() {
@@ -18,18 +23,7 @@ class StatisticsPageManager {
 	}
 
 	async initPage() {
-		const { timestamp,
-			score,
-			mode,
-			teamKind,
-			ability,
-			myTeamClientInfoList,
-			opponnetTeamClientInfoList,
-			word,
-			scoreList,
-			myTeam,
-			hitMapList,
-			boardInfo } = await this._getClientGameDetail(this.profileId, this.gameId);
+		const { timestamp, score, mode, teamKind, ability, myTeamClientInfoList, opponnetTeamClientInfoList, word, scoreList, myTeam, hitMapList, boardInfo } = await this._getClientGameDetail(this.profileId, this.gameId);
 
 		this.word = word;
 		this.hitMapList = hitMapList;
@@ -42,6 +36,7 @@ class StatisticsPageManager {
 		this.myTeam = myTeam;
 
 		this.app.innerHTML = this._getHTML();
+		this._setExitButton();
 		this._subscribeWindow();
 		this._setHitMap();
 		requestAnimationFrame(this._renderScoreGraph.bind(this));
@@ -51,7 +46,7 @@ class StatisticsPageManager {
 	async _getClientGameDetail(clientId, gameId) {
 		const getClientGameDetailMessage = {
 			event: "getClientGameDetail",
-			content: { clientId, gameId }
+			content: { clientId, gameId },
 		};
 		this.clientInfo.socket.send(JSON.stringify(getClientGameDetailMessage));
 		return await new Promise(resolve => {
@@ -71,10 +66,10 @@ class StatisticsPageManager {
 		let opponentPoint = 0;
 		const myPoints = [];
 		const opponentPoints = [];
-		scoreList.forEach((score) => {
-			if (score === 'win') {
+		scoreList.forEach(score => {
+			if (score === "win") {
 				myPoint++;
-			} else if (score === 'lose') {
+			} else if (score === "lose") {
 				opponentPoint++;
 			}
 			myPoints.push(myPoint);
@@ -87,62 +82,63 @@ class StatisticsPageManager {
 		this._renderScoreGraphRef = this._renderScoreGraph.bind(this);
 		windowObservable.subscribeResize(this._renderScoreGraphRef);
 	}
-	_unsubscribeWindow() { // TODO : 화면 나갈 때 호출하기
+	_unsubscribeWindow() {
+		// TODO : 화면 나갈 때 호출하기
 		windowObservable.unsubscribeResize(this._renderScoreGraphRef);
 	}
 
 	_renderScoreGraph() {
-		const lineCanvas = document.querySelector('#graphLineCanvas');
-		lineCanvas.innerHTML = '';
-		const circleCanvas = document.querySelector('#graphCircleCanvas');
-		circleCanvas.innerHTML = '';
-		const graphRect = document.querySelector('#graphContainer').getBoundingClientRect();
+		const lineCanvas = document.querySelector("#graphLineCanvas");
+		lineCanvas.innerHTML = "";
+		const circleCanvas = document.querySelector("#graphCircleCanvas");
+		circleCanvas.innerHTML = "";
+		const graphRect = document.querySelector("#graphContainer").getBoundingClientRect();
 		const scale = { x: graphRect.width / this.round, y: graphRect.height / this.winningScore };
 
 		const renderLine = (points, color) => {
 			const createLine = (pos1, pos2, color) => {
-				const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-				line.setAttribute('x1', pos1.x);
-				line.setAttribute('y1', pos1.y);
-				line.setAttribute('x2', pos2.x);
-				line.setAttribute('y2', pos2.y);
-				line.setAttribute('stroke', color);
-				line.setAttribute('stroke-width', '0.3rem');
+				const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+				line.setAttribute("x1", pos1.x);
+				line.setAttribute("y1", pos1.y);
+				line.setAttribute("x2", pos2.x);
+				line.setAttribute("y2", pos2.y);
+				line.setAttribute("stroke", color);
+				line.setAttribute("stroke-width", "0.3rem");
 				lineCanvas.append(line);
-			}
+			};
 			const createCircle = (pos, round) => {
-				const circleButton = document.createElement('button');
-				circleButton.classList.add('circleButton');
+				const circleButton = document.createElement("button");
+				circleButton.classList.add("circleButton");
 				circleButton.style.left = `${pos.x}px`;
 				circleButton.style.top = `${pos.y}px`;
-				circleButton.addEventListener('click', () => {
+				circleButton.addEventListener("click", () => {
 					clearInterval(this.renderHitMapIntervalID);
 					this._renderHitMap(round);
 				});
 				circleCanvas.append(circleButton);
-			}
-			let prevPoint = { 
-				x: window.scrollX + graphRect.left, 
-				y: window.scrollY + graphRect.bottom
-			}
+			};
+			let prevPoint = {
+				x: window.scrollX + graphRect.left,
+				y: window.scrollY + graphRect.bottom,
+			};
 			points.forEach((point, index) => {
 				const currentPoint = {
-					x: window.scrollX + graphRect.left + ((index + 1) * scale.x),
-					y: window.scrollY + graphRect.bottom - (point * scale.y)
-				}
+					x: window.scrollX + graphRect.left + (index + 1) * scale.x,
+					y: window.scrollY + graphRect.bottom - point * scale.y,
+				};
 				createLine(prevPoint, currentPoint, color);
 				createCircle(currentPoint, index + 1);
 				prevPoint = currentPoint;
 			});
-		}
+		};
 
-		renderLine(this.myPoints, '#BEBEBE');
-		renderLine(this.opponentPoints, '#D570FF');
+		renderLine(this.myPoints, "#BEBEBE");
+		renderLine(this.opponentPoints, "#D570FF");
 	}
 
 	_setHitMap() {
 		this.hitMapLabel = document.querySelector("#hitMapContainer .label");
-		this.hitMapPanel = document.querySelector('#hitMapPanel');
+		this.hitMapPanel = document.querySelector("#hitMapPanel");
 		this.currentRound = 1;
 		const interval = 1.5; // 초 단위
 		this.renderHitMapIntervalID = setInterval(() => {
@@ -157,39 +153,44 @@ class StatisticsPageManager {
 
 		const removeBalls = () => {
 			const children = Array.from(this.hitMapPanel.children);
-			children.forEach((child) => {
-				if (child.classList.contains('scoreBall') ||
-					child.classList.contains('paddleBall')) {
+			children.forEach(child => {
+				if (child.classList.contains("scoreBall") || child.classList.contains("paddleBall")) {
 					this.hitMapPanel.removeChild(child);
 				}
 			});
-		}
+		};
 		removeBalls();
 
 		const { boardHeight, boardWidth, ballRadius } = this.boardInfo;
 		const ballSizePercent = ((ballRadius * 2) / boardWidth) * 100;
-		const yTotalPercent = ((boardHeight - (ballRadius * 2)) / boardHeight) * 100;
-		const xTotalPercent = ((boardWidth - (ballRadius * 2)) / boardWidth) * 100;
+		const yTotalPercent = ((boardHeight - ballRadius * 2) / boardHeight) * 100;
+		const xTotalPercent = ((boardWidth - ballRadius * 2) / boardWidth) * 100;
 
 		const renderBall = (type, x, y) => {
 			const ball = document.createElement("div");
-			if (type === 'SCORE') {
-				ball.classList.add('scoreBall');
-			} else if (type === 'PADDLE') {
-				ball.classList.add('paddleBall');
+			if (type === "SCORE") {
+				ball.classList.add("scoreBall");
+			} else if (type === "PADDLE") {
+				ball.classList.add("paddleBall");
 			}
 			ball.style.width = `${ballSizePercent}%`;
-			ball.style.height = 'auto';
-			ball.style.aspectRatio = '1/1';
+			ball.style.height = "auto";
+			ball.style.aspectRatio = "1/1";
 			const yPercent = (y / boardHeight) * yTotalPercent;
 			const xPercent = (x / boardWidth) * xTotalPercent;
 			ball.style.top = `${yPercent}%`;
 			ball.style.left = this.myTeam === "right" ? `${xPercent}%` : `${xTotalPercent - xPercent}%`;
 			this.hitMapPanel.append(ball);
-		}
+		};
 
 		this.hitMapList[round].forEach(({ type, x, y }) => {
 			renderBall(type, x, y);
+		});
+	}
+
+	_setExitButton() {
+		document.querySelector(".exitButton").addEventListener("click", async () => {
+			history.back();
 		});
 	}
 
@@ -254,7 +255,7 @@ class StatisticsPageManager {
 		`;
 	}
 	_getGraphLabelsHTML(start, end) {
-		let labels = '';
+		let labels = "";
 		for (let count = start; count <= end; count++) {
 			labels += `<div>${count}</div>`;
 		}
