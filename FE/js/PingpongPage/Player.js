@@ -113,7 +113,7 @@ class Player {
 		windowObservable.unsubscribeMousemove(this.sendPaddlePositionRef);
 		windowObservable.unsubscribeTouchmove(this.sendPaddlePositionRef);
 		windowObservable.unsubscribeTouchstart(this.sendPaddlePositionRef);
-		windowObservable.unsubscribeKeydown(this.updateKeyboardPressInfoByKeyDown);
+		windowObservable.unsubscribeKeydown(this.updateKeyboardPressInfoByKeyDownRef);
 		windowObservable.unsubscribeKeyup(this.updateKeyboardPressInfoByKeyUpRef);
 	}
 
