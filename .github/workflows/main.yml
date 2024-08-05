@@ -1,0 +1,25 @@
+name: manual deploy
+
+run-name: ${{ github.actor }} is manually deploying server
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install sshpass
+      run: sudo apt-get install -y sshpass
+
+    - name: DevServer Deploy
+      env:
+        SSH_DEV_DEVELOPER_PASSWORD: ${{ secrets.SSH_DEV_DEVELOPER_PASSWORD }}
+      run: |
+        sshpass -p $SSH_DEV_DEVELOPER_PASSWORD \
+        ssh -o "StrictHostKeyChecking=no" developer@dev.lesser-project.site \
+        "cd /home/developer/PingPongKing-KimVampire && git pull && \
+        make"
