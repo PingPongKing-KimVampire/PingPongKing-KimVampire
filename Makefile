@@ -4,6 +4,9 @@ ENV = DATA_PATH=${DATA_DIR}
 up: down create-dir
 	$(ENV) docker-compose up --build
 
+background-up: down create-dir
+	$(ENV) docker-compose up --build -d
+
 down:
 	docker-compose down -v
 
