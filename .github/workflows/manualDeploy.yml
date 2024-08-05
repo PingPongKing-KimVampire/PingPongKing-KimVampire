@@ -22,4 +22,4 @@ jobs:
         sshpass -p $SSH_DEVELOPER_PASSWORD \
         ssh -o "StrictHostKeyChecking=no" developer@3.34.164.158 \
         "cd /home/developer/PingPongKing-KimVampire && git pull && \
-        make"
+        make background-up"
