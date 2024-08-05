@@ -17,7 +17,7 @@ jobs:
 
     - name: DevServer Deploy
       env:
-        SSH_DEV_DEVELOPER_PASSWORD: ${{ secrets.SSH_DEV_DEVELOPER_PASSWORD }}
+        SSH_DEVELOPER_PASSWORD: ${{ secrets.SSH_DEVELOPER_PASSWORD }}
       run: |
         sshpass -p $SSH_DEVELOPER_PASSWORD \
         ssh -o "StrictHostKeyChecking=no" developer@dev.lesser-project.site \
