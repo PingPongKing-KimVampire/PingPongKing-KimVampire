@@ -1,12 +1,11 @@
-from django.utils import timezone
 import asyncio
 import uuid
 import random
-import copy
 
 from .ball import Ball
 from .player import Player
 from .gameRoomNotifier import GameRoomNotifier
+from .gameDataManager import GameDataManager
 
 FRAME_PER_SECOND = 60
 LEFT = 'left'
@@ -41,7 +40,7 @@ class GameRoomManager:
         self.right_ability = None
 
         # game playing info
-        self.board_width = 1550
+        self.board_width = 1600
         self.board_height = 1000
         self.ball_radius = 25
         self.ball = Ball()
@@ -58,6 +57,7 @@ class GameRoomManager:
         self.notifier = GameRoomNotifier(channel_layer, room_id, self.ball)
 
         # statics
+        self.db_manager = GameDataManager(self.left_mode, self.right_mode)
         self.win_team = None
         self.start_time = None
         self.end_time = None
@@ -192,6 +192,7 @@ class GameRoomManager:
             player.modify_paddle_size(size)
         
     async def trigger_game(self):
+        self.db_manager.set_teams_info(self.team_left, self.team_right, self.left_ability, self.right_ability)
         self.is_playing = True
         self.is_end = False
         self._reset_round()
@@ -204,17 +205,15 @@ class GameRoomManager:
 
     async def _game_loop(self):
         await asyncio.sleep(1.5)
-        self.start_time = timezone.now()
+        self.db_manager.set_start_time()
         await self._send_all_paddle_location()
-        # print('게임 직전')
         while self.is_playing and not self.is_end:
             self.ball.move()
             ball_state = await self._detect_collisions(self.ball)
             await self._send_real_ball_update(ball_state)
             await asyncio.sleep(1 / FRAME_PER_SECOND)
-        # print('루프 끝')
-        self.end_time = timezone.now()
-        await self.save_data_to_db()
+        self.db_manager.set_end_time()
+        await self.db_manager.save_data_to_db(self.score, self.win_team)
         await self.notifier.broadcast('notifyGameEnd', {'winTeam': self.win_team})
 
     def update_target(self, client_id, x, y):
@@ -301,7 +300,7 @@ class GameRoomManager:
         return NOHIT
     
     async def _apply_paddle_hit(self, player, ball):
-        self.save_hit_map('PADDLE', ball.pos_y, ball.pos_x)
+        self.db_manager.save_hit_map('PADDLE', ball.pos_y, ball.pos_x)
         state = []
 
         state = PADDLE
@@ -350,7 +349,7 @@ class GameRoomManager:
     async def _end_round(self):
         self.ball.hit_count = 0
         round_win_team = self._add_score()
-        self.save_round_data(round_win_team)
+        self.db_manager.save_round_data(self.round, round_win_team)
 
         win_team = 'left' if self.ball.dx > 0 else 'right'
         data = {'team' : win_team, 'score' : self.score[win_team]}
@@ -379,6 +378,7 @@ class GameRoomManager:
         return False
 
     def _end_game_loop(self):
+        self._change_game_state()
         team = 'left' if self.score[LEFT] >= END_SCORE else 'right'
         return team
 
@@ -392,67 +392,6 @@ class GameRoomManager:
     def _change_game_state(self):
         self.is_playing = False
         self.is_end = True
-        
-    ### DB
-
-    async def save_data_to_db(self):
-        data = {
-            "start_time" : self.start_time,
-            "end_time" : self.end_time,
-            "mode": self.get_game_mode(),
-            "team1_users": self.get_client_id_list('left'),
-            "team1_kind": self.left_mode,
-            "team2_users": self.get_client_id_list('right'),
-            "team2_kind": self.right_mode,
-            "team1_ability": self.left_ability,
-            "team2_ability": self.right_ability,
-            "win_team" : self.win_team,
-            "team1_score" : self.score[LEFT],
-            "team2_score" : self.score[RIGHT],
-            "round": self.game_data
-        }
-        from pingpongRoom.repositories import GameRepository
-        game = await GameRepository.save_game_async(data)
-        # game None 처리 필요
-
-        # # Gamn DB Test, 지울 것.
-        # game = await GameRepository.get_games_by_user_id(self.clients[0])
-        # print(game)
-    
-    def save_round_data(self, round_win_team):
-        data = {
-            'win_team' : round_win_team,
-            'ball_hits' : copy.deepcopy(self.round_hit_map)
-        }
-        self.game_data[self.round] = data
-        self.round_hit_map = []
-
-    def save_hit_map(self, type, y, x):
-        data = {
-            'y' : y,
-            'x' : x,
-            'type' : type
-        }
-        self.round_hit_map.append(data)
-    
-    def get_game_mode(self):
-        if self.left_mode == 'human' and self.right_mode == 'human':
-            mode = 'HUMAN_HUMAN'
-        elif self.left_mode == 'vampire' and self.right_mode == 'human':
-            mode = 'VAMPIRE_HUMAN'
-        else:
-            mode = 'VAMPIRE_VAMPIRE'
-        return mode
-    
-    def get_client_id_list(self, team):
-        if team == 'left':
-            team = self.team_left
-        else:
-            team = self.team_right
-        data = []
-        for client_id, player in team.items():
-            data.append(client_id)
-        return data
 
     async def _send_real_ball_update(self, ball_state):
         if not self.ball.check_unghost():
@@ -460,7 +399,7 @@ class GameRoomManager:
 
         if ball_state == SCORE:
             self.is_scored = True
-            self.save_hit_map('SCORE', self.ball.pos_y, self. ball.pos_x)
+            self.db_manager.save_hit_map('SCORE', self.ball.pos_y, self. ball.pos_x)
             if self.ball.is_speedtwist:
                 await self.notifier.broadcast('notifyUnspeedTwistBall')
             await self._end_round()
@@ -469,11 +408,10 @@ class GameRoomManager:
             await self.notifier.broadcast_ball_location_update()
 
     async def give_up_game(self, consumer):
-        self._change_game_state()
         client_id = consumer.client_id
         self.win_team = 'left' if client_id in self.team_left else  'right'
-        if self.is_playing:
-            await self.notifier.broadcast('notifyGameGiveUp', {'clientId': client_id})
+        await self.notifier.broadcast('notifyGameGiveUp', {'clientId': client_id})
+        self._change_game_state()
 
     async def _game_ready_and_start(self):
         board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height , 'ballRadius': self.ball_radius}

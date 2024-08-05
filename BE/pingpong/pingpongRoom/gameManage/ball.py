@@ -41,7 +41,7 @@ class Ball:
         self.pos_y += self.dy
     
     def check_unghost(self):
-        if self.is_vanish and self.dx < 0 and self.pos_x < 517 or self.is_vanish and self.dx > 0 and self.pos_x > 1033:
+        if self.is_vanish and self.dx < 0 and self.pos_x < 700 or self.is_vanish and self.dx > 0 and self.pos_x > 900:
             self.is_vanish = False
             return False
         return True
