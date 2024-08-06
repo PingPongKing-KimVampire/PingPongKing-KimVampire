@@ -1,5 +1,6 @@
 import windowObservable from "../../WindowObservable.js";
 import { StatisticsInfoNotFound } from "../Error/Error.js";
+import { getMatchLogDiv, setMatchLogPlayerClickListener } from "../ProfilePage/MatchLog.js";
 
 class StatisticsPageManager {
 	constructor(app, clientInfo, renderPage, queryParam) {
@@ -23,8 +24,9 @@ class StatisticsPageManager {
 	}
 
 	async initPage() {
-		const { timestamp, score, mode, teamKind, ability, myTeamClientInfoList, opponnetTeamClientInfoList, word, scoreList, myTeam, hitMapList, boardInfo } = await this._getClientGameDetail(this.profileId, this.gameId);
+		const { timestamp, score, mode, result, teamKind, ability, myTeamClientInfoList, opponentTeamClientInfoList, word, scoreList, myTeam, hitMapList, boardInfo } = await this._getClientGameDetail(this.profileId, this.gameId);
 
+		this.gameHistory = { gameId: this.gameId, timestamp, score, result, mode, teamKind, ability, myTeamClientInfoList, opponentTeamClientInfoList };
 		this.word = word;
 		this.hitMapList = hitMapList;
 		const { myPoints, opponentPoints } = this._getPoints(scoreList);
@@ -39,6 +41,7 @@ class StatisticsPageManager {
 		this._setExitButton();
 		this._subscribeWindow();
 		this._setHitMap();
+		setMatchLogPlayerClickListener(this.renderPage.bind(this));
 		requestAnimationFrame(this._renderScoreGraph.bind(this));
 		requestAnimationFrame(this._renderHitMap.bind(this, 1));
 	}
@@ -215,7 +218,9 @@ class StatisticsPageManager {
 	}
 	_getMainPanelHTML() {
 		return `
-			<div id="mainPanel"></div>
+			<div id="mainPanel">
+				${getMatchLogDiv(this.gameHistory)}
+			</div>
 		`;
 	}
 	_getWordPanelHTML(word) {
