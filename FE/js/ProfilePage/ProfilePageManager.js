@@ -1,5 +1,5 @@
 import { GlobalConnectionError, ProfileTargetNotFound, isSocketConnected } from "../Error/Error.js";
-import { getMatchLogDiv } from "./getMatchLogDiv.js";
+import { getMatchLogDiv, setMatchLogPlayerClickListener } from "./MatchLog.js";
 
 class ProfilePageManager {
 	constructor(app, clientInfo, renderPage, queryParam) {
@@ -31,6 +31,7 @@ class ProfilePageManager {
 		this._setMatchLogClickListener();
 		this._setExitButton();
 		this._setEditProfileButton();
+		setMatchLogPlayerClickListener(this.renderPage.bind(this));
 	}
 
 	_setMatchLogClickListener() {

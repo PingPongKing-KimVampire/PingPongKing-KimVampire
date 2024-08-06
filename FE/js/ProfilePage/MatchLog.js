@@ -51,7 +51,7 @@ function _getMatchPlayerListContainerDiv(myTeamClientInfoList, opponentTeamClien
 
 function _getPlayerContainerDiv(player, color) {
 	return `
-        <div class="playerContainer" data-id="${player.id}">
+        <div class="playerContainer existPlayer" data-id="${player.clientId}">
             <div class="playerAvatarImgFrame ${color}Border">
                 <img class="playerAvatarImg" src="${player.avatarUrl}">
             </div>
@@ -71,4 +71,14 @@ function _getEmptyPlayerContainerDiv(color) {
                  <span></span>
              </div>
          </div>`;
+}
+
+export function setMatchLogPlayerClickListener(renderPage) {
+	document.querySelectorAll(".existPlayer").forEach(existPlayer => {
+		existPlayer.addEventListener("click", e => {
+			e.stopPropagation();
+			const id = parseInt(existPlayer.dataset.id);
+			renderPage("profile", { id });
+		});
+	});
 }

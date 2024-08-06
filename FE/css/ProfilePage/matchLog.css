@@ -128,6 +128,14 @@
 	flex-direction: row;
     justify-content: space-between;
 	align-items: center;
+	z-index: 200;
+}
+
+
+.existPlayer:hover {
+    cursor: pointer;
+    background-color: #e0e0e080;
+	transition: background-color 0.3s ease;
 }
 
 .playerAvatarImgFrame{
@@ -140,6 +148,7 @@
 .playerAvatarImg{
     width: 100%;
     height: 100%;
+	z-index: 300;
 }
 
 .noAvatarRed{

@@ -1,6 +1,6 @@
 import windowObservable from "../../WindowObservable.js";
 import { StatisticsInfoNotFound } from "../Error/Error.js";
-import { getMatchLogDiv } from "../ProfilePage/getMatchLogDiv.js";
+import { getMatchLogDiv, setMatchLogPlayerClickListener } from "../ProfilePage/MatchLog.js";
 
 class StatisticsPageManager {
 	constructor(app, clientInfo, renderPage, queryParam) {
@@ -41,6 +41,7 @@ class StatisticsPageManager {
 		this._setExitButton();
 		this._subscribeWindow();
 		this._setHitMap();
+		setMatchLogPlayerClickListener(this.renderPage.bind(this));
 		requestAnimationFrame(this._renderScoreGraph.bind(this));
 		requestAnimationFrame(this._renderHitMap.bind(this, 1));
 	}
