@@ -160,7 +160,7 @@ class PageRouter {
 				this._inVisibleChatButton();
 				this.nextPageManager = new PingpongPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "profile") {
-				this._loadCSS(["css/ProfilePage/profilePage.css"]);
+				this._loadCSS(["css/ProfilePage/profilePage.css", "css/ProfilePage/matchLog.css"]);
 				this._visibleChatButton();
 				this.nextPageManager = new ProfilePageManager(this.app, this.clientInfo, this.renderPage.bind(this), queryParam);
 			} else if (url === "editProfile") {
@@ -184,7 +184,7 @@ class PageRouter {
 				this._inVisibleChatButton();
 				this.nextPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			} else if (url === "statistics") {
-				this._loadCSS(["css/StatisticsPage/statisticsPage.css"]);
+				this._loadCSS(["css/StatisticsPage/statisticsPage.css", "css/ProfilePage/matchLog.css"]);
 				this._visibleChatButton();
 				this.nextPageManager = new StatisticsPageManager(this.app, this.clientInfo, this.renderPage.bind(this), queryParam);
 			}
