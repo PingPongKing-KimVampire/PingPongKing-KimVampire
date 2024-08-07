@@ -14,7 +14,7 @@ class ProfilePageManager {
 		if (!isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
 		if (!this.queryParam | (this.queryParam["id"] === undefined)) throw new ProfileTargetNotFound();
 
-		this.profileTarget = { id: this.queryParam["id"] };
+		this.profileTarget = { id: parseInt(this.queryParam["id"]) };
 		this.clientInfo.profileTarget = null;
 		const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
 		this.profileTarget.nickname = nickname;
