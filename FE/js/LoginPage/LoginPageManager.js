@@ -30,7 +30,11 @@ class LoginPageManager {
 		this.loginButton.disabled = true;
 		this.loginButton.addEventListener("click", this._loginListener.bind(this));
 
-		document.querySelector("#signupButton").addEventListener("click", this.renderPage.bind(this, "signup"));
+		document.querySelector("#signupButton").addEventListener("click", () => {
+			if (this.isAttemptingLogin) return;
+			this.renderPage("signup");
+		});
+		this.isAttemptingLogin = false;
 	}
 
 	_updateLoginButton() {
@@ -47,8 +51,8 @@ class LoginPageManager {
 
 	async _loginListener(event) {
 		event.preventDefault();
-
-		this.loginState = "ACTIVE";
+		if (this.isAttemptingLogin) return;
+		this.isAttemptingLogin = true;
 
 		const id = this.idInput.value;
 		const pw = this.pwInput.value;
@@ -70,6 +74,7 @@ class LoginPageManager {
 			this.renderPage("lobby");
 		} catch (error) {
 			this.warning.textContent = error.message;
+			this.isAttemptingLogin = false;
 		}
 	}
 
