@@ -161,7 +161,8 @@ class WaitingRoomPageManager {
 				this._updateReadyState(clientId, state);
 				if (clientId === this.clientInfo.id) this.me.readyState = state;
 				this._rerenderPage();
-			} else if (event === "notifyGameReady") {
+			} else if (event === "notifyGameRoomReady") {
+				this._renderReadyModal();
 				//3, 2, 1 추후 구현
 			} else if (event === "notifyGameStart") {
 				console.log("NOTIFY GAME START!!!");
@@ -188,6 +189,20 @@ class WaitingRoomPageManager {
 			}
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", this.listener);
+	}
+
+	_renderReadyModal() {
+		const readyModalElment = document.createElement("div");
+		readyModalElment.id = "readyModal";
+		readyModalElment.innerHTML = `
+			<div id="readyModalImage">
+				<div class="spinner-container">
+					<div id="spinner"></div>
+				</div>
+			</div>
+			<div id="readyModalText">Game Start!</div>
+		`;
+		this.app.append(readyModalElment);
 	}
 
 	_pushNewPlayer(id, nickname, team, avatarUrl) {

@@ -221,7 +221,7 @@ class PageRouter {
 		// await new Promise(res => {
 		// 	setTimeout(() => {
 		// 		res();
-		// 	}, 100000000);
+		// 	}, 1000);
 		// });
 	}
 
