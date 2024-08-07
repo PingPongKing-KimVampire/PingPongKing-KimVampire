@@ -183,6 +183,7 @@ class GameReadRepository:
 		data = {
 			"score": [my_team.score, opponent_team.score],
 			"mode": game.mode,
+			"timestamp": game.start_at.isoformat(),
 			"result": my_team.is_win_to_string(),
 			"teamKind": [my_team.kind, opponent_team.kind],
 			"ability": [my_team.effect, opponent_team.effect],
@@ -257,7 +258,10 @@ class GameReadRepository:
 		comeback_win = False
 		comeback_lose = False
 		paddle_hits_per_round = [sum(1 for hit in hits if hit["type"] == "PADDLE") for hits in hit_map_list.values()]
-
+		if our_team.score >= opponent_team.score and not our_team.is_win:
+			return "기권패"
+		elif our_team.score <= opponent_team.score and our_team.is_win:
+			return "상대팀의 기권으로 인한 승리"
 		for round in rounds:
 			if round.win_team.id == our_team.id:
 				if was_losing:
@@ -279,7 +283,7 @@ class GameReadRepository:
 			return "그 실력에 잠이 오냐?"
 		elif any(hits >= 10 for hits in paddle_hits_per_round):
 			return "치혈했던 혈전"
-		elif our_team.score > opponent_team.score and our_team.is_win:
+		elif our_team.score > opponent_team.score:
 			return "승리"
 		else:
 			return "패배"	

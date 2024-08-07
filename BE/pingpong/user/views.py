@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from .repositories import UserRepository
+from django.db import IntegrityError
 import json
 import re
 from rest_framework import status
@@ -55,7 +56,16 @@ def signup(request):
         return JsonResponse({"duplicated_item": "id"}, status=409)
     elif UserRepository.exists_user_by_nickname(nickname):
         return JsonResponse({"duplicated_item": "nickname"}, status=409)
-    user = UserRepository.create_user(username, password, nickname)
+    try:
+        user = UserRepository.create_user(username, password, nickname)
+    except IntegrityError as e:
+        print("intergrity error log")
+        if 'username' in str(e):
+            return JsonResponse({"duplicated_item": "id"}, status=409)
+        elif 'nickname' in str(e):
+            return JsonResponse({"duplicated_item": "nickname"}, status=409)
+        else:
+            raise e
     response_data = {
         'userId': user.id
     }
