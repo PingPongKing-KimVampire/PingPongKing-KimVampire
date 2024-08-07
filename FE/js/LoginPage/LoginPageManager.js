@@ -47,6 +47,9 @@ class LoginPageManager {
 
 	async _loginListener(event) {
 		event.preventDefault();
+
+		this.loginState = "ACTIVE";
+
 		const id = this.idInput.value;
 		const pw = this.pwInput.value;
 		try {
@@ -135,13 +138,19 @@ class LoginPageManager {
 	}
 
 	async _getFriendInfo(socket) {
-		const friendInfo = {};
-		//ToDo: Promise.all로 리팩토링
-		friendInfo.friendList = await this._getFriendList(socket);
-		friendInfo.clientListWhoFriendRequestedMe = await this._getClientListWhoFriendRequestedMe(socket);
-		friendInfo.clientListIFriendRequested = await this._getClientListIFriendRequested(socket);
-		friendInfo.clientListIBlocked = await this._getClientListIBlocked(socket);
-		return friendInfo;
+		const [friendList, clientListWhoFriendRequestedMe, clientListIFriendRequested, clientListIBlocked] = await Promise.all([
+			this._getFriendList(socket),
+			this._getClientListWhoFriendRequestedMe(socket),
+			this._getClientListIFriendRequested(socket),
+			this._getClientListIBlocked(socket),
+		]);
+
+		return {
+			friendList,
+			clientListWhoFriendRequestedMe,
+			clientListIFriendRequested,
+			clientListIBlocked,
+		};
 	}
 
 	_getFriendList(socket) {
