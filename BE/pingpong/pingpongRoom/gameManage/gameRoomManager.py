@@ -128,6 +128,17 @@ class GameRoomManager:
         player = self.clients[client_id]
         player.set_state(state)
         
+    def get_game_info(self):
+        board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height , 'ballRadius': self.ball_radius}
+        player_data = self._get_player_data()
+        data = {
+            "playerInfo" : player_data,
+            "teamInfo" : { "leftTeamAbilitfy " : self.left_mode, "rightTeamAbility" : self.right_mode},
+            "boardInfo" : board_data,
+            "score" : [self.score[LEFT], self.score[RIGHT]]
+        }
+        return data
+        
     def check_game_ready(self):
         if not self.is_room_full():
             return False
@@ -414,13 +425,7 @@ class GameRoomManager:
         self._change_game_state()
 
     async def _game_ready_and_start(self):
-        board_data = { 'boardWidth': self.board_width, 'boardHeight': self.board_height , 'ballRadius': self.ball_radius}
-        player_data = self._get_player_data()
-        data = {
-            "playerInfo" : player_data,
-            "teamInfo" : { "leftTeamAbilitfy " : self.left_mode, "rightTeamAbility" : self.right_mode},
-            "boardInfo" : board_data
-        }
+        data = self.get_game_info()
         await self.notifier.broadcast('notifyGameRoomReady')
         await asyncio.sleep(1.5)
         await self.notifier.broadcast('notifyGameStart', data)
