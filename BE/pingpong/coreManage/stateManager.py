@@ -173,7 +173,7 @@ class StateManager:
         return data
     
     def remove_room(self, room_id):
-        if self.rooms[room_id]:
+        if room_id in self.rooms:
             del self.rooms[room_id]
 
     def get_waiting_room_player_list(self, room_id: str) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
