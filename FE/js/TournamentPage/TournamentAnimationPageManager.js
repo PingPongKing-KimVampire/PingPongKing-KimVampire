@@ -345,6 +345,8 @@ class TournamentAnimationPageManager {
 				this._enterPingpongRoom();
 			} else if (event === "notifyAllTeamFinish") {
 				this._renderAlertTournament(content.stage);
+			} else if (event === "notifyOpponentLeave") {
+				alert("당신의 상대방이 토너먼트에서 떠났습니다.");
 			}
 		};
 		this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
@@ -383,23 +385,6 @@ class TournamentAnimationPageManager {
 				resolve();
 			});
 		});
-		// // 대기실 입장 요청 보내기
-		// const enterWaitingRoomMessage = {
-		// 	event: "enterWaitingRoom",
-		// 	content: { clientId: this.clientInfo.id },
-		// };
-		// pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
-		// // 대기실 입장 응답 받기
-		// await new Promise(resolve => {
-		// 	const listener = messageEvent => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (event === "enterWaitingRoomResponse") {
-		// 			pingpongRoomSocket.removeEventListener("message", listener);
-		// 			resolve();
-		// 		}
-		// 	};
-		// 	pingpongRoomSocket.addEventListener("message", listener);
-		// });
 		this.clientInfo.gameInfo = {
 			pingpongRoomSocket,
 			roomId,
