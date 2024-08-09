@@ -153,6 +153,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             if self.is_playing:
                 return
             await asyncio.sleep(1)
+        self.game_manager.is_end = True
         await self._send('notifyGameGiveUp', {})
         await notify_group(self.channel_layer, f"tournament_{self.room_id}", 
                                "notifyGameEnd", {'winner_id' : self.client_id})
