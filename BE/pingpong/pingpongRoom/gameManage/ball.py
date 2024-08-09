@@ -26,7 +26,7 @@ class Ball:
         self.dy = 0
 
     def start_move(self, serve_team):
-        speed = NORMAL_SPEED if not self.is_speedtwist else NORMAL_SPEED * 2
+        speed = NORMAL_SPEED if not self.is_speedtwist else NORMAL_SPEED * 1.2
         self.speed = speed
         if serve_team == 'left':
             self.angle = 0
@@ -59,7 +59,7 @@ class Ball:
         if not self.is_speedtwist:
             speed, angle = NORMAL_SPEED + self.hit_count, NORMAL_ANGLE
         else: 
-            speed, angle = (self.speed + self.hit_count) * 2, SPEEDTWIST_ANGLE
+            speed, angle = (NORMAL_SPEED + self.hit_count) * 1.2, SPEEDTWIST_ANGLE
         self.speed = speed
         rand = random.randint(-angle, angle)
         self.angle = max(0, min(45, self.angle + rand))

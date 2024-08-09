@@ -192,6 +192,7 @@ class StateManager:
         team_left_list, team_right_list = self.get_waiting_room_player_list(room_id)
         team_left_ability, team_right_ability = self.get_room_ability(room_id)
         content = {
+            'message' : 'OK',
             'teamLeftList': team_left_list,
             'teamRightList': team_right_list,
             'teamLeftAbility': team_left_ability,
