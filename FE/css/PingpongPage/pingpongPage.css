@@ -198,6 +198,7 @@
 	align-items: center;
 	background-color: rgba(0, 0, 0, 0.7);
 }
+
 #gameOverModal #contentBox {
 	height: 15%;
 	width: 30%;
@@ -207,7 +208,14 @@
 	align-items: center;
 	font-size: 2rem;
 }
+
+#gameOverModal .gameOverImage {
+	height: 80%;
+	margin-bottom: 10px;
+}
+
 #gameOverModal button {
+	height: 20%;
 	padding: 2% 10%;
 }
 

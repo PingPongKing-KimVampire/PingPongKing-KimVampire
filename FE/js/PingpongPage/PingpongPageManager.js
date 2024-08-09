@@ -39,15 +39,48 @@ class PingpongPageManager {
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("close", closeListener);
 
-		// TODO : 탁구장 폐쇄 감지가 불가능해서 임시로 notifyGameEnd API 활용
+		// TODO : 탁구장 폐쇄 감지가 불가능해서 임시로 notify API 활용
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", messageEvent => {
-			const { event } = JSON.parse(messageEvent.data);
+			const { event, content } = JSON.parse(messageEvent.data);
 			if (event === "notifyGameEnd") {
-				console.log("notify game end!");
+				const { winTeam } = content;
+				let myTeam;
+				let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.id === this.clientInfo.id);
+				if (myPlayer) {
+					myTeam = "left";
+				} else {
+					myTeam = "right";
+				}
+				if (winTeam == myTeam) {
+					this._setGameOverImage("win");
+				} else {
+					this._setGameOverImage("lose");
+				}
 				this.clientInfo.gameInfo.pingpongRoomSocket.close();
 			}
 		});
 		this._subscribeWindow();
+	}
+
+	_setGameOverImage(result) {
+		const gameOverImage = document.querySelector(".gameOverImage");
+		let svgPath;
+
+		switch (result) {
+			case "win":
+				svgPath = "images/winIcon.svg";
+				break;
+			case "lose":
+				svgPath = "images/loseIcon.svg";
+				break;
+			case "observer":
+				svgPath = "images/winIcon.sv"; // 관전자는 어떻게 처리?
+				break;
+			default:
+				console.error("Invalid result");
+				return;
+		}
+		gameOverImage.innerHTML = `<img src="${svgPath}">`;
 	}
 
 	_manageExitRoom() {
@@ -190,7 +223,7 @@ class PingpongPageManager {
 		return `
 			<div id="gameOverModal">
 				<div id="contentBox">
-					임시 게임 종료 화면
+					<div class="gameOverImage"></div>
 					<button class="generalButton">나가기</button>
 				</div>
 			</div>

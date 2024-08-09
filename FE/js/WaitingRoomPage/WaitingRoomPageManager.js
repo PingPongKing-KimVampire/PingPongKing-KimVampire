@@ -120,6 +120,7 @@ class WaitingRoomPageManager {
 		if (myPlayer) {
 			this.me.readyState = myPlayer.readyState;
 			this.me.team = "left";
+			// this.clientInfo.gameInfo.team
 		} else {
 			myPlayer = this.clientInfo.gameInfo.teamRightList.find(player => player.id === this.clientInfo.id);
 			this.me.readyState = myPlayer.readyState;
