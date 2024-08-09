@@ -104,6 +104,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyWaitingRoomClosed', content=content)
     
     async def notifyMatchMakingComplete(self, content):
-        self.is_matchmaking == False
+        self.is_matchmaking = False
         content = content['content']
         await self._send(event='notifyMatchMakingComplete', content=content)

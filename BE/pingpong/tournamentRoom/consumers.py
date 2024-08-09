@@ -98,7 +98,7 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
                             'stage' : self.tournament_state})
         else:
             await self._send("notifyOpponentLeave")
-            await notify_group(self.channel_layer, f"tournament_{self.gameroom_id_now}", 
+            await notify_group(self.channel_layer, self.tournament_id, 
                                 "notifyGameEnd", {'winner_id' : self.client_id})
 
     async def notifyGameEnd(self, content):
