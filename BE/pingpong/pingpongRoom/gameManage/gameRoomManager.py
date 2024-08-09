@@ -205,7 +205,6 @@ class GameRoomManager:
     async def trigger_game(self):
         self.db_manager.set_teams_info(self.team_left, self.team_right, self.left_ability, self.right_ability)
         self.is_playing = True
-        self.is_end = False
         self._reset_round()
         self.check_jiant_blocker(self.left_ability, self.right_ability)
         asyncio.create_task(self._game_ready_and_start())

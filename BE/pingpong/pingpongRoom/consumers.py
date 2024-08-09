@@ -54,10 +54,11 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
                 raise Exception('NoRoom')
             self.game_mode = self.game_manager.mode
             if self.game_mode == 'tournament':
-                if self.is_playing:
-                    raise Exception('Timeout')
+                if self.game_manager.is_playing or self.game_manager.is_end:
+                    raise Exception('NoRoom')
                 self.team = self.game_manager.get_client_team(self.client_id)
                 if self.team:
+                    await self._send('enterWaitingRoomResponse', {'message' : 'OK'})
                     asyncio.create_task(self.timeout_tournament_start())
                 else:
                     raise Exception('NotIdentified')
