@@ -20,7 +20,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.game_manager = None
         self.game_mode = None
         self.team = None
-        self.game_state = None
+        self.is_playing = None
 
         self.is_observer = False
         
@@ -37,7 +37,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     def set_pingpong_room_consumer(self, room_id):
         self.room_id = room_id
-        self.game_state = 'waiting'
+        self.is_playing = False
         self.game_manager = stateManager.get_pingpongroom_manager(room_id)
         self.is_observer = self.scope['url_route']['kwargs'].get('observe') == 'observe'
 
@@ -54,7 +54,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
                 raise Exception('NoRoom')
             self.game_mode = self.game_manager.mode
             if self.game_mode == 'tournament':
-                if self.game_state == 'playing':
+                if self.is_playing:
                     raise Exception('Timeout')
                 self.team = self.game_manager.get_client_team(self.client_id)
                 if self.team:
@@ -81,9 +81,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await discard_group(self, self.room_id)
             await discard_group(self, room_id_team)
             stateManager.remove_consumer_from_map(self.client_id, self)
-            if self.game_state == 'playing':
+            if self.is_playing:
                 await self.game_manager.give_up_game(self)
-            elif self.game_state == 'waiting' and self.game_manager:
+            elif self.is_playing == False and self.game_manager:
                 stateManager.remove_client_from_room(self.room_id, self.client_id)
                 await stateManager.notify_room_change(self.room_id)
                 await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
@@ -102,7 +102,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
         event = message.get('event')
         content = message.get('content')
-        if self.game_state == 'playing':
+        if self.is_playing:
             await self.handle_playing_event(event, content)
         else:
             Printer.log(f"<<<<<< ROOM {self.room_id} received <<<<<<", "magenta")
@@ -149,7 +149,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
 
     async def timeout_tournament_start(self):
         for _ in range(10):
-            if self.game_state == 'playing':
+            if self.is_playing:
                 return
             await asyncio.sleep(1)
         await self._send('notifyGameGiveUp', {})
@@ -160,6 +160,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def send_enter_observe_mode_response(self):
         data = self.game_manager.get_game_info()
         self._send(event="enterObserveModeResponse", content=data)
+        self.is_playing = True
 
     """
     Notify methods
@@ -195,7 +196,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyGameRoomReady', content=content['content'])
 
     async def notifyGameStart(self, content):
-        self.game_state = 'playing'
+        self.is_playing = True
         if self.game_mode == 'tournament':
             await notify_group(self.channel_layer, f"tournament_{self.room_id}", "notifyGameStart", {})
         await self._send(event='notifyGameStart', content=content['content'])
@@ -205,7 +206,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
     async def notifyGameEnd(self, content):
         content = content['content']
-        self.game_state = 'finished'
+        self.is_playing = False
         win_team = content['winTeam']
         if self.game_mode == 'tournament' and self.team == win_team:
             await notify_group(self.channel_layer, f"tournament_{self.room_id}", 
