@@ -24,13 +24,26 @@ class WaitingRoomPageManager {
 			});
 		});
 
-		const { teamLeftList, teamRightList, teamLeftAbility, teamRightAbility } = await new Promise(resolve => {
+		const { teamLeftList, teamRightList, teamLeftAbility, teamRightAbility } = await new Promise((resolve, reject) => {
 			pingpongRoomSocket.addEventListener(
 				"message",
 				function listener(messageEvent) {
 					const { event, content } = JSON.parse(messageEvent.data);
 					if (event === "enterWaitingRoomResponse") {
-						if (content.message === "RoomIsFull") {
+						if (content.message === "OK") {
+							pingpongRoomSocket.removeEventListener("message", listener);
+							resolve(content);
+						} else {
+							let errorText = "";
+							if (content.message === "RoomIsFull") {
+								errorText = "방이 꽉 찼습니다!";
+							} else if (content.message === "NoRoom") {
+								errorText = "존재하지 않는 방입니다!";
+							} else if (content.message === "NotIdentified") {
+								errorText = "토너먼트에 참가한 플레이어만 게임에 참여할 수 있습니다!";
+							} else {
+								errorText = "알 수 없는 에러!";
+							}
 							this.app.innerHTML = "";
 							const questionModalElement = document.createElement("div");
 							questionModalElement.classList.add("questionModal");
@@ -38,9 +51,9 @@ class WaitingRoomPageManager {
 							questionModalElement.innerHTML = `
 														<div class="questionBox">
 															<div class="title"></div>
-															<div class="question"> 방이 꽉 찼습니다! </div>
+															<div class="question"> ${errorText} </div>
 															<div class="buttonGroup">
-																<button class="activatedButton">돌아가기</button>
+																<button class="activatedButton">나가기</button>
 															</div>
 														</div>
 														`;
@@ -50,13 +63,10 @@ class WaitingRoomPageManager {
 							buttonElement.addEventListener("click", e => {
 								e.stopPropagation();
 								buttonGroupElement.remove();
-								history.back();
+								reject(content.message);
 							});
 							this.app.append(questionModalElement);
-							return;
 						}
-						pingpongRoomSocket.removeEventListener("message", listener);
-						resolve(content);
 					}
 				}.bind(this),
 			);
