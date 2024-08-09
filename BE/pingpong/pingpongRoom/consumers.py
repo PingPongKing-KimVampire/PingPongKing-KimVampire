@@ -31,8 +31,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         except:
             await self.close()
         self.set_pingpong_room_consumer(self.scope['url_route']['kwargs']['room_id'])
-        await add_group(self, self.room_id)
         await self.send_pingpongroom_accept_response()
+        await add_group(self, self.room_id)
         stateManager.add_consumer_to_map(self.client_id, self)
 
     def set_pingpong_room_consumer(self, room_id):
@@ -50,11 +50,9 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
                     await self.send_enter_observe_mode_response()
                 return
             await add_group(self, f"{self.room_id}-{self.team}")
-            self.game_mode = self.game_manager.mode
             if self.game_manager == None:
                 raise Exception('NoRoom')
-            if self.game_manager.is_playing:
-                raise Exception('Playing')
+            self.game_mode = self.game_manager.mode
             if self.game_mode == 'tournament':
                 if self.game_state == 'playing':
                     raise Exception('Timeout')
@@ -73,6 +71,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
                     raise Exception('RoomIsFull')
         except Exception as e:
             error_message = str(e)
+            self.game_manager = None
             await self._send(event='enterWaitingRoomResponse', content={'message': error_message})
             await self.close()
             
