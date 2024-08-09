@@ -41,6 +41,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.is_playing = False
         self.game_manager = stateManager.get_pingpongroom_manager(room_id)
         self.is_observer = self.scope['url_route']['kwargs'].get('observe') == 'observe'
+        print(self.is_observer)
 
     async def send_pingpongroom_accept_response(self):
         try:
