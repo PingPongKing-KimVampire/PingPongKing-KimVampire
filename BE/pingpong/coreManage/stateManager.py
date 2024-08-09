@@ -168,9 +168,13 @@ class StateManager:
     def get_waiting_room_list(self) -> List[Dict[str, Any]]:
         data = []
         for room in self.rooms.values():
-            if room.mode == 'normal':
+            if room.mode == 'normal' and room.is_playing == False:
                 data.append(room.get_room_data())
         return data
+    
+    def remove_room(self, room_id):
+        if self.rooms[room_id]:
+            del self.rooms[room_id]
 
     def get_waiting_room_player_list(self, room_id: str) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         room = self.rooms.get(room_id, None)
@@ -236,7 +240,6 @@ class StateManager:
         game_manager = room
         if game_manager:
             if game_manager.mode == 'normal':
-                del self.rooms[room_id]
                 await self.notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo': {'roomId': room_id}})
             await game_manager.trigger_game()
 

@@ -116,11 +116,13 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             if self.client_id == winner_id:
                 self.tournament_state = 'final'
                 self.tournament_manager.add_semi_final_winner(winner_id)
-            if self.tournament_manager.is_ready_final_room():
-                await self.tournament_manager.notify_all_team_finish(self, 'semiFinal')
+                if self.tournament_manager.all_client_finish() and \
+                    self.tournament_manager.is_ready_final_room():
+                    await self.tournament_manager.notify_all_team_finish(self, 'semiFinal')
         elif self.tournament_state == 'final':
             self.tournament_state = 'finish'
-            await self.tournament_manager.notify_all_team_finish(self, 'final')
+            if self.client_id == winner_id:
+                await self.tournament_manager.notify_all_team_finish(self, 'final')
 
     async def updateGameroomScore(self, content):
         content = content['content']
