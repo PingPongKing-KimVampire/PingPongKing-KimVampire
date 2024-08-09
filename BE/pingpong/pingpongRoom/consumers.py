@@ -28,7 +28,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         try:
             await stateManager.authorize_client(self, dict(self.scope['headers']))
             await self.accept(subprotocol="authorization")
-            Printer.log(f"Client connected to waiting room {self.room_id}", "blue")
         except:
             await self.close()
         self.set_pingpong_room_consumer(self.scope['url_route']['kwargs']['room_id'])
@@ -40,8 +39,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         self.room_id = room_id
         self.is_playing = False
         self.game_manager = stateManager.get_pingpongroom_manager(room_id)
-        self.is_observer = self.scope['url_route']['kwargs'].get('observe') == 'observe'
-        print(self.is_observer)
+        self.is_observer = self.scope['path'].endswith('/observe')
 
     async def send_pingpongroom_accept_response(self):
         try:

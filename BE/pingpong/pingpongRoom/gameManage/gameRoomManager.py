@@ -44,6 +44,7 @@ class GameRoomManager:
         self.board_height = 1000
         self.ball_radius = 25
         self.ball = Ball()
+        self.ball.set_ball_to_serve('left', self.board_width, self.board_height)
         self.is_playing = False
         self.is_end = False
         self.score = {LEFT: 0, RIGHT: 0}
