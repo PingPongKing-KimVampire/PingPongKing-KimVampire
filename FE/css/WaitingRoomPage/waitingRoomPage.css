@@ -1,3 +1,8 @@
+html {
+	position: static;
+	overflow: visible;
+}
+
 #container {
 	height: 88%;
 	width: 80%;
