@@ -1,4 +1,5 @@
 from utils.printer import Printer
+import math
 
 MAX_SPEED = 70
 SENSITIVE_FACTOR = 7
@@ -128,3 +129,9 @@ class Player:
     def set_paddle_big(self):
         self.paddle_height = self.paddle_height * 2
         self.paddle_width = self.paddle_width * 4
+        
+    def reversal_ball(self, ball):
+        movement_influence = math.atan2(self.dy, self.dx)
+        movement_angle = math.degrees(movement_influence)
+        
+        ball.reversal_by_player(movement_angle)

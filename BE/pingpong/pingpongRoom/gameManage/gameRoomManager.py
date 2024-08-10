@@ -329,10 +329,7 @@ class GameRoomManager:
             await self.notifier.broadcast('notifyGhostBall')
 
         ball.hit_count += 1
-        if ball.speed == 0:
-            ball.start_move(self.serve_turn)
-        else:
-            ball.reversal_random()
+        player.reversal_ball(ball)
 
         return state
     
