@@ -66,6 +66,7 @@
 	animation: run 2s infinite linear;
 	animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 	margin-bottom: 1.5%;
+	height: 30%;
 }
 
 @keyframes run {
@@ -80,7 +81,15 @@
 .findQueueText {
 	font-size: 2.5rem;
 	margin-top: 1.5%;
-	margin-bottom: 10%;
+}
+
+@media (min-aspect-ratio: 2/1) {
+	.findQueueImage {
+		margin-bottom: 1%;
+	}
+	.findQueueText {
+		margin-top: 1%;
+	}
 }
 
 @media (max-aspect-ratio: 1.3/1) {
@@ -93,6 +102,12 @@
 	}
 	.waitingQueueContainer {
 		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.5rem 0rem;
+	}
+	.findQueueImage {
+		height: 25%;
+	}
+	.findQueueText {
+		font-size: 2rem;
 	}
   }
   @media (max-aspect-ratio: 1.1/1) {
@@ -110,6 +125,10 @@
 	.waitingQueueContainer {
 	  height: 92%;
 	  box-shadow: rgb(155, 153, 153) 0rem 0rem 1.2rem 0rem;
+	}
+	.findQueueImage {
+		width: 30%;
+		height: auto;
 	}
   }
   @media (max-aspect-ratio: 1/1.2) {
@@ -132,5 +151,8 @@
 	}
 	.leaveWaitingTournamentButton:hover {
 	  height: 85%;
+	}
+	.findQueueText {
+		font-size: 1.5rem;
 	}
   }
