@@ -299,12 +299,14 @@ class TournamentAnimationPageManager {
 	}
 
 	_subscribeWindow() {
-		// this._renderBracketRef = this._renderBracket.bind(this);
-		// windowObservable.subscribeResize(this._renderBracketRef);
+		this.renderBracketLineRef = (() => {
+			this.point = this._calculatePoints();
+			this._renderBracketLine();
+		}).bind(this);
+		windowObservable.subscribeResize(this.renderBracketLineRef);
 	}
 	_unsubscribeWindow() {
-		// TODO : 페이지 나갈 시 호출
-		// windowObservable.unsubscribeResize(this._renderBracketRef);
+		windowObservable.unsubscribeResize(this.renderBracketLineRef);
 	}
 
 	_setExitButton() {
