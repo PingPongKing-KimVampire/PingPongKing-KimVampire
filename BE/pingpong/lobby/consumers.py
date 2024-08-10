@@ -33,6 +33,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Close code: {close_code}", "red")
         await discard_group(self, 'lobby')
         if self.is_matchmaking:
+            print('is_matchmaking', self.is_matchmaking)
             stateManager.remove_from_match_queue(self)
         stateManager.remove_consumer_from_map(self.client_id, self)
 
@@ -103,6 +104,6 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyWaitingRoomClosed', content=content)
     
     async def notifyMatchMakingComplete(self, content):
-        self.is_matchmaking == False
+        self.is_matchmaking = False
         content = content['content']
         await self._send(event='notifyMatchMakingComplete', content=content)

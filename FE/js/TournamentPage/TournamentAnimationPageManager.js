@@ -310,6 +310,7 @@ class TournamentAnimationPageManager {
 	_setExitButton() {
 		const isSemiFinalLoser = id => {
 			let winnerId;
+			// console.log(this.tournamentInfo);
 			if (this.tournamentInfo.semiFinal[0].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[0].winnerId;
 			else if (this.tournamentInfo.semiFinal[1].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[1].winnerId;
 			//아직 경기 전
@@ -341,10 +342,20 @@ class TournamentAnimationPageManager {
 			const message = JSON.parse(messageEvent.data);
 			const { event, content } = message;
 			if (event === "notifyYourGameRoomReady") {
-				await this._enterWaitingRoom(content.pingpongroomId);
+				try {
+					await this._enterWaitingRoom(content.pingpongroomId);
+				} catch (e) {
+					if (e === "게임에 참여하지 못했습니다!") {
+						alert(e);
+						return;
+					}
+					throw e;
+				}
 				this._enterPingpongRoom();
 			} else if (event === "notifyAllTeamFinish") {
 				this._renderAlertTournament(content.stage);
+			} else if (event === "notifyOpponentLeave") {
+				alert("당신의 상대방이 토너먼트에서 떠났습니다.");
 			}
 		};
 		this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
@@ -377,29 +388,34 @@ class TournamentAnimationPageManager {
 
 	async _enterWaitingRoom(roomId) {
 		// 핑퐁룸 소켓에 연결
+		// if (this.clientInfo.nickname === "b") {
+		// 	await new Promise((resolve, reject) => {
+		// 		console.log("here");
+		// 		setTimeout(() => {
+		// 			resolve();
+		// 		}, 15000);
+		// 	});
+		// }
 		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {
 				resolve();
 			});
 		});
-		// // 대기실 입장 요청 보내기
-		// const enterWaitingRoomMessage = {
-		// 	event: "enterWaitingRoom",
-		// 	content: { clientId: this.clientInfo.id },
-		// };
-		// pingpongRoomSocket.send(JSON.stringify(enterWaitingRoomMessage));
-		// // 대기실 입장 응답 받기
-		// await new Promise(resolve => {
-		// 	const listener = messageEvent => {
-		// 		const { event, content } = JSON.parse(messageEvent.data);
-		// 		if (event === "enterWaitingRoomResponse") {
-		// 			pingpongRoomSocket.removeEventListener("message", listener);
-		// 			resolve();
-		// 		}
-		// 	};
-		// 	pingpongRoomSocket.addEventListener("message", listener);
-		// });
+		await new Promise((resolve, reject) => {
+			pingpongRoomSocket.addEventListener("message", messageEvent => {
+				const { event, content } = JSON.parse(messageEvent.data);
+				//ok면 resolve
+				if (event === "enterWaitingRoomResponse") {
+					if (content.message === "OK") {
+						console.log("RESOLVE");
+						resolve();
+					} else if (content.message === "NoRoom") {
+						reject("게임에 참여하지 못했습니다!");
+					}
+				}
+			});
+		});
 		this.clientInfo.gameInfo = {
 			pingpongRoomSocket,
 			roomId,
@@ -751,25 +767,17 @@ class TournamentAnimationPageManager {
 			}
 
 			async function startObserveGame(roomId) {
-				const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
+				const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/observe`, ["authorization", this.clientInfo.accessToken]);
 				await new Promise(resolve => {
 					pingpongRoomSocket.addEventListener("open", () => {
 						resolve();
 					});
 				});
 
-				const requestObserveMessage = {
-					event: "requestObserve",
-					content: {
-						clientId: this.clientInfo.id,
-					},
-				};
-				pingpongRoomSocket.send(JSON.stringify(requestObserveMessage));
-
 				const { playerInfo, teamInfo, boardInfo } = await new Promise(resolve => {
 					pingpongRoomSocket.addEventListener("message", function listener(messageEvent) {
 						const { event, content } = JSON.parse(messageEvent.data);
-						if (event === "requestObserveResponse") {
+						if (event === "enterObserveModeResponse") {
 							pingpongRoomSocket.removeEventListener("message", listener);
 							resolve(content);
 						}
@@ -794,12 +802,11 @@ class TournamentAnimationPageManager {
 				};
 			}
 
-			function createObserveButton(type) {
+			function createObserveButton(type, roomId) {
 				const observeButton = document.createElement("button");
 				observeButton.classList.add("generalButton", "observeButton");
 				observeButton.textContent = "관전하기";
-				//roomId 바인딩 하기
-				observeButton.addEventListener("click", startObserveGame);
+				observeButton.addEventListener("click", startObserveGame.bind(this, roomId));
 				setElementPos(type, observeButton);
 				elementCanvas.append(observeButton);
 			}
@@ -815,9 +822,10 @@ class TournamentAnimationPageManager {
 			}
 			const stages = [...this.tournamentInfo.final, ...this.tournamentInfo.semiFinal];
 			const types = ["final", "leftSemiFinal", "rightSemiFinal"];
+			console.log(stages);
 			stages.forEach((stage, index) => {
-				if (stage.state === "isPlaying") {
-					createObserveButton(types[index]);
+				if (stage.state === "playing") {
+					createObserveButton.call(this, types[index], stage.roomId);
 				} else if (stage.state == "finished") {
 					createScoreBox(types[index], ...stage.score);
 				}
@@ -930,13 +938,6 @@ class TournamentAnimationPageManager {
 			</div>
 		`;
 	}
-
-	// _getWinningPlayer(score, clientIdList) {
-	// 	const [score1, score2] = score;
-	// 	const [clientId1, clientId2] = clientIdList;
-	// 	const winnerId = score1 > score2 ? clientId1 : clientId2;
-	// 	return this.clientInfo.tournamentInfo.tournamentClientList.find(player => player.id === winnerId);
-	// }
 
 	_findPlayer(id) {
 		return this.clientInfo.tournamentInfo.tournamentClientList.find(player => player.id === id);

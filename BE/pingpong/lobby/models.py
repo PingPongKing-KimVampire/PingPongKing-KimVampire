@@ -55,6 +55,7 @@ class BlockedRelationship(models.Model):
 
 class Team(models.Model):
     id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=20, null=True)
     kind = models.CharField(max_length=20, default="HUMAN", null=False)
     game = models.ForeignKey('Game', related_name='teams', on_delete=models.CASCADE)
     effect = models.CharField(max_length=20, null=False, default="none")

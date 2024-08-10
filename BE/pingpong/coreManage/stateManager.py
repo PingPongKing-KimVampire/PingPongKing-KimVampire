@@ -33,6 +33,9 @@ class StateManager:
         self.match_queue = []
         self.is_match_task_running = False
         self.tournaments = {}
+
+    def get_pingpongroom_manager(self, room_id):
+        return self.rooms.get(room_id, None)
         
     def get_channel_layer(self):
         return self.channel_layer
@@ -165,9 +168,13 @@ class StateManager:
     def get_waiting_room_list(self) -> List[Dict[str, Any]]:
         data = []
         for room in self.rooms.values():
-            if room.mode == 'normal':
+            if room.mode == 'normal' and room.is_playing == False:
                 data.append(room.get_room_data())
         return data
+    
+    def remove_room(self, room_id):
+        if room_id in self.rooms:
+            del self.rooms[room_id]
 
     def get_waiting_room_player_list(self, room_id: str) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         room = self.rooms.get(room_id, None)
@@ -189,6 +196,7 @@ class StateManager:
         team_left_list, team_right_list = self.get_waiting_room_player_list(room_id)
         team_left_ability, team_right_ability = self.get_room_ability(room_id)
         content = {
+            'message' : 'OK',
             'teamLeftList': team_left_list,
             'teamRightList': team_right_list,
             'teamLeftAbility': team_left_ability,
@@ -232,7 +240,6 @@ class StateManager:
         game_manager = room
         if game_manager:
             if game_manager.mode == 'normal':
-                del self.rooms[room_id]
                 await self.notify_lobby('notifyWaitingRoomClosed', {'waitingRoomInfo': {'roomId': room_id}})
             await game_manager.trigger_game()
 

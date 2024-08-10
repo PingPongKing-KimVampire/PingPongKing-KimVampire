@@ -1,0 +1,39 @@
+#app {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#loadingAnimation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+.vampireSpinner {
+    width: 6%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: url('../../images/playerD.webp') center/cover;
+    animation: spin 10s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#pageMoveText {
+    margin-top: 1%;
+    font-size: 1.2em;
+    color: white;
+}

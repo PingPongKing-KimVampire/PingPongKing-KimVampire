@@ -1,0 +1,379 @@
+#container {
+	height: 78%;
+	width: 85%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+#graphLineCanvas,
+#graphCircleCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#mainInfoContainer {
+	width: 100%;
+	height: 20%;
+	display: flex;
+	flex-direction: row;
+}
+
+#mainPanel,
+#wordPanel {
+	height: 100%;
+	width: 50%;
+	border-color: white;
+	border-style: solid;
+	border-width: 0.1rem;
+}
+
+#mainPanel {
+	border-right-width: 0;
+	border-radius: 2rem 0 0 2rem;
+}
+
+#wordPanel {
+	border-radius: 0 2rem 2rem 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+	background: linear-gradient(#010425, #370F26);
+}
+
+#wordTitle {
+	height: 25%;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-end;
+	font-size: 1.1rem;
+	font-weight: 200;
+}
+
+#word {
+	height: 75%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding-bottom: 2%;
+	font-size: 2.4rem;
+	font-weight: 500;
+}
+
+#subInfoContainer {
+	height: 72%;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#scoreGraphContainer,
+#hitMapContainer {
+	height: 100%;
+	width: 48%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.label {
+	height: 12%;
+	font-size: 2.5rem;
+	font-weight: 600;
+}
+
+#scorePanel,
+#hitMapPanel {
+	height: 88%;
+	width: 100%;
+	border: 0.1rem solid white;
+	border-radius: 2rem;
+}
+
+#hitMapPanel {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+}
+
+#scorePanel {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#graphContainer {
+	position: relative;
+	height: 72%;
+	width: 76%;
+	border-left: 0.1rem solid white;
+	border-bottom: 0.1rem solid white;
+	margin: 0 0 1% 1%;
+}
+
+#xLabels,
+#yLabels {
+	position: absolute;
+	display: flex;
+	justify-content: space-between;
+}
+
+#xLabels {
+	top: 105%;
+	left: 0%;
+	flex-direction: row;
+	width: 100%;
+}
+
+#yLabels {
+	top: 0%;
+	right: 104%;
+	flex-direction: column-reverse;
+	justify-content: space-between;
+	height: 100%;
+}
+
+.circleButton {
+	position: absolute;
+	width: 0.75%;
+	aspect-ratio: 1/1;
+	transform: translate(-50%, -50%);
+	border-radius: 3rem;
+	background-color: white;
+}
+.circleButton:hover {
+	background-color: rgb(213, 112, 255);
+	transition: background-color 0.1s;
+}
+
+.subBoard {
+	width: 50%;
+	height: 100%;
+}
+
+.subBoard:nth-of-type(1) {
+	border-right: 0.05rem solid white;
+}
+
+.subBoard:nth-of-type(2) {
+	border-left: 0.05rem solid white;
+}
+
+#hitMapPanel .paddleBall {
+	height: auto;
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: white;
+}
+
+#hitMapPanel .scoreBall {
+	height: auto;
+	width: 3%;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	background-color: rgb(213, 112, 255);
+}
+
+.exitButton {
+	z-index: 100;
+}
+
+@media (orientation: portrait) {
+	body {
+		overflow-x: hidden;
+	}
+
+	#app {
+		height: auto;
+	}
+
+	#container {
+		height: auto;
+		padding: 10% 0;
+	}
+
+	#mainInfoContainer,
+	#subInfoContainer {
+		height: auto;
+		flex-direction: column;
+	}
+
+	#mainPanel,
+	#wordPanel {
+		width: 100%;
+		aspect-ratio: 1/0.2;
+		box-sizing: border-box;
+	}
+
+	#mainPanel {
+		border-right-width: 0.1rem;
+		border-bottom-width: 0;
+		border-radius: 2rem 2rem 0 0;
+	}
+
+	#wordPanel {
+		border-radius: 0 0 2rem 2rem;
+	}
+
+	#scoreGraphContainer,
+	#hitMapContainer {
+		width: 100%;
+		aspect-ratio: 1/0.73;
+		margin-top: 8%;
+	}
+
+	#scorePanel,
+	#hitMapPanel {
+		box-sizing: border-box;
+	}
+
+	#wordTitle {
+		height: 30%;
+	}
+
+	#word {
+		height: 70%;
+		font-size: 2rem;
+	}
+
+	.circleButton {
+		width: 1.7%;
+	}
+
+	#hitMapPanel .paddleBall {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
+	#hitMapPanel .scoreBall {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
+	.circleButton {
+		width: 0.9%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.6/1) {
+	#word {
+		font-size: 2rem;
+	}
+	.label {
+		font-size: 2.1rem;
+		height: 10%;
+	}
+	.circleButton {
+		width: 1%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
+	.circleButton {
+		width: 1.1%;
+	}
+	/* #hitMapPanel {
+		flex-direction: column;
+	}
+	.subBoard {
+		width: 100%;
+		height: 50%;
+	}
+	.subBoard:nth-of-type(1) {
+		border-right: none;
+		border-bottom: 0.05rem solid white;
+	}
+	.subBoard:nth-of-type(2) {
+		border-left: none;
+		border-top: 0.05rem solid white;
+	} */
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+	#word {
+		font-size: 1.6rem;
+	}
+	.label {
+		font-size: 2rem;
+		height: 10%;
+	}
+	.circleButton {
+		width: 1.2%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+	#word {
+		font-size: 1.6rem;
+	}
+	.label {
+		font-size: 2rem;
+	}
+	#mainPanel,
+	#wordPanel {
+		width: 100%;
+		aspect-ratio: 1/0.25;
+	}
+	.circleButton {
+		width: 2%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+	#wordTitle {
+		height: 35%;
+		font-size: 1rem ;
+	}
+	#word {
+		height: 65%;
+		font-size: 1.4rem;
+	}
+	.label {
+		font-size: 1.8rem;
+	}
+	.circleButton {
+		width: 2.2%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+	#app {
+		height: 100%;
+	}
+	.circleButton {
+		width: 2.3%;
+	}
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 1/2) {
+	#wordTitle {
+		height: 35%;
+		font-size: 0.9rem ;
+	}
+	#word {
+		height: 65%;
+		font-size: 1.2rem;
+	}
+	.label {
+		font-size: 1.5rem;
+	}
+	.circleButton {
+		width: 2.6%;
+	}
+}

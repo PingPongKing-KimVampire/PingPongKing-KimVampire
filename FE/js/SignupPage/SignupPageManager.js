@@ -1,5 +1,5 @@
-const SERVER = window.location.hostname;
-const PORT = 80;
+import { SERVER_ADDRESS } from "../PageRouter.js";
+import { SERVER_PORT } from "../PageRouter.js";
 
 class SignupPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -144,7 +144,7 @@ class SignupPageManager {
 
 	async _validateDuplicateId(id) {
 		const query = new URLSearchParams({ username: id }).toString();
-		const url = `http://${SERVER}:${PORT}/api/check-username?${query}`;
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-username?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -160,7 +160,7 @@ class SignupPageManager {
 
 	async _validateDuplicateNickName(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
-		const url = `http://${SERVER}:${PORT}/api/check-nickname?${query}`;
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-nickname?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -194,6 +194,8 @@ class SignupPageManager {
 	}
 
 	_signUpUser = async () => {
+		//여러번 회원가입 버튼을 클릭했을때 첫번째 요청만 전송하도록 함
+		this.signupButton.disabled = true;
 		const username = this.idInput.value;
 		const nickname = this.nickNameInput.value;
 		const password = this.pwInput.value;
@@ -204,7 +206,7 @@ class SignupPageManager {
 			password: password,
 		};
 
-		const url = `http://${SERVER}:${PORT}/api/signup`;
+		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/signup`;
 
 		try {
 			const response = await fetch(url, {
@@ -239,10 +241,6 @@ class SignupPageManager {
 				this._displaySignupFailureNotiWindow("서버의 응답이 없습니다.");
 		}
 
-
-		// const data = await response.json();
-		// console.log('회원가입 성공:', data);
-		// 회원가입 성공 후 추가 작업 (예: 리디렉션)
 		this.renderPage("login");
 	};
 	_displaySignupFailureNotiWindow(infomation) {

@@ -23,7 +23,7 @@ class EditProfilePageManager {
 	}
 
 	async connectPage() {
-		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+		if (!isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
 	}
 
 	clearPage() {}
@@ -204,7 +204,6 @@ class EditProfilePageManager {
 		this.exitModal.style.display = "flex";
 	};
 	_exitEditProfilePage = () => {
-		this.clientInfo.profileTarget = { id: this.clientInfo.id };
 		history.back();
 	};
 	_hideExitModal = () => {

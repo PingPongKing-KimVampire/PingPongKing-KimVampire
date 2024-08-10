@@ -170,7 +170,6 @@ class PingpongRenderer {
 		if (!this.fakeBallList) this.fakeBallList = [];
 		const playBoardDiv = document.querySelector("#playBoard");
 		for (let i = 0; i < idList.length; i++) {
-			console.log(idList);
 			const element = document.createElement("div");
 			element.className = "ball";
 			//임시
@@ -188,8 +187,6 @@ class PingpongRenderer {
 
 	_removeFakeBall(ballId) {
 		const targetFakeBall = this.fakeBallList.find(fakeBall => fakeBall.id === ballId);
-		console.log(ballId, targetFakeBall);
-		// console.log(targetFakeBall);
 		targetFakeBall.element.classList.remove("opaqueOpacity");
 		targetFakeBall.element.classList.add("pop");
 		targetFakeBall.element.addEventListener("transitionend", () => {

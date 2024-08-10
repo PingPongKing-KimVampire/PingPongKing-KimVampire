@@ -1,7 +1,8 @@
 from utils.printer import Printer
+import math
 
-MAX_SPEED = 50
-SENSITIVE_FACTOR = 10
+MAX_SPEED = 70
+SENSITIVE_FACTOR = 7
 
 class Player:
     def __init__(self, nickname, ability, team, image_uri):
@@ -29,7 +30,7 @@ class Player:
     def get_state(self):
         return self.ready_state
         
-    def set_paddle_size(self, player_count):
+    def set_paddle_size(self, player_count): # 필요한지 체크
         if player_count == 1:
             return 10, 150
         elif player_count == 2:
@@ -59,7 +60,7 @@ class Player:
             return self.dx < 0
 
     def is_colliding_with_ball(self, ball):
-        steps = 10
+        steps = 50 # 성능 문제 생기면 조절 할 것
         for i in range(steps):
             t = i / steps
             interpolated_x = self.previous_x + (self.pos_x - self.previous_x) * t
@@ -91,14 +92,14 @@ class Player:
     def needs_update(self):
         distance = self._calculate_distance()
         
-        if distance > 0:
+        if distance > 1:
             speed = min(MAX_SPEED, distance / SENSITIVE_FACTOR)
             self.dx = (self.target_x - self.pos_x) / distance * speed
             self.dy = (self.target_y - self.pos_y) / distance * speed
             return True
         else:
             speed = 0
-            self.dx = 0 
+            self.dx = 0
             self.dy = 0
             return False
         
@@ -128,3 +129,9 @@ class Player:
     def set_paddle_big(self):
         self.paddle_height = self.paddle_height * 2
         self.paddle_width = self.paddle_width * 4
+        
+    def reversal_ball(self, ball):
+        movement_influence = math.atan2(self.dy, self.dx)
+        movement_angle = math.degrees(movement_influence)
+        
+        ball.reversal_by_player(movement_angle)

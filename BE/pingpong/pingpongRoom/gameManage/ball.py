@@ -1,9 +1,15 @@
 import math
 import random
 
+NORMAL_SPEED = 15
+
+NORMAL_ANGLE = 40
+SPEEDTWIST_ANGLE = 70
+
 class Ball:
-    def __init__(self, speed, radius):
+    def __init__(self, speed=NORMAL_SPEED, radius=25, hit_count = 0):
         self.speed = speed
+        self.hit_count = 0
         self.radius = radius
         self.pos_x = 0
         self.pos_y = 0
@@ -11,7 +17,7 @@ class Ball:
         self.dx = 0
         self.dy = 0
         self.is_vanish = False
-        self.state = 0 
+        self.is_speedtwist = False
 
     def reset_ball(self, x, y):
         self.pos_x = x
@@ -19,20 +25,12 @@ class Ball:
         self.dx = 0
         self.dy = 0
 
-    def start_move(self, speed, serve_team):
-        self.speed = speed
-        if serve_team == 'left':
-            self.angle = 0
-        else:
-            self.angle = 180
-        dir = self._calculate_ball_direction()
-        self.dx = dir['dx']
-        self.dy = dir['dy']
-
     def move(self):
         self.pos_x += self.dx
         self.pos_y += self.dy
-        if self.is_vanish and self.dx < 0 and self.pos_x < 517 or self.is_vanish and self.dx > 0 and self.pos_x > 1033:
+    
+    def check_unghost(self):
+        if self.is_vanish and self.dx < 0 and self.pos_x < 700 or self.is_vanish and self.dx > 0 and self.pos_x > 900:
             self.is_vanish = False
             return False
         return True
@@ -45,14 +43,6 @@ class Ball:
 
     def pause(self):
         self.speed = 0
-
-    def reversal_random(self, speed=5, angle=None):
-        self.speed = speed
-        rand = random.randint(-40 - angle, 40 + angle)
-        self.angle = max(0, min(45, self.angle + rand))
-        dir = self._calculate_ball_direction()
-        self.dx = dir['dx'] if self.dx < 0 else -dir['dx']
-        self.dy = -dir['dy'] if self.dy < 0 else dir['dy']
 
     def change_direction(self, angle):
         self.angle = angle
@@ -79,3 +69,20 @@ class Ball:
             serve_position = 3 * board_width / 4
         self.reset_ball(serve_position, board_height / 2)
         self.pause()
+        
+    def set_ball_speed_twist(self):
+        self.speed = self.speed * 2
+        
+    def reversal_by_player(self, movement_angle):
+        if not self.is_speedtwist:
+            self.speed = NORMAL_SPEED + self.hit_count
+            self.angle = movement_angle
+        else: 
+            self.speed = (NORMAL_SPEED + self.hit_count) * 1.2
+            rand = random.randint(-SPEEDTWIST_ANGLE, SPEEDTWIST_ANGLE)
+            self.angle = rand
+        
+        # 새로운 방향 계산 및 설정
+        dir = self._calculate_ball_direction()
+        self.dx = dir['dx']
+        self.dy = dir['dy']

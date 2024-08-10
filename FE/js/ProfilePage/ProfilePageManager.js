@@ -1,21 +1,20 @@
 import { GlobalConnectionError, ProfileTargetNotFound, isSocketConnected } from "../Error/Error.js";
+import { getMatchLogDiv, setMatchLogPlayerClickListener } from "./MatchLog.js";
 
 class ProfilePageManager {
-	constructor(app, clientInfo, renderPage) {
+	constructor(app, clientInfo, renderPage, queryParam) {
 		console.log("ProfilePage!!!");
 		this.clientInfo = clientInfo;
 		this.app = app;
 		this.renderPage = renderPage;
+		this.queryParam = queryParam;
 	}
 
 	async connectPage() {
-		if (isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
-		if (!this.clientInfo?.profileTarget?.id | (this.clientInfo?.profileTarget?.id === 0)) {
-			throw new ProfileTargetNotFound();
-		}
-		//this.client.profileTarget.id가 설정되어 있어야함
-		//target이 설정되어 있지 않으면 throw, 추후 URL에 target을 넣을 생각 하자.
-		this.profileTarget = { id: this.clientInfo.profileTarget.id };
+		if (!isSocketConnected(this.clientInfo?.socket)) throw new GlobalConnectionError();
+		if (!this.queryParam | (this.queryParam["id"] === undefined)) throw new ProfileTargetNotFound();
+
+		this.profileTarget = { id: parseInt(this.queryParam["id"]) };
 		this.clientInfo.profileTarget = null;
 		const { nickname, avatarUrl, gameHistoryList } = await this.getClientProfile(this.profileTarget.id);
 		this.profileTarget.nickname = nickname;
@@ -32,13 +31,21 @@ class ProfilePageManager {
 		this._setMatchLogClickListener();
 		this._setExitButton();
 		this._setEditProfileButton();
+		setMatchLogPlayerClickListener(this.renderPage.bind(this));
 	}
 
 	_setMatchLogClickListener() {
 		document.querySelectorAll(".matchLog").forEach(matchLog => {
 			matchLog.addEventListener("click", event => {
 				const id = parseInt(matchLog.dataset.id);
-				alert(id);
+				this.clientInfo.statisticsInfo = {
+					profileId: this.profileTarget.id,
+					gameId: id,
+				};
+				this.renderPage("statistics", {
+					profileId: this.profileTarget.id,
+					gameId: id,
+				});
 			});
 		});
 	}
@@ -97,85 +104,10 @@ class ProfilePageManager {
                 </button>
             </div>
             <div id="matchLogContainer">
-                ${this.profileTarget.gameHistoryList.map(gameHistory => this._getMatchLogDiv(gameHistory)).join("")}
+                ${this.profileTarget.gameHistoryList.map(gameHistory => `<div class="matchLogPanel">${getMatchLogDiv(gameHistory)}</div>`).join("")}
             </div>
         </div>
         `;
-	}
-
-	_getMatchLogDiv(gameHistory) {
-		const date = new Date(gameHistory.timestamp);
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, "0");
-		const day = String(date.getDate()).padStart(2, "0");
-		return `
-        <div class="matchLog" data-id="${gameHistory.gameId}">
-            <div class="matchDate">
-                ${year}.${month}.${day}
-            </div>
-            <div class="matchScoreContainer">
-                <img class="matchResultImage" src="images/${gameHistory.result?.toLowerCase()}Icon.svg">
-                <div class="scoreFrame">
-                    ${gameHistory.score[0]} : ${gameHistory.score[1]}
-                </div>
-            </div>
-            <div class="matchTeamListContainer">
-                <div class="matchTeamContainer">
-                    ${gameHistory.ability[0] !== "none" ? "<img class='vampireAbilityImage' src='images/ability/" + gameHistory.ability[0] + ".png'>" : "<div></div>"}
-                    <img class="match${gameHistory.teamKind[0] === "human" ? "Human" : "Vampire"}TeamImage" src="images/${gameHistory.teamKind[0]}Icon.png">
-                </div>
-                <div class="vsFrame">VS</div>
-                <div class="matchTeamContainer">
-                    <img class="match${gameHistory.teamKind[1] === "human" ? "Human" : "Vampire"}TeamImage" src="images/${gameHistory.teamKind[1]}Icon.png">
-                    ${gameHistory.ability[1] !== "none" ? "<img class='vampireAbilityImage' src='images/ability/" + gameHistory.ability[1] + ".png'>" : "<div></div>"}
-                </div>
-            </div>
-            ${this.getMatchPlayerListContainerDiv(gameHistory.myTeamClientInfoList, gameHistory.opponentTeamClientInfoList)}
-        </div>       
-        `;
-	}
-
-	getMatchPlayerListContainerDiv(myTeamClientInfoList, opponentTeamClientInfoList) {
-		return `
-        <div class="matchPlayerListContainer">
-            <div class="teamPlayerListContainer">
-                ${myTeamClientInfoList.map(player => this.getPlayerContainerDiv(player, "red")).join("")}
-                ${Array.from({ length: 5 - myTeamClientInfoList.length })
-									.map(() => this.getEmptyPlayerContainerDiv("red"))
-									.join("")}
-            </div>
-            <div class="teamPlayerListContainer">
-                ${opponentTeamClientInfoList.map(player => this.getPlayerContainerDiv(player, "blue")).join("")}
-                ${Array.from({ length: 5 - opponentTeamClientInfoList.length })
-									.map(() => this.getEmptyPlayerContainerDiv("blue"))
-									.join("")}
-            </div>
-        </div>
-        `;
-	}
-
-	getPlayerContainerDiv(player, color) {
-		return `
-        <div class="playerContainer" data-id="${player.id}">
-            <div class="playerAvatarImgFrame ${color}Border">
-                <img class="playerAvatarImg" src="${player.avatarUrl}">
-            </div>
-            <div class="playerNickname">
-                <span>${player.nickname}</span>
-            </div>
-        </div>
-        `;
-	}
-	getEmptyPlayerContainerDiv(color) {
-		return `
-        <div class="playerContainer">
-             <div class="playerAvatarImgFrame ${color}Border">
-                 <div class="noAvatar${color === "red" ? "Red" : "Blue"}"></div>
-             </div>
-             <div class="playerNickname">
-                 <span></span>
-             </div>
-         </div>`;
 	}
 }
 

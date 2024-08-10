@@ -30,7 +30,11 @@ class LoginPageManager {
 		this.loginButton.disabled = true;
 		this.loginButton.addEventListener("click", this._loginListener.bind(this));
 
-		document.querySelector("#signupButton").addEventListener("click", this.renderPage.bind(this, "signup"));
+		document.querySelector("#signupButton").addEventListener("click", () => {
+			if (this.isAttemptingLogin) return;
+			this.renderPage("signup");
+		});
+		this.isAttemptingLogin = false;
 	}
 
 	_updateLoginButton() {
@@ -47,6 +51,9 @@ class LoginPageManager {
 
 	async _loginListener(event) {
 		event.preventDefault();
+		if (this.isAttemptingLogin) return;
+		this.isAttemptingLogin = true;
+
 		const id = this.idInput.value;
 		const pw = this.pwInput.value;
 		try {
@@ -61,11 +68,13 @@ class LoginPageManager {
 			this.clientInfo.accessToken = this.accessToken;
 			this._setFriendInfoNotifyListener(this.clientInfo.socket);
 			this._setInviteListener(this.clientInfo.socket);
+			this.handleSocketDisconnection(this.clientInfo.socket);
 
 			this.renderPage("chatting");
 			this.renderPage("lobby");
 		} catch (error) {
 			this.warning.textContent = error.message;
+			this.isAttemptingLogin = false;
 		}
 	}
 
@@ -134,13 +143,19 @@ class LoginPageManager {
 	}
 
 	async _getFriendInfo(socket) {
-		const friendInfo = {};
-		//ToDo: Promise.all로 리팩토링
-		friendInfo.friendList = await this._getFriendList(socket);
-		friendInfo.clientListWhoFriendRequestedMe = await this._getClientListWhoFriendRequestedMe(socket);
-		friendInfo.clientListIFriendRequested = await this._getClientListIFriendRequested(socket);
-		friendInfo.clientListIBlocked = await this._getClientListIBlocked(socket);
-		return friendInfo;
+		const [friendList, clientListWhoFriendRequestedMe, clientListIFriendRequested, clientListIBlocked] = await Promise.all([
+			this._getFriendList(socket),
+			this._getClientListWhoFriendRequestedMe(socket),
+			this._getClientListIFriendRequested(socket),
+			this._getClientListIBlocked(socket),
+		]);
+
+		return {
+			friendList,
+			clientListWhoFriendRequestedMe,
+			clientListIFriendRequested,
+			clientListIBlocked,
+		};
 	}
 
 	_getFriendList(socket) {
@@ -307,6 +322,12 @@ class LoginPageManager {
 				});
 				this.app.append(questionModalElement);
 			}
+		});
+	}
+
+	handleSocketDisconnection(socket) {
+		socket.addEventListener("close", () => {
+			this.renderPage("error");
 		});
 	}
 
