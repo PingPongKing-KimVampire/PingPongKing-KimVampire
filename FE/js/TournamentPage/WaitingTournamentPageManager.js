@@ -14,7 +14,6 @@ class WaitingTournamentPageManager {
 	}
 
 	clearPage() {
-		this._unsubscribeWindow();
 		if (this.clientInfo.nextPage === "lobby") {
 			this._removePageListener();
 			return;
@@ -24,7 +23,6 @@ class WaitingTournamentPageManager {
 	}
 
 	async initPage() {
-		// this._adjustButtonSize();
 		this._listenNotifyMatchMakingComplete();
 		this._setLeaveWaitingTournamentButton();
 	}
