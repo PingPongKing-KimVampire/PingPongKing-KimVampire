@@ -29,6 +29,7 @@ services:
     build: ./FE
     ports:
       - "80:80"
+      - "443:443"
     volumes: # 나중에 삭제
       - ./FE:/usr/share/nginx/html
     depends_on:

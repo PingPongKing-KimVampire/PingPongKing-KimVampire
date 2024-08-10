@@ -16,7 +16,7 @@ class WaitingRoomCreationPageManager {
 			if (!accessToken) {
 				throw new AccessTokenNotFoundError();
 			}
-			const lobbySocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`, ["authorization", accessToken]);
+			const lobbySocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/lobby`, ["authorization", accessToken]);
 			await new Promise(resolve => {
 				lobbySocket.addEventListener("open", () => {
 					resolve();
@@ -74,7 +74,7 @@ class WaitingRoomCreationPageManager {
 		}
 		if (this.humanCountOptionButtons.length > 0) {
 			this.humanCountOptionButtons.forEach(button => {
-				button.addEventListener("click", (event) => {
+				button.addEventListener("click", event => {
 					event.stopPropagation();
 					this._humanCountOptionButtonClicked(event);
 				});
