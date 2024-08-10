@@ -235,3 +235,30 @@
     flex-shrink: 1; /* 기본값은 1이므로 아이템이 줄어들 수 있게 설정 */
     min-width: 0; /* 축소할 수 있는 최소 너비를 설정하여 ellipsis가 동작하도록 함 */
 }
+
+@media (max-aspect-ratio: 1/1.4) {
+    .matchDate {
+		font-size: 0.9rem;
+	}
+	.scoreFrame {
+		font-size: 1.4rem;
+	}
+	.matchTeamListContainer {
+		width: 24%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.8) {
+    .matchScoreContainer {
+        height: 40%;
+    }
+	.scoreFrame {
+		font-size: 1rem;
+	}
+    .matchPlayerListContainer {
+        width: 35%;
+    }
+    .playerNickname span {
+        font-size: 0.7rem;
+    }
+}

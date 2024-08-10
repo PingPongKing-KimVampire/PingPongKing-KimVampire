@@ -126,8 +126,134 @@
 	background: linear-gradient(to bottom, rgb(50, 26, 81), rgba(213, 112, 255, 0.1));
 }
 
-@media (orientation: portrait) {
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
+	#avatarContainer {
+		height: 55%;
+	}
+	.avatarImgFrame {
+		height: 70%;
+	}
+	#WinLossContainer {
+		height: 22%;
+	}
+	.editProfileButton, .logoutButton {
+		width: 80%;
+		font-size: 1.8rem;
+	}
+	#matchLogContainer {
+		width: 50%;
+	}
+}
+
+@media (max-aspect-ratio: 1.3/1) {
+	#matchLogContainer {
+		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.5rem 0rem;
+	}
+}
+
+@media (max-aspect-ratio: 1.2/1) {
 	#container {
 		flex-direction: column;
+	}
+	#avatarContainer {
+		width: 40%;
+		height: 50%;
+		justify-content: center;
+		margin-bottom: 2%;
+	}
+	#profileInfo {
+		height: 60%;
+		margin-top: 5%;
+		margin-bottom: 10%;
+	}
+	.avatarImgFrame {
+		height: 67%;
+	}
+	#WinLossContainer {
+		height: 24%;
+	}
+	.nicknameFrame {
+		font-size: 2.5rem;
+	}
+	.winLossFrame {
+		font-size: 1.4rem;
+	}
+	#buttonGroup {
+		flex-direction: row;
+		height: 10%;
+	}
+	.editProfileButton, .logoutButton {
+		width: 46%;
+		height: 100%;
+		font-size: 1.4rem;
+	}
+	#matchLogContainer {
+		height: 50%;
+		width: 85%;
+		align-self: center;
+		padding-bottom: 3%;
+	}
+	.matchLogPanel {
+		width: 94%;
+		height: 35%;
+		margin-top: 3%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1) {
+	#matchLogContainer {
+		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.2rem 0rem;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.2) {
+	#avatarContainer {
+		width: 45%;
+		margin-bottom: 1%;
+	}
+	#buttonGroup {
+		height: 9%;
+	}
+	.matchLogPanel {
+		height: 30%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.4) {
+	#avatarContainer {
+		height: 45%;
+		width: 55%;
+	}
+	#WinLossContainer {
+		height: 27%;
+	}
+	#matchLogContainer {
+		height: 55%;
+		border-width: 0.1rem;
+	}
+	.matchLogPanel {
+		height: 23%;
+		border-width: 0.1rem;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.6) {
+	#avatarContainer {
+		width: 60%;
+	}
+	.matchLogPanel {
+		height: 20%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.8) {
+	#avatarContainer {
+		width: 65%;
+	}
+	.editProfileButton, .logoutButton {
+		font-size: 1.2rem;
+	}
+	.matchLogPanel {
+		height: 18%;
 	}
 }
