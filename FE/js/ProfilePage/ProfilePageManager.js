@@ -31,6 +31,7 @@ class ProfilePageManager {
 		this._setMatchLogClickListener();
 		this._setExitButton();
 		this._setEditProfileButton();
+		this._setLogoutButton();
 		setMatchLogPlayerClickListener(this.renderPage.bind(this));
 	}
 
@@ -55,6 +56,17 @@ class ProfilePageManager {
 			if (this.profileTarget.id === this.clientInfo.id) this.renderPage("editProfile");
 			else {
 				alert("친구 추가/삭제/요청/요청 취소는 미구현입니다.");
+			}
+		});
+	}
+
+	_setLogoutButton() {
+		document.querySelector(".logoutButton").addEventListener("click", async () => {
+			if (this.profileTarget.id === this.clientInfo.id) {
+				this.clientInfo.socket.close();
+				this.renderPage("login");
+			} else {
+				alert("친구 로그아웃 버튼은 미구현입니다.");
 			}
 		});
 	}
@@ -101,6 +113,9 @@ class ProfilePageManager {
                 </div>
                 <button class="editProfileButton">
                     ${this.clientInfo.id === this.profileTarget.id ? "프로필 편집" : "친구추가"}
+                </button>
+				<button class="logoutButton">
+                    ${this.clientInfo.id === this.profileTarget.id ? "로그아웃" : "친구 로그아웃"}
                 </button>
             </div>
             <div id="matchLogContainer">

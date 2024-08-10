@@ -327,7 +327,8 @@ class LoginPageManager {
 
 	handleSocketDisconnection(socket) {
 		socket.addEventListener("close", () => {
-			this.renderPage("error");
+			if(this.clientInfo.currentPage !== "login" && this.clientInfo.currentPage !== "signup")
+				this.renderPage("error");
 		});
 	}
 
