@@ -6,6 +6,7 @@ import json
 from coreManage.stateManager import StateManager
 from utils.printer import Printer
 from coreManage.group import add_group, discard_group, notify_group
+from coreManage.recieveCleaner import ReceiveCleaner
 
 stateManager = StateManager()
 
@@ -47,6 +48,10 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         message = json.loads(text_data)
         event = message.get('event')
         content = message.get('content')
+
+        event = ReceiveCleaner.clean(event)
+        content = ReceiveCleaner.clean(content)
+        
         Printer.log("<<<<<< LOBBY recieve <<<<<<", "bright_cyan")
         Printer.log(f"event : {event}", "white")
         Printer.log(f"content : {content}\n", "white")

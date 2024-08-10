@@ -7,6 +7,7 @@ import asyncio
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
 from coreManage.group import add_group, discard_group, notify_group
+from coreManage.recieveCleaner import ReceiveCleaner
 
 stateManager = StateManager()
 
@@ -74,6 +75,9 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
         message = json.loads(text_data)
         event = message.get('event')
         content = message.get('content')
+        
+        event = ReceiveCleaner.clean(event)
+        content = ReceiveCleaner.clean(content)
         
         Printer.log(f"<<<< Tournament {self.tournament_id} recieve <<<<<", "bright_cyan")
         Printer.log(f"event : {event}", "white")
