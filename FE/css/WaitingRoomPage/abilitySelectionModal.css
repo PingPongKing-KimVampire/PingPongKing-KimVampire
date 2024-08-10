@@ -122,7 +122,7 @@
 		margin: 5% 0;
 	}
 }
-@media (orientation: portrait) and (min-aspect-ratio: 1/1.1) and (max-aspect-ratio: 1/1) {
+@media (orientation: portrait) and (max-aspect-ratio: 1/1) {
 	.abilityContainer {
 		width: 50%;
 	}
@@ -137,7 +137,7 @@
 		line-height: 1.7rem;
 	}
 }
-@media (orientation: portrait) and (min-aspect-ratio: 1/1.2) and (max-aspect-ratio: 1/1.1) {
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.1) {
 	.abilityContainer {
 		width: 55%;
 	}
@@ -145,12 +145,19 @@
 		width: 30%;
 	}
 }
-@media (orientation: portrait) and (min-aspect-ratio: 1/1.5) and (max-aspect-ratio: 1/1.2) {
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
 	.abilityContainer {
 		width: 60%;
 	}
 	#vamVamAbilityContainer {
 		width: 35%;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.35) {
+	.abilityDescription {
+		font-size: 1.1rem;
+		line-height: 1.5rem;
+		border-radius: 1.2rem;
 	}
 }
 @media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
@@ -160,12 +167,73 @@
 	#vamVamAbilityContainer {
 		width: 40%;
 	}
+	.abilityDescription {
+		font-size: 1rem;
+		line-height: 1.4rem;
+		border-radius: 1.2rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/1.7) {
+	.abilityName {
+		font-size: 1.4rem;
+	}
+	.abilityDescription {
+		font-size: 0.9rem;
+		line-height: 1.3rem;
+		border-radius: 1rem;
+	}
+}
+@media (orientation: portrait) and (max-aspect-ratio: 1/2) {
+	.abilityName {
+		font-size: 1.2rem;
+	}
+	.abilityDescription {
+		font-size: 0.8rem;
+		line-height: 1.1rem;
+		border-radius: 0.8rem;
+	}
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.55/1) {
+@media (orientation: landscape) and (min-aspect-ratio: 2/1) {
+	.abilityName {
+		font-size: 2.6rem;
+	}
+	.abilityDescription {
+		font-size: 2rem;
+		line-height: 2.7rem;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 2/1) {
+	.abilityName {
+		font-size: 2.4rem;
+	}
+	.abilityDescription {
+		font-size: 1.6rem;
+		line-height: 2.3rem;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
+	.abilityName {
+		font-size: 2.2rem;
+	}
+	.abilityDescription {
+		font-size: 1.4rem;
+		line-height: 2rem;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
 	.abilityName {
 		font-size: 2rem;
 	}
+	.abilityDescription {
+		font-size: 1.3rem;
+		line-height: 1.8rem;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
 	.abilityDescription {
 		font-size: 1.2rem;
 		line-height: 1.7rem;
@@ -180,12 +248,22 @@
 		line-height: 1.5rem;
 	}
 }
-@media (orientation: landscape) and (max-aspect-ratio: 1.15/1) {
+@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
 	.abilityName {
 		font-size: 1.6rem;
 	}
 	.abilityDescription {
 		font-size: 1rem;
 		line-height: 1.3rem;
+	}
+}
+@media (orientation: landscape) and (max-aspect-ratio: 1.1/1) {
+	.abilityName {
+		font-size: 1.4rem;
+	}
+	.abilityDescription {
+		font-size: 0.9rem;
+		line-height: 1.2rem;
+		border-radius: 1.2rem;
 	}
 }
