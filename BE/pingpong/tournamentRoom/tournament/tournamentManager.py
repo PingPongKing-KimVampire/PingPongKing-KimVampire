@@ -36,7 +36,10 @@ class TournamentManager:
             'semiFinal' : None,
             'final' : None
         }
+
         self.semi_final_winners = []
+        self.final_winer = None
+        
         self.make_semi_final_rooms()
         self.make_final_room()
         
@@ -48,6 +51,13 @@ class TournamentManager:
 
     def get_client_info_list(self):
         return self.client_info_list
+
+    def get_game_room_id_now(self, client_id, client_state):
+        for gameroom_info in self.tournament_info_list[client_state]:
+            for id in gameroom_info['clientIdList']:
+                if client_id == id:
+                    return gameroom_info['roomId']
+        return None
 
     def is_opponent_ready(self, client_state, client_id):
         opponent_id = None
@@ -62,12 +72,13 @@ class TournamentManager:
         else:
             return False
 
-    def get_game_room_id_now(self, client_id, client_state):
-        for gameroom_info in self.tournament_info_list[client_state]:
-            for id in gameroom_info['clientIdList']:
-                if client_id == id:
-                    return gameroom_info['roomId']
-        return None
+    async def end_game(self, room_id, tournament_state, client_id):
+        print('end game!!')
+        if self.is_opponent_ready(tournament_state, client_id):
+            return
+        self.change_tournamanet_info_game_state(tournament_state, room_id, client_id, 'finished')
+        await self.notify_tournament_room('notifyTournamentInfoChange')
+        await self.add_semi_final_winner(client_id)
 
     def get_tournament_info_list(self):
         return self.tournament_info_list
@@ -86,15 +97,24 @@ class TournamentManager:
         # print('winner_id : ', winner_id)
         # print(json.dumps(self.tournament_info_list))
 
-    def add_semi_final_winner(self, client_id):
+    async def add_semi_final_winner(self, winner_id):
         for client_info in self.client_info_list:
-            if client_id == client_info['id']:
+            # 중복 실행 방지
+            if winner_id == client_info['id'] and client_info not in self.semi_final_winners:
                 self.semi_final_winners.append(client_info)
-                break
+                if self.is_ready_final_room():
+                    await self.notify_all_team_finish('semiFinal')
+                return
+            
+    async def set_final_winner(self, winner_id):
+        if self.final_winer == None:
+            self.final_winer = winner_id
+            await self.notify_all_team_finish('final')
 
     def is_ready_final_room(self):
         if self.semi_final_winners.__len__() == 2:
-            return self.enter_final_room()
+            self.enter_final_room()
+            return True
         return None
 
     def make_semi_final_rooms(self):
@@ -133,8 +153,18 @@ class TournamentManager:
         room_id = self.tournament_info_list['final'][0]['roomId']
         return room_id, game_manager
     
+    def sort_final_room_data(self):
+        client_id_0 = self.semi_final_winners[0]['id']
+        print(self.tournament_info_list['semiFinal'][0]['clientIdList'])
+        print(self.tournament_info_list['semiFinal'][1]['clientIdList'])
+        print(self.semi_final_winners)
+        if client_id_0 in self.tournament_info_list['semiFinal'][1]['clientIdList']:
+            self.semi_final_winners[0], self.semi_final_winners[1] = self.semi_final_winners[1], self.semi_final_winners[0]
+        print(self.semi_final_winners)
+    
     def enter_final_room(self):
         room_id, game_manager = self.get_final_room_data()
+        self.sort_final_room_data()
         client_1 = self.semi_final_winners[0]
         client_2 = self.semi_final_winners[1]
         self.tournament_info_list['final'][0] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
@@ -168,12 +198,12 @@ class TournamentManager:
                     gameroom_info['score'][1] = score
                 break
 
-    async def notify_all_team_finish(self, consumer, tournament_state):
+    async def notify_all_team_finish(self, tournament_state):
         await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
-        if consumer.tournament_state == "final":
-            asyncio.create_task(self.triggger_final_room())
+        if tournament_state == "semiFinal":
+            asyncio.create_task(self.trigger_final_room())
 
-    async def triggger_final_room(self):
+    async def trigger_final_room(self):
         self.tournament_state = 'final'
         room_id = self.tournament_info_list['final'][0]['roomId']
         await asyncio.sleep(10)
@@ -200,7 +230,7 @@ class TournamentManager:
                 db_manager.set_end_time()
                 db_manager.save_data_to_db({'left' : 0, 'right' : 0}, win_team)
     
-    async def notify_tournament_room(self, event, content):
+    async def notify_tournament_room(self, event, content={}):
         await self.channel_layer.group_send(
             self.room_id,
             {

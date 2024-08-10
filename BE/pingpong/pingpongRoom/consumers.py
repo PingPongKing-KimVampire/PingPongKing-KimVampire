@@ -77,18 +77,19 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
             await self.close()
             
     async def disconnect(self, close_code):
-        if self.client_id:
-            room_id_team = f"{self.room_id}-{self.team}"
-            await discard_group(self, self.room_id)
-            await discard_group(self, room_id_team)
-            stateManager.remove_consumer_from_map(self.client_id, self)
-            if self.is_playing:
-                await self.game_manager.give_up_game(self)
-            elif self.is_end == False and self.is_playing == False and self.game_manager:
-                stateManager.remove_client_from_room(self.room_id, self.client_id)
-                await stateManager.notify_room_change(self.room_id)
-                await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
-            Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
+        if self.client_id == None:
+            return
+        room_id_team = f"{self.room_id}-{self.team}"
+        await discard_group(self, self.room_id)
+        await discard_group(self, room_id_team)
+        stateManager.remove_consumer_from_map(self.client_id, self)
+        if self.is_playing and not self.is_observer:
+            await self.game_manager.give_up_game(self)
+        elif self.is_end == False and self.is_playing == False and self.game_manager:
+            stateManager.remove_client_from_room(self.room_id, self.client_id)
+            await stateManager.notify_room_change(self.room_id)
+            await stateManager.notify_leave_waiting_room(self.room_id, self.client_id)
+        Printer.log(f"Client {self.client_id} disconnected from room {self.room_id}", "yellow")
 
     async def _send(self, event=str, content={}):
         # if not (event == "notifyPaddleLocationUpdate" or event == "notifyBallLocationUpdate" or event == "notifyFakeBallLocationUpdate"):
