@@ -9,20 +9,20 @@ export function getMatchLogDiv(gameHistory) {
                 ${year}.${month}.${day}
             </div>
             <div class="matchScoreContainer">
-                <img class="matchResultImage" src="images/${gameHistory.result?.toLowerCase()}Icon.svg">
+                <img class="matchResultImage" src="images/${gameHistory.result?.toLowerCase()}Icon.png">
                 <div class="scoreFrame">
                     ${gameHistory.score[0]} : ${gameHistory.score[1]}
                 </div>
             </div>
             <div class="matchTeamListContainer">
                 <div class="matchTeamContainer">
-                    ${gameHistory.ability[0] !== "none" ? "<img class='vampireAbilityImage' src='images/ability/" + gameHistory.ability[0] + ".png'>" : "<div></div>"}
+                    ${gameHistory.ability[0] !== "none" ? "<img class='leftAbilityImage' src='images/ability/" + gameHistory.ability[0] + ".png'>" : "<div></div>"}
                     <img class="match${gameHistory.teamKind[0] === "human" ? "Human" : "Vampire"}TeamImage" src="images/${gameHistory.teamKind[0]}Icon.png">
                 </div>
                 <div class="vsFrame">VS</div>
                 <div class="matchTeamContainer">
                     <img class="match${gameHistory.teamKind[1] === "human" ? "Human" : "Vampire"}TeamImage" src="images/${gameHistory.teamKind[1]}Icon.png">
-                    ${gameHistory.ability[1] !== "none" ? "<img class='vampireAbilityImage' src='images/ability/" + gameHistory.ability[1] + ".png'>" : "<div></div>"}
+                    ${gameHistory.ability[1] !== "none" ? "<img class='rightAbilityImage' src='images/ability/" + gameHistory.ability[1] + ".png'>" : "<div></div>"}
                 </div>
             </div>
             ${_getMatchPlayerListContainerDiv(gameHistory.myTeamClientInfoList, gameHistory.opponentTeamClientInfoList)}

@@ -9,15 +9,24 @@
 
 #avatarContainer{
     width: 20%;
-    height: 70%;
+    height: 65%;
     display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
 }
 
-.avatarImgFrame{
+#profileInfo {
 	width: 100%;
+	height: 70%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.avatarImgFrame{
+	height: 75%;
 	aspect-ratio: 1/1;
 	border-radius: 15rem;
 	border: 0.12rem solid white;
@@ -30,7 +39,7 @@
 }
 
 #WinLossContainer{
-    height: 15%;
+    height: 20%;
     width: 100%;
     display: flex;
 	flex-direction: column;
@@ -39,9 +48,14 @@
 }
 
 .nicknameFrame{
+	width: 120%;
     color: white;
-	font-size: 4rem;
+	font-size: 3rem;
     font-weight: 600;
+	text-align: center;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 .winLossFrame{
@@ -49,16 +63,25 @@
     font-weight: 200;
 }
 
-.editProfileButton{
+#buttonGroup {
+	width: 100%;
+	height: 22%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.editProfileButton, .logoutButton {
     width: 70%;
-    height: 10%;
+    height: 42%;
     background-color: rgb(213, 112, 255);
     border-radius: 10rem;
-    font-size: 2.3rem;
+    font-size: 2rem;
     font-weight: 700;
 }
 
-.editProfileButton:hover {
+.editProfileButton:hover, .logoutButton:hover {
 	cursor: pointer;
 }
 
@@ -66,17 +89,18 @@
     width: 45%;
     height: 88%;
     align-self: flex-end;
-    border-left: 0.1rem solid white;
-    border-top: 0.1rem solid white;
-    border-right: 0.1rem solid white;
-    border-radius: 1.2rem 1.2rem 0 0;
+	border: 0.14rem solid white;
+	border-bottom: none;
+    border-radius: 1.5rem 1.5rem 0 0;
     display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
     overflow-y: scroll;
     box-sizing: border-box;
-    padding-bottom: 1%;
+	padding-top: 0.2%;
+    padding-bottom: 2%;
+	box-shadow: rgb(155, 153, 153) 0rem 0rem 2rem 0rem;
 }
 
 #matchLogContainer::-webkit-scrollbar {
@@ -84,21 +108,26 @@
 }
 
 .matchLogPanel{
-    border: 0.12rem solid white;
-    border-radius: 2rem;
-    width: 95%;
+    border: 0.14rem solid white;
+    border-radius: 1rem;
+    width: 92%;
     height: 18%;
-    margin-top: 2.5%;
+    margin-top: 4%;
     flex-shrink: 0;
     display: flex;
 	flex-direction: row;
 	justify-content: space-around;
 	align-items: center;
-    padding-right: 3%;
     box-sizing: border-box;
 }
 
 .matchLogPanel:hover {
 	cursor: pointer;
-    background-color: rgba(213, 112, 255, 0.1);
+	background: linear-gradient(to bottom, rgb(50, 26, 81), rgba(213, 112, 255, 0.1));
+}
+
+@media (orientation: portrait) {
+	#container {
+		flex-direction: column;
+	}
 }
