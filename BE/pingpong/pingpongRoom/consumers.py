@@ -161,7 +161,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
     async def send_enter_observe_mode_response(self):
         data = self.game_manager.get_game_info()
-        self._send(event="enterObserveModeResponse", content=data)
+        await self._send(event="enterObserveModeResponse", content=data)
         self.is_playing = True
 
     """
