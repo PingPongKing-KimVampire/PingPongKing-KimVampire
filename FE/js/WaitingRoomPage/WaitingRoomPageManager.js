@@ -17,7 +17,7 @@ class WaitingRoomPageManager {
 		if (!this.clientInfo?.gameInfo) {
 			throw new GameInfoNotSettingError();
 		}
-		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${this.clientInfo.gameInfo.roomId}`, ["authorization", this.clientInfo.accessToken]);
+		const pingpongRoomSocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${this.clientInfo.gameInfo.roomId}`, ["authorization", this.clientInfo.accessToken]);
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {
 				resolve();

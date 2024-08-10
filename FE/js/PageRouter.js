@@ -17,7 +17,7 @@ import StatisticsPageManager from "./StatisticsPage/StatisticsPageManager.js";
 export const SERVER_ADDRESS = window.location.hostname;
 // export const SERVER_ADDRESS = "10.18.236.23";
 
-export const SERVER_PORT = "80";
+export const SERVER_PORT = "443";
 
 class PageRouter {
 	constructor() {

@@ -17,7 +17,7 @@ class TournamentAnimationPageManager {
 			throw new TournamentInfodNotSettingError();
 		}
 		async function _connectTournamentSocket(id) {
-			const tournamentSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`, ["authorization", this.clientInfo.accessToken]);
+			const tournamentSocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`, ["authorization", this.clientInfo.accessToken]);
 			await new Promise(resolve => {
 				tournamentSocket.addEventListener("open", () => {
 					resolve();
@@ -382,7 +382,7 @@ class TournamentAnimationPageManager {
 	}
 
 	async _enterWaitingRoom(roomId) {
-		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
+		const pingpongRoomSocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {
 				resolve();
@@ -753,7 +753,7 @@ class TournamentAnimationPageManager {
 			}
 
 			async function startObserveGame(roomId) {
-				const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/observe`, ["authorization", this.clientInfo.accessToken]);
+				const pingpongRoomSocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/observe`, ["authorization", this.clientInfo.accessToken]);
 				await new Promise(resolve => {
 					pingpongRoomSocket.addEventListener("open", () => {
 						resolve();
