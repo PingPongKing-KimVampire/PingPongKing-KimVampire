@@ -46,9 +46,9 @@ class PingpongRenderer {
 		this.me = null;
 
 		//관전자는 오른쪽 팀처럼 처리한다.
-		if (this.clientInfo.gameInfo.role === "observer") {
-			this.me = { team: "right" };
-		}
+		// if (this.clientInfo.gameInfo.role === "observer") {
+		// 	this.me = { team: "right" };
+		// }
 
 		this.ball = {
 			element: document.querySelector(".ball"),
@@ -260,6 +260,10 @@ class PingpongRenderer {
 			};
 			this.players.push(player);
 			if (id === this.clientInfo.id) this.me = player;
+			if (this.clientInfo.gameInfo.role === "observer") {
+				this.me = player;
+			}
+			1;
 		}
 	}
 
