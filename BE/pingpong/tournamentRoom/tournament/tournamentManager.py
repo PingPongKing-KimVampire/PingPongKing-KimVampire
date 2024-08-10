@@ -1,11 +1,7 @@
 import asyncio
 import uuid
-import random
 from pingpongRoom.gameManage.gameRoomManager import GameRoomManager
-from pingpongRoom.gameManage.gameDataManager import GameDataManager
 from coreManage.group import add_group, discard_group, notify_group
-
-import json
 
 class TournamentManager:
     def __init__(self, stateManager, channel_layer, room_id, consumers):
@@ -23,9 +19,6 @@ class TournamentManager:
                 'avatarUrl': consumer.avatar_url
             })
             self.client_state[consumer.client_id] = False
-            # print('id:', consumer.client_id)
-            # print('nickname:', consumer.nickname)
-            # print('avatarUrl: ', consumer.avatar_url)
 
         self.tournament_state = "semiFinal" # semiFinal, final
         self.tournament_info_list = {
@@ -73,7 +66,6 @@ class TournamentManager:
             return False
 
     async def end_game(self, room_id, tournament_state, client_id):
-        print('end game!!')
         if self.is_opponent_ready(tournament_state, client_id):
             return
         self.change_tournamanet_info_game_state(tournament_state, room_id, client_id, 'finished')
@@ -91,11 +83,6 @@ class TournamentManager:
                 gameroom_info['state'] = state
                 gameroom_info['winnerId'] = winner_id
                 break
-        # print('change tournament state')
-        # print('tournament state : ', tournament_state)
-        # print('state : ', state)
-        # print('winner_id : ', winner_id)
-        # print(json.dumps(self.tournament_info_list))
 
     async def add_semi_final_winner(self, winner_id):
         for client_info in self.client_info_list:
@@ -131,8 +118,6 @@ class TournamentManager:
             semi_final_arr.append(self.set_game_room_data(client_1, client_2, room_id, game_manager))
             self.stateManager.rooms[room_id] = game_manager
         self.tournament_info_list['semiFinal'] = semi_final_arr
-        # print('make semi final rooms')
-        # print(json.dumps(self.tournament_info_list))
 
     def make_final_room(self):
         room_id, game_manager = self.make_game_room()
@@ -145,8 +130,6 @@ class TournamentManager:
             'state' : 'notStarted'
         }]
         self.stateManager.rooms[room_id] = game_manager
-        # print('make final rooms')
-        # print(json.dumps(self.tournament_info_list))
         
     def get_final_room_data(self):
         game_manager = self.game_manager_list['final']
@@ -155,21 +138,15 @@ class TournamentManager:
     
     def sort_final_room_data(self):
         client_id_0 = self.semi_final_winners[0]['id']
-        print(self.tournament_info_list['semiFinal'][0]['clientIdList'])
-        print(self.tournament_info_list['semiFinal'][1]['clientIdList'])
-        print(self.semi_final_winners)
         if client_id_0 in self.tournament_info_list['semiFinal'][1]['clientIdList']:
             self.semi_final_winners[0], self.semi_final_winners[1] = self.semi_final_winners[1], self.semi_final_winners[0]
-        print(self.semi_final_winners)
     
     def enter_final_room(self):
-        room_id, game_manager = self.get_final_room_data()
         self.sort_final_room_data()
+        room_id, game_manager = self.get_final_room_data()
         client_1 = self.semi_final_winners[0]
         client_2 = self.semi_final_winners[1]
         self.tournament_info_list['final'][0] = self.set_game_room_data(client_1, client_2, room_id, game_manager)
-        # print('enter final room')
-        # print(json.dumps(self.tournament_info_list))
         return room_id
 
     def set_game_room_data(self, client_1, client_2, room_id, game_manager):
@@ -213,23 +190,7 @@ class TournamentManager:
         }
         await notify_group(self.channel_layer, f"tournament_{room_id}", 
                            "start_final_room", data)
-        # await notify_group(self.channel_layer, f"tournament_{room_id}", 
-        #                    "notifyYourGameRoomReady", data)
         
-    async def make_game_db(self, tournament_state, room_id, winner_id):
-        for gameroom_info in self.tournament_info_list[tournament_state]:
-            if gameroom_info['roomId'] == room_id:
-                if winner_id == gameroom_info['clientIdList'][0]:
-                    win_team = 'left'
-                else:
-                    win_team = 'right'
-                db_manager = GameDataManager()
-                db_manager.set_teams_info({gameroom_info['clientIdList'][0] : None}, 
-                                          {gameroom_info['clientIdList'][1] : None})
-                db_manager.set_start_time()
-                db_manager.set_end_time()
-                db_manager.save_data_to_db({'left' : 0, 'right' : 0}, win_team)
-    
     async def notify_tournament_room(self, event, content={}):
         await self.channel_layer.group_send(
             self.room_id,

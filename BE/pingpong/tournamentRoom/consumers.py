@@ -56,11 +56,12 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
                          { "tournamentClientList": client_list_data })
             
     async def disconnect(self, close_code):
-        if self.client_id:
-            stateManager.remove_consumer_from_map(self.client_id, self)
-            await discard_group(self, self.tournament_id)
-            self.tournament_manager.set_client_state(self.client_id, False)
-            await self.tournament_manager.end_game(self.gameroom_id_now, self.tournament_state, self.client_id)
+        if self.client_id == None:
+            return
+        stateManager.remove_consumer_from_map(self.client_id, self)
+        await discard_group(self, self.tournament_id)
+        self.tournament_manager.set_client_state(self.client_id, False)
+        await self.tournament_manager.end_game(self.gameroom_id_now, self.tournament_state, self.client_id)
 
     async def _send(self, event=str, content={}):
         Printer.log(f">>>>> Tournament {self.tournament_id} sent >>>>>", "bright_cyan")
