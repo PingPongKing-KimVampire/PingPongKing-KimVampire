@@ -126,6 +126,13 @@
 	background: linear-gradient(to bottom, rgb(50, 26, 81), rgba(213, 112, 255, 0.1));
 }
 
+@media (orientation: landscape) and (min-aspect-ratio: 1.9/1) {
+	.matchScoreContainer {
+		height: 50%;
+		width: 15%;
+	}
+}
+
 @media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
 	#avatarContainer {
 		height: 55%;
