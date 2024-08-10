@@ -74,10 +74,13 @@ MIDDLEWARE = [
 # 나중에 제거할 것
 CORS_ORIGIN_WHITELIST = [
     'http://localhost',
-    'http://localhost:5500',
+    'http://localhost:80',
+    'http://localhost:443',
+    'http://localhost:3001',
     'http://127.0.0.1',
-    'http://127.0.0.1:5500',
-    'http://kimvampire.com'
+    'http://127.0.0.1:80',
+    'http://127.0.0.1:443',
+    'http://127.0.0.1:3001',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
