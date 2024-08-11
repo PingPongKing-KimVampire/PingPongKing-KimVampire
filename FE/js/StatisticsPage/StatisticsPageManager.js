@@ -40,10 +40,12 @@ class StatisticsPageManager {
 		this.app.innerHTML = this._getHTML();
 		this._setExitButton();
 		this._subscribeWindow();
-		this._setHitMap();
 		setMatchLogPlayerClickListener(this.renderPage.bind(this));
-		requestAnimationFrame(this._renderScoreGraph.bind(this));
-		requestAnimationFrame(this._renderHitMap.bind(this, 1));
+		if (this.round) { // 플레이한 라운드가 있을 경우에만 (기권 사용한 상황 대비)
+			this._setHitMap();
+			requestAnimationFrame(this._renderScoreGraph.bind(this));
+			requestAnimationFrame(this._renderHitMap.bind(this, 1));
+		}
 	}
 
 	async _getClientGameDetail(clientId, gameId) {
@@ -238,7 +240,7 @@ class StatisticsPageManager {
 					${this._getScorePanelHTML()}
 				</div>
 				<div id="hitMapContainer">
-					<label class="label">n라운드 타점 지도</label>
+					<label class="label">라운드 별 타점 지도</label>
 					${this._getHitMapPanelHTML()}
 				</div>
 			</div>
