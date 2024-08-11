@@ -4,7 +4,7 @@
 
 #container {
 	height: 65%;
-	width: 26%;
+	width: 30%;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -47,7 +47,7 @@
 }
 
 #nicknameContainer {
-	height: 25%;
+	height: 18%;
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -57,14 +57,14 @@
 
 #nicknameInput {
 	width: 100%;
-	height: 60%;
+	height: 100%;
 	box-sizing: border-box;
 	border-radius: 10rem;
 	background-color: transparent;
 	border: 0.1rem solid white;
 	padding: 0 8%;
 	color: white;
-	font-size: 2rem;
+	font-size: 2.5rem;
 	text-align: center;
 }
 
@@ -75,6 +75,7 @@
 	padding-top: 5%;
 	text-align: center;
 	line-height: 1.5rem;
+	box-sizing: border-box;
 }
 
 #completeButton {
@@ -94,22 +95,31 @@
 	width: 100vw;
 	height: 100vh;
 	position: absolute;
-	z-index: 1;
+	z-index: 101;
 	justify-content: center;
-	align-content: center;
+	align-items: center;
 	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.avatarFrameContainer {
+	height: 60%;
+	aspect-ratio: 3/2;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	flex-wrap: wrap;
 }
 
 .selectionAvatarFrame {
-	width: 26vw;
-	height: 26vw;
+	width: calc(100% * (1 / 3)); /* 한 줄에 3개의 아바타가 들어감 */
+	aspect-ratio: 1/1;
 	background-color: #020626;
 	border: 1px solid white;
 	overflow: hidden;
 	display: flex;
 	justify-content: center;
 	align-Items: center;
+	box-sizing: border-box;
 }
 
 .selectionAvatarFrame:hover {
@@ -123,7 +133,6 @@
 .selectionAvatarImage {
 	width: auto;
 	height: 100%;
-	/* border-radius: 50%; */
 	max-width: none;
 }
 
@@ -131,65 +140,128 @@
 	width: auto;
 	height: 50%;
 	max-width: none;
-	/* visibility: none; */
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.7/1) {
+@media (min-aspect-ratio: 2/1) {
 	#container {
-		width: 35%;
+		width: 25%;
+	}
+	#nicknameContainer {
+		height: 20%;
+	}
+	#completeButton {
+		font-size: 2.6rem;
+		padding: 0.8% 4%;
+	}
+	.avatarFrameContainer {
+		height: 70%;
 	}
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
+@media (max-aspect-ratio: 2/1) {
+	#nicknameContainer {
+		height: 19%;
+	}
+	#completeButton {
+		font-size: 2.4rem;
+	}
+	.avatarFrameContainer {
+		height: 65%;
+	}
+}
+
+@media (max-aspect-ratio: 1.7/1) {
+	#nicknameContainer {
+		height: 18%;
+	}
+	#completeButton {
+		font-size: 2.2rem;
+	}
+	.avatarFrameContainer {
+		height: 60%;
+	}
+}
+
+@media (max-aspect-ratio: 1.4/1) {
+	#container {
+		width: 36%;
+	}
+	.avatarFrameContainer {
+		width: 65%;
+		height: auto;
+	}
+}
+
+@media (max-aspect-ratio: 1.2/1) {
 	#container {
 		width: 42%;
 	}
-}
-
-@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
-	#container {
-		width: 50%;
-	}
-}
-
-@media (orientation: portrait) {
 	#completeButton {
-		bottom: 7%;
-		padding: 2.5% 12%;
+		padding: 1.2% 7%;
+		font-size: 2rem;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1) {
+@media (max-aspect-ratio: 1/1) {
 	#container {
 		height: 60%;
 		width: 50%;
 	}
+	#nicknameInput {
+		font-size: 2.2rem;
+	}
+	#completeButton {
+		padding: 1.5% 9%;
+		font-size:1.82rem;
+	}
+	.avatarFrameContainer {
+		width: 50%;
+		aspect-ratio: 2/3;
+	}
+	.selectionAvatarFrame {
+		width: calc(100% * (1 / 2)); /* 한 줄에 3개의 아바타가 들어감 */
+	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+@media (max-aspect-ratio: 1/1.2) {
 	#container {
 		height: 55%;
+		width: 50%;
+	}
+	.avatarFrameContainer {
 		width: 55%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+@media (max-aspect-ratio: 1/1.4) {
 	#container {
-		height: 50%;
+		height: 52%;
+		width: 60%;
+	}
+	.avatarFrameContainer {
 		width: 60%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+@media (max-aspect-ratio: 1/1.6) {
 	#container {
-		height: 45%;
+		height: 50%;
+		width: 60%;
+	}
+	#completeButton {
+		padding: 2% 12%;
+		font-size: 1.6rem;
+	}
+	.avatarFrameContainer {
 		width: 65%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+@media (max-aspect-ratio: 1/1.8) {
 	#container {
-		height: 40%;
+		height: 45%;
+	}
+	.avatarFrameContainer {
 		width: 70%;
 	}
 }

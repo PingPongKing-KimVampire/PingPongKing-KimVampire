@@ -8,40 +8,53 @@
 }
 
 .waitingTournamentContainer {
+	height: 95%;
 	width: 70%;
-	height: 100%;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 }
 
+#tabContainer {
+	height: 9%;
+	width: 90%;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: flex-end;
+}
+
 .leaveWaitingTournamentButton {
-	margin-top: 3%;
-	margin-left: 5%;
-	overflow: hidden;
+	height: 90%;
+	border: 0.14rem solid white;
+	border-bottom: none;
+	border-radius: 1rem 1rem 0 0;
 	font-size: 2rem;
-	font-weight: 900;
-	border-left: 0.1rem solid white;
-	border-top: 0.1rem solid white;
-	border-right: 0.1rem solid white;
-	border-radius: 0.8rem 0.8rem 0 0;
-	background-color: inherit;
-	color: inherit;
-	align-self: flex-start;
+	font-weight: 700;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
+	padding: 0 2%;
+}
+.leaveWaitingTournamentButton:hover {
+	cursor: pointer;
+	background-color: rgb(213, 112, 255);
+	color: rgb(1, 4, 37);
+	border-color: rgb(213, 112, 255);
+	height: 100%;
+	transition-property: background-color, color, height;
+	transition-duration: 0.5s;
 }
 
 .waitingQueueContainer {
 	width: 100%;
-	height: 93%;
-	border-left: 0.1rem solid white;
-	border-top: 0.1rem solid white;
-	border-right: 0.1rem solid white;
-	border-radius: 0.8rem 0.8rem 0 0;
+	height: 91%;
+	border: 0.14rem solid white;
+	border-bottom: none;
+	border-radius: 1.5rem 1.5rem 0 0;
+	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -53,6 +66,7 @@
 	animation: run 2s infinite linear;
 	animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 	margin-bottom: 1.5%;
+	height: 30%;
 }
 
 @keyframes run {
@@ -67,5 +81,78 @@
 .findQueueText {
 	font-size: 2.5rem;
 	margin-top: 1.5%;
-	margin-bottom: 10%;
 }
+
+@media (min-aspect-ratio: 2/1) {
+	.findQueueImage {
+		margin-bottom: 1%;
+	}
+	.findQueueText {
+		margin-top: 1%;
+	}
+}
+
+@media (max-aspect-ratio: 1.3/1) {
+	.leaveWaitingTournamentButton {
+		font-size: 1.8rem;
+		height: 85%;
+	}
+	.leaveWaitingTournamentButton:hover {
+	  height: 95%;
+	}
+	.waitingQueueContainer {
+		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.5rem 0rem;
+	}
+	.findQueueImage {
+		height: 25%;
+	}
+	.findQueueText {
+		font-size: 2rem;
+	}
+  }
+  @media (max-aspect-ratio: 1.1/1) {
+	.leaveWaitingTournamentButton {
+	  font-size: 1.6rem;
+	}
+  }
+  @media (max-aspect-ratio: 1/1) {
+	.waitingTournamentContainer {
+	  width: 90%;
+	}
+	#tabContainer {
+	  height: 8%;
+	}
+	.waitingQueueContainer {
+	  height: 92%;
+	  box-shadow: rgb(155, 153, 153) 0rem 0rem 1.2rem 0rem;
+	}
+	.findQueueImage {
+		width: 30%;
+		height: auto;
+	}
+  }
+  @media (max-aspect-ratio: 1/1.2) {
+	.leaveWaitingTournamentButton {
+	  font-size: 1.4rem;
+	  padding: 0 5%;
+	}
+  }
+  @media (max-aspect-ratio: 1/1.5) {
+	.leaveWaitingTournamentButton {
+	  height: 80%;
+	}
+	.leaveWaitingTournamentButton:hover {
+	  height: 90%;
+	}
+  }
+  @media (max-aspect-ratio: 1/1.7) {
+	.leaveWaitingTournamentButton {
+	  height: 75%;
+	}
+	.leaveWaitingTournamentButton:hover {
+	  height: 85%;
+	}
+	.findQueueText {
+		font-size: 1.5rem;
+	}
+  }

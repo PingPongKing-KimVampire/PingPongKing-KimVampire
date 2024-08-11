@@ -9,15 +9,24 @@
 
 #avatarContainer{
     width: 20%;
-    height: 70%;
+    height: 65%;
     display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
 }
 
-.avatarImgFrame{
+#profileInfo {
 	width: 100%;
+	height: 70%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.avatarImgFrame{
+	height: 75%;
 	aspect-ratio: 1/1;
 	border-radius: 15rem;
 	border: 0.12rem solid white;
@@ -30,7 +39,7 @@
 }
 
 #WinLossContainer{
-    height: 15%;
+    height: 20%;
     width: 100%;
     display: flex;
 	flex-direction: column;
@@ -39,9 +48,14 @@
 }
 
 .nicknameFrame{
+	width: 120%;
     color: white;
-	font-size: 4rem;
+	font-size: 3rem;
     font-weight: 600;
+	text-align: center;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 .winLossFrame{
@@ -49,26 +63,26 @@
     font-weight: 200;
 }
 
-.editProfileButton{
+#buttonGroup {
+	width: 100%;
+	height: 22%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.editProfileButton, .logoutButton {
     width: 70%;
-    height: 10%;
+    height: 42%;
     background-color: rgb(213, 112, 255);
     border-radius: 10rem;
-    font-size: 2.3rem;
+    font-size: 2rem;
     font-weight: 700;
 }
 
-.editProfileButton:hover {
+.editProfileButton:hover, .logoutButton:hover {
 	cursor: pointer;
-}
-
-.logoutButton{
-    width: 70%;
-    height: 10%;
-    background-color: rgb(213, 112, 255);
-    border-radius: 10rem;
-    font-size: 2.3rem;
-    font-weight: 700;
 }
 
 .logoutButton:hover {
@@ -79,17 +93,18 @@
     width: 45%;
     height: 88%;
     align-self: flex-end;
-    border-left: 0.1rem solid white;
-    border-top: 0.1rem solid white;
-    border-right: 0.1rem solid white;
-    border-radius: 1.2rem 1.2rem 0 0;
+	border: 0.14rem solid white;
+	border-bottom: none;
+    border-radius: 1.5rem 1.5rem 0 0;
     display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
     overflow-y: scroll;
     box-sizing: border-box;
-    padding-bottom: 1%;
+	padding-top: 0.2%;
+    padding-bottom: 2%;
+	box-shadow: rgb(155, 153, 153) 0rem 0rem 2rem 0rem;
 }
 
 #matchLogContainer::-webkit-scrollbar {
@@ -97,21 +112,159 @@
 }
 
 .matchLogPanel{
-    border: 0.12rem solid white;
-    border-radius: 2rem;
-    width: 95%;
+    border: 0.14rem solid white;
+    border-radius: 1rem;
+    width: 92%;
     height: 18%;
-    margin-top: 2.5%;
+    margin-top: 4%;
     flex-shrink: 0;
     display: flex;
 	flex-direction: row;
 	justify-content: space-around;
 	align-items: center;
-    padding-right: 3%;
     box-sizing: border-box;
 }
 
 .matchLogPanel:hover {
 	cursor: pointer;
-    background-color: rgba(213, 112, 255, 0.1);
+	background: linear-gradient(to bottom, rgb(50, 26, 81), rgba(213, 112, 255, 0.1));
+}
+
+@media (orientation: landscape) and (min-aspect-ratio: 1.9/1) {
+	.matchScoreContainer {
+		height: 50%;
+		width: 15%;
+	}
+}
+
+@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
+	#avatarContainer {
+		height: 55%;
+	}
+	.avatarImgFrame {
+		height: 70%;
+	}
+	#WinLossContainer {
+		height: 22%;
+	}
+	.editProfileButton, .logoutButton {
+		width: 80%;
+		font-size: 1.8rem;
+	}
+	#matchLogContainer {
+		width: 50%;
+	}
+}
+
+@media (max-aspect-ratio: 1.3/1) {
+	#matchLogContainer {
+		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.5rem 0rem;
+	}
+}
+
+@media (max-aspect-ratio: 1.2/1) {
+	#container {
+		flex-direction: column;
+	}
+	#avatarContainer {
+		width: 40%;
+		height: 50%;
+		justify-content: center;
+		margin-bottom: 2%;
+	}
+	#profileInfo {
+		height: 60%;
+		margin-top: 5%;
+		margin-bottom: 10%;
+	}
+	.avatarImgFrame {
+		height: 67%;
+	}
+	#WinLossContainer {
+		height: 24%;
+	}
+	.nicknameFrame {
+		font-size: 2.5rem;
+	}
+	.winLossFrame {
+		font-size: 1.4rem;
+	}
+	#buttonGroup {
+		flex-direction: row;
+		height: 10%;
+	}
+	.editProfileButton, .logoutButton {
+		width: 46%;
+		height: 100%;
+		font-size: 1.4rem;
+	}
+	#matchLogContainer {
+		height: 50%;
+		width: 85%;
+		align-self: center;
+		padding-bottom: 3%;
+	}
+	.matchLogPanel {
+		width: 94%;
+		height: 35%;
+		margin-top: 3%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1) {
+	#matchLogContainer {
+		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.2rem 0rem;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.2) {
+	#avatarContainer {
+		width: 45%;
+		margin-bottom: 1%;
+	}
+	#buttonGroup {
+		height: 9%;
+	}
+	.matchLogPanel {
+		height: 30%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.4) {
+	#avatarContainer {
+		height: 45%;
+		width: 55%;
+	}
+	#WinLossContainer {
+		height: 27%;
+	}
+	#matchLogContainer {
+		height: 55%;
+		border-width: 0.1rem;
+	}
+	.matchLogPanel {
+		height: 23%;
+		border-width: 0.1rem;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.6) {
+	#avatarContainer {
+		width: 60%;
+	}
+	.matchLogPanel {
+		height: 20%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.8) {
+	#avatarContainer {
+		width: 65%;
+	}
+	.editProfileButton, .logoutButton {
+		font-size: 1.2rem;
+	}
+	.matchLogPanel {
+		height: 18%;
+	}
 }

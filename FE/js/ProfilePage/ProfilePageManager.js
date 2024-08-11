@@ -100,23 +100,27 @@ class ProfilePageManager {
         <button class="exitButton"></button>
         <div id="container">
             <div id="avatarContainer">
-                <div class="avatarImgFrame">
-                    <img class="avatarImg" src="${this.profileTarget.avatarUrl}">
-                </div>
-                <div id="WinLossContainer">
-                    <div class="nicknameFrame">
-                        ${this.profileTarget.nickname}
-                    </div>
-                    <div class="winLossFrame">
-                        ${this.profileTarget.winCount}승 ${this.profileTarget.loseCount}패
-                    </div>
-                </div>
-                <button class="editProfileButton">
-                    ${this.clientInfo.id === this.profileTarget.id ? "프로필 편집" : "친구추가"}
-                </button>
-				<button class="logoutButton">
-                    ${this.clientInfo.id === this.profileTarget.id ? "로그아웃" : "친구 로그아웃"}
-                </button>
+				<div id="profileInfo">
+					<div class="avatarImgFrame">
+						<img class="avatarImg" src="${this.profileTarget.avatarUrl}">
+					</div>
+					<div id="WinLossContainer">
+						<div class="nicknameFrame">
+							${this.profileTarget.nickname}
+						</div>
+						<div class="winLossFrame">
+							${this.profileTarget.winCount}승 ${this.profileTarget.loseCount}패
+						</div>
+					</div>
+				</div>
+				<div id="buttonGroup">
+					<button class="editProfileButton">
+						${this.clientInfo.id === this.profileTarget.id ? "프로필 편집" : "친구 요청"}
+						</button>
+					<button class="logoutButton">
+						${this.clientInfo.id === this.profileTarget.id ? "로그아웃" : "차단"}
+					</button>
+				</div>
             </div>
             <div id="matchLogContainer">
                 ${this.profileTarget.gameHistoryList.map(gameHistory => `<div class="matchLogPanel">${getMatchLogDiv(gameHistory)}</div>`).join("")}

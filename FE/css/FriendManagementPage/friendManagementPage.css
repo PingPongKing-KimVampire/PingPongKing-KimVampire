@@ -28,7 +28,7 @@
 	border-top-right-radius: 1rem;
 	border: 0.14rem solid white;
 	border-bottom: none;
-	font-size: 2.2rem;
+	font-size: 2rem;
 	font-weight: 700;
 	box-sizing: border-box;
 }
@@ -66,6 +66,7 @@
 	border-bottom: none;
 	border-radius: 1.5rem 1.5rem 0 0;
 	box-sizing: border-box;
+	box-shadow: rgb(155, 153, 153) 0rem 0rem 2rem 0rem;
 }
 
 #innerContentContainer {
@@ -186,7 +187,7 @@
 
 .clientManagementButton {
 	height: 100%;
-	width: 47%;
+	width: 45%;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
@@ -210,10 +211,13 @@
 	background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
-	.tabButton {
-		font-size: 2rem;
+@media (min-aspect-ratio: 2/1) {
+	.clientManagementButton {
+		width: 47%;
 	}
+}
+
+@media (max-aspect-ratio: 1.5/1) {
 	#searchContainer.visible {
 		height: 16%;
 	}
@@ -224,34 +228,60 @@
 		margin-bottom: 1.6%;
 		padding: 1.5% 3%;
 	}
+	.buttonGroup {
+		height: 60%;
+	}
 }
-@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+@media (max-aspect-ratio: 1.3/1) {
 	.tabButton {
 		font-size: 1.8rem;
+		height: 85%;
 	}
-	#container {
-		width: 80%;
+	.tabButton:hover {
+		height: 95%;
 	}
+	#contentContainer {
+		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.5rem 0rem;
+	}
+	.buttonGroup {
+		width: 35%;
+	}
+	.clientManagementButton {
+		font-size: 1.2rem;
+	}
+}
+
+@media (max-aspect-ratio: 1.2/1) {
 	.clientListContainer::-webkit-scrollbar {
 		width: 0.8rem;
 	}
 	.clientItem {
 		margin-bottom: 1.8%;
 	}
+	.buttonGroup {
+		height: 55%;
+	}
+	.clientManagementButton {
+		font-size: 1.1rem;
+	}
 }
 
-@media (orientation: portrait) {
+@media (max-aspect-ratio: 1.1/1) {
+	.tabButton {
+		font-size: 1.6rem;
+	}
+}
+
+@media (max-aspect-ratio: 1/1) {
 	#container {
-		width: 85%;
+		width: 90%;
 	}
 	#tabContainer {
 		height: 8%;
 	}
-	.tabButton {
-		font-size: 1.8rem;
-	}
 	#contentContainer {
 		height: 92%;
+		box-shadow: rgb(155, 153, 153) 0rem 0rem 1.2rem 0rem;
 	}
 	#searchContainer.visible {
 		height: 15%;
@@ -268,24 +298,18 @@
 	.clientItem {
 		margin-bottom: 1.6%;
 		padding: 1.5% 3%;
+		border-width: 0.1rem;
 	}
 	.nickname {
 		width: 32%;
 		font-size: 1.6rem;
 	}
 	.buttonGroup {
-		height: 65%;
-		width: 40%;
-	}
-	.clientManagementButton {
-		font-size: 1.15rem;
+		width: 37%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.15) {
-	.tabButton {
-		font-size: 1.6rem;
-	}
+@media (max-aspect-ratio: 1/1.15) {
 	#searchContainer.visible {
 		height: 14%;
 	}
@@ -297,10 +321,14 @@
 		margin-bottom: 1.9%;
 	}
 }
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.3) {
+
+@media (max-aspect-ratio: 1/1.2) {
 	.tabButton {
 		font-size: 1.4rem;
 	}
+}
+
+@media (max-aspect-ratio: 1/1.3) {
 	.clientItem {
 		padding: 2% 3%;
 	}
@@ -311,19 +339,12 @@
 		font-size: 1rem;
 	}
 }
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.5) {
-	#container {
-		height: 97%;
-		width: 90%;
-	}
-	#tabContainer {
-		height: 6.5%;
-	}
-	#contentContainer {
-		height: 93.5%;
-	}
+@media (max-aspect-ratio: 1/1.5) {
 	.tabButton {
-		font-size: 1.2rem;
+		height: 80%;
+	}
+	.tabButton:hover {
+		height: 90%;
 	}
 	#searchContainer.visible {
 		height: 12%;
@@ -343,20 +364,19 @@
 	.nickname {
 		font-size: 1.2rem;
 	}
-	.clientManagementButton {
-		font-size: 1rem;
+	.buttonGroup {
+		width: 40%;
 	}
 }
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
-	#tabContainer {
-		height: 6%;
-	}
-	#contentContainer {
-		height: 94%;
-	}
+@media (max-aspect-ratio: 1/1.7) {
 	.tabButton {
-		font-size: 1rem;
+		height: 75%;
 	}
+	.tabButton:hover {
+		height: 85%;
+	}
+}
+@media (max-aspect-ratio: 1/1.8) {
 	#searchContainer.visible {
 		height: 10%;
 	}

@@ -5,6 +5,7 @@ import asyncio
 from utils.printer import Printer
 from coreManage.stateManager import StateManager
 from coreManage.group import add_group, discard_group, notify_group
+from coreManage.recieveCleaner import ReceiveCleaner
 
 stateManager = StateManager()
 
@@ -104,6 +105,10 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         
         event = message.get('event')
         content = message.get('content')
+        
+        event = ReceiveCleaner.clean(event)
+        content = ReceiveCleaner.clean(content)
+
         if self.is_playing:
             await self.handle_playing_event(event, content)
         else:
@@ -163,6 +168,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
     async def send_enter_observe_mode_response(self):
         data = self.game_manager.get_game_info()
         await self._send(event="enterObserveModeResponse", content=data)
+        await self.game_manager.send_all_paddle_location_for_observe(self)
         self.is_playing = True
 
     """

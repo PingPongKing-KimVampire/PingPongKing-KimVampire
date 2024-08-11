@@ -402,9 +402,9 @@ class FriendManagementPageManager {
 		return `
 			<div id="tabContainer">
 				<button class="tabButton selectedTabButton" id="searchClientButton">유저 검색</button>
-				<button class="tabButton" id="friendRequestButton">친구 요청 목록</button>
-				<button class="tabButton" id="myFriendButton">내 친구 관리</button>
-				<button class="tabButton" id="blockClientButton">차단 유저 관리</button>
+				<button class="tabButton" id="friendRequestButton">친구 요청</button>
+				<button class="tabButton" id="myFriendButton">내 친구</button>
+				<button class="tabButton" id="blockClientButton">차단 유저</button>
 			</div>
 		`;
 	}

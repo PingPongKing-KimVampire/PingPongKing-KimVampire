@@ -432,3 +432,9 @@ class GameRoomManager:
             data = {'clientId': client_id, 'xPosition': player.pos_x, 'yPosition': player.pos_y}
             if self.is_playing:
                 await self.notifier.broadcast('notifyPaddleLocationUpdate', data)
+                
+    async def send_all_paddle_location_for_observe(self, consumer):
+        for client_id, player in self.clients.items():
+            data = {'clientId': client_id, 'xPosition': player.pos_x, 'yPosition': player.pos_y}
+            if self.is_playing:
+                await consumer._send('notifyPaddleLocationUpdate', data)

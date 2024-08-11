@@ -244,10 +244,12 @@ class EditProfilePageManager {
 		);
 		return `
 		  <div class="avatarSelectionModal">
-			${avatarPathListHtml}
-			<div class="selectionAvatarFrame" id="uploadFrame">
-				<img class="uploadIconImage" src="images/uploadIcon.png">
-				<input type="file" id="fileInput" style="display: none;" accept="image/*">
+			<div class="avatarFrameContainer">
+				${avatarPathListHtml}
+				<div class="selectionAvatarFrame" id="uploadFrame">
+					<img class="uploadIconImage" src="images/uploadIcon.png">
+					<input type="file" id="fileInput" style="display: none;" accept="image/*">
+				</div>
 			</div>
 		  </div>
 		  `;

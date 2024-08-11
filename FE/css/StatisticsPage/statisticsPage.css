@@ -1,3 +1,8 @@
+html {
+	position: static;
+	overflow: visible;
+}
+
 #container {
 	height: 78%;
 	width: 85%;
@@ -33,11 +38,11 @@
 
 #mainPanel {
 	border-right-width: 0;
-	border-radius: 2rem 0 0 2rem;
+	border-radius: 1.5rem 0 0 1.5rem;
 }
 
 #wordPanel {
-	border-radius: 0 2rem 2rem 0;
+	border-radius: 0 1.5rem 1.5rem 0;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -95,21 +100,53 @@
 #hitMapPanel {
 	height: 88%;
 	width: 100%;
+	position: relative;
 	border: 0.1rem solid white;
-	border-radius: 2rem;
+	border-radius: 1.5rem;
 }
 
 #hitMapPanel {
-	position: relative;
 	display: flex;
 	flex-direction: row;
-	overflow: hidden;
 }
 
 #scorePanel {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+#lineDescriptionContainer {
+	width: 30%;
+	aspect-ratio: 9/1;
+	position: absolute;
+	top: 3%;
+	left: 5%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+#myTeamLineDescription, #opponentTeamLineDescription {
+	height: 100%;
+	width: 50%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+    align-items: center;
+}
+#lineDescriptionContainer .teamLine {
+	height: 15%;
+	width: 25%;
+}
+#myTeamLineDescription .teamLine {
+	background-color: rgb(213, 112, 255);
+}
+#opponentTeamLineDescription .teamLine {
+	background-color: #BEBEBE;
+}
+#lineDescriptionContainer .lineDescriptionText {
+	width: 65%;
+	font-size: 1.2rem;
 }
 
 #graphContainer {
@@ -153,7 +190,8 @@
 }
 .circleButton:hover {
 	background-color: rgb(213, 112, 255);
-	transition: background-color 0.1s;
+	transition: background-color 0.1s, box-shadow 0.1s;
+	box-shadow: 0 0 10px 5px rgba(213, 112, 255, 0.5);
 }
 
 .subBoard {
@@ -161,11 +199,11 @@
 	height: 100%;
 }
 
-.subBoard:nth-of-type(1) {
+#hitMapPanel .subBoard:nth-child(3) {
 	border-right: 0.05rem solid white;
 }
 
-.subBoard:nth-of-type(2) {
+#hitMapPanel .subBoard:nth-child(4) {
 	border-left: 0.05rem solid white;
 }
 
@@ -187,72 +225,184 @@
 	background-color: rgb(213, 112, 255);
 }
 
+#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+	position: absolute;
+	bottom: 103%;
+	font-size: 1.2rem;
+	border: 0.1rem solid white;
+	border-radius: 1rem;
+	padding: 0.7% 2%;
+}
+
+#hitMapPanel #opponentTeamText {
+	left: 3%;
+}
+
+#hitMapPanel #myTeamText {
+	right: 3%;
+}
+
 .exitButton {
 	z-index: 100;
 }
 
-@media (orientation: portrait) {
-	body {
-		overflow-x: hidden;
+@media (min-aspect-ratio: 2/1) {
+	.matchScoreContainer {
+		height: 52%;
+		width: 15%;
 	}
-
-	#app {
-		height: auto;
+	#lineDescriptionContainer {
+		width: 25%;
 	}
+}
 
-	#container {
-		height: auto;
-		padding: 10% 0;
+@media (max-aspect-ratio: 1.8/1) {
+	#lineDescriptionContainer {
+		width: 35%;
 	}
-
-	#mainInfoContainer,
-	#subInfoContainer {
-		height: auto;
-		flex-direction: column;
+	.circleButton {
+		width: 0.9%;
 	}
+}
 
+@media (max-aspect-ratio: 1.6/1) {
+	.matchScoreContainer {
+		width: 20%;
+	}
+	#word {
+		font-size: 2rem;
+	}
+	.label {
+		font-size: 2.1rem;
+		height: 10%;
+	}
+	#lineDescriptionContainer .lineDescriptionText {
+		font-size: 1rem;
+	}
+	.circleButton {
+		width: 1%;
+	}
+	#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+		font-size: 1rem;
+	}
+}
+
+@media (max-aspect-ratio: 1.4/1) {
 	#mainPanel,
 	#wordPanel {
 		width: 100%;
 		aspect-ratio: 1/0.2;
 		box-sizing: border-box;
 	}
-
 	#mainPanel {
 		border-right-width: 0.1rem;
 		border-bottom-width: 0;
-		border-radius: 2rem 2rem 0 0;
+		border-radius: 1.5rem 1.5rem 0 0;
 	}
-
+	.matchScoreContainer {
+		width: 15%;
+		height: 53%;
+	}
+	.matchTeamListContainer {
+		width: 18%;
+	}
+	#mainInfoContainer {
+		flex-direction: column;
+		height: 40%;
+	}
 	#wordPanel {
-		border-radius: 0 0 2rem 2rem;
+		border-radius: 0 0 1.5rem 1.5rem;
 	}
+	#subInfoContainer {
+		height: 52%;
+	}
+	.label {
+		height: 14%;
+	}
+	#scorePanel, #hitMapPanel {
+		height: 84%;
+	}
+	#lineDescriptionContainer {
+		width: 40%;
+		top: 2%;
+	}
+	.circleButton {
+		width: 1.1%;
+	}
+}
 
+@media (max-aspect-ratio: 1.2/1) {
+	.matchScoreContainer {
+		height: 51%;
+	}
+	.matchTeamListContainer {
+		width: 20%;
+	}
+	#word {
+		font-size: 1.8rem;
+	}
+	.label {
+		font-size: 2rem;
+	}
+	#lineDescriptionContainer {
+		width: 45%;
+	}
+	.circleButton {
+		width: 1.2%;
+	}
+}
+
+@media (max-aspect-ratio: 1/1) {
+	body {
+		overflow-x: hidden;
+	}
+	#app {
+		height: auto;
+	}
+	#container {
+		height: auto;
+		padding: 10% 0;
+	}
+	.matchScoreContainer {
+		width: 20%;
+		height: 50%;
+	}
+	.matchTeamListContainer {
+		width: 23%;
+	}
+	#wordTitle {
+		height: 30%;
+	}
+	#word {
+		height: 70%;
+		font-size: 2rem;
+	}
+	#subInfoContainer {
+		height: auto;
+		flex-direction: column;
+	}
 	#scoreGraphContainer,
 	#hitMapContainer {
 		width: 100%;
 		aspect-ratio: 1/0.73;
 		margin-top: 8%;
 	}
-
+	.label {
+		font-size: 2.4rem;
+		height: 10%;
+	}
 	#scorePanel,
 	#hitMapPanel {
 		box-sizing: border-box;
+		height: 88%;
 	}
-
-	#wordTitle {
-		height: 30%;
+	#lineDescriptionContainer {
+		width: 28%;
+		top: 3%;
 	}
-
-	#word {
-		height: 70%;
-		font-size: 2rem;
-	}
-
 	.circleButton {
 		width: 1.7%;
 	}
-
 	#hitMapPanel .paddleBall {
 		width: auto;
 		height: 3%;
@@ -265,60 +415,7 @@
 	}
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
-	.circleButton {
-		width: 0.9%;
-	}
-}
-
-@media (orientation: landscape) and (max-aspect-ratio: 1.6/1) {
-	#word {
-		font-size: 2rem;
-	}
-	.label {
-		font-size: 2.1rem;
-		height: 10%;
-	}
-	.circleButton {
-		width: 1%;
-	}
-}
-
-@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
-	.circleButton {
-		width: 1.1%;
-	}
-	/* #hitMapPanel {
-		flex-direction: column;
-	}
-	.subBoard {
-		width: 100%;
-		height: 50%;
-	}
-	.subBoard:nth-of-type(1) {
-		border-right: none;
-		border-bottom: 0.05rem solid white;
-	}
-	.subBoard:nth-of-type(2) {
-		border-left: none;
-		border-top: 0.05rem solid white;
-	} */
-}
-
-@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
-	#word {
-		font-size: 1.6rem;
-	}
-	.label {
-		font-size: 2rem;
-		height: 10%;
-	}
-	.circleButton {
-		width: 1.2%;
-	}
-}
-
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+@media (max-aspect-ratio: 1/1.2) {
 	#word {
 		font-size: 1.6rem;
 	}
@@ -328,14 +425,27 @@
 	#mainPanel,
 	#wordPanel {
 		width: 100%;
-		aspect-ratio: 1/0.25;
+		aspect-ratio: 1/0.22;
+	}
+	#lineDescriptionContainer {
+		width: 32%;
+		left: 4%;
 	}
 	.circleButton {
 		width: 2%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+@media (max-aspect-ratio: 1/1.4) {
+	#mainPanel {
+		border-radius: 1rem 1rem 0 0;
+	}
+	#wordPanel {
+		border-radius: 0 0 1rem 1rem;
+	}
+	#scorePanel, #hitMapPanel {
+		border-radius: 1rem;
+	}
 	#wordTitle {
 		height: 35%;
 		font-size: 1rem ;
@@ -347,21 +457,52 @@
 	.label {
 		font-size: 1.8rem;
 	}
+	#lineDescriptionContainer {
+		width: 36%;
+	}
 	.circleButton {
 		width: 2.2%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
-	#app {
-		height: 100%;
+@media (max-aspect-ratio: 1/1.6) {
+	.matchDate {
+		font-size: 0.7rem;
+	}
+	.matchScoreContainer {
+		width: 18%;
+	}
+	.scoreFrame {
+		font-size: 1.2rem;
+	}
+	.matchTeamListContainer .vsFrame {
+		font-size: 1rem;
+	}
+	.label {
+		font-size: 1.6rem;
+		height: 12%;
+	}
+	#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+		font-size: 0.8rem;
+	}
+	#scorePanel, #hitMapPanel {
+		height: 86%;
+	}
+	#lineDescriptionContainer .lineDescriptionText {
+		font-size: 0.8rem;
 	}
 	.circleButton {
 		width: 2.3%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/2) {
+@media (max-aspect-ratio: 1/2) {
+	#app {
+		height: 100%;
+	}
+	.scoreFrame {
+		font-size: 1rem;
+	}
 	#wordTitle {
 		height: 35%;
 		font-size: 0.9rem ;
@@ -372,6 +513,9 @@
 	}
 	.label {
 		font-size: 1.5rem;
+	}
+	#lineDescriptionContainer {
+		width: 40%;
 	}
 	.circleButton {
 		width: 2.6%;

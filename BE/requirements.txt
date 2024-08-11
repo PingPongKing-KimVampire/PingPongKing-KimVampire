@@ -10,3 +10,4 @@ django-cors-headers
 pytest
 pytest-django
 pytest-asyncio
+bleach

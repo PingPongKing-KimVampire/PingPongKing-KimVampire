@@ -40,10 +40,12 @@ class StatisticsPageManager {
 		this.app.innerHTML = this._getHTML();
 		this._setExitButton();
 		this._subscribeWindow();
-		this._setHitMap();
 		setMatchLogPlayerClickListener(this.renderPage.bind(this));
-		requestAnimationFrame(this._renderScoreGraph.bind(this));
-		requestAnimationFrame(this._renderHitMap.bind(this, 1));
+		if (this.round) { // 플레이한 라운드가 있을 경우에만 (기권 사용한 상황 대비)
+			this._setHitMap();
+			requestAnimationFrame(this._renderScoreGraph.bind(this));
+			requestAnimationFrame(this._renderHitMap.bind(this, 1));
+		}
 	}
 
 	async _getClientGameDetail(clientId, gameId) {
@@ -86,7 +88,6 @@ class StatisticsPageManager {
 		windowObservable.subscribeResize(this._renderScoreGraphRef);
 	}
 	_unsubscribeWindow() {
-		// TODO : 화면 나갈 때 호출하기
 		windowObservable.unsubscribeResize(this._renderScoreGraphRef);
 	}
 
@@ -135,8 +136,8 @@ class StatisticsPageManager {
 			});
 		};
 
-		renderLine(this.myPoints, "#BEBEBE");
-		renderLine(this.opponentPoints, "#D570FF");
+		renderLine(this.myPoints, "#D570FF");
+		renderLine(this.opponentPoints, "#BEBEBE");
 	}
 
 	_setHitMap() {
@@ -239,7 +240,7 @@ class StatisticsPageManager {
 					${this._getScorePanelHTML()}
 				</div>
 				<div id="hitMapContainer">
-					<label class="label">n라운드 타점 지도</label>
+					<label class="label">라운드 별 타점 지도</label>
 					${this._getHitMapPanelHTML()}
 				</div>
 			</div>
@@ -248,6 +249,7 @@ class StatisticsPageManager {
 	_getScorePanelHTML() {
 		return `
 			<div id="scorePanel">
+				${this._getLineDescriptionHTML()}
 				<div id="graphContainer">
 					<div id="xLabels">
 						${this._getGraphLabelsHTML(0, this.round)}
@@ -255,6 +257,20 @@ class StatisticsPageManager {
 					<div id="yLabels">
 						${this._getGraphLabelsHTML(0, this.winningScore)}
 					</div>
+				</div>
+			</div>
+		`;
+	}
+	_getLineDescriptionHTML() {
+		return `
+			<div id="lineDescriptionContainer">
+				<div id="myTeamLineDescription">
+					<div class="teamLine"></div>
+					<div class="lineDescriptionText">우리 편</div>
+				</div>
+				<div id="opponentTeamLineDescription">
+					<div class="teamLine"></div>
+					<div class="lineDescriptionText">상대 편</div>
 				</div>
 			</div>
 		`;
@@ -269,6 +285,8 @@ class StatisticsPageManager {
 	_getHitMapPanelHTML() {
 		return `
 			<div id="hitMapPanel">
+				<div id="myTeamText">우리 편</div>
+				<div id="opponentTeamText">상대 편</div>
 				<div class="subBoard"></div>
 				<div class="subBoard"></div>
 				<div class="ball"></div>

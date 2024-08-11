@@ -91,20 +91,11 @@ class WaitingRoomPageManager {
 
 	initPage() {
 		this._setMeInfo();
-		this.app.innerHTML = this._getHTML();
-
-		this.leftReadyText = document.querySelector(".teamPanel:first-of-type .readyText");
-		this.rightReadyText = document.querySelector(".teamPanel:last-of-type .readyText");
-		this._subscribeWindow();
-		document.querySelector("#readyButton").addEventListener("click", event => {
-			this._sendMyReadyStateChangeMessage.call(this);
-		});
-		this._manageExitRoom();
-		this._setAbilityButtons();
+		this._renderPage();
 		this._listenWaitingRoomEvent();
 	}
 
-	_rerenderPage() {
+	_renderPage() {
 		this.app.innerHTML = this._getHTML();
 		this.leftReadyText = document.querySelector(".teamPanel:first-of-type .readyText");
 		this.rightReadyText = document.querySelector(".teamPanel:last-of-type .readyText");
@@ -162,16 +153,16 @@ class WaitingRoomPageManager {
 			if (event === "notifyWaitingRoomEnter") {
 				const { id, nickname, team, avatarUrl } = content;
 				this._pushNewPlayer(id, nickname, team, avatarUrl);
-				this._rerenderPage();
+				this._renderPage();
 			} else if (event === "notifyWaitingRoomExit") {
 				const clientId = content.clientId;
 				this._popPlayer(clientId);
-				this._rerenderPage();
+				this._renderPage();
 			} else if (event === "notifyReadyStateChange") {
 				const { clientId, state } = content;
 				this._updateReadyState(clientId, state);
 				if (clientId === this.clientInfo.id) this.me.readyState = state;
-				this._rerenderPage();
+				this._renderPage();
 			} else if (event === "notifyGameRoomReady") {
 				this._renderReadyModal();
 				//3, 2, 1 추후 구현
@@ -196,7 +187,7 @@ class WaitingRoomPageManager {
 				if (content.team === this.me.team && this.myAbilityButton) {
 					this.me.selectAbility = true;
 				}
-				this._rerenderPage();
+				this._renderPage();
 			}
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", this.listener);
@@ -277,6 +268,7 @@ class WaitingRoomPageManager {
 	}
 
 	_toggleReadyTextVisible(orientation) {
+		console.log(orientation);
 		if (orientation === "landscape") {
 			this.leftReadyText.classList.remove("invisible");
 			this.rightReadyText.classList.remove("invisible");

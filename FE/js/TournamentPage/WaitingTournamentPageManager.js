@@ -14,7 +14,6 @@ class WaitingTournamentPageManager {
 	}
 
 	clearPage() {
-		this._unsubscribeWindow();
 		if (this.clientInfo.nextPage === "lobby") {
 			this._removePageListener();
 			return;
@@ -24,7 +23,6 @@ class WaitingTournamentPageManager {
 	}
 
 	async initPage() {
-		this._adjustButtonSize();
 		this._listenNotifyMatchMakingComplete();
 		this._setLeaveWaitingTournamentButton();
 	}
@@ -73,34 +71,13 @@ class WaitingTournamentPageManager {
 		});
 	}
 
-	_subscribeWindow() {
-		this._adjustButtonSizeRef = this._adjustButtonSize.bind(this);
-		windowObservable.subscribeResize(_adjustButtonSizeRef);
-	}
-
-	_unsubscribeWindow() {
-		windowObservable.unsubscribeResize(this._adjustButtonSizeRef);
-	}
-
-	_adjustButtonSize() {
-		const leaveWaitingTournamentButton = document.querySelector(".leaveWaitingTournamentButton");
-		const viewWidth = window.innerWidth;
-		const viewHeight = window.innerHeight;
-
-		if (viewWidth < viewHeight) {
-			leaveWaitingTournamentButton.style.height = "4vh";
-			leaveWaitingTournamentButton.style.width = "calc(4vh * 5 / 1)";
-		} else {
-			leaveWaitingTournamentButton.style.width = "20vw";
-			leaveWaitingTournamentButton.style.height = "calc(20vw * 1 / 4)";
-		}
-	}
-
 	_getHTML() {
 		return `
         <div class="waitingTournament">
             <div class="waitingTournamentContainer">
-                ${this._getLeaveWaitingTournamentButtonHtml()}
+				<div id="tabContainer">
+					${this._getLeaveWaitingTournamentButtonHtml()}
+				</div>
                 ${this.getWaitingQueueContainer()}
             </div>
         </div>
