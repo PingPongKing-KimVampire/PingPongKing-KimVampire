@@ -353,6 +353,12 @@ class TournamentAnimationPageManager {
 				this._renderAlertTournament(content.stage);
 			} else if (event === "notifyOpponentLeave") {
 				alert("당신의 상대방이 토너먼트에서 떠났습니다.");
+			} else if (event === "notifyTournamentInfoChange") {
+				if (this.clientInfo.currentPage !== "tournament") return;
+				this.tournamentInfo.semiFinal = content.semiFinal;
+				this.tournamentInfo.final = content.final;
+				this._unsubscribeWindow();
+				await this.initPage();
 			}
 		};
 		this.clientInfo.tournamentInfo.tournamentSocket.addEventListener("message", listener);
