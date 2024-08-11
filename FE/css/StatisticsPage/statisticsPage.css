@@ -158,7 +158,8 @@ html {
 }
 .circleButton:hover {
 	background-color: rgb(213, 112, 255);
-	transition: background-color 0.1s;
+	transition: background-color 0.1s, box-shadow 0.1s;
+	box-shadow: 0 0 10px 5px rgba(213, 112, 255, 0.5);
 }
 
 .subBoard {

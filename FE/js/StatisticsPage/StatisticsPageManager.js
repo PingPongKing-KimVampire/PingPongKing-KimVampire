@@ -86,7 +86,6 @@ class StatisticsPageManager {
 		windowObservable.subscribeResize(this._renderScoreGraphRef);
 	}
 	_unsubscribeWindow() {
-		// TODO : 화면 나갈 때 호출하기
 		windowObservable.unsubscribeResize(this._renderScoreGraphRef);
 	}
 
@@ -135,8 +134,8 @@ class StatisticsPageManager {
 			});
 		};
 
-		renderLine(this.myPoints, "#BEBEBE");
-		renderLine(this.opponentPoints, "#D570FF");
+		renderLine(this.myPoints, "#D570FF");
+		renderLine(this.opponentPoints, "#BEBEBE");
 	}
 
 	_setHitMap() {
