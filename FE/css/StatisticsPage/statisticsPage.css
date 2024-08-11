@@ -1,3 +1,8 @@
+html {
+	position: static;
+	overflow: visible;
+}
+
 #container {
 	height: 78%;
 	width: 85%;
@@ -33,11 +38,11 @@
 
 #mainPanel {
 	border-right-width: 0;
-	border-radius: 2rem 0 0 2rem;
+	border-radius: 1.5rem 0 0 1.5rem;
 }
 
 #wordPanel {
-	border-radius: 0 2rem 2rem 0;
+	border-radius: 0 1.5rem 1.5rem 0;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -96,7 +101,7 @@
 	height: 88%;
 	width: 100%;
 	border: 0.1rem solid white;
-	border-radius: 2rem;
+	border-radius: 1.5rem;
 }
 
 #hitMapPanel {
@@ -191,87 +196,23 @@
 	z-index: 100;
 }
 
-@media (orientation: portrait) {
-	body {
-		overflow-x: hidden;
-	}
-
-	#app {
-		height: auto;
-	}
-
-	#container {
-		height: auto;
-		padding: 10% 0;
-	}
-
-	#mainInfoContainer,
-	#subInfoContainer {
-		height: auto;
-		flex-direction: column;
-	}
-
-	#mainPanel,
-	#wordPanel {
-		width: 100%;
-		aspect-ratio: 1/0.2;
-		box-sizing: border-box;
-	}
-
-	#mainPanel {
-		border-right-width: 0.1rem;
-		border-bottom-width: 0;
-		border-radius: 2rem 2rem 0 0;
-	}
-
-	#wordPanel {
-		border-radius: 0 0 2rem 2rem;
-	}
-
-	#scoreGraphContainer,
-	#hitMapContainer {
-		width: 100%;
-		aspect-ratio: 1/0.73;
-		margin-top: 8%;
-	}
-
-	#scorePanel,
-	#hitMapPanel {
-		box-sizing: border-box;
-	}
-
-	#wordTitle {
-		height: 30%;
-	}
-
-	#word {
-		height: 70%;
-		font-size: 2rem;
-	}
-
-	.circleButton {
-		width: 1.7%;
-	}
-
-	#hitMapPanel .paddleBall {
-		width: auto;
-		height: 3%;
-		aspect-ratio: 1/1;
-	}
-	#hitMapPanel .scoreBall {
-		width: auto;
-		height: 3%;
-		aspect-ratio: 1/1;
+@media (min-aspect-ratio: 2/1) {
+	.matchScoreContainer {
+		height: 52%;
+		width: 15%;
 	}
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
+@media (max-aspect-ratio: 1.8/1) {
 	.circleButton {
 		width: 0.9%;
 	}
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.6/1) {
+@media (max-aspect-ratio: 1.6/1) {
+	.matchScoreContainer {
+		width: 20%;
+	}
 	#word {
 		font-size: 2rem;
 	}
@@ -284,41 +225,124 @@
 	}
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.4/1) {
+@media (max-aspect-ratio: 1.4/1) {
+	#mainPanel,
+	#wordPanel {
+		width: 100%;
+		aspect-ratio: 1/0.2;
+		box-sizing: border-box;
+	}
+	#mainPanel {
+		border-right-width: 0.1rem;
+		border-bottom-width: 0;
+		border-radius: 1.5rem 1.5rem 0 0;
+	}
+	.matchScoreContainer {
+		width: 15%;
+		height: 53%;
+	}
+	.matchTeamListContainer {
+		width: 18%;
+	}
+	#mainInfoContainer {
+		flex-direction: column;
+		height: 40%;
+	}
+	#wordPanel {
+		border-radius: 0 0 1.5rem 1.5rem;
+	}
+	#subInfoContainer {
+		height: 52%;
+	}
+	.label {
+		height: 14%;
+	}
+	#scorePanel, #hitMapPanel {
+		height: 84%;
+	}
 	.circleButton {
 		width: 1.1%;
 	}
-	/* #hitMapPanel {
-		flex-direction: column;
-	}
-	.subBoard {
-		width: 100%;
-		height: 50%;
-	}
-	.subBoard:nth-of-type(1) {
-		border-right: none;
-		border-bottom: 0.05rem solid white;
-	}
-	.subBoard:nth-of-type(2) {
-		border-left: none;
-		border-top: 0.05rem solid white;
-	} */
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+@media (max-aspect-ratio: 1.2/1) {
+	.matchScoreContainer {
+		height: 51%;
+	}
+	.matchTeamListContainer {
+		width: 20%;
+	}
 	#word {
-		font-size: 1.6rem;
+		font-size: 1.8rem;
 	}
 	.label {
 		font-size: 2rem;
-		height: 10%;
 	}
 	.circleButton {
 		width: 1.2%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+@media (max-aspect-ratio: 1/1) {
+	body {
+		overflow-x: hidden;
+	}
+	#app {
+		height: auto;
+	}
+	#container {
+		height: auto;
+		padding: 10% 0;
+	}
+	.matchScoreContainer {
+		width: 20%;
+		height: 50%;
+	}
+	.matchTeamListContainer {
+		width: 23%;
+	}
+	#wordTitle {
+		height: 30%;
+	}
+	#word {
+		height: 70%;
+		font-size: 2rem;
+	}
+	#subInfoContainer {
+		height: auto;
+		flex-direction: column;
+	}
+	#scoreGraphContainer,
+	#hitMapContainer {
+		width: 100%;
+		aspect-ratio: 1/0.73;
+		margin-top: 8%;
+	}
+	.label {
+		font-size: 2.4rem;
+		height: 10%;
+	}
+	#scorePanel,
+	#hitMapPanel {
+		box-sizing: border-box;
+		height: 88%;
+	}
+	.circleButton {
+		width: 1.7%;
+	}
+	#hitMapPanel .paddleBall {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
+	#hitMapPanel .scoreBall {
+		width: auto;
+		height: 3%;
+		aspect-ratio: 1/1;
+	}
+}
+
+@media (max-aspect-ratio: 1/1.2) {
 	#word {
 		font-size: 1.6rem;
 	}
@@ -328,14 +352,23 @@
 	#mainPanel,
 	#wordPanel {
 		width: 100%;
-		aspect-ratio: 1/0.25;
+		aspect-ratio: 1/0.22;
 	}
 	.circleButton {
 		width: 2%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+@media (max-aspect-ratio: 1/1.4) {
+	#mainPanel {
+		border-radius: 1rem 1rem 0 0;
+	}
+	#wordPanel {
+		border-radius: 0 0 1rem 1rem;
+	}
+	#scorePanel, #hitMapPanel {
+		border-radius: 1rem;
+	}
 	#wordTitle {
 		height: 35%;
 		font-size: 1rem ;
@@ -352,16 +385,38 @@
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
-	#app {
-		height: 100%;
+@media (max-aspect-ratio: 1/1.6) {
+	.matchDate {
+		font-size: 0.7rem;
+	}
+	.matchScoreContainer {
+		width: 18%;
+	}
+	.scoreFrame {
+		font-size: 1.2rem;
+	}
+	.matchTeamListContainer .vsFrame {
+		font-size: 1rem;
+	}
+	.label {
+		font-size: 1.6rem;
+		height: 12%;
+	}
+	#scorePanel, #hitMapPanel {
+		height: 86%;
 	}
 	.circleButton {
 		width: 2.3%;
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/2) {
+@media (max-aspect-ratio: 1/2) {
+	#app {
+		height: 100%;
+	}
+	.scoreFrame {
+		font-size: 1rem;
+	}
 	#wordTitle {
 		height: 35%;
 		font-size: 0.9rem ;

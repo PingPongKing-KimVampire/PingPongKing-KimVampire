@@ -1,7 +1,7 @@
 .chatButton {
 	width: 5vw;
 	aspect-ratio: 1/1;
-	position: absolute;
+	position: fixed;
 	bottom: 1.5vw;
 	left: 1.5vw;
 	background: url('../../images/chattingIcon.png') center/cover;
@@ -46,7 +46,7 @@
 }
 
 .chatContainer {
-	position: absolute;
+	position: fixed;
 	width: 36vw;
 	aspect-ratio: 1.4/1;
 	bottom: 7vw;
