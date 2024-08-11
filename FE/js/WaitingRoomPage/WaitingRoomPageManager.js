@@ -152,6 +152,7 @@ class WaitingRoomPageManager {
 			const { event, content } = message;
 			if (event === "notifyWaitingRoomEnter") {
 				const { id, nickname, team, avatarUrl } = content;
+				console.log(content);
 				this._pushNewPlayer(id, nickname, team, avatarUrl);
 				this._renderPage();
 			} else if (event === "notifyWaitingRoomExit") {
@@ -220,6 +221,7 @@ class WaitingRoomPageManager {
 			this.clientInfo.gameInfo.teamRightList.push({
 				id,
 				nickname,
+				avatarUrl,
 				readyState: "NOTREADY",
 			});
 	}
@@ -408,7 +410,6 @@ class WaitingRoomPageManager {
 				${abilityBtnInnerHTML}
 			</button>
 		`;
-
 		return `
 			<div class="nameContainer">
 				<div class="name">${player.nickname}</div>
@@ -417,7 +418,7 @@ class WaitingRoomPageManager {
 				${mode === "vampire" ? abilityBtnHTML : ""}
 				<div class="avatarImgFrame">
 					<img class="avatarImg ${player.readyState === "READY" ? "on" : ""}" 
-						src="images/playerA.png">
+						src="${player.avatarUrl}">
 				</div>
 			</div>
 		`;
@@ -442,7 +443,7 @@ class WaitingRoomPageManager {
 	_getPlayerInfoItemHTML(player) {
 		return `
 			<div class="avatarImgFrame">
-				<img class="avatarImg ${player.readyState === "READY" ? "on" : ""}" src="images/playerA.png">
+				<img class="avatarImg ${player.readyState === "READY" ? "on" : ""}" src="${player.avatarUrl}">
 			</div>
 			<div class="listName">${player.nickname}</div>
 		`;

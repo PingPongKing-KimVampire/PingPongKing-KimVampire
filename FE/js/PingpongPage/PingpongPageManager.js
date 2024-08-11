@@ -8,10 +8,6 @@ class PingpongPageManager {
 		this.app = app;
 		this.clientInfo = clientInfo;
 		this.renderPage = renderPage;
-
-		// this.app.innerHTML = this._getGameOverModalHTML();
-		// this._setGameOverImage("lose");
-		// this._displayGameOverModal();
 	}
 
 	connectPage() {
@@ -31,7 +27,6 @@ class PingpongPageManager {
 		if (this.clientInfo.gameInfo.role !== "observer") this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 		this._manageExitRoom();
 		const closeListener = () => {
-			// this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("close", closeListener);
 			this._cleanupPingpongInteraction();
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("close", closeListener);
