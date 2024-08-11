@@ -262,7 +262,7 @@ class GameRoomManager:
         else:
             count = self.team_left.__len__()
         id_list = []
-        for i in range(count):
+        for i in range(count - 1):
             id = str(uuid.uuid4())
             id_list.append(id)
             self.fake_ball[id] = Ball(hit_count=self.ball.hit_count)
@@ -349,9 +349,6 @@ class GameRoomManager:
     def update_target(self, client_id, x, y):
         self.clients[client_id].update_target(x, y)
 
-    async def update_paddle_location(self, client_id, content):
-        await self.queue.put((client_id, content))
-
     ### Game control methods
 
     async def _end_round(self):
@@ -417,7 +414,7 @@ class GameRoomManager:
 
     async def give_up_game(self, consumer):
         client_id = consumer.client_id
-        self.win_team = 'left' if client_id in self.team_left else  'right'
+        self.win_team = 'right' if client_id in self.team_left else  'left'
         await self.notifier.broadcast('notifyGameGiveUp', {'clientId': client_id})
         self._change_game_state()
 

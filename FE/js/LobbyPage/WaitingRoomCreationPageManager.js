@@ -142,7 +142,7 @@ class WaitingRoomCreationPageManager {
 	}
 
 	async _createAndEnterRoom() {
-		const title = this.titleInput.value;
+		const inputTitle = this.titleInput.value;
 		const mode = this.modeButtons.find(button => button.checked).value;
 		let leftMode;
 		let leftPlayerCount;
@@ -168,8 +168,8 @@ class WaitingRoomCreationPageManager {
 			rightPlayerCount = humanCount;
 		}
 
-		this._sendCreateRoomMsg(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
-		const roomId = await this._handleCreateRoomResponse(title, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
+		this._sendCreateRoomMsg(inputTitle, leftMode, leftPlayerCount, rightMode, rightPlayerCount);
+		const {roomId, title} = await this._handleCreateRoomResponse();
 		await this._enterWaitingRoom(roomId, title, leftMode, rightMode, leftPlayerCount, rightPlayerCount);
 	}
 
@@ -210,7 +210,7 @@ class WaitingRoomCreationPageManager {
 				if (event === "createWaitingRoomResponse") {
 					if (content.message === "OK") {
 						this.clientInfo.socket.removeEventListener("message", listener);
-						resolve(content.roomId);
+						resolve({roomId: content.roomId, title: content.title});
 					}
 				}
 			};

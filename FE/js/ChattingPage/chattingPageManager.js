@@ -322,7 +322,7 @@ class ChattingPageManager {
 				const messageElement = document.createElement("div");
 				const senderSide = content.sendClientId === this.clientInfo.id ? "rightSender" : "leftSender";
 				messageElement.classList.add("messageBubble", senderSide);
-				messageElement.textContent = content.message;
+				messageElement.innerHTML = content.message;
 				this.messageListContainer.append(messageElement);
 				const friend = this.clientInfo.friendInfo.friendList.find(friend => friend.id === content.sendClientId || friend.id === content.receiveClientId);
 				friend.chat.unreadMessageCount = 0;

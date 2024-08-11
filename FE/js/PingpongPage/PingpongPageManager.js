@@ -8,10 +8,6 @@ class PingpongPageManager {
 		this.app = app;
 		this.clientInfo = clientInfo;
 		this.renderPage = renderPage;
-
-		// this.app.innerHTML = this._getGameOverModalHTML();
-		// this._setGameOverImage("lose");
-		// this._displayGameOverModal();
 	}
 
 	connectPage() {
@@ -31,7 +27,6 @@ class PingpongPageManager {
 		if (this.clientInfo.gameInfo.role !== "observer") this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
 		this._manageExitRoom();
 		const closeListener = () => {
-			// this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("close", closeListener);
 			this._cleanupPingpongInteraction();
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("close", closeListener);
@@ -158,6 +153,7 @@ class PingpongPageManager {
 		if (this.clientInfo.gameInfo.role !== "observer") {
 			this.player.unsubscribeWindow.call(this.player);
 		}
+		if (this.clientInfo?.gameInfo?.pingpongRoomSocket) this.clientInfo.gameInfo.pingpongRoomSocket.close();
 	}
 
 	_getPingpongHTML() {
@@ -182,7 +178,7 @@ class PingpongPageManager {
 					<div class="playerAvatar"></div>
 				</div>
 				<div class="timeInfo">
-					<div id="timeText">01 : 33</div>
+					<div id="timeText">42</div>
 				</div>
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">
