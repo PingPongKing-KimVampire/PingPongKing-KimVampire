@@ -5,6 +5,7 @@ NORMAL_SPEED = 15
 
 NORMAL_ANGLE = 40
 SPEEDTWIST_ANGLE = 70
+SPEEDTWIST_SPEED_RATIO = 1.5
 
 class Ball:
     def __init__(self, speed=NORMAL_SPEED, radius=25, hit_count = 0):
@@ -78,7 +79,7 @@ class Ball:
             self.speed = NORMAL_SPEED + self.hit_count
             self.angle = movement_angle
         else: 
-            self.speed = (NORMAL_SPEED + self.hit_count) * 1.2
+            self.speed = (NORMAL_SPEED + self.hit_count) * SPEEDTWIST_SPEED_RATIO
             rand = random.randint(-SPEEDTWIST_ANGLE, SPEEDTWIST_ANGLE)
             self.angle = rand
         

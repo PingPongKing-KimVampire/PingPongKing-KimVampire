@@ -14,7 +14,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         # Client Info
         self.client_id = None
         self.nickname = None
-        self.avatar_uri = None
+        self.avatar_url = None
 
         # Pingpong Room Info
         self.room_id = None
@@ -64,7 +64,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
                 else:
                     raise Exception('NotIdentified')
             else:  # normal mode
-                self.team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.avatar_uri)
+                self.team, is_you_create = stateManager.enter_waiting_room(self.room_id, self.client_id, self.nickname, self.avatar_url)
                 if self.team:
                     await self.send_enter_pingpongroom_response(self.room_id, is_you_create)
                     Printer.log(f"Client {self.client_id} entered room {self.room_id}", "blue")
@@ -144,7 +144,7 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         Printer.log(f"Client {self.client_id} selected ability {content['ability']}", "blue")
 
     async def send_enter_pingpongroom_response(self, room_id, is_you_create):
-        await stateManager.notify_room_enter(self.room_id, self.client_id, self.avatar_uri, self.nickname, self.team)
+        await stateManager.notify_room_enter(self.room_id, self.client_id, self.avatar_url, self.nickname, self.team)
         
         if is_you_create:
             await stateManager.notify_room_created(self.room_id)
