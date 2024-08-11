@@ -182,8 +182,8 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyBallLocationUpdate', content=content['content'])
 
     async def notifyScoreUpdate(self, content):
-        if self.game_mode == 'tournament':
-            await notify_group(self.channel_layer, f"tournament_{self.room_id}", 'updateGameroomScore', content['content'])
+        # if self.game_mode == 'tournament':
+        #     await notify_group(self.channel_layer, f"tournament_{self.room_id}", 'updateGameroomScore', content['content'])
         await self._send(event='notifyScoreUpdate', content=content['content'])
     
     async def notifySelectAbility(self, content):

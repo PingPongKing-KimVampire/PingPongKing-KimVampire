@@ -166,14 +166,14 @@ class TournamentManager:
         game_room_manager = GameRoomManager(self.channel_layer, game_room_id, f"tournament_{game_room_id}")
         return game_room_id, game_room_manager
 
-    def update_room_score(self, state, room_id, team, score):
-        for gameroom_info in self.tournament_info_list[state]:
-            if gameroom_info['roomId'] == room_id:
-                if team == 'left':
-                    gameroom_info['score'][0] = score
-                else:
-                    gameroom_info['score'][1] = score
-                break
+    # def update_room_score(self, state, room_id, team, score):
+    #     for gameroom_info in self.tournament_info_list[state]:
+    #         if gameroom_info['roomId'] == room_id:
+    #             if team == 'left':
+    #                 gameroom_info['score'][0] = score
+    #             else:
+    #                 gameroom_info['score'][1] = score
+    #             break
 
     async def notify_all_team_finish(self, tournament_state):
         await self.notify_tournament_room("notifyAllTeamFinish", {"stage": tournament_state})
