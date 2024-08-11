@@ -268,6 +268,8 @@ class StatisticsPageManager {
 	_getHitMapPanelHTML() {
 		return `
 			<div id="hitMapPanel">
+				<div id="myTeamText">우리 편</div>
+				<div id="opponentTeamText">상대 편</div>
 				<div class="subBoard"></div>
 				<div class="subBoard"></div>
 				<div class="ball"></div>

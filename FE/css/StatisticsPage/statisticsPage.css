@@ -108,7 +108,6 @@ html {
 	position: relative;
 	display: flex;
 	flex-direction: row;
-	overflow: hidden;
 }
 
 #scorePanel {
@@ -167,11 +166,11 @@ html {
 	height: 100%;
 }
 
-.subBoard:nth-of-type(1) {
+#hitMapPanel .subBoard:nth-child(3) {
 	border-right: 0.05rem solid white;
 }
 
-.subBoard:nth-of-type(2) {
+#hitMapPanel .subBoard:nth-child(4) {
 	border-left: 0.05rem solid white;
 }
 
@@ -191,6 +190,23 @@ html {
 	position: absolute;
 	border-radius: 50%;
 	background-color: rgb(213, 112, 255);
+}
+
+#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+	position: absolute;
+	bottom: 103%;
+	font-size: 1.2rem;
+	border: 0.1rem solid white;
+	border-radius: 1rem;
+	padding: 0.7% 2%;
+}
+
+#hitMapPanel #opponentTeamText {
+	left: 3%;
+}
+
+#hitMapPanel #myTeamText {
+	right: 3%;
 }
 
 .exitButton {
@@ -220,6 +236,9 @@ html {
 	.label {
 		font-size: 2.1rem;
 		height: 10%;
+	}
+	#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+		font-size: 1rem;
 	}
 	.circleButton {
 		width: 1%;
@@ -402,6 +421,9 @@ html {
 	.label {
 		font-size: 1.6rem;
 		height: 12%;
+	}
+	#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+		font-size: 0.8rem;
 	}
 	#scorePanel, #hitMapPanel {
 		height: 86%;

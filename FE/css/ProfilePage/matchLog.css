@@ -215,9 +215,6 @@
     border-radius: 0.3rem;
 }
 
-
-
-
 .playerNickname {
     width: 70%;
     height: 100%;
@@ -246,6 +243,9 @@
 	.matchTeamListContainer {
 		width: 24%;
 	}
+    .vsFrame {
+        font-size: 1rem;
+    }
 }
 
 @media (max-aspect-ratio: 1/1.8) {
@@ -260,5 +260,8 @@
     }
     .playerNickname span {
         font-size: 0.7rem;
+    }
+    .vsFrame {
+        font-size: 0.8rem;
     }
 }
