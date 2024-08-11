@@ -247,6 +247,7 @@ class StatisticsPageManager {
 	_getScorePanelHTML() {
 		return `
 			<div id="scorePanel">
+				${this._getLineDescriptionHTML()}
 				<div id="graphContainer">
 					<div id="xLabels">
 						${this._getGraphLabelsHTML(0, this.round)}
@@ -254,6 +255,20 @@ class StatisticsPageManager {
 					<div id="yLabels">
 						${this._getGraphLabelsHTML(0, this.winningScore)}
 					</div>
+				</div>
+			</div>
+		`;
+	}
+	_getLineDescriptionHTML() {
+		return `
+			<div id="lineDescriptionContainer">
+				<div id="myTeamLineDescription">
+					<div class="teamLine"></div>
+					<div class="lineDescriptionText">우리 편</div>
+				</div>
+				<div id="opponentTeamLineDescription">
+					<div class="teamLine"></div>
+					<div class="lineDescriptionText">상대 편</div>
 				</div>
 			</div>
 		`;

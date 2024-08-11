@@ -100,12 +100,12 @@ html {
 #hitMapPanel {
 	height: 88%;
 	width: 100%;
+	position: relative;
 	border: 0.1rem solid white;
 	border-radius: 1.5rem;
 }
 
 #hitMapPanel {
-	position: relative;
 	display: flex;
 	flex-direction: row;
 }
@@ -114,6 +114,39 @@ html {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+#lineDescriptionContainer {
+	width: 30%;
+	aspect-ratio: 9/1;
+	position: absolute;
+	top: 3%;
+	left: 5%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+#myTeamLineDescription, #opponentTeamLineDescription {
+	height: 100%;
+	width: 50%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+    align-items: center;
+}
+#lineDescriptionContainer .teamLine {
+	height: 15%;
+	width: 25%;
+}
+#myTeamLineDescription .teamLine {
+	background-color: rgb(213, 112, 255);
+}
+#opponentTeamLineDescription .teamLine {
+	background-color: #BEBEBE;
+}
+#lineDescriptionContainer .lineDescriptionText {
+	width: 65%;
+	font-size: 1.2rem;
 }
 
 #graphContainer {
@@ -218,9 +251,15 @@ html {
 		height: 52%;
 		width: 15%;
 	}
+	#lineDescriptionContainer {
+		width: 25%;
+	}
 }
 
 @media (max-aspect-ratio: 1.8/1) {
+	#lineDescriptionContainer {
+		width: 35%;
+	}
 	.circleButton {
 		width: 0.9%;
 	}
@@ -237,11 +276,14 @@ html {
 		font-size: 2.1rem;
 		height: 10%;
 	}
-	#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+	#lineDescriptionContainer .lineDescriptionText {
 		font-size: 1rem;
 	}
 	.circleButton {
 		width: 1%;
+	}
+	#hitMapPanel #opponentTeamText, #hitMapPanel #myTeamText {
+		font-size: 1rem;
 	}
 }
 
@@ -280,6 +322,10 @@ html {
 	#scorePanel, #hitMapPanel {
 		height: 84%;
 	}
+	#lineDescriptionContainer {
+		width: 40%;
+		top: 2%;
+	}
 	.circleButton {
 		width: 1.1%;
 	}
@@ -297,6 +343,9 @@ html {
 	}
 	.label {
 		font-size: 2rem;
+	}
+	#lineDescriptionContainer {
+		width: 45%;
 	}
 	.circleButton {
 		width: 1.2%;
@@ -347,6 +396,10 @@ html {
 		box-sizing: border-box;
 		height: 88%;
 	}
+	#lineDescriptionContainer {
+		width: 28%;
+		top: 3%;
+	}
 	.circleButton {
 		width: 1.7%;
 	}
@@ -374,6 +427,10 @@ html {
 		width: 100%;
 		aspect-ratio: 1/0.22;
 	}
+	#lineDescriptionContainer {
+		width: 32%;
+		left: 4%;
+	}
 	.circleButton {
 		width: 2%;
 	}
@@ -399,6 +456,9 @@ html {
 	}
 	.label {
 		font-size: 1.8rem;
+	}
+	#lineDescriptionContainer {
+		width: 36%;
 	}
 	.circleButton {
 		width: 2.2%;
@@ -428,6 +488,9 @@ html {
 	#scorePanel, #hitMapPanel {
 		height: 86%;
 	}
+	#lineDescriptionContainer .lineDescriptionText {
+		font-size: 0.8rem;
+	}
 	.circleButton {
 		width: 2.3%;
 	}
@@ -450,6 +513,9 @@ html {
 	}
 	.label {
 		font-size: 1.5rem;
+	}
+	#lineDescriptionContainer {
+		width: 40%;
 	}
 	.circleButton {
 		width: 2.6%;
