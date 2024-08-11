@@ -75,10 +75,6 @@ class PingpongRenderer {
 		const leftName = document.querySelector("#leftDisplayBoard .playerName");
 		const rightName = document.querySelector("#rightDisplayBoard .playerName");
 
-		console.log(this.clientInfo.gameInfo);
-		console.log(leftMode);
-		console.log(rightMode);
-
 		if (leftMode === "human" && rightMode === "human") {
 			if (this.me.team === "left") {
 				rightName.innerText = this.clientInfo.gameInfo.teamLeftList[0].nickname;
@@ -102,16 +98,23 @@ class PingpongRenderer {
 		const leftAvatar = document.querySelector("#leftDisplayBoard .playerAvatar");
 		const rightAvatar = document.querySelector("#rightDisplayBoard .playerAvatar");
 
-		const appendImage = (avatar, src, count = 1) => {
-			for (let i = 0; i < count; i++) {
+		const appendImage = (avatar, srcList) => {
+			for (let i = 0; i < srcList.length; i++) {
 				const img = document.createElement("img");
-				img.src = src;
-				img.style.maxWidth = `${100 / count}%`;
+				img.src = srcList[i];
+				img.style.maxWidth = `${100 / srcList.length}%`;
 				avatar.appendChild(img);
 			}
 		};
-		appendImage(leftAvatar, "images/playerA.png", leftTotalPlayerCount);
-		appendImage(rightAvatar, "images/playerB.png", rightTotalPlayerCount);
+		const leftPlayerSrcList = this.clientInfo.gameInfo.teamLeftList.map(player => player.avatarUrl);
+		const rightPlayerSrcList = this.clientInfo.gameInfo.teamRightList.map(player => player.avatarUrl);
+		if (this.me.team === "right") {
+			appendImage(leftAvatar, leftPlayerSrcList);
+			appendImage(rightAvatar, rightPlayerSrcList);
+		} else {
+			appendImage(leftAvatar, rightPlayerSrcList);
+			appendImage(rightAvatar, leftPlayerSrcList	);
+		}
 	}
 
 	listener = messageEvent => {
