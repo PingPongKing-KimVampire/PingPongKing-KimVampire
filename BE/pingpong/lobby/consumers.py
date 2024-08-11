@@ -69,10 +69,12 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             await self.match_making_cancel(self)
 
     async def create_waiting_room(self, content):
+        title = content['title']
         room_id = stateManager.create_room(content['waitingRoomInfo'])
         await self._send(event='createWaitingRoomResponse', 
             content={
                 'message': 'OK',
+                'title' : title,
                 'roomId': room_id
         })
 
