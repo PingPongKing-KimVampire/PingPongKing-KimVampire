@@ -162,6 +162,11 @@
 	box-sizing: border-box;
 	overflow: hidden;
 }
+
+.avatarImgFrame:hover {
+	cursor: pointer;
+}
+
 .avatarImg {
 	width: 100%;
 }

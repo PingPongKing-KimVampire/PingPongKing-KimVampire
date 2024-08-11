@@ -108,6 +108,7 @@ class FriendManagementPageManager {
 		clientListContainer.innerHTML = this._getSearchedClientListHTML(searchedClientList);
 		this._setClientManagementButtons();
 		this._autoSetScrollTrackColor();
+		this._handleAvatarClick();
 	};
 
 	// 친구 요청 목록 탭 렌더링
@@ -116,6 +117,7 @@ class FriendManagementPageManager {
 		const innerContentContainer = document.querySelector("#innerContentContainer");
 		innerContentContainer.innerHTML = this._getFriendRequestListContainerHTML();
 		this._setClientManagementButtons();
+		this._handleAvatarClick();
 	}
 
 	// 내 친구 관리 탭 렌더링
@@ -124,6 +126,7 @@ class FriendManagementPageManager {
 		const innerContentContainer = document.querySelector("#innerContentContainer");
 		innerContentContainer.innerHTML = this._getFriendListContainerHTML();
 		this._setClientManagementButtons();
+		this._handleAvatarClick();
 	}
 
 	//차단 목록 관리 탭
@@ -132,6 +135,7 @@ class FriendManagementPageManager {
 		const innerContentContainer = document.querySelector("#innerContentContainer");
 		innerContentContainer.innerHTML = this._getBlockListManagementContainerHTML();
 		this._setClientManagementButtons();
+		this._handleAvatarClick();
 	}
 
 	_listenNotifyEvent() {
@@ -166,6 +170,18 @@ class FriendManagementPageManager {
 		} else if (this.selectedTab === "blockListManagementTab") {
 			this._renderBlockListManagementTab();
 		}
+	}
+
+	_handleAvatarClick() {
+		const clientListContainer = document.querySelector(".clientListContainer");
+		clientListContainer.querySelectorAll(".avatarImgFrame").forEach(avatar => {
+			avatar.addEventListener("click", event => {
+				event.stopPropagation();
+				const clientItem = event.target.closest(".clientItem");
+				const id = parseInt(clientItem.dataset.id);
+				this.renderPage("profile", { id });
+			});
+		});
 	}
 
 	_setClientManagementButtons() {
