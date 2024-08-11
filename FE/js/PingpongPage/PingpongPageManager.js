@@ -8,6 +8,10 @@ class PingpongPageManager {
 		this.app = app;
 		this.clientInfo = clientInfo;
 		this.renderPage = renderPage;
+
+		// this.app.innerHTML = this._getGameOverModalHTML();
+		// this._setGameOverImage("lose");
+		// this._displayGameOverModal();
 	}
 
 	connectPage() {
@@ -18,70 +22,76 @@ class PingpongPageManager {
 		this.clientInfo.gameInfo.pingpongRoomSocket.close();
 		if (this.player) this.player._clearPlayer();
 		this.clientInfo.gameInfo = null;
-		this._unsubscribeWindow();
 	}
 
 	async initPage() {
-		//하드코딩
 		this.playerList = [];
 		this.app.innerHTML = this._getPingpongHTML();
-
 		this.pingpongRenderer = new PingpongRenderer(this.clientInfo);
 		if (this.clientInfo.gameInfo.role !== "observer") this.player = new Player(this.clientInfo, this.playerList, this.sizeInfo);
-
-		this._manageExitRoom(); // 탁구장 나가기 처리
-
-		// 탁구장 폐쇄 감지
-		// TODO : 현재 테스트 불가능
+		this._manageExitRoom();
 		const closeListener = () => {
-			this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("close", closeListener);
+			// this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("close", closeListener);
 			this._cleanupPingpongInteraction();
-			this._displayGameOverModal();
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("close", closeListener);
-
-		// TODO : 탁구장 폐쇄 감지가 불가능해서 임시로 notify API 활용
 		this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
 			if (event === "notifyGameEnd") {
-				const { winTeam } = content;
-				let myTeam;
-				let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.id === this.clientInfo.id);
-				if (myPlayer) {
-					myTeam = "left";
-				} else {
-					myTeam = "right";
-				}
-				if (winTeam == myTeam) {
-					this._setGameOverImage("win");
-				} else {
-					this._setGameOverImage("lose");
-				}
+				this._renderGameOverImage(content.winTeam);
+				this._displayGameOverModal();
 				this.clientInfo.gameInfo.pingpongRoomSocket.close();
 			}
 		});
 		this._subscribeWindow();
 	}
 
+	_displayGameOverModal() {
+		const gameOverModal = document.querySelector("#gameOverModal");
+		gameOverModal.style.display = "flex";
+		document.querySelector("#gameOverModal button").addEventListener("click", () => {
+			if (this.clientInfo.tournamentInfo) {
+				this.renderPage("tournament");
+				return;
+			}
+			this.renderPage("lobby");
+		});
+	}
+
+	_renderGameOverImage(winTeam) {
+		let myTeam;
+		let myPlayer = this.clientInfo.gameInfo.teamLeftList.find(player => player.id === this.clientInfo.id);
+		if (myPlayer) {
+			myTeam = "left";
+		} else {
+			myTeam = "right";
+		}
+		if (winTeam == myTeam) {
+			this._setGameOverImage("win");
+		} else {
+			this._setGameOverImage("lose");
+		}
+	}
+
 	_setGameOverImage(result) {
 		const gameOverImage = document.querySelector(".gameOverImage");
+		const gameOverModal = document.querySelector("#gameOverModal");
 		let svgPath;
 
 		switch (result) {
 			case "win":
-				svgPath = "images/winIcon.svg";
+				gameOverImage.classList.add("winImage");
+				gameOverModal.classList.add("winBackground");
 				break;
 			case "lose":
-				svgPath = "images/loseIcon.svg";
+				gameOverImage.classList.add("loseImage");
+				gameOverModal.classList.add("loseBackground");
 				break;
 			case "observer":
-				svgPath = "images/winIcon.sv"; // 관전자는 어떻게 처리?
+				gameOverImage.classList.add("winImage");
+				gameOverModal.classList.add("winBackground");
 				break;
-			default:
-				console.error("Invalid result");
-				return;
 		}
-		gameOverImage.innerHTML = `<img src="${svgPath}">`;
 	}
 
 	_manageExitRoom() {
@@ -129,7 +139,11 @@ class PingpongPageManager {
 	}
 	_exitYesButtonClicked() {
 		this._cleanupPingpongInteraction();
-		history.back();
+		if (this.clientInfo.tournamentInfo) {
+			this.renderPage("tournament");
+			return;
+		}
+		this.renderPage("lobby");
 	}
 	_exitNoButtonClicked(questionModal) {
 		this.exitModalState = "INACTIVE";
@@ -137,26 +151,13 @@ class PingpongPageManager {
 	}
 
 	_cleanupPingpongInteraction() {
-		// PingpongPageManager, PingpongRenderer, Player에서 소켓과의 모든 상호작용 삭제
-		// TODO : 남아있는 리스너 확인하기
+		if (!this.clientInfo?.gameInfo) return;
 		this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
 		this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
 
 		if (this.clientInfo.gameInfo.role !== "observer") {
 			this.player.unsubscribeWindow.call(this.player);
 		}
-	}
-
-	_displayGameOverModal() {
-		const gameOverModal = document.querySelector("#gameOverModal");
-		gameOverModal.style.display = "flex";
-		document.querySelector("#gameOverModal button").addEventListener("click", () => {
-			if (this.clientInfo.tournamentInfo) {
-				this.renderPage("tournament");
-				return;
-			}
-			this.renderPage("lobby");
-		});
 	}
 
 	_getPingpongHTML() {
@@ -209,7 +210,7 @@ class PingpongPageManager {
 			<button class="exitButton"></button>
 			<div class="questionModal">
 				<div class="questionBox">
-					<div class="question">${this.clientInfo.gameInfo.role === "observer"?"관전을 종료하시겠습니까?":"상대에게 승리를 선사하시겠습니까?"}</div>
+					<div class="question">${this.clientInfo.gameInfo.role === "observer" ? "관전을 종료하시겠습니까?" : "상대에게 승리를 선사하시겠습니까?"}</div>
 					<div class="buttonGroup">
 						<button class="activatedButton">네</button>
 						<button class="activatedButton">아니오</button>

@@ -119,7 +119,6 @@ class PingpongRenderer {
 			this._updateScore(content);
 		} else if (event === "notifyGameEnd") {
 			// 게임 승리
-			this._endGame(content);
 		} else if (event === "notifyGameGiveUp") {
 			// 누군가의 기권 선언
 			this._removePlayer(content);
@@ -203,7 +202,7 @@ class PingpongRenderer {
 	}
 
 	removeListener() {
-		this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", this.listener);
+		if (this.clientInfo?.gameInfo?.pingpongRoomSocket) this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", this.listener);
 	}
 
 	_subscribeWindow() {
@@ -267,10 +266,10 @@ class PingpongRenderer {
 		}
 	}
 
-	_removePlayer({ id }) {
-		const playerToRemove = this.players.find(player => player.id === id);
+	_removePlayer({ clientId }) {
+		const playerToRemove = this.players.find(player => player.id === clientId);
 		playerToRemove.paddle.element.remove();
-		this.players = this.players.filter(player => player.id !== id);
+		this.players = this.players.filter(player => player.id !== clientId);
 	}
 
 	_createPaddle(board) {
@@ -361,12 +360,12 @@ class PingpongRenderer {
 		}
 	}
 
-	_endGame({ winTeam }) {
-		const winBoard = this.me.team === winTeam ? this.rightBoard : this.leftBoard;
-		const loseBoard = this.me.team === winTeam ? this.leftBoard : this.rightBoard;
-		winBoard.style.backgroundColor = "blue";
-		loseBoard.style.backgroundColor = "red";
-	}
+	// _endGame({ winTeam }) {
+	// 	const winBoard = this.me.team === winTeam ? this.rightBoard : this.leftBoard;
+	// 	const loseBoard = this.me.team === winTeam ? this.leftBoard : this.rightBoard;
+	// 	winBoard.style.backgroundColor = "blue";
+	// 	loseBoard.style.backgroundColor = "red";
+	// }
 
 	_updateGameContainer() {
 		const ratio = this.gameContainerRatio;

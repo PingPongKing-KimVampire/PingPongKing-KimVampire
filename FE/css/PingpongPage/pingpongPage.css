@@ -186,7 +186,6 @@
 }
 
 
-/* TODO 임시 게임 종료 화면. 나중에 지우기 */
 #gameOverModal {
 	display: none;
 	/* display: flex; */
@@ -196,12 +195,19 @@
 	z-index: 1;
 	justify-content: center;
 	align-items: center;
-	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.winBackground {
+    background: linear-gradient(to bottom, rgba(1, 4, 37, 0.5), rgba(4, 15, 139, 0.5));
+}
+
+.loseBackground {
+    background: linear-gradient(to bottom, rgba(1, 4, 37, 0.5), rgba(79, 19, 49, 0.5));
 }
 
 #gameOverModal #contentBox {
-	height: 15%;
-	width: 30%;
+	height: 30%;
+	width: 50%;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -210,14 +216,27 @@
 }
 
 #gameOverModal .gameOverImage {
-	height: 80%;
-	margin-bottom: 10px;
+	width: 45%;
+	aspect-ratio: 3 / 1;
+}
+
+#gameOverModal .winImage {
+	background: url("../../images/winIcon.svg") center/contain no-repeat;
+}
+
+#gameOverModal .loseImage {
+	background: url("../../images/loseIcon.svg") center/contain no-repeat;
 }
 
 #gameOverModal button {
-	height: 20%;
-	padding: 2% 10%;
+	height: 30%;
+	width: 40%;
+	font-size: 2.5rem;
 }
+
+/* #gameOverModal button:hover {
+	
+} */
 
 @media (orientation: portrait) {
 	html {
