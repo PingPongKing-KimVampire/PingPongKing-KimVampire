@@ -54,8 +54,8 @@ class SignupPageManager {
 	}
 
 	_checkId = async () => {
-		if (this.idInput.value === '') {
-			this.idWarning.textContent = '';
+		if (this.idInput.value === "") {
+			this.idWarning.textContent = "";
 			this.idValidState = false;
 			return;
 		}
@@ -73,18 +73,16 @@ class SignupPageManager {
 				return;
 			}
 		} catch (error) {
-			if (error instanceof Error)
-				this.idWarning.textContent = error.message;
-			if (error instanceof TypeError && error.message === 'Failed to fetch')
-				this.idWarning.textContent = "서버의 응답이 없습니다.";
+			if (error instanceof Error) this.idWarning.textContent = error.message;
+			if (error instanceof TypeError && error.message === "Failed to fetch") this.idWarning.textContent = "서버의 응답이 없습니다.";
 			return;
 		}
 		this.idValidState = true;
 		this.idWarning.textContent = "";
 	};
 	_checkPw = () => {
-		if (this.pwInput.value === '') {
-			this.pwWarning.textContent = '';
+		if (this.pwInput.value === "") {
+			this.pwWarning.textContent = "";
 			this.pwValidState = false;
 			return;
 		}
@@ -98,8 +96,8 @@ class SignupPageManager {
 		this.pwWarning.textContent = "";
 	};
 	_checkRePw = () => {
-		if (this.rePwInput.value === '') {
-			this.rePwWarning.textContent = '';
+		if (this.rePwInput.value === "") {
+			this.rePwWarning.textContent = "";
 			this.rePwValidState = false;
 			return;
 		}
@@ -113,8 +111,8 @@ class SignupPageManager {
 		this.rePwWarning.textContent = "";
 	};
 	_checkNickName = async () => {
-		if (this.nickNameInput.value === '') {
-			this.nickNameWarning.textContent = '';
+		if (this.nickNameInput.value === "") {
+			this.nickNameWarning.textContent = "";
 			this.nickNameValidState = false;
 			return;
 		}
@@ -132,10 +130,8 @@ class SignupPageManager {
 				return;
 			}
 		} catch (error) {
-			if (error instanceof Error)
-				this.nickNameWarning.textContent = error.message;
-			if (error instanceof TypeError && error.message === 'Failed to fetch')
-				this.nickNameWarning.textContent = "서버의 응답이 없습니다.";
+			if (error instanceof Error) this.nickNameWarning.textContent = error.message;
+			if (error instanceof TypeError && error.message === "Failed to fetch") this.nickNameWarning.textContent = "서버의 응답이 없습니다.";
 			return;
 		}
 		this.nickNameValidState = true;
@@ -144,7 +140,7 @@ class SignupPageManager {
 
 	async _validateDuplicateId(id) {
 		const query = new URLSearchParams({ username: id }).toString();
-		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-username?${query}`;
+		const url = `https://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-username?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -152,7 +148,7 @@ class SignupPageManager {
 			},
 		});
 		if (!response.ok) {
-			throw new Error('서버와의 연결이 불안정합니다.');
+			throw new Error("서버와의 연결이 불안정합니다.");
 		}
 		const data = await response.json();
 		return data.is_available;
@@ -160,7 +156,7 @@ class SignupPageManager {
 
 	async _validateDuplicateNickName(nickName) {
 		const query = new URLSearchParams({ nickname: nickName }).toString();
-		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-nickname?${query}`;
+		const url = `https://${SERVER_ADDRESS}:${SERVER_PORT}/api/check-nickname?${query}`;
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -168,7 +164,7 @@ class SignupPageManager {
 			},
 		});
 		if (!response.ok) {
-			throw new Error('서버와의 연결이 불안정합니다.');
+			throw new Error("서버와의 연결이 불안정합니다.");
 		}
 		const data = await response.json();
 		return data.is_available;
@@ -206,7 +202,7 @@ class SignupPageManager {
 			password: password,
 		};
 
-		const url = `http://${SERVER_ADDRESS}:${SERVER_PORT}/api/signup`;
+		const url = `https://${SERVER_ADDRESS}:${SERVER_PORT}/api/signup`;
 
 		try {
 			const response = await fetch(url, {
@@ -218,42 +214,39 @@ class SignupPageManager {
 			});
 
 			if (!response.ok) {
-				let information = '';
+				let information = "";
 				if (response.status === 409) {
-					const responseData = await response.json(); 
-					if (responseData.duplicated_item === 'id') {
-						information = '이미 존재하는 아이디입니다.';
-					} else if (responseData.duplicated_item === 'nickname') {
-						information = '이미 존재하는 닉네임입니다.';
+					const responseData = await response.json();
+					if (responseData.duplicated_item === "id") {
+						information = "이미 존재하는 아이디입니다.";
+					} else if (responseData.duplicated_item === "nickname") {
+						information = "이미 존재하는 닉네임입니다.";
 					}
 				} else if (response.status >= 400 && response.status < 500) {
-					information = '입력 내용이 유효하지 않습니다.';
+					information = "입력 내용이 유효하지 않습니다.";
 				} else if (response.status >= 500) {
-					information = '서버와의 연결이 불안정합니다.';
+					information = "서버와의 연결이 불안정합니다.";
 				}
 				throw new Error(information);
 			}
-
 		} catch (error) {
-			if (error instanceof Error)
-				this._displaySignupFailureNotiWindow(error.message);
-			if (error instanceof TypeError && error.message === 'Failed to fetch')
-				this._displaySignupFailureNotiWindow("서버의 응답이 없습니다.");
+			if (error instanceof Error) this._displaySignupFailureNotiWindow(error.message);
+			if (error instanceof TypeError && error.message === "Failed to fetch") this._displaySignupFailureNotiWindow("서버의 응답이 없습니다.");
 		}
 
 		this.renderPage("login");
 	};
 	_displaySignupFailureNotiWindow(infomation) {
-		const notiWindow = document.querySelector('.notiWindow');
-		notiWindow.querySelector('.infomation').textContent = infomation;
-		notiWindow.style.display = 'flex';
+		const notiWindow = document.querySelector(".notiWindow");
+		notiWindow.querySelector(".infomation").textContent = infomation;
+		notiWindow.style.display = "flex";
 
-		const confirmButton = notiWindow.querySelector('.confirmButton');
+		const confirmButton = notiWindow.querySelector(".confirmButton");
 		const listener = () => {
-			confirmButton.removeEventListener('click', listener);
-			notiWindow.style.display = 'none';
-		}
-		confirmButton.addEventListener('click', listener);
+			confirmButton.removeEventListener("click", listener);
+			notiWindow.style.display = "none";
+		};
+		confirmButton.addEventListener("click", listener);
 	}
 
 	_updateSignupButton = () => {

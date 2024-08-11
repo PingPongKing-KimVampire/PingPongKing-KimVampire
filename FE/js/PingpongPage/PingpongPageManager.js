@@ -15,6 +15,7 @@ class PingpongPageManager {
 	}
 
 	clearPage() {
+		this.clientInfo.gameInfo.pingpongRoomSocket.close();
 		if (this.player) this.player._clearPlayer();
 		this.clientInfo.gameInfo = null;
 		this._unsubscribeWindow();
@@ -95,11 +96,7 @@ class PingpongPageManager {
 	}
 	_exitYesButtonClicked() {
 		this._cleanupPingpongInteraction();
-		if (this.clientInfo.tournamentInfo) {
-			this.renderPage("tournament");
-			return;
-		}
-		this.renderPage("lobby");
+		history.back();
 	}
 	_exitNoButtonClicked(questionModal) {
 		this.exitModalState = "INACTIVE";
@@ -111,7 +108,10 @@ class PingpongPageManager {
 		// TODO : 남아있는 리스너 확인하기
 		this.pingpongRenderer.removeListener.call(this.pingpongRenderer);
 		this.pingpongRenderer.unsubscribeWindow.call(this.pingpongRenderer);
-		this.player.unsubscribeWindow.call(this.player);
+
+		if (this.clientInfo.gameInfo.role !== "observer") {
+			this.player.unsubscribeWindow.call(this.player);
+		}
 	}
 
 	_displayGameOverModal() {
@@ -176,7 +176,7 @@ class PingpongPageManager {
 			<button class="exitButton"></button>
 			<div class="questionModal">
 				<div class="questionBox">
-					<div class="question">상대에게 승리를 선사하시겠습니까?</div>
+					<div class="question">${this.clientInfo.gameInfo.role === "observer"?"관전을 종료하시겠습니까?":"상대에게 승리를 선사하시겠습니까?"}</div>
 					<div class="buttonGroup">
 						<button class="activatedButton">네</button>
 						<button class="activatedButton">아니오</button>

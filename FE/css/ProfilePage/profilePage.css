@@ -85,6 +85,19 @@
 	cursor: pointer;
 }
 
+.logoutButton{
+    width: 70%;
+    height: 10%;
+    background-color: rgb(213, 112, 255);
+    border-radius: 10rem;
+    font-size: 2.3rem;
+    font-weight: 700;
+}
+
+.logoutButton:hover {
+	cursor: pointer;
+}
+
 #matchLogContainer {
     width: 45%;
     height: 88%;

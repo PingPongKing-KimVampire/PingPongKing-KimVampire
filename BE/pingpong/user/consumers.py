@@ -10,6 +10,8 @@ import uuid
 from django.core.files.base import ContentFile
 from django.conf import settings
 from coreManage.group import add_group, discard_group, notify_group, notify_client_event
+from coreManage.recieveCleaner import ReceiveCleaner
+
 MAX_URI_LENGTH = 200
 stateManager = StateManager()
 DEFAULT_IMAGE_URI = "images/playerA.png"
@@ -56,6 +58,10 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         message = json.loads(text_data)
         event = message.get('event')
         content = message.get('content')
+        
+        event = ReceiveCleaner.clean(event)
+        content = ReceiveCleaner.clean(content)
+        
         Printer.log("<<<<<")
         Printer.log(f"event : {event}")
         Printer.log(f"content : {content}")

@@ -17,7 +17,7 @@ class TournamentAnimationPageManager {
 			throw new TournamentInfodNotSettingError();
 		}
 		async function _connectTournamentSocket(id) {
-			const tournamentSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`, ["authorization", this.clientInfo.accessToken]);
+			const tournamentSocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/tournament-room/${id}`, ["authorization", this.clientInfo.accessToken]);
 			await new Promise(resolve => {
 				tournamentSocket.addEventListener("open", () => {
 					resolve();
@@ -312,7 +312,6 @@ class TournamentAnimationPageManager {
 	_setExitButton() {
 		const isSemiFinalLoser = id => {
 			let winnerId;
-			// console.log(this.tournamentInfo);
 			if (this.tournamentInfo.semiFinal[0].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[0].winnerId;
 			else if (this.tournamentInfo.semiFinal[1].clientIdList.includes(id)) winnerId = this.tournamentInfo.semiFinal[1].winnerId;
 			//아직 경기 전
@@ -346,14 +345,10 @@ class TournamentAnimationPageManager {
 			if (event === "notifyYourGameRoomReady") {
 				try {
 					await this._enterWaitingRoom(content.pingpongroomId);
+					await this._enterPingpongRoom();
 				} catch (e) {
-					if (e === "게임에 참여하지 못했습니다!") {
-						alert(e);
-						return;
-					}
-					throw e;
+					alert(e);
 				}
-				this._enterPingpongRoom();
 			} else if (event === "notifyAllTeamFinish") {
 				this._renderAlertTournament(content.stage);
 			} else if (event === "notifyOpponentLeave") {
@@ -389,16 +384,7 @@ class TournamentAnimationPageManager {
 	}
 
 	async _enterWaitingRoom(roomId) {
-		// 핑퐁룸 소켓에 연결
-		// if (this.clientInfo.nickname === "b") {
-		// 	await new Promise((resolve, reject) => {
-		// 		console.log("here");
-		// 		setTimeout(() => {
-		// 			resolve();
-		// 		}, 15000);
-		// 	});
-		// }
-		const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
+		const pingpongRoomSocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}`, ["authorization", this.clientInfo.accessToken]);
 		await new Promise(resolve => {
 			pingpongRoomSocket.addEventListener("open", () => {
 				resolve();
@@ -407,10 +393,8 @@ class TournamentAnimationPageManager {
 		await new Promise((resolve, reject) => {
 			pingpongRoomSocket.addEventListener("message", messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
-				//ok면 resolve
 				if (event === "enterWaitingRoomResponse") {
 					if (content.message === "OK") {
-						console.log("RESOLVE");
 						resolve();
 					} else if (content.message === "NoRoom") {
 						reject("게임에 참여하지 못했습니다!");
@@ -441,12 +425,15 @@ class TournamentAnimationPageManager {
 		};
 		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(changeReadyStateMessage));
 		// 3초 후 notifyGameStart 메시지 받기
-		const { boardInfo, playerInfo } = await new Promise(resolve => {
+		const { boardInfo, playerInfo } = await new Promise((resolve, reject) => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === "notifyGameStart") {
 					this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", listener);
 					resolve(content);
+				} else if (event === "notifyGameGiveUp") {
+					this.clientInfo.gameInfo.pingpongRoomSocket.removeEventListener("message", listener);
+					reject("상대가 게임에 참여하지 않았습니다! 부전승 개꿀~");
 				}
 			};
 			this.clientInfo.gameInfo.pingpongRoomSocket.addEventListener("message", listener);
@@ -470,7 +457,6 @@ class TournamentAnimationPageManager {
 			});
 		});
 		this.clientInfo.gameInfo.sizeInfo = boardInfo;
-		this._unsubscribeWindow();
 		this.renderPage("pingpong");
 	}
 
@@ -769,7 +755,7 @@ class TournamentAnimationPageManager {
 			}
 
 			async function startObserveGame(roomId) {
-				const pingpongRoomSocket = new WebSocket(`ws://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/observe`, ["authorization", this.clientInfo.accessToken]);
+				const pingpongRoomSocket = new WebSocket(`wss://${SERVER_ADDRESS}:${SERVER_PORT}/ws/pingpong-room/${roomId}/observe`, ["authorization", this.clientInfo.accessToken]);
 				await new Promise(resolve => {
 					pingpongRoomSocket.addEventListener("open", () => {
 						resolve();
@@ -785,23 +771,41 @@ class TournamentAnimationPageManager {
 						}
 					});
 				});
-				const teamLeftList = playerInfo.filter(player => player.team === "left");
-				const teamRightList = playerInfo.filter(player => player.team === "right");
+
 				this.clientInfo.gameInfo = {
 					role: "observer",
 					pingpongRoomSocket,
-					teamLeftList,
-					teamRightList,
-					teamLeftMode: teamInfo.leftTeamAbilitfy,
-					teamrightMode: teamInfo.rightTeamAbilitfy,
-					teamLeftScore: teamInfo.leftTeamScore,
-					teamRightScore: teamInfo.rightTeamScore,
-					sizeInfo: {
-						boardWidth: boardInfo.boardWidth,
-						boardHeight: boardInfo.boardHeight,
-						ballRadius: boardInfo.ballRadius,
-					},
+					roomId,
+					title: null,
+					teamLeftList: [],
+					teamRightList: [],
+					teamLeftMode: "human",
+					teamRightMode: "human",
+					teamLeftTotalPlayerCount: 1,
+					teamRightTotalPlayerCount: 1,
+					teamLeftAbility: null,
+					teamRightAbility: null,
 				};
+
+				playerInfo.forEach(player => {
+					let teamList;
+					if (player.team === "left") {
+						teamList = this.clientInfo.gameInfo.teamLeftList;
+					} else if (player.team === "right") {
+						teamList = this.clientInfo.gameInfo.teamRightList;
+					}
+					teamList.push({
+						id: player.clientId,
+						nickname: this.clientInfo.tournamentInfo.tournamentClientList.find(p => p.id === player.clientId).nickname,
+						avatarUrl: this.clientInfo.tournamentInfo.tournamentClientList.find(p => p.id === player.clientId).avatarUrl,
+						readyState: "READY",
+						ability: null,
+						paddleWidth: player.paddleWidth,
+						paddleHeight: player.paddleHeight,
+					});
+				});
+				this.clientInfo.gameInfo.sizeInfo = boardInfo;
+				this.renderPage("pingpong");
 			}
 
 			function createObserveButton(type, roomId) {
@@ -824,7 +828,6 @@ class TournamentAnimationPageManager {
 			}
 			const stages = [...this.tournamentInfo.final, ...this.tournamentInfo.semiFinal];
 			const types = ["final", "leftSemiFinal", "rightSemiFinal"];
-			console.log(stages);
 			stages.forEach((stage, index) => {
 				if (stage.state === "playing") {
 					createObserveButton.call(this, types[index], stage.roomId);
