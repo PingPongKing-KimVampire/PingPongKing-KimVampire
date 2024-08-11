@@ -158,6 +158,7 @@ class PingpongPageManager {
 		if (this.clientInfo.gameInfo.role !== "observer") {
 			this.player.unsubscribeWindow.call(this.player);
 		}
+		if (this.clientInfo?.gameInfo?.pingpongRoomSocket) this.clientInfo.gameInfo.pingpongRoomSocket.close();
 	}
 
 	_getPingpongHTML() {
