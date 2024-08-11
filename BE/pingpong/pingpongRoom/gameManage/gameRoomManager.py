@@ -417,7 +417,7 @@ class GameRoomManager:
 
     async def give_up_game(self, consumer):
         client_id = consumer.client_id
-        self.win_team = 'left' if client_id in self.team_left else  'right'
+        self.win_team = 'right' if client_id in self.team_left else  'left'
         await self.notifier.broadcast('notifyGameGiveUp', {'clientId': client_id})
         self._change_game_state()
 
