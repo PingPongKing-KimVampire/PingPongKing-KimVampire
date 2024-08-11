@@ -75,12 +75,27 @@ class PingpongRenderer {
 		const leftName = document.querySelector("#leftDisplayBoard .playerName");
 		const rightName = document.querySelector("#rightDisplayBoard .playerName");
 
-		if (this.me.team === "left") {
-			leftName.innerText = leftMode;
-			rightName.innerText = rightMode;
+		console.log(this.clientInfo.gameInfo);
+		console.log(leftMode);
+		console.log(rightMode);
+
+		if (leftMode === "human" && rightMode === "human") {
+			if (this.me.team === "left") {
+				rightName.innerText = this.clientInfo.gameInfo.teamLeftList[0].nickname;
+				leftName.innerText = this.clientInfo.gameInfo.teamRightList[0].nickname;
+			} else {
+				leftName.innerText = this.clientInfo.gameInfo.teamLeftList[0].nickname;
+				rightName.innerText = this.clientInfo.gameInfo.teamRightList[0].nickname;
+			}
+			return;
 		} else {
-			rightName.innerText = leftMode;
-			leftName.innerText = rightMode;
+			if (this.me.team === "left") {
+				rightName.innerText = leftMode;
+				leftName.innerText = rightMode;
+			} else {
+				leftName.innerText = leftMode;
+				rightName.innerText = rightMode;
+			}
 		}
 	}
 	_setDisplayAvatar(leftTotalPlayerCount, rightTotalPlayerCount) {
