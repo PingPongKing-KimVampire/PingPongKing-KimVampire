@@ -266,20 +266,6 @@ body {
 	50% {
 	  transform: rotate(5deg);
 	}
-  }
-
-  @media (orientation: portrait) {
-	.exitButton {
-		top: 2%;
-		left: 3%;
-	}
-	.questionModal .buttonGroup {
-		flex-direction: column;
-	}
-	.questionModal .buttonGroup button {
-		width: 80%;
-		margin: 3.5% 0;
-	}
 }
 
 @media (min-aspect-ratio: 2.5/1) {
@@ -301,8 +287,17 @@ body {
 	.questionModal .buttonGroup {
 		width: 50%;
 	}
+	.exitButton {
+		width: 4%;
+	}
 }
 @media (max-aspect-ratio: 1/1) {
+	.exitButton {
+		top: 2%;
+		left: 3%;
+		height: 5%;
+		width: auto;
+	}
 	.questionModal .questionBox {
 		font-size: 3rem;
 	}
@@ -310,10 +305,13 @@ body {
 		font-size: 2rem;
 	}
 	.questionModal .buttonGroup {
+		flex-direction: column;
 		padding-top: 5%;
 	}
 	.questionModal .buttonGroup button {
 		font-size: 1.8rem;
+		width: 80%;
+		margin: 3.5% 0;
 	}
 }
 @media (max-aspect-ratio: 1/1.3) {
