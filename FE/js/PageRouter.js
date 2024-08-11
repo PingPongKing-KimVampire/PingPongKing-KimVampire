@@ -24,6 +24,7 @@ class PageRouter {
 		this.app = document.querySelector("#app");
 		this.chatButton = document.querySelector(".chatButton");
 		this.clientInfo = {
+			isMobile: /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
 			socket: null,
 			id: null,
 			nickname: null,
@@ -195,6 +196,9 @@ class PageRouter {
 			if (isUpdateHistory) history.pushState({}, "", this.buildUrl(url, queryParam));
 			this.currentPageManager = this.nextPageManager;
 			this.nextPageManager = null;
+			if (this.clientInfo.isMobile) { // 모바일에서 app 높이는 window.innerHeight, 전체 스크롤 페이지는 auto
+				this.app.style.height = url !== 'statistics' ? window.innerHeight + "px" : "auto";
+			}
 			await this.currentPageManager.initPage();
 		} catch (e) {
 			console.log(e);
