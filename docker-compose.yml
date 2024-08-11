@@ -4,7 +4,7 @@ services:
   db:
     image: postgres:16-alpine
     volumes:
-      - ${DATA_PATH}:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
     ports:
@@ -14,10 +14,8 @@ services:
 
   web:
     build: ./BE
-    volumes:
-      - ./BE:/app
     expose:
-      - "3001:3001"
+      - "3001"
     depends_on:
       - db
     env_file:
@@ -27,11 +25,12 @@ services:
 
   nginx:
     build: ./FE
+    # 평가시 볼륨 제거 할 것
+    volumes: 
+      - ./FE:/usr/share/nginx/html
     ports:
       - "80:80"
       - "443:443"
-    volumes: # 나중에 삭제
-      - ./FE:/usr/share/nginx/html
     depends_on:
       - web
     networks:
@@ -40,3 +39,6 @@ services:
 networks:
   vampire:
     driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,19 +1,10 @@
-DATA_DIR = ./DB/data_db
-ENV = DATA_PATH=${DATA_DIR}
+up: down
+	docker-compose up --build
 
-up: down create-dir
-	$(ENV) docker-compose up --build
-
-background-up: down create-dir
-	$(ENV) docker-compose up --build -d
+background-up: down
+	docker-compose up --build -d
 
 down:
-	docker-compose down -v
+	docker-compose down
 
-clean:
-	rm -rf $(DATA_DIR)
-
-create-dir:
-	mkdir -p $(DATA_DIR)
-
-.PHONY: down clean create-dir up
+.PHONY: down up

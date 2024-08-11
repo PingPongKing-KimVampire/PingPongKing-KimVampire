@@ -13,5 +13,7 @@ echo "PostgreSQL started"
 python manage.py makemigrations
 python manage.py migrate
 
+python manage.py create_default_users
+
 # Daphne 서버 시작
 exec "$@"
