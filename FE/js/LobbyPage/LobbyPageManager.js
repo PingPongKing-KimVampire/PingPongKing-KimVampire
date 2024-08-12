@@ -107,7 +107,7 @@ class LobbyPageManager {
 					element: newWaitingRoomElement,
 					maxPlayerCount,
 				};
-				this.waitingRoomListContainer.appendChild(newWaitingRoomElement);
+				this.waitingRoomListContainer.prepend(newWaitingRoomElement);
 			} else if (event === "notifyWaitingRoomClosed") {
 				const { roomId } = content.waitingRoomInfo;
 				if (this.allWaitingRoomElement[roomId]) {
