@@ -114,7 +114,7 @@ class StateManager:
     def add_channel_layer(self, channel_layer) -> None:
         if self.channel_layer is None:
             self.channel_layer = channel_layer
-            self.make_test_rooms()
+            self.make_test_rooms() # 평가시 삭제
             create_task(self.match_making_loop())
 
     # Room Management
