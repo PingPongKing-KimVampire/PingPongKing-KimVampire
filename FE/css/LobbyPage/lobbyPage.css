@@ -352,6 +352,33 @@
     height: 92%;
     box-shadow: rgb(155, 153, 153) 0rem 0rem 1.2rem 0rem;
   }
+  .lobbyTab {
+    justify-content: flex-start
+  }
+
+  #iconContainer {
+    position: fixed;
+    right: 4%;
+    top: 2%;
+    width: 20%;
+    aspect-ratio: 2/1;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #profileButton {
+    height: auto;
+    width: 50%;
+    aspect-ratio: 1/1;
+  }
+
+  #friendManagementButton {
+    height: auto;
+    width: 40%;
+    aspect-ratio: 1/1;
+  }
 }
 @media (max-aspect-ratio: 1/1.2) {
   .tournamentJoinButton, .createWaitingRoomButton {
