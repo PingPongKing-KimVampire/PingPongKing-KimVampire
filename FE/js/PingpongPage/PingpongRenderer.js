@@ -85,6 +85,8 @@ class PingpongRenderer {
 			}
 			return;
 		} else {
+			leftMode = leftMode.charAt(0).toUpperCase() + leftMode.slice(1).toLowerCase();;
+			rightMode = rightMode.charAt(0).toUpperCase() + rightMode.slice(1).toLowerCase();;
 			if (this.me.team === "left") {
 				rightName.innerText = leftMode;
 				leftName.innerText = rightMode;
