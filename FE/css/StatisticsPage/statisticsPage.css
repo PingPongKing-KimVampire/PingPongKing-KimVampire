@@ -361,7 +361,7 @@ html {
 	}
 	#container {
 		height: auto;
-		padding: 10% 0;
+		padding: 20% 0;
 	}
 	.matchScoreContainer {
 		width: 20%;
@@ -499,6 +499,9 @@ html {
 @media (max-aspect-ratio: 1/2) {
 	#app {
 		height: 100%;
+	}
+	#container {
+		padding: 10% 0;
 	}
 	.scoreFrame {
 		font-size: 1rem;

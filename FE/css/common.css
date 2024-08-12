@@ -63,6 +63,7 @@ body {
 	width: 100%;
 	height: 100%;
 	font-family: "Inter", sans-serif;
+	background-color: rgb(1, 4, 37);
 }
 
 #app {
