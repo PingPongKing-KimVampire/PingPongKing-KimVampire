@@ -350,13 +350,13 @@ class TournamentAnimationPageManager {
 
 		const addExitButton = () => {
 			const buttonHTML = `
-				<button class="tournamentExitButton">
-					<div class="tournamentExitButtonImg"></div>
-					<span class="tournamentExitButtonText">토너먼트에서 나가기</span>
+				<button id="tournamentExitButton">
+					<img src="images/exitImg.png">
+					토너먼트에서 나가기
 				</button>
 				`;
 			this.app.insertAdjacentHTML("afterbegin", buttonHTML);
-			const tournamentExitButton = document.querySelector(".tournamentExitButton");
+			const tournamentExitButton = document.querySelector("#tournamentExitButton");
 			tournamentExitButton.addEventListener("click", async () => {
 				this.renderPage("lobby");
 			});
