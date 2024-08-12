@@ -67,6 +67,22 @@ class LobbyPageManager {
 
 	_setFriendManagementButton() {
 		this.friendManagementButton = document.querySelector("#friendManagementButton");
+		const requestCount = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.length;
+		if (requestCount) {
+			const friendRequestCount = this.friendManagementButton.querySelector("#friendRequestCount");
+			friendRequestCount.classList.remove("invisible");
+			friendRequestCount.textContent = requestCount;
+		}
+		const friendManagementButtonImage = this.friendManagementButton.querySelector("img");
+
+		this.friendManagementButton.addEventListener("mouseover", function () {
+			friendManagementButtonImage.src = "images/hoverFriendManagementIcon.png";
+		});
+
+		this.friendManagementButton.addEventListener("mouseout", function () {
+			friendManagementButtonImage.src = "images/friendManagementIcon.png";
+		});
+
 		this.friendManagementButton.addEventListener("click", () => {
 			this.renderPage("friendManagement");
 		});
@@ -74,6 +90,7 @@ class LobbyPageManager {
 
 	_setProfileButton() {
 		this.profileButton = document.querySelector("#profileButton");
+		this.profileButton.innerHTML = `<img src="${this.clientInfo.avatarUrl}">`;
 		this.profileButton.addEventListener("click", () => {
 			this.renderPage("profile", { id: this.clientInfo.id });
 		});
@@ -260,10 +277,12 @@ class LobbyPageManager {
 
 	_getHTML() {
 		return `
-    <div id="friendTest">
-	  <button id="profileButton">프로필 관리 페이지</button>
-      <button id="friendManagementButton">친구 관리 페이지</button>
-      <span id="friendRequestCount">1</span>
+    <div id="iconContainer">
+		<button id="profileButton"></button>
+		<div id="friendManagementButton">
+			<img src="images/friendManagementIcon.png">
+			<div id="friendRequestCount" class="invisible"></div>
+		</div>
     </div>
     <div class="lobby">
       <div class="lobbyInner">

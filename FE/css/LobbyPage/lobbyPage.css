@@ -1,15 +1,3 @@
-#friendTest {
-  position: absolute;
-  top: 3%;
-  left: 2%;
-  width: 10%;
-  height: 3%;
-}
-#friendManagementButton {
-  width: 70%;
-  height: 100%;
-}
-
 .lobby {
   width: 100%;
   height: 100%;
@@ -185,6 +173,79 @@
   height: 12%; /* 원하는 높이로 조정 */
   background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0));
   pointer-events: none; /* 클릭 이벤트를 방지 */
+}
+
+#iconContainer {
+  position: fixed;
+  right: 2%;
+  top: 3%;
+  width: 6%;
+  aspect-ratio: 4/6;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#profileButton {
+  height: 50%;
+  aspect-ratio: 1/1;
+  border: 0.12rem solid white;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+#profileButton:hover {
+  cursor: pointer;
+}
+
+#profileButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+#friendManagementButton {
+  height: 40%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+#friendManagementButton:hover {
+  cursor: pointer;
+  background-color: #D570FF;
+}
+
+#friendManagementButton img {
+  width: 70%;
+  height: auto;
+  object-fit: cover;
+}
+
+#friendRequestCount {
+  position: absolute;
+  top: 0%;
+  right: 0%;
+  width: 40%;
+  aspect-ratio: 2/1;
+  background-color: #FF2500;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+}
+
+#friendRequestCount .invisible {
+  display: none;
 }
 
 @media (min-aspect-ratio: 2.8/1) {
