@@ -134,4 +134,6 @@ class Player:
         movement_influence = math.atan2(self.dy, self.dx)
         movement_angle = math.degrees(movement_influence)
         
+        movement_angle = (movement_angle + 270) % 360
+        
         ball.reversal_by_player(movement_angle)

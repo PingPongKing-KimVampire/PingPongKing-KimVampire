@@ -51,7 +51,6 @@ class GameRoomManager:
         self.round = 0
         self.serve_turn = LEFT
         self.fake_ball = {}
-        self.queue = asyncio.Queue()
         self.is_scored = False
 
         # notifier
