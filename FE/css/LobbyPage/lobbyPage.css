@@ -118,6 +118,11 @@
   box-sizing: border-box;
 }
 
+.waitingRoomContainer:hover {
+  cursor: pointer;
+	background: linear-gradient(to bottom, rgb(50, 26, 81), rgba(213, 112, 255, 0.1));
+}
+
 .waitingRoomContainer .gameTypeContainer {
   font-size: 1rem;
   width: 15%;
