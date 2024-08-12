@@ -75,28 +75,46 @@ class PingpongRenderer {
 		const leftName = document.querySelector("#leftDisplayBoard .playerName");
 		const rightName = document.querySelector("#rightDisplayBoard .playerName");
 
-		if (this.me.team === "left") {
-			leftName.innerText = leftMode;
-			rightName.innerText = rightMode;
+		if (leftMode === "human" && rightMode === "human") {
+			if (this.me.team === "left") {
+				rightName.innerText = this.clientInfo.gameInfo.teamLeftList[0].nickname;
+				leftName.innerText = this.clientInfo.gameInfo.teamRightList[0].nickname;
+			} else {
+				leftName.innerText = this.clientInfo.gameInfo.teamLeftList[0].nickname;
+				rightName.innerText = this.clientInfo.gameInfo.teamRightList[0].nickname;
+			}
+			return;
 		} else {
-			rightName.innerText = leftMode;
-			leftName.innerText = rightMode;
+			if (this.me.team === "left") {
+				rightName.innerText = leftMode;
+				leftName.innerText = rightMode;
+			} else {
+				leftName.innerText = leftMode;
+				rightName.innerText = rightMode;
+			}
 		}
 	}
 	_setDisplayAvatar(leftTotalPlayerCount, rightTotalPlayerCount) {
 		const leftAvatar = document.querySelector("#leftDisplayBoard .playerAvatar");
 		const rightAvatar = document.querySelector("#rightDisplayBoard .playerAvatar");
 
-		const appendImage = (avatar, src, count = 1) => {
-			for (let i = 0; i < count; i++) {
+		const appendImage = (avatar, srcList) => {
+			for (let i = 0; i < srcList.length; i++) {
 				const img = document.createElement("img");
-				img.src = src;
-				img.style.maxWidth = `${100 / count}%`;
+				img.src = srcList[i];
+				img.style.maxWidth = `${100 / srcList.length}%`;
 				avatar.appendChild(img);
 			}
 		};
-		appendImage(leftAvatar, "images/playerA.png", leftTotalPlayerCount);
-		appendImage(rightAvatar, "images/playerB.png", rightTotalPlayerCount);
+		const leftPlayerSrcList = this.clientInfo.gameInfo.teamLeftList.map(player => player.avatarUrl);
+		const rightPlayerSrcList = this.clientInfo.gameInfo.teamRightList.map(player => player.avatarUrl);
+		if (this.me.team === "right") {
+			appendImage(leftAvatar, leftPlayerSrcList);
+			appendImage(rightAvatar, rightPlayerSrcList);
+		} else {
+			appendImage(leftAvatar, rightPlayerSrcList);
+			appendImage(rightAvatar, leftPlayerSrcList	);
+		}
 	}
 
 	listener = messageEvent => {

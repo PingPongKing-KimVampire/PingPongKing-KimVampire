@@ -198,24 +198,15 @@ class LobbyPageManager {
 		const gameTypeContainer = document.createElement("div");
 		gameTypeContainer.className = "gameTypeContainer";
 
-		const teamName1 = document.createElement("span");
-		teamName1.className = "teamName";
-		if (leftMode === "human") teamName1.textContent = "인간";
-		else if (leftMode === "vampire") teamName1.textContent = "뱀파이어";
-
-		const vsName = document.createElement("span");
-		vsName.className = "vsName";
-		vsName.textContent = "vs";
-
-		const teamName2 = document.createElement("span");
-		teamName2.className = "teamName";
-
-		if (rightMode === "human") teamName2.textContent = "인간";
-		else if (rightMode === "vampire") teamName2.textContent = "뱀파이어";
-
-		gameTypeContainer.appendChild(teamName1);
-		gameTypeContainer.appendChild(vsName);
-		gameTypeContainer.appendChild(teamName2);
+		const typeImage = document.createElement("img");
+		if (leftMode === "human" && rightMode === "human") {
+			typeImage.src = "images/humanVsHuman.webp";
+		} else if (leftMode === "vampire" && rightMode === "vampire") {
+			typeImage.src = "images/vampireVsVampire.jpeg";
+		} else {
+			typeImage.src = "images/humanVsVampire.webp";
+		}
+		gameTypeContainer.appendChild(typeImage);
 
 		const matchName = document.createElement("div");
 		matchName.className = "matchName";

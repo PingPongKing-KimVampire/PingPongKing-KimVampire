@@ -12,6 +12,7 @@ import ProfilePageManager from "./ProfilePage/ProfilePageManager.js";
 import TournamentAnimationPageManager from "./TournamentPage/TournamentAnimationPageManager.js";
 import ErrorPageManager from "./ErrorPage/ErrorPageManager.js";
 import StatisticsPageManager from "./StatisticsPage/StatisticsPageManager.js";
+import windowObservable from "../WindowObservable.js";
 
 // export const SERVER_ADDRESS = "127.0.0.1";
 export const SERVER_ADDRESS = window.location.hostname;
@@ -24,6 +25,7 @@ class PageRouter {
 		this.app = document.querySelector("#app");
 		this.chatButton = document.querySelector(".chatButton");
 		this.clientInfo = {
+			isMobile: /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
 			socket: null,
 			id: null,
 			nickname: null,
@@ -93,6 +95,11 @@ class PageRouter {
 				],
 			},
 		};
+
+		if (this.clientInfo.isMobile) {
+			this._setAppSize();
+			windowObservable.subscribeResize(this._setAppSize.bind(this));
+		}
 
 		window.addEventListener("popstate", event => {
 			const url = window.location.href;
@@ -195,6 +202,10 @@ class PageRouter {
 			if (isUpdateHistory) history.pushState({}, "", this.buildUrl(url, queryParam));
 			this.currentPageManager = this.nextPageManager;
 			this.nextPageManager = null;
+			if (this.clientInfo.isMobile) { // 모바일에서 app 높이는 window.innerHeight, 전체 스크롤 페이지는 auto
+				this.app.style.height = url !== 'statistics' ? window.innerHeight + "px" : "auto";
+			}
+			if (this.clientInfo.isMobile) this._setAppSize();
 			await this.currentPageManager.initPage();
 		} catch (e) {
 			console.log(e);
@@ -207,6 +218,17 @@ class PageRouter {
 			this._inVisibleChatButton();
 			this.currentPageManager = new ErrorPageManager(this.app, this.clientInfo, this.renderPage.bind(this));
 			await this.currentPageManager.initPage();
+		}
+	}
+
+	_setAppSize() {
+		const isStatisticsPage = this.currentPageManager instanceof StatisticsPageManager;
+		const windowAspectRatio = window.innerWidth / window.innerHeight;
+		// statistics 전체 스크롤 화면인 경우 auto
+		if (isStatisticsPage && 1/2 < windowAspectRatio && windowAspectRatio <= 1/1) {
+			this.app.style.height = 'auto';
+		} else {
+			this.app.style.height = `${window.innerHeight}px`;
 		}
 	}
 

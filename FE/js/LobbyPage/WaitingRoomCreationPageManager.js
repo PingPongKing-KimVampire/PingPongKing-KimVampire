@@ -250,11 +250,11 @@ class WaitingRoomCreationPageManager {
 			<label class="label">모드</label>
 			<div class="selectionBox">
 				<input type="radio" name="mode" id="humanVsHuman" value="humanVsHuman">
-				<label for=humanVsHuman class="modeButton">인간 VS 인간</label>
+				<label for=humanVsHuman class="modeButton humanVsHumanBackground"></label>
 				<input type="radio" name="mode" id="vampireVsVampire" value="vampireVsVampire">
-				<label for=vampireVsVampire class="modeButton">뱀파이어 VS 뱀파이어</label>
+				<label for=vampireVsVampire class="modeButton vampireVsVampireBackground"></label>
 				<input type="radio" name="mode" id="vampireVsHuman" value="vampireVsHuman">
-				<label for=vampireVsHuman class="modeButton">뱀파이어 VS 인간</label>
+				<label for=vampireVsHuman class="modeButton humanVsVampireBackground"></label>
 			</div>
 		`;
 	}

@@ -7,6 +7,7 @@ import { TournamentInfodNotSettingError } from "../Error/Error.js";
 
 class TournamentAnimationPageManager {
 	constructor(app, clientInfo, renderPage) {
+		console.log("Tournament Page!");
 		this.app = app;
 		this.renderPage = renderPage;
 		this.clientInfo = clientInfo;
@@ -119,14 +120,41 @@ class TournamentAnimationPageManager {
 			const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
 			const leftFinalContainer = document.querySelector(".subTree:first-of-type .final");
 			leftFinalContainer.innerHTML = this._getPlayerHTML(this._findPlayer(leftSemiFinal.winnerId));
+			const leftPlayer = document.querySelector(".subTree:first-of-type .semiFinal .player:first-of-type");
+			const rightPlayer = document.querySelector(".subTree:first-of-type .semiFinal .player:last-of-type");
+			leftPlayer.classList.add("finishedPlayer");
+			rightPlayer.classList.add("finishedPlayer");
+			if (leftSemiFinal.clientIdList[0] === leftSemiFinal.winnerId) {
+				rightPlayer.classList.add("losePlayer");
+			} else if (leftSemiFinal.clientIdList[1] === leftSemiFinal.winnerId) {
+				leftPlayer.classList.add("losePlayer");
+			}
 		} else if (type === "rightSemiFinal") {
 			const [leftSemiFinal, rightSemiFinal] = this.tournamentInfo.semiFinal;
 			const rightFinalContainer = document.querySelector(".subTree:last-of-type .final");
 			rightFinalContainer.innerHTML = this._getPlayerHTML(this._findPlayer(rightSemiFinal.winnerId));
+			const leftPlayer = document.querySelector(".subTree:last-of-type .semiFinal .player:first-of-type");
+			const rightPlayer = document.querySelector(".subTree:last-of-type .semiFinal .player:last-of-type");
+			leftPlayer.classList.add("finishedPlayer");
+			rightPlayer.classList.add("finishedPlayer");
+			if (rightSemiFinal.clientIdList[0] === rightSemiFinal.winnerId) {
+				rightPlayer.classList.add("losePlayer");
+			} else if (rightSemiFinal.clientIdList[1] === rightSemiFinal.winnerId) {
+				leftPlayer.classList.add("losePlayer");
+			}
 		} else if (type === "final") {
 			const [final] = this.tournamentInfo.final;
 			const winnerContainer = document.querySelector("#root");
 			winnerContainer.innerHTML = this._getPlayerHTML(this._findPlayer(final.winnerId), true);
+			const leftPlayer = document.querySelector(".subTree:first-of-type .final .player");
+			const rightPlayer = document.querySelector(".subTree:last-of-type .final .player");
+			leftPlayer.classList.add("finishedPlayer");
+			rightPlayer.classList.add("finishedPlayer");
+			if (final.clientIdList[0] === final.winnerId) {
+				rightPlayer.classList.add("losePlayer");
+			} else if (final.clientIdList[1] === final.winnerId) {
+				leftPlayer.classList.add("losePlayer");
+			}
 		}
 	}
 

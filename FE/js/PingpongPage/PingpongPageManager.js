@@ -178,7 +178,7 @@ class PingpongPageManager {
 					<div class="playerAvatar"></div>
 				</div>
 				<div class="timeInfo">
-					<div id="timeText">01 : 33</div>
+					<div id="timeText">42</div>
 				</div>
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">

@@ -1,8 +1,3 @@
-html {
-	position: static;
-	overflow: visible;
-}
-
 #friendTest {
   position: absolute;
   top: 3%;
@@ -143,6 +138,13 @@ html {
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
+  overflow: hidden;
+}
+
+.gameTypeContainer img{
+  height: 100%;
+  width: auto;
+  border-radius: 1rem;
 }
 
 .waitingRoomContainer .teamName {
@@ -239,12 +241,12 @@ html {
   .waitingRoomContainer .gameTypeContainer {
     height: 70%;
   }
-  .waitingRoomContainer .teamName {
+  /* .waitingRoomContainer .teamName {
     font-size: 1.3rem;
   }
   .waitingRoomContainer .vsName {
     font-size: 1rem;
-  }
+  } */
   .waitingRoomContainer .gameName {
     font-size: 1.8rem;
   }
@@ -265,12 +267,12 @@ html {
   .waitingRoomContainer .gameTypeContainer {
     height: 65%;
   }
-  .waitingRoomContainer .teamName {
+  /* .waitingRoomContainer .teamName {
     font-size: 1.2rem;
   }
   .waitingRoomContainer .vsName {
     font-size: 0.8rem;
-  }
+  } */
   .waitingRoomContainer .gameName {
     font-size: 1.6rem;
   }
@@ -311,12 +313,12 @@ html {
     height: 60%;
     width: 20%;
   }
-  .waitingRoomContainer .teamName {
+  /* .waitingRoomContainer .teamName {
     font-size: 1.1rem;
   }
   .waitingRoomContainer .vsName {
     font-size: 0.7rem;
-  }
+  } */
   .waitingRoomContainer .gameName {
     font-size: 1.4rem;
     line-height: 1.7rem;
