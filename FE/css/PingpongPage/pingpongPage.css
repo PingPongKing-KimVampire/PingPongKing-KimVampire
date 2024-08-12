@@ -198,15 +198,15 @@
 }
 
 .winBackground {
-    background: linear-gradient(to bottom, rgba(1, 4, 37, 0.5), rgba(4, 15, 139, 0.5));
+    background: linear-gradient(to bottom, rgba(1, 4, 37, 0.7), rgba(5, 5, 104, 0.7));
 }
 
 .loseBackground {
-    background: linear-gradient(to bottom, rgba(1, 4, 37, 0.5), rgba(79, 19, 49, 0.5));
+    background: linear-gradient(to bottom, rgba(1, 4, 37, 0.7), rgba(79, 19, 49, 0.7));
 }
 
 #gameOverModal #contentBox {
-	height: 30%;
+	height: 35%;
 	width: 50%;
 	display: flex;
 	flex-direction: column;
@@ -217,28 +217,98 @@
 
 #gameOverModal .gameOverImage {
 	width: 45%;
-	aspect-ratio: 3 / 1;
+	height: 50%;
 }
 
 #gameOverModal .winImage {
-	background: url("../../images/winIcon.svg") center/contain no-repeat;
+	background: url("../../images/winIcon.png") center/contain no-repeat;
 }
 
 #gameOverModal .loseImage {
-	background: url("../../images/loseIcon.svg") center/contain no-repeat;
+	background: url("../../images/loseIcon.png") center/contain no-repeat;
 }
 
 #gameOverModal button {
-	height: 30%;
-	width: 40%;
+	height: 25%;
+	width: 35%;
 	font-size: 2.5rem;
 }
 
-/* #gameOverModal button:hover {
-	
-} */
+#gameOverModal .winImage + button:hover {
+	background-color: rgb(41, 136, 251);
+	border-color: rgb(41, 136, 251);
+	color: rgb(1, 4, 37);
+}
 
-@media (orientation: portrait) {
+#gameOverModal .loseImage + button:hover {
+	background-color: rgb(219, 48, 20);
+	border-color: rgb(219, 48, 20);
+	color: rgb(1, 4, 37);
+}
+
+@media (min-aspect-ratio: 2/1) {
+	#gameOverModal #contentBox {
+		height: 40%;
+	}
+	#gameOverModal .gameOverImage {
+		width: 60%;
+	}
+	#gameOverModal button {
+		width: 40%;
+		font-size: 3.4rem;
+	}
+}
+@media (max-aspect-ratio: 2/1) {
+	#gameOverModal #contentBox {
+		height: 38%;
+	}
+	#gameOverModal .gameOverImage {
+		width: 60%;
+	}
+	#gameOverModal button {
+		font-size: 2.8rem;
+	}
+}
+@media (max-aspect-ratio: 1.7/1) {
+	#gameOverModal #contentBox {
+		height: 34%;
+	}
+	#gameOverModal .gameOverImage {
+		width: 65%;
+	}
+}
+@media (max-aspect-ratio: 1.5/1) {
+	#gameOverModal #contentBox {
+		height: 32%;
+	}
+	#gameOverModal .gameOverImage {
+		width: 70%;
+	}
+	#gameOverModal button {
+		font-size: 2.5rem;
+	}
+}
+@media (max-aspect-ratio: 1.3/1) {
+	#gameOverModal #contentBox {
+		height: 28%;
+	}
+	#gameOverModal button {
+		font-size: 2.5rem;
+		width: 40%;
+		height: 27%;
+	}
+}
+@media (max-aspect-ratio: 1.2/1) {
+	#gameOverModal .gameOverImage {
+		width: 85%;
+	}
+	#gameOverModal button {
+		font-size: 2.2rem;
+		height: 28%;
+		width: 50%;
+	}
+}
+@media (max-aspect-ratio: 1/1) {
 	html {
 		font-size: 1.6vw;
 	}
@@ -286,5 +356,54 @@
 		width: auto;
 		height: 3%;
 		aspect-ratio: 1/1;
+	}
+	#gameOverModal .gameOverImage {
+		width: 90%;
+	}
+	#gameOverModal button {
+		height: 26%;
+	}
+}
+@media (max-aspect-ratio: 1/1.1) {
+	#gameOverModal #contentBox {
+		width: 55%;
+	}
+}
+@media (max-aspect-ratio: 1/1.2) {
+	#gameOverModal #contentBox {
+		width: 65%;
+	}
+	#gameOverModal button {
+		height: 25%;
+		font-size: 2.5rem;
+	}
+}
+@media (max-aspect-ratio: 1/1.4) {
+	#gameOverModal #contentBox {
+		height: 25%;
+	}
+	#gameOverModal button {
+		height: 26%;
+	}
+}
+@media (max-aspect-ratio: 1/1.6) {
+	#gameOverModal #contentBox {
+		height: 22%;
+	}
+	#gameOverModal button {
+		font-size: 2.8rem;
+		height: 27%;
+	}
+}
+@media (max-aspect-ratio: 1/2) {
+	#gameOverModal #contentBox {
+		width: 75%;
+	}
+	#gameOverModal .gameOverImage  {
+		width: 100%;
+	}
+	#gameOverModal button {
+		font-size: 3.4rem;
+		height: 25%;
 	}
 }
