@@ -130,8 +130,17 @@ class EditProfilePageManager {
 		await new Promise(resolve => {
 			const listener = messsageEvent => {
 				const { event, content } = JSON.parse(messsageEvent.data);
-				if (event === "updateClientInfoResponse" && content.message === "OK") {
-					resolve();
+				if (event === "updateClientInfoResponse") {
+					if (content.message === "OK") {
+						//API추가되면 추가
+						// const { nickname, ImageUrl } = content.updateInfo;
+						// if (nickname) this.clientInfo.nickname = nickname;
+						// if (ImageUrl) this.clientInfo.avatarUrl = ImageUrl ;
+						resolve();
+					} else {
+						alert(content.message);
+						resolve();
+					}
 				}
 			};
 			this.clientInfo.socket.addEventListener("message", listener);
@@ -149,6 +158,7 @@ class EditProfilePageManager {
 		this.avatarSelectionModal.style.display = "flex";
 		const modalClicked = e => {
 			if (e.target.className.includes("selectionAvatarImage")) {
+				console.log("here");
 				this.avatarImg.src = e.target.src;
 				this.isAvatarUpdated = e.target.dataset.src !== this.clientInfo.avatarUrl;
 				this.isDefaultAvatar = true;
@@ -165,18 +175,17 @@ class EditProfilePageManager {
 		const uploadFrame = document.querySelector("#uploadFrame");
 		const fileInput = document.querySelector("#fileInput");
 		uploadFrame.addEventListener("click", () => {
+			this._hideAvatarEditModal.call(this);
 			fileInput.click();
 		});
 		fileInput.addEventListener("change", event => {
 			const file = event.target.files[0];
 			if (file) {
-				//파일을 화면에 렌더링한다.
 				const reader = new FileReader();
 				reader.onload = e => {
 					this.avatarImg.src = e.target.result;
 					this.isAvatarUpdated = true;
 					this.isDefaultAvatar = false;
-					this._hideAvatarEditModal.call(this);
 				};
 				reader.readAsDataURL(file);
 			}
