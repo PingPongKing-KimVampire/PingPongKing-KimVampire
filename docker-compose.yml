@@ -22,6 +22,8 @@ services:
       - .env
     networks:
       - vampire
+    volumes:
+      - image_data:/app/image
 
   nginx:
     build: ./FE
@@ -42,3 +44,4 @@ networks:
 
 volumes:
   postgres_data:
+  image_data:

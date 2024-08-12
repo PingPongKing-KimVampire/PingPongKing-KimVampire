@@ -16,10 +16,33 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import CustomTokenObtainPairSerializer
-
+from django.http import HttpResponse, Http404
+from django.conf import settings
+import os
+from mimetypes import guess_type
 username_pattern = r'^[A-Za-z0-9]{1,20}$'
 nickname_pattern = r'^[A-Za-z가-힣0-9]{1,20}$'
 password_pattern = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}:">?<,\-./;\'[\]\\|])[A-Za-z\d!@#$%^&*()_+{}:">?<,\-./;\'[\]\\|]{8,20}$'
+
+@require_http_methods(["GET"])
+def get_image(request, filename):
+    print("filename", filename)
+    if filename.endswith('/'):
+        filename = filename.rstrip('/')
+    image_path = os.path.join(settings.MEDIA_ROOT, filename)
+    # 파일 존재 여부 확인
+    if os.path.exists(image_path):
+        # MIME 타입 추측
+        content_type, _ = guess_type(image_path)
+        content_type = content_type or 'application/octet-stream'
+        
+        # 이미지 파일을 바이트로 읽기
+        with open(image_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type=content_type)
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(image_path)
+            return response
+    else:
+        raise Http404("Image does not exist")
 
 def username_is_valid(username):
     return re.match(username_pattern, username) is not None

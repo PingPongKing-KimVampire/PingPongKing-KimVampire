@@ -20,7 +20,9 @@ from user.views import signup
 from user.views import login
 from user.views import check_username
 from user.views import check_nickname
+from user.views import get_image
 from user.views import CustomTokenObtainPairView, TokenRefreshView, TokenVerifyView
+from django.urls import re_path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -31,4 +33,5 @@ urlpatterns = [
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+	re_path(r'^image/(?P<filename>.+)$', get_image, name='get_image')
 ]
