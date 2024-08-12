@@ -227,12 +227,8 @@ class WaitingRoomPageManager {
 	}
 
 	_popPlayer(id) {
-		this.clientInfo.gameInfo.teamLeftList = this.clientInfo.gameInfo.teamLeftList.filter(player => {
-			player.id !== id;
-		});
-		this.clientInfo.gameInfo.teamRightList = this.clientInfo.gameInfo.teamRightList.filter(player => {
-			player.id !== id;
-		});
+		this.clientInfo.gameInfo.teamLeftList = this.clientInfo.gameInfo.teamLeftList.filter(player => player.id !== id);
+		this.clientInfo.gameInfo.teamRightList = this.clientInfo.gameInfo.teamRightList.filter(player => player.id !== id);
 	}
 
 	_updateReadyState(id, readyState) {
