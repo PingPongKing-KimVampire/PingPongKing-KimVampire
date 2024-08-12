@@ -58,8 +58,6 @@ class TournamentManager:
             for i in range(2):
                 if client_id == gameroom_info['clientIdList'][i]:
                     opponent_id = gameroom_info['clientIdList'][1 - i]
-                    print('client_id', client_id)
-                    print('opponnent_id', opponent_id)
         if opponent_id:
             return self.get_client_state(opponent_id)
         else:

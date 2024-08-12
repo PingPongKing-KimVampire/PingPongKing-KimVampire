@@ -305,7 +305,6 @@ class GameRoomManager:
     async def _detect_paddle_collision(self, ball):
         players_to_check = self._get_players_to_check(ball)
         for player in players_to_check:
-            # print(player.nickname)
             if self._is_ball_colliding_with_paddle(player, ball):
                 return await self._apply_paddle_hit(player, ball)
         return NOHIT

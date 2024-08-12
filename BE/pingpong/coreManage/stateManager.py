@@ -70,16 +70,11 @@ class StateManager:
                 raise ObjectDoesNotExist("user not found")
         consumer.nickname = user.nickname
         consumer.avatar_url = user.get_image_uri()
-        # print(consumer.client_id)
-        # print(consumer.nickname)
-        # print(consumer.avatar_url)
 
     def is_client_in_lobby(self, client_id):
         if client_id in self.lobby_clients:
-            print(f"Client {client_id} is in the lobby.")
             return True
         else:
-            print(f"Client {client_id} is not in the lobby.")
             return False
 
     # Matchmaking Management

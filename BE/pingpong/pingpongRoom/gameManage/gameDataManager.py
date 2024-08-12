@@ -44,7 +44,6 @@ class GameDataManager:
             "team2_score" : score[RIGHT],
             "round": self.game_data
         }
-        print(data)
         game = await GameRepository.save_game_async(data)
         # game None 처리 필요
 

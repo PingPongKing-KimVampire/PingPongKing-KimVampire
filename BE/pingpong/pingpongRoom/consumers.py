@@ -226,7 +226,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         stateManager.remove_room(self.room_id)
 
     async def notifyGhostBall(self, content):
-        Printer.log(f"Ghost ball", "green")
         await self._send(event='notifyGhostBall', content=content['content'])
 
     async def notifyFakeBallCreate(self, content):
@@ -236,7 +235,6 @@ class PingpongRoomConsumer(AsyncWebsocketConsumer):
         await self._send(event='notifyFakeBallRemove', content=content['content'])
 
     async def notifyUnghostBall(self, content):
-        Printer.log(f"Unghost ball", "green")
         await self._send(event='notifyUnghostBall', content=content['content'])
 
     async def notifyFakeBallLocationUpdate(self, content):

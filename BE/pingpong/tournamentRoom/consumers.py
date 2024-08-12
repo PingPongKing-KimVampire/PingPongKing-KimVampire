@@ -143,7 +143,6 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
 
     async def notifyAllTeamFinish(self, content):
         if self.tournament_state == 'final':
-            print('결승 시작')
             self.gameroom_id_now = self.tournament_manager.get_game_room_id_now(self.client_id, self.tournament_state)
             await add_group(self, f"tournament_{self.gameroom_id_now}")
         await self._send("notifyAllTeamFinish", content['content'])
