@@ -133,11 +133,9 @@ class EditProfilePageManager {
 				if (event === "updateClientInfoResponse" && content.message === "OK") {
 					resolve();
 				}
-				// TODO : 실패 시 처리하기
 			};
 			this.clientInfo.socket.addEventListener("message", listener);
 		});
-		// TODO : 이후 마이페이지 렌더링하기
 		this._exitEditProfilePage();
 	};
 
