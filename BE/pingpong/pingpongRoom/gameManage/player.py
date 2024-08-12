@@ -131,9 +131,5 @@ class Player:
         self.paddle_width = self.paddle_width * 4
         
     def reversal_ball(self, ball):
-        movement_influence = math.atan2(self.dy, self.dx)
-        movement_angle = math.degrees(movement_influence)
-        
-        movement_angle = (movement_angle + 270) % 360
-        
-        ball.reversal_by_player(movement_angle)
+        speed = math.sqrt(self.dx**2 + self.dy**2)
+        ball.reversal_by_player(self.dx, self.dy, speed)
