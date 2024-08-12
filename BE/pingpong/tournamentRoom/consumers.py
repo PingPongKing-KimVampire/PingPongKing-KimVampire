@@ -127,12 +127,11 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             self.tournament_state = 'finish'
             await self.tournament_manager.set_final_winner(winner_id)
 
-    # async def updateGameroomScore(self, content):
-    #     content = content['content']
-    #     team = content['team']
-    #     score = content['score']
-    #     self.tournament_manager.update_room_score(self.tournament_state, self.gameroom_id_now, team, score)
-    #     await self.notify_tournament_room("notifyTournamentInfoChange")
+    async def updateGameroomScore(self, content):
+        content = content['content']
+        team = content['team']
+        score = content['score']
+        self.tournament_manager.update_room_score(self.tournament_state, self.gameroom_id_now, team, score)
 
     async def notifyYourGameRoomReady(self, content):
         content = content['content']
