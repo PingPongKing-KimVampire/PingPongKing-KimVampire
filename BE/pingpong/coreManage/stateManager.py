@@ -79,13 +79,25 @@ class StateManager:
 
     # Matchmaking Management
     def add_to_match_queue(self, consumer) -> None:
-        self.match_queue.append(consumer)
-        Printer.log(f"Client {consumer.client_id} added to match queue", "blue")
+        try:
+            if consumer not in self.match_queue:
+                self.match_queue.append(consumer)
+                Printer.log(f"Client {consumer.client_id} added to match queue", "blue")
+            else:
+                Printer.log(f"Client {consumer.client_id} already in match queue", "yellow")
+        except:
+            Printer.log(f"무언가 큐 에러...")
 
     def remove_from_match_queue(self, consumer) -> None:
-        self.match_queue.remove(consumer)
-        Printer.log(f"Client {consumer.client_id} removed from match queue", "blue")
-
+        try:
+            if consumer in self.match_queue:
+                self.match_queue.remove(consumer)
+                Printer.log(f"Client {consumer.client_id} removed from match queue", "blue")
+            else:
+                Printer.log(f"Client {consumer.client_id} not found in match queue", "yellow")
+        except:
+            Printer.log(f"무언가 큐 에러...")
+            
     def is_match_queue_full(self) -> bool:
         return len(self.match_queue) >= 4
 
@@ -114,7 +126,6 @@ class StateManager:
     def add_channel_layer(self, channel_layer) -> None:
         if self.channel_layer is None:
             self.channel_layer = channel_layer
-            self.make_test_rooms() # 평가시 삭제
             create_task(self.match_making_loop())
 
     # Room Management
@@ -247,30 +258,6 @@ class StateManager:
         # Printer.log(f"!!!!! notify ROOM {room_id} !!!!!", "cyan")
         if self.channel_layer:
             await notify_group(self.channel_layer, room_id, event, content)
-
-    # Test Methods
-    def make_test_rooms(self):
-        self.create_test_room('human_vs_human', '인간 vs 인간', 'human', 'human', 1, 1)
-        self.enter_test_client('human_vs_human', 'test1', '인간봇', None, 'human')
-        self.change_client_ready_state('human_vs_human', 'test1', 'READY')
-        
-        self.create_test_room('vam_vs_humans_jiantBlocker', '뱀파이어 : 자이언트블로커', 'vampire', 'human', 1, 1)
-        self.enter_test_client('vam_vs_humans_jiantBlocker', 'jiantBlocker', '자이언트블로커', None, 'jiantBlocker')
-        self.change_client_ready_state('vam_vs_humans_jiantBlocker', 'jiantBlocker', 'READY')
-
-        self.create_test_room('vam_vs_humans_illusionFaker', '뱀파이어 : 일루전페이커', 'vampire', 'human', 1, 1)
-        self.enter_test_client('vam_vs_humans_illusionFaker', 'illusionFaker', '일루전페이커', None, 'illusionFaker')
-        self.change_client_ready_state('vam_vs_humans_illusionFaker', 'illusionFaker', 'READY')
-
-        self.create_test_room('vam_vs_humans_speedTwister', '뱀파이어 : 스피드 트위스터', 'vampire', 'human', 1, 1)
-        self.enter_test_client('vam_vs_humans_speedTwister', 'speedTwister', '스피드트위스터', None, 'speedTwister')
-        self.change_client_ready_state('vam_vs_humans_speedTwister', 'speedTwister', 'READY')
-
-        self.create_test_room('vam_vs_humans_ghostSmasher', '뱀파이어 : 고스트 스매셔', 'vampire', 'human', 1, 1)
-        self.enter_test_client('vam_vs_humans_ghostSmasher', 'ghostSmasher', '고스트스매셔', None, 'ghostSmasher')
-        self.change_client_ready_state('vam_vs_humans_ghostSmasher', 'ghostSmasher', 'READY')
-
-
     
     def create_test_room(self, room_id, title, left_mode, right_mode, left_max_count, right_max_count):
         self.rooms[room_id] = GameRoomManager(self.channel_layer, room_id, title, left_mode, right_mode, left_max_count, right_max_count, 'normal')
