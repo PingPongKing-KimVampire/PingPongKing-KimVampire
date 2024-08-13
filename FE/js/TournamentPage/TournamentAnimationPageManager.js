@@ -803,7 +803,7 @@ class TournamentAnimationPageManager {
 					});
 				});
 
-				const { playerInfo, teamInfo, boardInfo } = await new Promise(resolve => {
+				const { playerInfo, teamInfo, boardInfo, score } = await new Promise(resolve => {
 					pingpongRoomSocket.addEventListener("message", function listener(messageEvent) {
 						const { event, content } = JSON.parse(messageEvent.data);
 						if (event === "enterObserveModeResponse") {
@@ -813,6 +813,7 @@ class TournamentAnimationPageManager {
 					});
 				});
 
+				const [ leftScore, rightScore ] = score;
 				this.clientInfo.gameInfo = {
 					role: "observer",
 					pingpongRoomSocket,
@@ -826,6 +827,8 @@ class TournamentAnimationPageManager {
 					teamRightTotalPlayerCount: 1,
 					teamLeftAbility: null,
 					teamRightAbility: null,
+					teamLeftScore: leftScore,
+					teamRightScore: rightScore,
 				};
 
 				playerInfo.forEach(player => {

@@ -168,12 +168,14 @@ class PingpongPageManager {
 	}
 
 	_getDisplayBoardHTML() {
+		const teamLeftScore = !this.clientInfo.gameInfo.teamLeftScore ? 0 : this.clientInfo.gameInfo.teamLeftScore;
+		const teamRightScore = !this.clientInfo.gameInfo.teamRightScore ? 0 : this.clientInfo.gameInfo.teamRightScore;
 		return `
 			<div id="displayBoard">
 				<div id="leftDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamLeftScore ? 0 : this.clientInfo.gameInfo.teamLeftScore}</div></div>
+						<div class="playerScore">${teamLeftScore}<div class="playerScoreStroke">${teamLeftScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>
@@ -183,7 +185,7 @@ class PingpongPageManager {
 				<div id="rightDisplayBoard">
 					<div class="playerInfo">
 						<div class="playerName"></div>
-						<div class="playerScore">0<div class="playerScoreStroke">${!this.clientInfo.gameInfo.teamRightScore ? 0 : this.clientInfo.gameInfo.teamRightScore}</div></div>
+						<div class="playerScore">${teamRightScore}<div class="playerScoreStroke">${teamRightScore}</div></div>
 					</div>
 					<div class="playerAvatar"></div>
 				</div>
