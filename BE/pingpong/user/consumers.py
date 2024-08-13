@@ -570,7 +570,7 @@ def make_word_by_game(round_info_list, my_team):
     elif my_wins == 0:
         return "그 실력에 잠이 오냐?"
     elif any(hits >= 10 for hits in paddle_hits_per_round):
-        return "치혈했던 혈전"
+        return "치열했던 혈전"
     elif my_wins > opponent_wins:
         return "승리"
     else:

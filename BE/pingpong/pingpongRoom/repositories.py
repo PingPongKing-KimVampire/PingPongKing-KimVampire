@@ -279,7 +279,7 @@ class GameReadRepository:
 			if opponent_team.score == 0:
 				return "살살하셔야 겠어요~"
 			if any(hits >= 10 for hits in paddle_hits_per_round):
-				return "치혈했던 승리"
+				return "치열했던 승리"
 			else:
 				return "승리"
 		else:
@@ -288,6 +288,6 @@ class GameReadRepository:
 			if our_team.score  == 0:
 				return "그 실력에 잠이 오냐?"
 			if any(hits >= 10 for hits in paddle_hits_per_round):
-				return "치혈했던 패배"
+				return "치열했던 패배"
 			else:
 				return "패배"
