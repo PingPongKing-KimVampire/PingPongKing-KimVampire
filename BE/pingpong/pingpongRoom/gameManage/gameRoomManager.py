@@ -19,7 +19,7 @@ SPEEDTWIST = 4
 FAKE = 5
 UNSPEEDTWIST = 6
 
-END_SCORE = 50
+END_SCORE = 10
 
 
 class GameRoomManager:
