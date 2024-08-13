@@ -34,6 +34,7 @@ class EditProfilePageManager {
 		this.isAvatarUpdated = false;
 		this.isNicknameValid = true;
 		this.isDefaultAvatar;
+		this.isSendingToServer = false;
 
 		this.avatarImg = document.querySelector("#avatarImg");
 
@@ -115,6 +116,8 @@ class EditProfilePageManager {
 	}
 
 	_completeEditProfile = async () => {
+		if (this.isSendingToServer) return;
+		this.isSendingToServer = true;
 		const editMessage = {
 			event: "updateClientInfo",
 			content: {
@@ -143,6 +146,7 @@ class EditProfilePageManager {
 						const { nickname, imageUrl } = content.updateInfo;
 						if (nickname) this.clientInfo.nickname = nickname;
 						if (imageUrl) this.clientInfo.avatarUrl = imageUrl;
+						this.isSendingToServer = false;
 						resolve();
 					} else {
 						alert(content.message);
