@@ -120,11 +120,11 @@ body {
 }
 
 .exitButton {
-	width: 3%;
+	width: 3rem;
 	aspect-ratio: 1/1;
 	position: absolute;
-	top: 3%;
-	left: 2%;
+	top: 1.5rem;
+	left: 1.5rem;
 	background: url("../images/exitImg.png") center/cover;
 }
 .exitButton:hover {
@@ -270,6 +270,11 @@ body {
 }
 
 @media (min-aspect-ratio: 2.5/1) {
+	.exitButton {
+		width: 4.5rem;
+		top: 2.5rem;
+		left: 2.5rem;
+	}
 	.questionModal .questionBox {
 		font-size: 4rem;
 	}
@@ -284,21 +289,31 @@ body {
 		font-size: 2.2rem;
 	}
 }
+@media (max-aspect-ratio: 2.5/1) {
+	.exitButton {
+		width: 4rem;
+		top: 2.5rem;
+		left: 2.5rem;
+	}
+}
+@media (max-aspect-ratio: 2/1) {
+	.exitButton {
+		width: 3.5rem;
+	}
+}
+@media (max-aspect-ratio: 1.6/1) {
+	.exitButton {
+		width: 3rem;
+		top: 1.5rem;
+		left: 1.5rem;
+	}
+}
 @media (max-aspect-ratio: 1.4/1) {
 	.questionModal .buttonGroup {
 		width: 50%;
 	}
-	.exitButton {
-		width: 4%;
-	}
 }
 @media (max-aspect-ratio: 1/1) {
-	.exitButton {
-		top: 2%;
-		left: 3%;
-		height: 5%;
-		width: auto;
-	}
 	.questionModal .questionBox {
 		font-size: 3rem;
 	}
@@ -328,5 +343,15 @@ body {
 	.questionModal .buttonGroup button {
 		width: 100%;
 		font-size: 1.5rem;
+	}
+}
+@media (max-aspect-ratio: 1/1.5) {
+	.exitButton {
+		width: 2.5rem;
+	}
+}
+@media (max-aspect-ratio: 1/1.8) {
+	.exitButton {
+		width: 2rem;
 	}
 }
