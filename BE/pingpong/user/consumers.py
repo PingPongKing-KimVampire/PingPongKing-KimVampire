@@ -449,7 +449,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         await self._send("sendGameInviteResponse", {"message": "OK"})
         reciever_channel_name = channel_name_map[reciever_id]
         from .repositories import UserRepository
-        user = await UserRepository.get_user_by_id(reciever_id)
+        user = await UserRepository.get_user_by_id(self.client_id)
         data = stateManager.get_waiting_room_info(room_id)
         await notify_client_event(self.channel_layer, reciever_channel_name, 
                                     "notify_game_invite_arrive", 
