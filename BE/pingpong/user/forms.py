@@ -7,7 +7,6 @@ class SignUpForm(forms.ModelForm):
         model = User
         fields = ['username', 'password', 'nickname']
 
-    # 폼에서 비밀번호 해싱하기
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
