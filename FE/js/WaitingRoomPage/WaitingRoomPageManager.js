@@ -152,7 +152,6 @@ class WaitingRoomPageManager {
 			const { event, content } = message;
 			if (event === "notifyWaitingRoomEnter") {
 				const { id, nickname, team, avatarUrl } = content;
-				console.log(content);
 				this._pushNewPlayer(id, nickname, team, avatarUrl);
 				this._renderPage();
 			} else if (event === "notifyWaitingRoomExit") {
@@ -266,7 +265,6 @@ class WaitingRoomPageManager {
 	}
 
 	_toggleReadyTextVisible(orientation) {
-		console.log(orientation);
 		if (orientation === "landscape") {
 			this.leftReadyText.classList.remove("invisible");
 			this.rightReadyText.classList.remove("invisible");

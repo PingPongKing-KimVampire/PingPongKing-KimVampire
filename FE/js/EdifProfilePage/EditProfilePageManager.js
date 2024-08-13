@@ -169,7 +169,7 @@ class EditProfilePageManager {
 		this.avatarSelectionModal.style.display = "flex";
 		const modalClicked = e => {
 			if (e.target.className.includes("selectionAvatarImage")) {
-				console.log("here");
+
 				this.avatarImg.src = e.target.src;
 				this.isAvatarUpdated = e.target.dataset.src !== this.clientInfo.avatarUrl;
 				this.isDefaultAvatar = true;
