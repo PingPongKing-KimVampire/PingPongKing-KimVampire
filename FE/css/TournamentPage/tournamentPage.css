@@ -182,6 +182,10 @@
 	padding: 0 1.5% 0 3%;
 	font-size: 1.5rem;
 	z-index: 1;
+	background-color: rgb(1, 4, 37);
+	color: white;
+	border: 0.1rem solid white;
+	border-radius: 3rem;
 }
 #tournamentExitButton img {
 	position: absolute;
@@ -195,9 +199,10 @@
 	border-color: rgb(1, 4, 37);
 	color: rgb(1, 4, 37);
 	font-weight: 900;
+	cursor: pointer;
 }
 
-@media (orientation: landscape) and (max-aspect-ratio: 1.8/1) {
+@media (max-aspect-ratio: 1.8/1) {
 	#container {
 		width: 65%;
 	}
@@ -208,7 +213,8 @@
 		padding: 0 2% 0 4%;
 	}
 }
-@media (orientation: landscape) and (max-aspect-ratio: 1.5/1) {
+
+@media (max-aspect-ratio: 1.5/1) {
 	#container {
 		width: 80%;
 	}
@@ -217,7 +223,8 @@
 		font-size: 1.45rem;
 	}
 }
-@media (orientation: landscape) and (max-aspect-ratio: 1.2/1) {
+
+@media (max-aspect-ratio: 1.2/1) {
 	#container {
 		width: 85%;
 		height: 72%;
@@ -232,7 +239,7 @@
 	}
 }
 
-@media (orientation: portrait) and (max-aspect-ratio: 1/1) {
+@media (max-aspect-ratio: 1/1) {
 	#container {
 		height: 65%;
 		width: 90%;
@@ -250,11 +257,11 @@
 		top: 2%;
 		left: 3%;
 		height: 5%;
-		font-size: 1.4rem;
+		font-size: 1.3rem;
 		padding: 0 3% 0 6%;
 	}
 }
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.2) {
+@media (max-aspect-ratio: 1/1.2) {
 	#container {
 		height: 57%;
 		width: 90%;
@@ -262,8 +269,12 @@
 	.observeButton {
 		font-size: 1rem;
 	}
+	#tournamentExitButton {
+		height: 4.5%;
+		font-size: 1.2rem;
+	}
 }
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.4) {
+@media (max-aspect-ratio: 1/1.4) {
 	#container {
 		height: 50%;
 		width: 90%;
@@ -278,18 +289,18 @@
 		font-size: 0.8rem;
 	}
 	#tournamentExitButton {
-		height: 4.5%;
-		font-size: 1.3rem;
-		padding: 0 3.5% 0 7%;
+		height: 4.2%;
+		font-size: 1.1rem;
+		border-width: 0.08rem;
 	}
 }
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.6) {
+@media (max-aspect-ratio: 1/1.6) {
 	#container {
 		height: 37%;
 		width: 90%;
 	}
 }
-@media (orientation: portrait) and (max-aspect-ratio: 1/1.8) {
+@media (max-aspect-ratio: 1/1.8) {
 	#container {
 		height: 30%;
 		width: 90%;
@@ -301,9 +312,8 @@
 		font-size: 0.9rem;
 	}
 	#tournamentExitButton {
-		height: 4%;
-		font-size: 1.2rem;
-		padding: 0 3.5% 0 7%;
+		height: 3.8%;
+		font-size: 1rem;
 	}
 }
 
@@ -358,40 +368,3 @@
 	opacity: 1; /* 끝날 때 완전히 불투명 */
 	}
 }
-
-.tournamentExitButton {
-	width: 15%;
-	aspect-ratio: 5/1;
-	position: absolute;
-	border: 0.12rem solid white;
-	border-radius: 2rem;
-	background-color: transparent;
-	top: 3%;
-	left: 2%;
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
-}
-
-.tournamentExitButton:hover {
-	cursor: pointer;
-}
-
-.tournamentExitButtonImg{
-	height: 50%;
-	aspect-ratio: 1/1;
-	background: url("../../images/exitImg.png") center/cover;
-}
-
-.tournamentExitButtonText{
-	width: 75%;
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-	color: white;
-	font-size: 1.3rem;
-}
-
