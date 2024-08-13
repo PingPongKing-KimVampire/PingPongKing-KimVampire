@@ -1,6 +1,7 @@
 import windowObservable from "../../WindowObservable.js";
 import { StatisticsInfoNotFound } from "../Error/Error.js";
 import { getMatchLogDiv, setMatchLogPlayerClickListener } from "../ProfilePage/MatchLog.js";
+import { sendServer } from "../common.js";
 
 class StatisticsPageManager {
 	constructor(app, clientInfo, renderPage, queryParam) {
@@ -53,7 +54,7 @@ class StatisticsPageManager {
 			event: "getClientGameDetail",
 			content: { clientId, gameId },
 		};
-		this.clientInfo.socket.send(JSON.stringify(getClientGameDetailMessage));
+		sendServer(this.clientInfo.socket, getClientGameDetailMessage);
 		return await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);

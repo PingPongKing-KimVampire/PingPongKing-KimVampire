@@ -1,3 +1,5 @@
+import { sendServer } from "../common.js";
+
 class ChattingPageManager {
 	constructor(clientInfo, renderPage) {
 		console.log("Chatting Page!");
@@ -153,7 +155,7 @@ class ChattingPageManager {
 					message: messageContent,
 				},
 			};
-			this.clientInfo.socket.send(JSON.stringify(sendMessageObj));
+			sendServer(this.clientInfo.socket, sendMessageObj);
 			this.inputBox.value = "";
 		};
 
@@ -207,7 +209,7 @@ class ChattingPageManager {
 				roomId,
 			},
 		};
-		this.clientInfo.socket.send(JSON.stringify(sendGameInviteRequestMessage));
+		sendServer(this.clientInfo.socket, sendGameInviteRequestMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -228,7 +230,7 @@ class ChattingPageManager {
 			},
 		};
 		this.readingFriendId = null;
-		this.clientInfo.socket.send(JSON.stringify(stopReadingChatMessage));
+		sendServer(this.clientInfo.socket, stopReadingChatMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -283,7 +285,7 @@ class ChattingPageManager {
 				clientId: id,
 			},
 		};
-		this.clientInfo.socket.send(JSON.stringify(getTotalChatDataMessage));
+		sendServer(this.clientInfo.socket, getTotalChatDataMessage);
 		const messageList = await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);

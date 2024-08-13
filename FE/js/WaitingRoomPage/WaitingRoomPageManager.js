@@ -3,6 +3,7 @@ import { GameInfoNotSettingError } from "../Error/Error.js";
 
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
+import { sendServer } from "../common.js";
 
 class WaitingRoomPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -250,7 +251,7 @@ class WaitingRoomPageManager {
 				state: changedReadyState,
 			},
 		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(readyMessage));
+		sendServer(this.clientInfo.gameInfo.pingpongRoomSocket, readyMessage);
 	}
 
 	_changeMyReadyState(id) {
@@ -286,7 +287,7 @@ class WaitingRoomPageManager {
 			event: "selectAbility",
 			content: { ability: selectedItem.value },
 		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(selectAbilityMessage));
+		sendServer(this.clientInfo.gameInfo.pingpongRoomSocket, selectAbilityMessage);
 		this.abilityModal.style.display = "none";
 		this.abilityModal.removeEventListener("click", this._modalClicked);
 	};

@@ -2,6 +2,7 @@ import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
 
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
+import { sendServer } from "../common.js";
 
 class WaitingRoomCreationPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -199,7 +200,7 @@ class WaitingRoomCreationPageManager {
 				},
 			},
 		};
-		this.clientInfo.lobbySocket.send(JSON.stringify(createRoomMessage));
+		sendServer(this.clientInfo.lobbySocket, createRoomMessage);
 	}
 	_handleCreateRoomResponse() {
 		return new Promise(resolve => {

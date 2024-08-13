@@ -1,4 +1,5 @@
 import windowObservable from "../../WindowObservable.js";
+import { sendServer } from "../common.js";
 
 class Player {
 	constructor(clientInfo) {
@@ -261,7 +262,7 @@ class Player {
 				yPosition: y,
 			},
 		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(msg));
+		sendServer(this.clientInfo.gameInfo.pingpongRoomSocket, msg);
 	}
 
 	updateSubBoardRect() {

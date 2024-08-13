@@ -3,6 +3,7 @@ import windowObservable from "../../WindowObservable.js";
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
 import { AccessTokenNotFoundError, isSocketConnected } from "../Error/Error.js";
+import { sendServer } from "../common.js";
 
 class LobbyPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -132,7 +133,7 @@ class LobbyPageManager {
 			event: "getWaitingRoomList",
 			content: {},
 		};
-		this.clientInfo.lobbySocket.send(JSON.stringify(getWaitingRoomListMessage));
+		sendServer(this.clientInfo.lobbySocket, getWaitingRoomListMessage);
 		const waitingRoomList = await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -162,7 +163,7 @@ class LobbyPageManager {
 				event: "startMatchMaking",
 				content: {},
 			};
-			this.clientInfo.lobbySocket.send(JSON.stringify(startMatchMakingMessage));
+			sendServer(this.clientInfo.lobbySocket, startMatchMakingMessage);
 			await new Promise(resolve => {
 				const listener = messageEvent => {
 					const { event, content } = JSON.parse(messageEvent.data);

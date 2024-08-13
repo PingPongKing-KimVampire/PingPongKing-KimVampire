@@ -1,5 +1,6 @@
 import windowObservable from "../../WindowObservable.js";
 import { LobbyConnectionError, isSocketConnected } from "../Error/Error.js";
+import { sendServer } from "../common.js";
 
 class WaitingTournamentPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -56,7 +57,7 @@ class WaitingTournamentPageManager {
 				event: "cancelMatchMaking",
 				content: {},
 			};
-			this.clientInfo.lobbySocket.send(JSON.stringify(cancelMatchMakingMessage));
+			sendServer(this.clientInfo.lobbySocket, cancelMatchMakingMessage);
 			await new Promise(resolve => {
 				const listener = messageEvent => {
 					const { event, content } = JSON.parse(messageEvent.data);

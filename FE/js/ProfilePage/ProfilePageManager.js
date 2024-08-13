@@ -1,5 +1,6 @@
 import { GlobalConnectionError, ProfileTargetNotFound, isSocketConnected } from "../Error/Error.js";
 import { getMatchLogDiv, setMatchLogPlayerClickListener } from "./MatchLog.js";
+import { sendServer } from "../common.js";
 
 class ProfilePageManager {
 	constructor(app, clientInfo, renderPage, queryParam) {
@@ -82,7 +83,7 @@ class ProfilePageManager {
 			event: "getClientProfile",
 			content: { clientId: id },
 		};
-		this.clientInfo.socket.send(JSON.stringify(getCLientProfileMessage));
+		sendServer(this.clientInfo.socket, getCLientProfileMessage);
 		return await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);

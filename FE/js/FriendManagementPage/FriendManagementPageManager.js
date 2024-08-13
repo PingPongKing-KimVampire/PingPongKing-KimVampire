@@ -1,5 +1,6 @@
 import windowObservable from "../../WindowObservable.js";
 import { GlobalConnectionError, isSocketConnected } from "../Error/Error.js";
+import { sendServer } from "../common.js";
 
 class FriendManagementPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -84,7 +85,7 @@ class FriendManagementPageManager {
 				event: "searchClient",
 				content: { keyword: this.searchKeyword },
 			};
-			this.clientInfo.socket.send(JSON.stringify(searchClientMessage));
+			sendServer(this.clientInfo.socket, searchClientMessage);
 			const searchedClientList = await new Promise(resolve => {
 				const listener = messageEvent => {
 					const { event, content } = JSON.parse(messageEvent.data);
@@ -221,7 +222,7 @@ class FriendManagementPageManager {
 			event: "sendFriendRequest",
 			content: { clientInfo: { id: clientData.id } },
 		};
-		this.clientInfo.socket.send(JSON.stringify(friendRequestMessage));
+		sendServer(this.clientInfo.socket, friendRequestMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -241,7 +242,7 @@ class FriendManagementPageManager {
 			event: "acceptFriendRequest",
 			content: { clientInfo: { id } },
 		};
-		this.clientInfo.socket.send(JSON.stringify(acceptFriendRequestMessage));
+		sendServer(this.clientInfo.socket, acceptFriendRequestMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -269,7 +270,7 @@ class FriendManagementPageManager {
 			event: "rejectFriendRequest",
 			content: { clientInfo: { id } },
 		};
-		this.clientInfo.socket.send(JSON.stringify(rejectFriendRequestMessage));
+		sendServer(this.clientInfo.socket, rejectFriendRequestMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -292,7 +293,7 @@ class FriendManagementPageManager {
 			event: "cancelFriendRequest",
 			content: { clientInfo: { id } },
 		};
-		this.clientInfo.socket.send(JSON.stringify(cancelRequestMessage));
+		sendServer(this.clientInfo.socket, cancelRequestMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -312,7 +313,7 @@ class FriendManagementPageManager {
 			event: "deleteFriend",
 			content: { clientInfo: { id } },
 		};
-		this.clientInfo.socket.send(JSON.stringify(deleteFriendMessage));
+		sendServer(this.clientInfo.socket, deleteFriendMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -335,7 +336,7 @@ class FriendManagementPageManager {
 			event: "blockClient",
 			content: { clientInfo: { id: clientData.id } },
 		};
-		this.clientInfo.socket.send(JSON.stringify(blockClientMessage));
+		sendServer(this.clientInfo.socket, blockClientMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -365,7 +366,7 @@ class FriendManagementPageManager {
 			event: "unblockClient",
 			content: { clientInfo: { id } },
 		};
-		this.clientInfo.socket.send(JSON.stringify(unblockClientMessage));
+		sendServer(this.clientInfo.socket, unblockClientMessage);
 		await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
