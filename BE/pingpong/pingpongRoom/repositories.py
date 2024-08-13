@@ -273,17 +273,21 @@ class GameReadRepository:
 					comeback_lose = True
 					break
 				was_losing = True
-		if comeback_lose:
-			return "아쉬운 역전패"
-		elif comeback_win:
-			return "짜릿한 역전승"
-		elif opponent_team.score == 0:
-			return "살살하셔야 겠어요~"
-		elif our_team.score  == 0:
-			return "그 실력에 잠이 오냐?"
-		elif any(hits >= 10 for hits in paddle_hits_per_round):
-			return "치혈했던 혈전"
-		elif our_team.score > opponent_team.score:
-			return "승리"
+		if our_team.score > opponent_team.score:
+			if comeback_win:
+				return "짜릿한 역전승"
+			if opponent_team.score == 0:
+				return "살살하셔야 겠어요~"
+			if any(hits >= 10 for hits in paddle_hits_per_round):
+				return "치혈했던 승리"
+			else:
+				return "승리"
 		else:
-			return "패배"	
+			if comeback_lose:
+				return "아쉬운 역전패"
+			if our_team.score  == 0:
+				return "그 실력에 잠이 오냐?"
+			if any(hits >= 10 for hits in paddle_hits_per_round):
+				return "치혈했던 패배"
+			else:
+				return "패배"
