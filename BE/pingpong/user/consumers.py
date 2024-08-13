@@ -14,6 +14,7 @@ from coreManage.recieveCleaner import ReceiveCleaner
 from django.db import IntegrityError
 
 MAX_URI_LENGTH = 200
+MAX_FILE_SIZE = 10 * 1024 * 1024
 stateManager = StateManager()
 DEFAULT_IMAGE_URI = "images/playerA.png"
 DEFAULT_IMAGE_STORAGE = "../BE/data_image/"
@@ -184,6 +185,9 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         avatar_image = waiting_room_info['avatarImage']
         if 'imageUrl' not in avatar_image and avatar_image['imageData'] is not None:
             target_image_uri =  await self.upload_image(avatar_image['imageData'])
+            if target_image_uri is None:
+                await self._send("updateClientInfoResponse", {"message": "tooBigImage"})
+                return
             if len(target_image_uri) >= MAX_URI_LENGTH:
                 await self._send("updateClientInfoResponse", {"message": "longURILength"})
                 return 
@@ -223,7 +227,10 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         format, imgstr = image_data.split(';base64,')
         ext = format.split('/')[-1]
         file_name = f'{uuid.uuid4()}.{ext}'
-        data = ContentFile(base64.b64decode(imgstr), name=file_name)
+        decoded_img = base64.b64decode(imgstr)
+        if len(decoded_img) > MAX_FILE_SIZE:
+            return None
+        data = ContentFile(decoded_img, name=file_name)
         file_path = os.path.join(settings.MEDIA_ROOT, data.name)
         with open(file_path, 'wb') as f:
             f.write(data.read())
