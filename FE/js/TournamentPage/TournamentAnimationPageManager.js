@@ -419,6 +419,7 @@ class TournamentAnimationPageManager {
 			});
 		}
 		await _renderTournamentWarning.call(this);
+		if (!this.clientInfo.tournamentInfo) return;
 		this.clientInfo.tournamentInfo.renderingMode = "animation";
 		this.clientInfo.tournamentInfo.stage = stage;
 		this.renderPage("tournament");
@@ -813,7 +814,7 @@ class TournamentAnimationPageManager {
 					});
 				});
 
-				const [ leftScore, rightScore ] = score;
+				const [leftScore, rightScore] = score;
 				this.clientInfo.gameInfo = {
 					role: "observer",
 					pingpongRoomSocket,
