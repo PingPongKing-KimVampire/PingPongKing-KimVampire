@@ -64,6 +64,8 @@ class LobbyPageManager {
 
 		this._setFriendManagementButton();
 		this._setProfileButton();
+
+		this._subscribeWindow();
 	}
 
 	_setFriendManagementButton() {
@@ -149,7 +151,7 @@ class LobbyPageManager {
 
 	_subscribeWindow() {
 		this._autoSetScollTrackColorRef = this._autoSetScollTrackColor.bind(this);
-		windowObservable.subscribeResize(_autoSetScollTrackColorRef);
+		windowObservable.subscribeResize(this._autoSetScollTrackColorRef);
 	}
 
 	_unsubscribeWindow() {
