@@ -88,12 +88,13 @@ class Ball:
     def pause(self):
         self.speed = 0
 
-    def set_fake_ball(self, angle, speed):
+    def set_fake_ball(self, angle, speed, spin):
         self.angle = angle % 360
         self.speed = speed
         dir = self._calculate_ball_direction()
         self.dx = dir['dx']
         self.dy = dir['dy']
+        self.spin = spin
 
     def get_right_x(self):
         return self.pos_x + self.radius

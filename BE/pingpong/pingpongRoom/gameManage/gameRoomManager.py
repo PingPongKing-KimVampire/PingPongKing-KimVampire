@@ -267,7 +267,7 @@ class GameRoomManager:
             self.fake_ball[id] = Ball(hit_count=self.ball.hit_count)
             rand = random.randint(-15, 15)
             self.fake_ball[id].reset_ball(self.ball.pos_x, self.ball.pos_y)
-            self.fake_ball[id].set_fake_ball(self.ball.angle + rand, self.ball.speed)
+            self.fake_ball[id].set_fake_ball(self.ball.angle + rand, self.ball.speed, self.ball.spin)
         if self.is_playing:
             await self.notifier.broadcast('notifyFakeBallCreate', {'idList' : id_list})
         for id in id_list:
