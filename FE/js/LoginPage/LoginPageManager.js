@@ -1,5 +1,6 @@
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
+import { sendServer } from "../common.js";
 
 class LoginPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -122,7 +123,7 @@ class LoginPageManager {
 				clientId: id,
 			},
 		};
-		socket.send(JSON.stringify(initClientMessage));
+		sendServer(socket, initClientMessage);
 		const userData = await new Promise(resolve => {
 			socket.addEventListener(
 				"message",
@@ -163,7 +164,7 @@ class LoginPageManager {
 			event: "getFriendList",
 			content: {},
 		};
-		socket.send(JSON.stringify(getFriendListMessage));
+		sendServer(socket, getFriendListMessage);
 		return new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -181,7 +182,7 @@ class LoginPageManager {
 			event: "getClientListWhoFriendRequestedMe",
 			content: {},
 		};
-		socket.send(JSON.stringify(getClientListWhoFriendRequestedMeMessage));
+		sendServer(socket, getClientListWhoFriendRequestedMeMessage);
 		return new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -199,7 +200,7 @@ class LoginPageManager {
 			event: "getClientListIFriendRequested",
 			content: {},
 		};
-		socket.send(JSON.stringify(getClientListIFriendRequestedMessage));
+		sendServer(socket, getClientListIFriendRequestedMessage);
 		return new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -217,7 +218,7 @@ class LoginPageManager {
 			event: "getClientListIBlocked",
 			content: {},
 		};
-		socket.send(JSON.stringify(getClientListIBlockedMessage));
+		sendServer(socket, getClientListIBlockedMessage);
 		return new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);

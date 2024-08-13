@@ -1,6 +1,7 @@
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
 import { GlobalConnectionError, isSocketConnected } from "../Error/Error.js";
+import { sendServer } from "../common.js";
 
 class EditProfilePageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -125,8 +126,8 @@ class EditProfilePageManager {
 			}
 			editMessage.content.waitingRoomInfo.avatarImage = avatarImage;
 		}
-
-		this.clientInfo.socket.send(JSON.stringify(editMessage));
+		
+		sendServer(this.clientInfo.socket, editMessage);
 		await new Promise(resolve => {
 			const listener = messsageEvent => {
 				const { event, content } = JSON.parse(messsageEvent.data);

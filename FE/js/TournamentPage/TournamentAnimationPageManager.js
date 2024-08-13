@@ -3,6 +3,7 @@ import windowObservable from "../../WindowObservable.js";
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
 import { TournamentInfodNotSettingError } from "../Error/Error.js";
+import { sendServer } from "../common.js";
 
 class TournamentAnimationPageManager {
 	constructor(app, clientInfo, renderPage) {
@@ -317,7 +318,7 @@ class TournamentAnimationPageManager {
 			event: "getTournamentGameInfo",
 			content: {},
 		};
-		this.clientInfo.tournamentInfo.tournamentSocket.send(JSON.stringify(getTournamentInfoMessage));
+		sendServer(this.clientInfo.tournamentInfo.tournamentSocket, getTournamentInfoMessage);
 		const { semiFinal, final } = await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
@@ -463,7 +464,7 @@ class TournamentAnimationPageManager {
 			event: "changeReadyState",
 			content: { state: "READY" },
 		};
-		this.clientInfo.gameInfo.pingpongRoomSocket.send(JSON.stringify(changeReadyStateMessage));
+		sendServer(this.clientInfo.gameInfo.pingpongRoomSocket, changeReadyStateMessage);
 		// 3초 후 notifyGameStart 메시지 받기
 		const { boardInfo, playerInfo } = await new Promise((resolve, reject) => {
 			const listener = messageEvent => {
