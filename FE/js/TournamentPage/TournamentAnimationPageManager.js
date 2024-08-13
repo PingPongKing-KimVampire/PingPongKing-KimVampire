@@ -2,7 +2,6 @@ import windowObservable from "../../WindowObservable.js";
 
 import { SERVER_ADDRESS } from "../PageRouter.js";
 import { SERVER_PORT } from "../PageRouter.js";
-import { _connectLobbySocket } from "../connect.js";
 import { TournamentInfodNotSettingError } from "../Error/Error.js";
 
 class TournamentAnimationPageManager {
