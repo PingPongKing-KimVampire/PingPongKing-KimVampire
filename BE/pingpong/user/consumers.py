@@ -29,8 +29,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         token = headers.get(b'sec-websocket-protocol', b'')
         try:
             self.decoded_token = CustomTokenObtainPairSerializer.verify_token(token)
-            await self.accept(subprotocol="authorization")
-            Printer.log("WebSocket connection established", "green")      
+            await self.accept(subprotocol="authorization")    
         except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
             Printer.log("Invalid Authorization header, closing connection", "red")
             await self.close()
@@ -52,9 +51,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     async def _send(self, event, content):
         try:
             await self.send(json.dumps({ 'event': event, 'content': content }))
-            Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-            Printer.log(f"event : {event}", "cyan")
-            # Printer.log(f"content : {content}", "cyan")
         except:
             Printer.log(f"Global Websocket ERROR", "red")
             
@@ -66,11 +62,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         
         event = ReceiveCleaner.clean(event)
         content = ReceiveCleaner.clean(content)
-        
-        Printer.log("<<<<<")
-        Printer.log(f"event : {event}")
-        Printer.log(f"content : {content}")
-
         if event == 'initClient':
             await self.init_client()
             return
@@ -145,15 +136,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
 
     async def init_client(self):
         from .repositories import UserRepository
-        # try:
-        #     decoded_token = CustomTokenObtainPairSerializer.verify_token(access_token)
-        # except (InvalidTokenError, ExpiredSignatureError, KeyError, AttributeError):
-        #     Printer.log("Invalid Authorization header, closing connection", "red")
-        #     self.is_init = False
-        #     if (hasattr(self, 'client_id') and self.client_id in channel_name_map):
-        #         channel_name_map.pop(self.client_id)
-        #     discard_group(self, 'lobby')
-        #     await self.close()
         stateManager.add_channel_layer(self.channel_layer)
         client_id = self.decoded_token['user_id']
         self.client_id = client_id
@@ -162,8 +144,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         stateManager.add_consumer_to_map(self.client_id, self)
         
         self.client_nickname = self.decoded_token['nickname']
-        # add user 회원가입에서 이루어짐, 추후에 알림 기능 적용을 위해서 채널 만들고 관리할 필요 있음
-        # stateManager.add_user(client_id, decoded_token['nickname'])
         user = await UserRepository.get_user_by_id(client_id)
         response = {
             "id": client_id,
@@ -335,8 +315,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             }                                             })
     
     async def notify_friend_request_canceled(self, event):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
         content = event['content']
         await self.send(text_data=json.dumps({
             'event': 'notifyFriendRequestCanceled',
@@ -344,8 +322,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         }))
     
     async def notify_friend_request_accepted(self, event):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
         content = event['content']
         # 클라이언트에 메시지 전송
         await self.send(text_data=json.dumps({
@@ -372,8 +348,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         await self._send("rejectFriendRequestResponse", {"message": "OK"})
     
     async def notify_friend_request_rejected(self, event):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
         content = event['content']
         # 클라이언트에 메시지 전송
         await self.send(text_data=json.dumps({
@@ -400,8 +374,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
                                       {"clientInfo": {"id": user.id}})
 
     async def notify_friend_deleted(self, event):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
         content = event['content']
         await self.send(text_data=json.dumps({
             'event': 'notifyFriendDeleted',
@@ -409,10 +381,7 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         }))
     
     async def notify_friend_request_receive(self, event):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
         content = event['content']
-        # 클라이언트에 메시지 전송
         await self.send(text_data=json.dumps({
             'event': 'notifyFriendRequestReceive',
             'content': content
@@ -502,8 +471,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         await self._send("sendMessageResponse", {"message": "OK"})
 
     async def notify_message_received(self, event):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
         content = event['content']
         await self.send(text_data=json.dumps({
             'event': 'notifyMessageArrive',
@@ -546,8 +513,6 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             await notify_client_event(self.channel_layer, channel_name, event, content)
     
     async def notify_friend_active_state_change(self, event):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
         content = event['content']
         await self.send(text_data=json.dumps({
             'event': 'notifyFriendActiveStateChange',

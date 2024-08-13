@@ -115,7 +115,6 @@ def login(request):
         return JsonResponse({"error_code": "USER_02", "error_message": "password is invalid"}, status=400)
     user = UserRepository.authenticate(username, password)
     if user is not None:
-        # 시리얼라이저를 사용하여 토큰 생성
         refresh = CustomTokenObtainPairSerializer.get_token(user)
         access_token = str(refresh.access_token)
         response_data = {

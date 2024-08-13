@@ -6,11 +6,11 @@ from django.core.exceptions import ValidationError
 DEFAULT_IMAGE_URI = "images/playerA.png"
 
 class User(models.Model):
-    id = models.BigAutoField(primary_key=True)  # Big integer as a primary key
+    id = models.BigAutoField(primary_key=True)
     username = models.CharField(max_length=20, unique=True, null=True)
     password = models.CharField(max_length=100, null=True)
     nickname = models.CharField(max_length=20, unique=True, null=True)
-    image_uri = models.URLField(blank=True, null=True)  # Optional field
+    image_uri = models.URLField(blank=True, null=True)
     win = models.IntegerField(default=0, null=False)
     lose = models.IntegerField(default=0, null=False)
     
