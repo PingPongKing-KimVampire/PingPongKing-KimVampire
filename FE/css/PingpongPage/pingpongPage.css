@@ -132,7 +132,6 @@
 	position: absolute;
 	border-radius: 50%;
 	background-color: white;
-	transition: transform 0.5s ease-out, opacity 0.5s ease-out;
 }
 
 .opaqueOpacity{
@@ -140,6 +139,7 @@
 }
 
 .pop {
+	transition: transform 0.5s ease-out, opacity 0.5s ease-out;
 	transform: scale(3);
 	opacity: 0;
 }
