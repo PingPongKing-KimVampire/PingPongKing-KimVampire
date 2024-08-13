@@ -243,12 +243,12 @@ class FriendManagementPageManager {
 			content: { clientInfo: { id } },
 		};
 		sendServer(this.clientInfo.socket, acceptFriendRequestMessage);
-		await new Promise(resolve => {
+		const content = await new Promise(resolve => {
 			const listener = messageEvent => {
 				const { event, content } = JSON.parse(messageEvent.data);
 				if (event === "acceptFriendRequestResponse" && content.message === "OK") {
 					this.clientInfo.socket.removeEventListener("message", listener);
-					resolve();
+					resolve(content);
 				}
 			};
 			this.clientInfo.socket.addEventListener("message", listener);
@@ -256,6 +256,7 @@ class FriendManagementPageManager {
 		const newFriendClient = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.find(client => client.id === id);
 		if (newFriendClient) {
 			this.clientInfo.friendInfo.clientListWhoFriendRequestedMe = this.clientInfo.friendInfo.clientListWhoFriendRequestedMe.filter(client => client.id !== newFriendClient.id);
+			newFriendClient.activeState = content.clientInfo.activeState;
 			newFriendClient.chat = {
 				recentTimestamp: null,
 				unreadMessageCount: 0,

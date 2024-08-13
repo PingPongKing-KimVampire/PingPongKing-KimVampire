@@ -245,6 +245,7 @@ class LoginPageManager {
 				// 누군가 내 친구 요청을 수락
 				const acceptedClient = this.clientInfo.friendInfo.clientListIFriendRequested.find(client => client.id === content.clientInfo.id);
 				if (acceptedClient) {
+					acceptedClient.activeState = content.clientInfo.activeState;
 					this.clientInfo.friendInfo.clientListIFriendRequested = this.clientInfo.friendInfo.clientListIFriendRequested.filter(client => client.id !== content.clientInfo.id);
 					acceptedClient.chat = {
 						recentTimestamp: null,
