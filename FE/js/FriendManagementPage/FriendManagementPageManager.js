@@ -15,6 +15,7 @@ class FriendManagementPageManager {
 	}
 
 	clearPage() {
+		this.clientInfo.socket.removeEventListener("message", this.listener);
 		this._unsubscribeWindow();
 	}
 
@@ -140,7 +141,7 @@ class FriendManagementPageManager {
 	}
 
 	_listenNotifyEvent() {
-		const listener = messageEvent => {
+		this.listener = messageEvent => {
 			const { event, content } = JSON.parse(messageEvent.data);
 			if (this.selectedTab === "searchClientTab") {
 				if (event === "notifyFriendDeleted" || event === "notifyFriendRequestRejected" || event === "notifyFriendRequestAccepted" || event === "notifyFriendRequestCanceled" || event === "notifyFriendRequestReceive") {
@@ -156,9 +157,7 @@ class FriendManagementPageManager {
 				}
 			}
 		};
-		this.clientInfo.socket.addEventListener("message", listener);
-		//페이지 이동시 remove해야함
-		// this.clientInfo.socket.addEventListener('message', listener);
+		this.clientInfo.socket.addEventListener("message", this.listener);
 	}
 
 	_renderTabByCurrentMode() {
