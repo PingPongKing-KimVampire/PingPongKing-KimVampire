@@ -270,6 +270,7 @@ class ChattingPageManager {
 			this.selectedFriendItem.classList.remove("selectedFriendItem");
 			this.selectedInviteButton.classList.add("invisible");
 		}
+		if (!friendItem) return;
 		this.selectedFriendItem = friendItem;
 		this.selectedInviteButton = friendItem.querySelector(".inviteButton");
 		if (!this.selectedInviteButton) return;
