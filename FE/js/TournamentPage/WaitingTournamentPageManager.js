@@ -24,6 +24,7 @@ class WaitingTournamentPageManager {
 	}
 
 	async initPage() {
+		this.isResponseWaitingStatus = false;
 		this._listenNotifyMatchMakingComplete();
 		this._setLeaveWaitingTournamentButton();
 	}
@@ -53,6 +54,9 @@ class WaitingTournamentPageManager {
 	_setLeaveWaitingTournamentButton() {
 		const leaveWaitingTournamentButton = document.querySelector(".leaveWaitingTournamentButton");
 		leaveWaitingTournamentButton.addEventListener("click", async () => {
+			if(this.isResponseWaitingStatus)
+				return;
+			this.isResponseWaitingStatus = true;
 			const cancelMatchMakingMessage = {
 				event: "cancelMatchMaking",
 				content: {},
@@ -68,6 +72,7 @@ class WaitingTournamentPageManager {
 				};
 				this.clientInfo.lobbySocket.addEventListener("message", listener);
 			});
+			this.isResponseWaitingStatus = false;
 			history.back();
 		});
 	}
