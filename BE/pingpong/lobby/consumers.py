@@ -38,10 +38,13 @@ class LobbyConsumer(AsyncWebsocketConsumer):
         stateManager.remove_consumer_from_map(self.client_id, self)
 
     async def _send(self, event, content):
-        Printer.log(f">>>>> LOBBY sent >>>>>", "bright_cyan")
-        Printer.log(f"event : {event}", "white")
-        Printer.log(f"content : {content}\n", "white")
-        await self.send(json.dumps({ 'event': event, 'content': content }))
+        try:
+            await self.send(json.dumps({ 'event': event, 'content': content }))
+            Printer.log(f">>>>> LOBBY sent >>>>>", "bright_cyan")
+            Printer.log(f"event : {event}", "white")
+            Printer.log(f"content : {content}\n", "white")
+        except:
+            Printer.log(f"Lobby Websocket ERROR", "red")
 
     async def receive(self, text_data):
         message = json.loads(text_data)

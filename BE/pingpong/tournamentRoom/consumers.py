@@ -66,11 +66,14 @@ class TournamentRoomConsumer(AsyncWebsocketConsumer):
             await self.tournament_manager.end_game(self.gameroom_id_now, self.tournament_state, self.client_id)
 
     async def _send(self, event=str, content={}):
-        Printer.log(f">>>>> Tournament {self.tournament_id} sent >>>>>", "bright_cyan")
-        Printer.log(f"event : {event}", "white")
-        Printer.log(f"content : {content}\n", "white")
-        data = { 'event': event, 'content': content }
-        await self.send(json.dumps(data))
+        try:
+            data = { 'event': event, 'content': content }
+            await self.send(json.dumps(data))
+            Printer.log(f">>>>> Tournament {self.tournament_id} sent >>>>>", "bright_cyan")
+            Printer.log(f"event : {event}", "white")
+            Printer.log(f"content : {content}\n", "white")
+        except:
+            Printer.log(f"Tournament {self.tournament_id} Websocket ERROR", "red")
     
     async def receive(self, text_data):
         message = json.loads(text_data)

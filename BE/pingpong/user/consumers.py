@@ -49,10 +49,14 @@ class GlobalConsumer(AsyncWebsocketConsumer):
         Printer.log("WebSocket connection closed", "red")
         
     async def _send(self, event, content):
-        Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
-        Printer.log(f"event : {event}", "cyan")
-        # Printer.log(f"content : {content}", "cyan")
-        await self.send(json.dumps({ 'event': event, 'content': content }))
+        try:
+            await self.send(json.dumps({ 'event': event, 'content': content }))
+            Printer.log(f">>>>> AUTH sent >>>>>", "cyan")
+            Printer.log(f"event : {event}", "cyan")
+            # Printer.log(f"content : {content}", "cyan")
+        except:
+            Printer.log(f"Global Websocket ERROR", "red")
+            
 
     async def receive(self, text_data):
         message = json.loads(text_data)

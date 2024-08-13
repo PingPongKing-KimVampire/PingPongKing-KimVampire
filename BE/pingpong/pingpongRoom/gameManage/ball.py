@@ -88,8 +88,9 @@ class Ball:
     def pause(self):
         self.speed = 0
 
-    def change_direction(self, angle):
+    def set_fake_ball(self, angle, speed):
         self.angle = angle % 360
+        self.speed = speed
         dir = self._calculate_ball_direction()
         self.dx = dir['dx']
         self.dy = dir['dy']
