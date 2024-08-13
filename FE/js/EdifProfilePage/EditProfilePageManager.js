@@ -133,17 +133,16 @@ class EditProfilePageManager {
 			}
 			editMessage.content.waitingRoomInfo.avatarImage = avatarImage;
 		}
-		
+
 		sendServer(this.clientInfo.socket, editMessage);
 		await new Promise(resolve => {
 			const listener = messsageEvent => {
 				const { event, content } = JSON.parse(messsageEvent.data);
 				if (event === "updateClientInfoResponse") {
 					if (content.message === "OK") {
-						//API추가되면 추가
-						// const { nickname, ImageUrl } = content.updateInfo;
-						// if (nickname) this.clientInfo.nickname = nickname;
-						// if (ImageUrl) this.clientInfo.avatarUrl = ImageUrl ;
+						const { nickname, imageUrl } = content.updateInfo;
+						if (nickname) this.clientInfo.nickname = nickname;
+						if (imageUrl) this.clientInfo.avatarUrl = imageUrl;
 						resolve();
 					} else {
 						alert(content.message);
