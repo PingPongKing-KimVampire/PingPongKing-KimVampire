@@ -130,7 +130,7 @@ class EditProfilePageManager {
 		if (this.isAvatarUpdated) {
 			let avatarImage;
 			if (this.isDefaultAvatar) {
-				avatarImage = { imageUrl: this.avatarImg.src };
+				avatarImage = { imageUrl: this.avatarImg.dataset.src };
 			} else {
 				avatarImage = { imageData: this.avatarImg.src };
 			}
@@ -170,6 +170,9 @@ class EditProfilePageManager {
 		const modalClicked = e => {
 			if (e.target.className.includes("selectionAvatarImage")) {
 				this.avatarImg.src = e.target.dataset.src;
+				this.avatarImg.dataset.src = e.target.dataset.src;
+				// console.log(e.target.dataset.src);
+				// console.log(this.avatarImg.src);
 				this.isAvatarUpdated = e.target.dataset.src !== this.clientInfo.avatarUrl;
 				this.isDefaultAvatar = true;
 				this._hideAvatarEditModal.call(this);
