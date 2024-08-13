@@ -148,6 +148,10 @@ class ChattingPageManager {
 		const sendMessage = () => {
 			const messageContent = this.inputBox.value.trim();
 			if (messageContent === "") return;
+			if (messageContent.length > 1000) {
+				alert("1000자를 초과하는 메시지는 보낼 수 없습니다.");
+				return;
+			}
 			const sendMessageObj = {
 				event: "sendMessage",
 				content: {
