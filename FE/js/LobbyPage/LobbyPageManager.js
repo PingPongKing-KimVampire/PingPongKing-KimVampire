@@ -55,6 +55,7 @@ class LobbyPageManager {
 		this.enterNoButton = document.querySelector(".questionModal .activatedButton:nth-of-type(2)");
 		this.enterModalTitle = document.querySelector(".questionModal .title");
 		this.waitingRoomListContainer = document.querySelector(".waitingRoomListContainer");
+		this.isResponseWaitingStatus = false;
 
 		this.allWaitingRoomElement = {};
 		this._renderWaitingRoom(this.waitingRoomInfoList);
@@ -161,6 +162,9 @@ class LobbyPageManager {
 	_setTournamentJoinButton() {
 		const tournamentJoinButton = document.querySelector(".tournamentJoinButton");
 		tournamentJoinButton.addEventListener("click", async () => {
+			if(this.isResponseWaitingStatus)
+				return;
+			this.isResponseWaitingStatus = true;
 			const startMatchMakingMessage = {
 				event: "startMatchMaking",
 				content: {},
@@ -176,6 +180,7 @@ class LobbyPageManager {
 				};
 				this.clientInfo.lobbySocket.addEventListener("message", listener);
 			});
+			this.isResponseWaitingStatus = false;
 			this.renderPage("waitingTournament");
 		});
 	}

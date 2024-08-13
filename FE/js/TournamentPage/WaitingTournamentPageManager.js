@@ -15,15 +15,16 @@ class WaitingTournamentPageManager {
 	}
 
 	clearPage() {
-		if (this.clientInfo.nextPage === "lobby") {
-			this._removePageListener();
-			return;
-		}
+		this._removePageListener();
+		// if (this.clientInfo.nextPage === "lobby") {
+		// 	return;
+		// }
 		this.clientInfo.lobbySocket.close();
 		this.clientInfo.lobbySocket = null;
 	}
 
 	async initPage() {
+		this.isResponseWaitingStatus = false;
 		this._listenNotifyMatchMakingComplete();
 		this._setLeaveWaitingTournamentButton();
 	}
@@ -53,6 +54,9 @@ class WaitingTournamentPageManager {
 	_setLeaveWaitingTournamentButton() {
 		const leaveWaitingTournamentButton = document.querySelector(".leaveWaitingTournamentButton");
 		leaveWaitingTournamentButton.addEventListener("click", async () => {
+			if(this.isResponseWaitingStatus)
+				return;
+			this.isResponseWaitingStatus = true;
 			const cancelMatchMakingMessage = {
 				event: "cancelMatchMaking",
 				content: {},
@@ -68,6 +72,7 @@ class WaitingTournamentPageManager {
 				};
 				this.clientInfo.lobbySocket.addEventListener("message", listener);
 			});
+			this.isResponseWaitingStatus = false;
 			history.back();
 		});
 	}
