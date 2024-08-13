@@ -11,6 +11,7 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from coreManage.group import add_group, discard_group, notify_group, notify_client_event
 from coreManage.recieveCleaner import ReceiveCleaner
+from django.db import IntegrityError
 
 MAX_URI_LENGTH = 200
 stateManager = StateManager()
@@ -225,9 +226,13 @@ class GlobalConsumer(AsyncWebsocketConsumer):
             if isDuplicated:
                 await self._send("updateClientInfoResponse", {"message": "duplicatedNickname"})
                 return
-            user = await UserRepository.get_user_by_id(self.client_id)
+            try:
+                user = await UserRepository.get_user_by_id(self.client_id)
+            except IntegrityError as e:
+                print(f"IntegrityError occurred: {e}")
+                await self._send("updateClientInfoResponse", {"message": "duplicatedNickname"})
+                return
             await UserRepository.update_user_image_uri_and_nickname(user, target_image_uri, nickname)
-            
             await self._send("updateClientInfoResponse", {"message": "OK",
                                                           "updateInfo": {
                                                               "nickname": user.nickname,
