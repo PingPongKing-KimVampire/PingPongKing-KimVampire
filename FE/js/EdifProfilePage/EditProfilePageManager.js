@@ -194,6 +194,7 @@ class EditProfilePageManager {
 					this.avatarImg.src = e.target.result;
 					this.isAvatarUpdated = true;
 					this.isDefaultAvatar = false;
+					this._updateCompleteButton(this.isNicknameUpdated, this.isNicknameValid, this.isAvatarUpdated);
 				};
 				reader.readAsDataURL(file);
 			}
