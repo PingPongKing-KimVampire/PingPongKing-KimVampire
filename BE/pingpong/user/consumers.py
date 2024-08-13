@@ -188,46 +188,51 @@ class GlobalConsumer(AsyncWebsocketConsumer):
     
     async def updateClientInfo(self, waiting_room_info):
         from .repositories import UserRepository
-        try:
+        if 'nickname' not in waiting_room_info and 'avatarImage' not in waiting_room_info:
+            await self._send("updateClientInfoResponse", {"message": "invalidAvatarImage"})
+            return
+        if 'avatarImage' not in waiting_room_info and waiting_room_info['nickname'] is not None:
             user = await UserRepository.get_user_by_id(self.client_id)
-            update_info = {}
-            if 'nickname' not in waiting_room_info and 'avatarImage' not in waiting_room_info:
-                raise ValueError("invalidAvatarImage")
-            if 'avatarImage' not in waiting_room_info:
-                if waiting_room_info['nickname'] is not None:
-                    await UserRepository.update_user_nickname(user, waiting_room_info['nickname'])
-                    update_info['nickname'] = waiting_room_info['nickname']
-                else:
-                    raise ValueError("invalidAvatarImage")
-            else:
-                avatar_image = waiting_room_info['avatarImage']
-                if 'imageUrl' not in avatar_image and avatar_image['imageData'] is not None:
-                    target_image_uri = await self.upload_image(avatar_image['imageData'])
-                    if len(target_image_uri) >= MAX_URI_LENGTH:
-                        raise ValueError("longURILength")
-                elif avatar_image['imageUrl'] is not None and 'imageData' not in avatar_image:
-                    target_image_uri = avatar_image['imageUrl']
-                else:
-                    raise ValueError("invalidAvatarImage")
-
-                update_info['imageUrl'] = target_image_uri
-
-                if "nickname" not in waiting_room_info:
-                    await UserRepository.update_user_image_uri(user, target_image_uri)
-                else:
-                    nickname = waiting_room_info['nickname']
-                    if await UserRepository.exists_user_by_nickname_async(nickname):
-                        raise ValueError("duplicatedNickname")
-                    await UserRepository.update_user_image_uri_and_nickname(user, target_image_uri, nickname)
-                    update_info['nickname'] = nickname
-
-            response = {"message": "OK", "updateInfo": update_info}
-            await self._send("updateClientInfoResponse", response)
-        except ValueError as e:
-            error_message = str(e)
-            await self._send("updateClientInfoResponse", {"message": error_message})
-        except Exception as e:
-            await self._send("updateClientInfoResponse", {"message": "unexpectedError"})
+            await UserRepository.update_user_nickname(user, waiting_room_info['nickname'])
+            await self._send("updateClientInfoResponse", {"message": "OK",
+                                                          "updateInfo": {
+                                                              "nickname": waiting_room_info['nickname'],
+                                                              "imageUrl": user.get_image_uri()
+                                                          }})
+            return
+        avatar_image = waiting_room_info['avatarImage']
+        if 'imageUrl' not in avatar_image and avatar_image['imageData'] is not None:
+            target_image_uri =  await self.upload_image(avatar_image['imageData'])
+            if len(target_image_uri) >= MAX_URI_LENGTH:
+                await self._send("updateClientInfoResponse", {"message": "longURILength"})
+                return 
+        elif avatar_image['imageUrl'] is not None and 'imageData' not in avatar_image:
+            target_image_uri = avatar_image['imageUrl']
+        else:
+            await self._send("updateClientInfoResponse", {"message": "invalidAvatarImage"})
+            return
+        if "nickname" not in waiting_room_info:
+            user = await UserRepository.get_user_by_id(self.client_id)
+            await UserRepository.update_user_image_uri(user, target_image_uri)
+            await self._send("updateClientInfoResponse", {"message": "OK",
+                                                          "updateInfo": {
+                                                              "nickname": user.nickname,
+                                                              "imageUrl": target_image_uri
+                                                          }})
+        else:
+            nickname = waiting_room_info['nickname']
+            isDuplicated = await UserRepository.exists_user_by_nickname_async(nickname)
+            if isDuplicated:
+                await self._send("updateClientInfoResponse", {"message": "duplicatedNickname"})
+                return
+            user = await UserRepository.get_user_by_id(self.client_id)
+            await UserRepository.update_user_image_uri_and_nickname(user, target_image_uri, nickname)
+            
+            await self._send("updateClientInfoResponse", {"message": "OK",
+                                                          "updateInfo": {
+                                                              "nickname": user.nickname,
+                                                              "imageUrl": target_image_uri
+                                                          }})
     
     async def upload_image(self, image_data):
         format, imgstr = image_data.split(';base64,')
