@@ -272,6 +272,7 @@ class ChattingPageManager {
 		}
 		this.selectedFriendItem = friendItem;
 		this.selectedInviteButton = friendItem.querySelector(".inviteButton");
+		if (!this.selectedInviteButton) return;
 		this.selectedFriendItem.classList.add("selectedFriendItem");
 		if (this.clientInfo.currentPage === "waitingRoom") this.selectedInviteButton.classList.remove("invisible");
 	}
@@ -375,6 +376,10 @@ class ChattingPageManager {
 		) {
 			this._renderFriendList();
 		}
+
+		// if (event === "notifyFriendActiveStateChange") {
+		// 	console.log("notifyFriendActiveStateChange!!!!");
+		// }
 	};
 
 	_getChatContainerHTML() {
