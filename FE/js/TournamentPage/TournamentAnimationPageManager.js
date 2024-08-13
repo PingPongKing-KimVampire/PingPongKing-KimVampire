@@ -74,6 +74,7 @@ class TournamentAnimationPageManager {
 	async _initStaticPage() {
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
+				if (this.clientInfo.currentPage !== "tournament") return;
 				this.point = this._calculatePoints();
 				this._renderCurrentTournamentInfo();
 			});
@@ -84,6 +85,7 @@ class TournamentAnimationPageManager {
 		this.clientInfo.tournamentInfo.renderingMode = "normal"; //미래에 렌더링할때는 변경하지 않는 한 normal
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
+				if (this.clientInfo.currentPage !== "tournament") return;
 				this.point = this._calculatePoints();
 				this._renderBracketLine();
 				this._renderAnimtation(stage);
@@ -92,26 +94,30 @@ class TournamentAnimationPageManager {
 	}
 
 	async _renderAnimtation(stage) {
-		if (stage === "semiFinal") {
-			await this._renderPolylineAnimation("leftSemiFinal");
-			this._renderPlayer("leftSemiFinal");
-			this._renderScoreBox("leftSemiFinal");
-			await this._renderPolylineAnimation("rightSemiFinal");
-			this._renderPlayer("rightSemiFinal");
-			this._renderScoreBox("rightSemiFinal");
-		} else if (stage === "final") {
-			//하얀 선만 렌더링
-			const animationPromise1 = this._renderPolylineAnimation("leftSemiFinal");
-			const animationPromise2 = this._renderPolylineAnimation("rightSemiFinal");
-			await Promise.all([animationPromise1, animationPromise2]);
-			this._renderScoreBox("leftSemiFinal");
-			this._renderScoreBox("rightSemiFinal");
-			this._renderPlayer("leftSemiFinal");
-			this._renderPlayer("rightSemiFinal");
-			await this._renderPolylineAnimation("final");
-			this._renderPlayer("final");
-			this._renderScoreBox("final");
-			//나가기?
+		try {
+			if (stage === "semiFinal") {
+				await this._renderPolylineAnimation("leftSemiFinal");
+				this._renderPlayer("leftSemiFinal");
+				this._renderScoreBox("leftSemiFinal");
+				await this._renderPolylineAnimation("rightSemiFinal");
+				this._renderPlayer("rightSemiFinal");
+				this._renderScoreBox("rightSemiFinal");
+			} else if (stage === "final") {
+				//하얀 선만 렌더링
+				const animationPromise1 = this._renderPolylineAnimation("leftSemiFinal");
+				const animationPromise2 = this._renderPolylineAnimation("rightSemiFinal");
+				await Promise.all([animationPromise1, animationPromise2]);
+				this._renderScoreBox("leftSemiFinal");
+				this._renderScoreBox("rightSemiFinal");
+				this._renderPlayer("leftSemiFinal");
+				this._renderPlayer("rightSemiFinal");
+				await this._renderPolylineAnimation("final");
+				this._renderPlayer("final");
+				this._renderScoreBox("final");
+				//나가기?
+			}
+		} catch (e) {
+			return;
 		}
 	}
 
@@ -328,6 +334,7 @@ class TournamentAnimationPageManager {
 
 	_subscribeWindow() {
 		this.renderBracketLineRef = (() => {
+			if (this.clientInfo.currentPage !== "tournament") return;
 			this.point = this._calculatePoints();
 			this._renderBracketLine();
 		}).bind(this);

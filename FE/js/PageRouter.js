@@ -140,8 +140,8 @@ class PageRouter {
 		}
 		try {
 			this.clientInfo.nextPage = url;
-			await this._renderLoadingPage();
 			if (this.currentPageManager) await this.currentPageManager.clearPage();
+			await this._renderLoadingPage();
 			if (url === "login") {
 				this._loadCSS(["css/LoginPage/loginPage.css"]);
 				this._inVisibleChatButton();
