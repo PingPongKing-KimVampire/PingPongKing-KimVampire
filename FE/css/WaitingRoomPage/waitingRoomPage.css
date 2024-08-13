@@ -283,7 +283,7 @@
 	position: absolute;
 	height: 100%;
 	width: 100%;
-	z-index: 1000;
+	z-index: 300;
 	background-color: rgba(0, 0, 0, 0.8);
 	display: flex;
 	flex-direction: column;

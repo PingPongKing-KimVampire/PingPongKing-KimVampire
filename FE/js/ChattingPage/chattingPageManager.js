@@ -6,9 +6,20 @@ class ChattingPageManager {
 
 		this.clientInfo = clientInfo;
 		this.renderPage = renderPage;
+		this._changeButton();
 		this._appendChatButton();
-
 		this._initPage();
+	}
+
+	_changeButton() {
+		const originButton = document.querySelector(".chatButton");
+		originButton.remove();
+		const chatButton = document.createElement("button");
+		chatButton.classList.add("chatButton", "inVisible");
+		const totalUnreadCountDiv = document.createElement("div");
+		totalUnreadCountDiv.classList.add("totalUnreadCount");
+		chatButton.appendChild(totalUnreadCountDiv);
+		document.body.prepend(chatButton);
 	}
 
 	_appendChatButton() {
@@ -27,6 +38,7 @@ class ChattingPageManager {
 		const count = this.clientInfo.friendInfo.friendList.reduce((acc, current) => {
 			return acc + current.chat.unreadMessageCount;
 		}, 0);
+
 		if (count === 0) {
 			this.totalUnreadCount.classList.add("invisible");
 		} else {
@@ -38,6 +50,10 @@ class ChattingPageManager {
 	_initPage() {
 		this.isOpened = false;
 		this.readingFriendId = null;
+
+		// const chatButton = document.querySelector(".chatButton");
+		// const clonedChatButton = chatButton.cloneNode(true);
+		// chatButton.parentNode.replaceChild(clonedChatButton, chatButton);
 
 		document.querySelector(".chatButton").addEventListener("click", event => {
 			event.stopPropagation();

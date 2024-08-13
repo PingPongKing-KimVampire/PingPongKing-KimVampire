@@ -23,7 +23,7 @@ export const SERVER_PORT = "443";
 class PageRouter {
 	constructor() {
 		this.app = document.querySelector("#app");
-		this.chatButton = document.querySelector(".chatButton");
+		// this.chatButton = document.querySelector(".chatButton");
 		this.clientInfo = {
 			isMobile: /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
 			socket: null,
@@ -133,6 +133,7 @@ class PageRouter {
 	}
 
 	async renderPage(url, queryParam, isUpdateHistory = true) {
+		this.chatButton = document.querySelector(".chatButton");
 		if (url === "chatting") {
 			this._loadCSS(["css/ChattingPage/chattingPage.css", "css/ChattingPage/friendList.css"]);
 			const chattingPageManager = new ChattingPageManager(this.clientInfo, this.renderPage.bind(this));

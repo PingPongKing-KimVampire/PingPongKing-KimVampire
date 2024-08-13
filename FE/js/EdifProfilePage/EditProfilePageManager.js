@@ -13,9 +13,9 @@ class EditProfilePageManager {
 
 	_setDefaultAvatars() {
 		this._addDefaultAvatar("images/playerA.png");
-		this._addDefaultAvatar("images/capybaraVampire.webp");
-		this._addDefaultAvatar("images/playerC.svg");
-		this._addDefaultAvatar("images/capybaraVampire2.webp");
+		this._addDefaultAvatar("images/capybaraVampire.png");
+		this._addDefaultAvatar("images/capybaraVampire2.png");
+		this._addDefaultAvatar("images/foxVampire.png");
 		this._addDefaultAvatar("images/playerB.png");
 	}
 	_addDefaultAvatar(avatarPath) {
@@ -169,7 +169,7 @@ class EditProfilePageManager {
 		this.avatarSelectionModal.style.display = "flex";
 		const modalClicked = e => {
 			if (e.target.className.includes("selectionAvatarImage")) {
-				console.log("here");
+
 				this.avatarImg.src = e.target.src;
 				this.isAvatarUpdated = e.target.dataset.src !== this.clientInfo.avatarUrl;
 				this.isDefaultAvatar = true;
