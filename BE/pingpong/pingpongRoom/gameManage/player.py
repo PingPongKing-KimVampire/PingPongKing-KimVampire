@@ -21,8 +21,8 @@ class Player:
         self.dy = 0
         self.target_x = 0
         self.target_y = 0
-        self.paddle_width = 10
-        self.paddle_height = 150
+        self.paddle_width = 25
+        self.paddle_height = 200
 
     def set_state(self, state):
         self.ready_state = state
@@ -30,18 +30,6 @@ class Player:
     def get_state(self):
         return self.ready_state
         
-    def set_paddle_size(self, player_count): # 필요한지 체크
-        if player_count == 1:
-            return 10, 150
-        elif player_count == 2:
-            return 9, 120
-        elif player_count == 3:
-            return 8, 100
-        elif player_count == 4:
-            return 7, 80
-        else:
-            return 5, 50
-
     def reset_pos(self):
         if self.team == 'left':
             x = 1550 / 6
@@ -124,11 +112,10 @@ class Player:
         
     def set_paddle_small(self):
         self.paddle_height = self.paddle_height / 1.5
-        # self.paddle_width = self.paddle_width / 1
 
     def set_paddle_big(self):
-        self.paddle_height = self.paddle_height * 2
-        self.paddle_width = self.paddle_width * 4
+        self.paddle_height = self.paddle_height * 1.3
+        self.paddle_width = self.paddle_width * 2
         
     def reversal_ball(self, ball):
         speed = math.sqrt(self.dx**2 + self.dy**2)
