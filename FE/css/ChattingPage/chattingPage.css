@@ -96,6 +96,8 @@
 	max-width: 70%;
 	color: black;
 	line-height: 1.4rem;
+	overflow-wrap: break-word;
+	word-break: break-all;
 }
 
 .messageBubble.rightSender {
