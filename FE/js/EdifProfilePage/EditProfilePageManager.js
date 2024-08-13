@@ -32,14 +32,17 @@ class EditProfilePageManager {
 	initPage() {
 		this.isNicknameUpdated = false;
 		this.isAvatarUpdated = false;
+		this.isNicknameValid = true;
 		this.isDefaultAvatar;
 
 		this.avatarImg = document.querySelector("#avatarImg");
 
 		this.nicknameInput = document.querySelector("#nicknameInput");
 		this.nicknameInput.addEventListener("input", async () => {
-			this.isNicknameUpdated = await this._checkNickname();
-			this._updateCompleteButton(this.isNicknameUpdated, this.isAvatarUpdated);
+			const { isUpdated, isValid } = await this._checkNickname();
+			this.isNicknameUpdated = isUpdated;
+			this.isNicknameValid = isValid;
+			this._updateCompleteButton(this.isNicknameUpdated, this.isNicknameValid, this.isAvatarUpdated);
 		});
 		this.nicknameWarning = document.querySelector("#warning");
 
@@ -52,28 +55,32 @@ class EditProfilePageManager {
 	}
 
 	_checkNickname = async () => {
-		if (this.nicknameInput.value === "" || this.nicknameInput.value === this.clientInfo.nickname) {
+		if (this.nicknameInput.value === this.clientInfo.nickName) {
 			this.nicknameWarning.textContent = "";
-			return false;
+			return { isUpdated: false, isValid: true }; // 닉네임이 변경되지 않음
+		}
+		if (this.nicknameInput.value === "") {
+			this.nicknameWarning.textContent = "";
+			return { isUpdated: true, isValid: false }; // 입력란이 비어있음
 		}
 		if (!this._validateNickname(this.nicknameInput.value)) {
 			const invalidNicknameMessage = "1에서 20자의 영문, 숫자, 한글만 사용 가능합니다.";
 			this.nicknameWarning.textContent = invalidNicknameMessage;
-			return false;
+			return { isUpdated: true, isValid: false }; // 유효하지 않음
 		}
 		try {
 			if (!(await this._validateDuplicateNickname(this.nicknameInput.value))) {
 				const duplicateNicknameMessage = "이미 존재하는 닉네임입니다.";
 				this.nicknameWarning.textContent = duplicateNicknameMessage;
-				return false;
+				return { isUpdated: true, isValid: false }; // 중복됨
 			}
 		} catch (error) {
 			if (error instanceof Error) this.nicknameWarning.textContent = error.message;
 			if (error instanceof TypeError && error.message === `Failed to fetch`) this.nicknameWarning.textContent = "서버의 응답이 없습니다.";
-			return;
+			return { isUpdated: true, isValid: false }; // 중복 검사 불가능
 		}
 		this.nicknameWarning.textContent = "";
-		return true;
+		return { isUpdated: true, isValid: true }; // 닉네임이 유효하게 변경되었음
 	};
 	_validateNickname(nickname) {
 		const regex = /^[A-Za-z가-힣0-9]{1,20}$/;
@@ -95,8 +102,8 @@ class EditProfilePageManager {
 		return data.is_available;
 	}
 
-	_updateCompleteButton(isNicknameUpdated, isAvatarUpdated) {
-		if (isNicknameUpdated || isAvatarUpdated) {
+	_updateCompleteButton(isNicknameUpdated, isNicknameValid, isAvatarUpdated) {
+		if (isNicknameValid && (isAvatarUpdated || isNicknameUpdated)) {
 			this.completeButton.disabled = false;
 			this.completeButton.classList.add("generalButton");
 			this.completeButton.classList.remove("disabledButton");
@@ -193,7 +200,7 @@ class EditProfilePageManager {
 		});
 	}
 	_hideAvatarEditModal() {
-		this._updateCompleteButton(this.isNicknameUpdated, this.isAvatarUpdated);
+		this._updateCompleteButton(this.isNicknameUpdated, this.isNicknameValid, this.isAvatarUpdated);
 		this.avatarSelectionModal.style.display = "none";
 	}
 
