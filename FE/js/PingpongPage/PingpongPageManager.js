@@ -15,7 +15,7 @@ class PingpongPageManager {
 	}
 
 	clearPage() {
-		this.clientInfo.gameInfo.pingpongRoomSocket.close();
+		if (this.clientInfo.gameInfo?.pingpongRoomSocket) this.clientInfo.gameInfo.pingpongRoomSocket.close();
 		if (this.player) this.player._clearPlayer();
 		this.clientInfo.gameInfo = null;
 	}
