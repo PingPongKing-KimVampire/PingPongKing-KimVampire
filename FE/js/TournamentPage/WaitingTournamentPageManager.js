@@ -15,8 +15,8 @@ class WaitingTournamentPageManager {
 	}
 
 	clearPage() {
+		this._removePageListener();
 		if (this.clientInfo.nextPage === "lobby") {
-			this._removePageListener();
 			return;
 		}
 		this.clientInfo.lobbySocket.close();
