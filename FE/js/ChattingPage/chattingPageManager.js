@@ -166,6 +166,7 @@ class ChattingPageManager {
 		this.inputBox = document.querySelector(".inputBox");
 		const inputButton = document.querySelector(".inputButton");
 
+		if (!inputButton) return;
 		inputButton.addEventListener("click", sendMessage);
 
 		let isComposing = false;
@@ -261,6 +262,7 @@ class ChattingPageManager {
 
 	_renderFriendList() {
 		const friendListContainer = document.querySelector(".FriendListContainer");
+		if (!friendListContainer) return;
 		friendListContainer.innerHTML = this._getFriendListHTML();
 		friendListContainer.querySelectorAll(".friendItem").forEach(friendItem => {
 			const id = friendItem.dataset.id;
@@ -300,6 +302,8 @@ class ChattingPageManager {
 			};
 			this.clientInfo.socket.addEventListener("message", listener);
 		});
+
+		if (!messageList) return;
 
 		this.readingFriendId = id;
 		const friend = this.clientInfo.friendInfo.friendList.find(friend => friend.id === id);
